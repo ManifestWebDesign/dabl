@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified July 14th 2009
+ *    			Last Modified July 22nd 2009
  */
 
 class DABLGenerator{
@@ -279,6 +279,11 @@ $class .= '
 				$class .= '
 		}';
 			}
+			if($field->getPdoType()==PDO::PARAM_INT){
+				$class .= '
+		if($theValue!==null)
+			$theValue = (int)$theValue;';
+			}
 
 			$class .= '
 		if($this->'.$field->getName().' !== $theValue){
@@ -409,12 +414,12 @@ $class .= '
 	 */
 	 static function fromResult(PDOStatement $result){
 		$objects = array();
-		foreach($result as $object){
-			$temp = new '.$className.';
-			$temp->fromArray($object);
-			$temp->resetModified();
-			$temp->setNew(false);
-			$objects[] = $temp;
+		while($row = $result->fetch(PDO::FETCH_ASSOC))
+			$object = new '.$className.';
+			$object->fromArray($row);
+			$object->resetModified();
+			$object->setNew(false);
+			$objects[] = $object;
 		}
 		return $objects;
 	 }
@@ -597,9 +602,7 @@ $class .= '
 		}
 
 		$class .= '
-}
-
-?>';
+}';
 
 //<?php
 
@@ -619,9 +622,7 @@ $class .= '
 
 class ".$className." extends base$className{
 
-}
-
-?>";
+}";
 //<?ph
 
 		return $class;
@@ -891,7 +892,7 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 				if(!is_dir($options['view_path']))
 					throw new Exception($options['view_path']." is not a directory.");
 
-				$target_dir = $options['view_path'].self::pluralize($className)."/";
+				$target_dir = $options['view_path'].strtolower(self::pluralize($className)).DIRECTORY_SEPARATOR;
 
 				if(!is_dir($target_dir))
 					mkdir($target_dir, 0755);
@@ -915,7 +916,7 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 				if(!is_dir($target_dir))
 					throw new Exception("$target_dir is not a directory.");
 
-				$formFile = self::pluralize($className).".php";
+				$formFile = strtolower(self::pluralize($className)).".php";
 				$formFile = $target_dir.$formFile;
 				if(!file_exists($formFile)){
 					$view = $this->getController($tableName, $className, $options);
@@ -995,8 +996,7 @@ foreach (glob($options['extended_class_path']."*.php") as $filename){
 		);
 
 		// save some time in the case that singular and plural are the same
-		if ( in_array( strtolower( $string ), $uncountable ) )
-		return $string;
+		//if ( in_array( strtolower( $string ), $uncountable ) )return $string;
 
 		// check for irregular singular forms
 		foreach ( $irregular as $noun ){

@@ -159,7 +159,7 @@ class DBtoXML {
 			'var' => array('colName', 'tableName')
 	),
 	);
-	
+
 	public function setDbEncoding($v)
 	{
 		$this->dbEncoding = $v;
@@ -444,13 +444,15 @@ class DBtoXML {
 		$colScale = $column->getScale();
 
 		if ($colType === CreoleTypes::OTHER) {
-			$this->log("Column [" . $table->getName() . "." . $colName . "] has a column type (".$column->getNativeType().") that Propel does not support.", Project::MSG_WARN);
+			$message = "Column [" . $table->getName() . "." . $colName . "] has a column type (".$column->getNativeType().") that Propel does not support.";
+			$this->log($message);
+			throw new Exception($message);
 		}
 
-		$node->setAttribute("name", iconv($this->dbEncoding, 'utf-8', $colName));
+		$node->setAttribute("name", $colName);
 
 		if ($this->isSamePhpName()) {
-			$node->setAttribute("phpName", iconv($this->dbEncoding, 'utf-8', $colName));
+			$node->setAttribute("phpName", $colName);
 		}
 
 		$node->setAttribute("type", self::getMappedPropelType($colType));
