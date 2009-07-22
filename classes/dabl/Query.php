@@ -1,6 +1,6 @@
 <?php
 /**
- * Last Modified June 19th 2009
+ * Last Modified July 11th 2009
  */
 
 /**
@@ -420,7 +420,7 @@ class Query{
 		$q = clone $this;
 
 		if(!$conn)
-			$conn = DB::getConnection();
+			$conn = DBManager::getConnection();
 
 		$q->setAction("COUNT");
 		if(!$q->getTable())
@@ -445,7 +445,7 @@ class Query{
 
 		$q->setAction("DELETE");
 		if(!$conn)
-			$conn = DB::getConnection();
+			$conn = DBManager::getConnection();
 
 		$rows = $conn->exec($q);
 		return $rows;
@@ -463,7 +463,7 @@ class Query{
 
 		$q->setAction("SELECT");
 		if(!$conn)
-			$conn = DB::getConnection();
+			$conn = DBManager::getConnection();
 		return $conn->query($q);
 	}
 }

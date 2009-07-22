@@ -1,6 +1,11 @@
 <?php
 
 /*
+ * This is a modified version of the ColumnMap class
+ * from the Propel Runtime
+ */
+
+/*
  *  $Id: ColumnMap.php 784 2007-11-08 10:15:50Z heltem $
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS

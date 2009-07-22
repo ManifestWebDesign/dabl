@@ -4,19 +4,10 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified July 10th 2009
+ *    			Last Modified July 14th 2009
  */
 
-class DABL{
-	/**
-	 * @var String
-	 */
-	private $DB;
-
-	/**
-	 * @var DBAdapter
-	 */
-	private $connection;
+class DABLGenerator{
 
 	/**
 	 * @var String
@@ -24,13 +15,112 @@ class DABL{
 	private $connection_name;
 
 	/**
+	 * @var DOMDocument
+	 */
+	private $db_schema;
+
+	/**
 	 * Constructor function
 	 * @param $conn_name String
-	 * @param $db_name String
+	 * @param $schema DOMDocument
 	 */
-	function DABL($conn_name = null, $db_name = null){
+	function __construct($conn_name = null, DOMDocument $schema = null){
 		if($conn_name)$this->setConnectionName($conn_name);
-		if($db_name)$this->setDBName($db_name);
+		if($schema)$this->setSchema($schema);
+	}
+
+	/**
+	 * @param DOMDocument $schema
+	 */
+	function setSchema(DOMDocument $schema){
+		$this->db_schema = $schema;
+	}
+
+	/**
+	 * @return DOMDocument
+	 */
+	function getSchema(){
+		return $this->db_schema;
+	}
+
+	function getTableNames(){
+		$table_names = array();
+		$database = $this->getSchema()->getElementsByTagName('database')->item(0);
+		foreach($database->getElementsByTagName('table') as $table)
+			$table_names[] = $table->getAttribute("name");
+		return $table_names;
+	}
+
+	function getColumns($table_name){
+		$columns = array();
+		$database_node = $this->getSchema()->getElementsByTagName('database')->item(0);
+		foreach($database_node->getElementsByTagName('table') as $table_node){
+			if($table_node->getAttribute("name")!==$table_name)continue;
+			foreach($table_node->getElementsByTagName('column') as $column_node){
+				$column = new Column($column_node->getAttribute('name'));
+
+				if($column_node->hasAttribute('size'))
+					$column->setSize($column_node->getAttribute('size'));
+
+				$column->setType($column_node->getAttribute('type'));
+				$column->setPrimaryKey(($column_node->getAttribute('primaryKey')=="true"));
+				$column->setAutoIncrement(($column_node->getAttribute('autoIncrement=')=="true"));
+
+				if($column_node->hasAttribute('default'))
+					$column->setDefaultValue($column_node->getAttribute('default'));
+
+				$column->setNotNull(($column_node->getAttribute('required')=='true'));
+
+				$columns[] = $column;
+			}
+		}
+		return $columns;
+	}
+
+	function getForeignKeysFromTable($table_name){
+		$references = array();
+
+		$database_node = $this->getSchema()->getElementsByTagName('database')->item(0);
+		foreach($database_node->getElementsByTagName('table') as $table_node){
+			if($table_node->getAttribute("name")!==$table_name)continue;
+			foreach($table_node->getElementsByTagName('foreign-key') as $fk_node){
+				foreach($fk_node->getElementsByTagName('reference') as $reference_node){
+					$references[] = array(
+						'to_table' => $fk_node->getAttribute('foreignTable'),
+						'to_column' => $reference_node->getAttribute('foreign'),
+						'from_column' => $reference_node->getAttribute('local'),
+					);
+				}
+			}
+		}
+		return $references;
+	}
+
+	function getForeignKeysToTable($table_name){
+		$references = array();
+
+		$database_node = $this->getSchema()->getElementsByTagName('database')->item(0);
+		foreach($database_node->getElementsByTagName('table') as $table_node){
+			foreach($table_node->getElementsByTagName('foreign-key') as $fk_node){
+				foreach($fk_node->getElementsByTagName('reference') as $reference_node){
+					if($fk_node->getAttribute('foreignTable')!=$table_name)continue;
+					$references[] = array(
+						'from_table' => $table_node->getAttribute('name'),
+						'to_column' => $reference_node->getAttribute('foreign'),
+						'from_column' => $reference_node->getAttribute('local'),
+					);
+				}
+			}
+		}
+		return $references;
+	}
+
+	/**
+	 * @return String
+	 */
+	private function getDBName(){
+		foreach($this->getSchema()->getElementsByTagName('database') as $database)
+			return $database->getAttribute("name");
 	}
 
 	/**
@@ -38,7 +128,6 @@ class DABL{
 	 */
 	function setConnectionName($conn_name){
 		$this->connection_name = $conn_name;
-		$this->connection = DB::getConnection($conn_name);
 	}
 
 	/**
@@ -46,27 +135,6 @@ class DABL{
 	 */
 	private function getConnectionName(){
 		return $this->connection_name;
-	}
-
-	/**
-	 * @return DBAdapter
-	 */
-	private function getConnection(){
-		return $this->connection;
-	}
-
-	/**
-	 * @param String $db_name
-	 */
-	function setDBName($db_name){
-		$this->DB = $db_name;
-	}
-
-	/**
-	 * @return String
-	 */
-	private function getDBName(){
-		return $this->DB;
 	}
 
 	/**
@@ -78,20 +146,15 @@ class DABL{
 	 */
 	private function getBaseClass($table, $className, $options){
 
-		$conn = $this->getConnection();
-		$tableWrapped = $conn->quoteIdentifier($table);
-
 		//Gather all the information about the table's columns from the database
 		$PK = null;
 		$numeric=array();
 		$null = array();
 		$PKs = array();
-		$fields = array();
-		$columns = $conn->getColumns($this->getDBName(), $table);
-		foreach($columns as $column){
-			if($column->isPrimaryKey()) $PKs[] = $column->getName();
-			$fields[] = $column;
-		}
+		$fields = $this->getColumns($table);
+		foreach($fields as $field)
+			if($field->isPrimaryKey()) $PKs[] = $field->getName();
+
 		if(count($PKs)==1)
 			$PK = $PKs[0];
 
@@ -163,8 +226,19 @@ $class .= '
 		foreach($fields as $key=>$field){
 			$default = $field->getDefaultValue();
 			$class .= '
-	function get'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'(){
-		return $this->'.$field->getName().';
+	function get'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'('.($field->isTemporal() ? '$format = null' : '').'){';
+			if($field->isTemporal()){
+				$class .= '
+		if($this->'.$field->getName().'===null || !$format)
+			return $this->'.$field->getName().';
+		$dateTime = new DateTime($this->'.$field->getName().');
+		return $dateTime->format($format);';
+			}
+			else{
+			$class .='
+		return $this->'.$field->getName().';';
+			}
+			$class .='
 	}
 	function set'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'($theValue){';
 			if($field->isNumeric()){
@@ -221,7 +295,7 @@ $class .= '
 	 * @return DBAdapter
 	 */
 	static function getConnection(){
-		return DB::getConnection("'.$this->getConnectionName().'");
+		return DBManager::getConnection("'.$this->getConnectionName().'");
 	}
 
 	/**
@@ -270,7 +344,8 @@ $class .= '
 			throw new Exception("This table does not have a primary key.");
 		$conn = '.$className.'::getConnection();
 		$pkColumn = $conn->quoteIdentifier($PKs[0]);
-		$query = "SELECT * FROM '.$tableWrapped.' WHERE $pkColumn=".$conn->checkInput($thePK);
+		$tableWrapped = $conn->quoteIdentifier('.$className.'::getTableName());
+		$query = "SELECT * FROM $tableWrapped WHERE $pkColumn=".$conn->checkInput($thePK);
 		$conn->applyLimit($query, 0, 1);
 		return '.$className.'::fetchSingle($query);
 	}
@@ -287,13 +362,14 @@ $class .= '
 		}
 
 		$class .= ' ){
-		$conn = '.$className.'::getConnection();';
+		$conn = '.$className.'::getConnection();
+		$tableWrapped = $conn->quoteIdentifier('.$className.'::getTableName());';
 		foreach($PKs as $key=>$value){
 			$class .= '
 		if($PK'.$key.'===null)return null;';
 		}
 		$class .= '
-		$queryString = "SELECT * FROM '.$tableWrapped.' WHERE ';
+		$queryString = "SELECT * FROM $tableWrapped WHERE ';
 
 		foreach($PKs as $key=>$value){
 			if($key == 0) $class .= $value.'=".$conn->checkInput($PK'.$key.')."';
@@ -312,7 +388,7 @@ $class .= '
 	 * @return '.$className.'
 	 */
 	static function fetchSingle($queryString){
-		return array_pop('.$className.'::fetch($queryString));
+		return array_shift('.$className.'::fetch($queryString));
 	}
 
 	/**
@@ -351,7 +427,9 @@ $class .= '
 	 * @return Array
 	 */
 	static function getAll($extra = null){
-		return '.$className.'::fetch("SELECT * FROM '.$tableWrapped.' $extra ");
+		$conn = '.$className.'::getConnection();
+		$tableWrapped = $conn->quoteIdentifier('.$className.'::getTableName());
+		return '.$className.'::fetch("SELECT * FROM $tableWrapped $extra ");
 	}
 
 	/**
@@ -389,7 +467,7 @@ $class .= '
 ';
 
 		$used_from = array();
-		foreach($conn->getForeignKeysFromTable($this->getDBName(), $table) as $r){
+		foreach($this->getForeignKeysFromTable($table) as $r){
 			$to_table = $r['to_table'];
 			$to_className = $options['cap_class_names'] ? ucfirst($to_table) : $to_table;
 			$to_column = $r['to_column'];
@@ -418,9 +496,10 @@ $class .= '
 		if($this->get'.$from_column.'()===null)
 			return null;
 		$conn = $this->getConnection();
+		$columnQuoted = $conn->quoteIdentifier("'.$to_column.'");
 		$tableQuoted = $conn->quoteIdentifier('.$to_className.'::getTableName());
 		if($this->getCacheResults() && @$this->'.$to_table.'_c && !$this->isColumnModified("'.$from_column.'"))return $this->'.$to_table.'_c;
-		$queryString = "SELECT * FROM $tableQuoted WHERE '.$conn->quoteIdentifier($to_column).'=".$conn->checkInput($this->get'.$from_column.'());
+		$queryString = "SELECT * FROM $tableQuoted WHERE $columnQuoted=".$conn->checkInput($this->get'.$from_column.'());
 		$'.$to_table.' = '.$to_className.'::fetchSingle($queryString);
 		$this->'.$to_table.'_c = $'.$to_table.';
 		return $'.$to_table.';
@@ -429,7 +508,7 @@ $class .= '
 		}
 
 		$used_to = array();
-		foreach($conn->getForeignKeysToTable($this->getDBName(), $table) as $r){
+		foreach($this->getForeignKeysToTable($table) as $r){
 			$from_table = $r['from_table'];
 			$from_className = $options['cap_class_names'] ? ucfirst($from_table) : $from_table;
 			$from_column = $r['from_column'];
@@ -508,7 +587,8 @@ $class .= '
 
 		$conn = $this->getConnection();
 		$tableQuoted = $conn->quoteIdentifier('.$from_className.'::getTableName());
-		$queryString = "SELECT * FROM $tableQuoted WHERE '.$conn->quoteIdentifier($from_column).'=".$conn->checkInput($this->get'.$to_column.'())." $extra";
+		$columnQuoted = $conn->quoteIdentifier("'.$from_column.'");
+		$queryString = "SELECT * FROM $tableQuoted WHERE $columnQuoted=".$conn->checkInput($this->get'.$to_column.'())." $extra";
 		$'.$from_table.'s = '.$from_className.'::fetch($queryString);
 		if(!$extra)$this->'.$from_table.'s_c = $'.$from_table.'s;
 		return $'.$from_table.'s;
@@ -767,11 +847,10 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 
 		$options = array_merge($settings, $options);
 
-		$conn = $this->getConnection();
 		$db = $this->getDBName();
 
 		//Write php files for classes
-		foreach($conn->getTableNames($db) as $tableName){
+		foreach($this->getTableNames() as $tableName){
 			$className = @$options['class_prefix'].($options['cap_class_names'] ? ucfirst($tableName) : $tableName).@$options['class_suffix'];
 			$baseClass = $this->getBaseClass($tableName, $className, $options);
 

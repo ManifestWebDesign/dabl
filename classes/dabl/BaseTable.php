@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Last Modified July 3rd 2009
+ * Last Modified July 14th 2009
  */
 
 abstract class BaseTable {
@@ -222,6 +222,7 @@ abstract class BaseTable {
 			}
 			$this->resetModified();
 			$this->setNew(false);
+			return $count;
 		}
 		catch(PDOException $e){
 			throw new PDOException($e->getMessage().$queryString);
@@ -310,5 +311,3 @@ abstract class BaseTable {
 	}
 
 }
-
-?>

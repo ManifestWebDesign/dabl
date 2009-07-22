@@ -1,6 +1,6 @@
 <?
 /**
- * Last Modified June 19th 2009
+ * Last Modified July 11th 2009
  */
 
 /**
@@ -69,13 +69,13 @@ class Condition{
 
 		//Escape $left
 		if($quote == self::QUOTE_LEFT || $quote == self::QUOTE_BOTH)
-			$left = DB::checkInput($left);
+			$left = DBManager::checkInput($left);
 
 		//$right can be an array
 		if(is_array($right)){
 			//Escape $right (recursive)
 			if($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH)
-				$right = DB::checkInput($right);
+				$right = DBManager::checkInput($right);
 
 			//BETWEEN
 			if(count($right)==2 && $operator==Query::BETWEEN)
@@ -113,7 +113,7 @@ class Condition{
 		if($operator==Query::IS_NULL || $operator==Query::IS_NOT_NULL)
 			$right=null;
 		elseif($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH)
-			$right = DB::checkInput($right);
+			$right = DBManager::checkInput($right);
 
 		return "$left $operator $right";
 	}
