@@ -1,0 +1,937 @@
+<?php
+
+/**
+ *    DABL (Database ABstraction Layer)
+ *    	By DAn BLaisdell
+ *    		Inspired by Propel
+ *    			Last Modified July 10th 2009
+ */
+
+class DABL{
+	/**
+	 * @var String
+	 */
+	private $DB;
+
+	/**
+	 * @var DBAdapter
+	 */
+	private $connection;
+
+	/**
+	 * @var String
+	 */
+	private $connection_name;
+
+	/**
+	 * Constructor function
+	 * @param $conn_name String
+	 * @param $db_name String
+	 */
+	function DABL($conn_name = null, $db_name = null){
+		if($conn_name)$this->setConnectionName($conn_name);
+		if($db_name)$this->setDBName($db_name);
+	}
+
+	/**
+	 * @param String $conn_name
+	 */
+	function setConnectionName($conn_name){
+		$this->connection_name = $conn_name;
+		$this->connection = DB::getConnection($conn_name);
+	}
+
+	/**
+	 * @return String
+	 */
+	private function getConnectionName(){
+		return $this->connection_name;
+	}
+
+	/**
+	 * @return DBAdapter
+	 */
+	private function getConnection(){
+		return $this->connection;
+	}
+
+	/**
+	 * @param String $db_name
+	 */
+	function setDBName($db_name){
+		$this->DB = $db_name;
+	}
+
+	/**
+	 * @return String
+	 */
+	private function getDBName(){
+		return $this->DB;
+	}
+
+	/**
+	 * Generates a String with the contents of the Base class
+	 * @param String $tableName
+	 * @param String $className
+	 * @param Array $options
+	 * @return String
+	 */
+	private function getBaseClass($table, $className, $options){
+
+		$conn = $this->getConnection();
+		$tableWrapped = $conn->quoteIdentifier($table);
+
+		//Gather all the information about the table's columns from the database
+		$PK = null;
+		$numeric=array();
+		$null = array();
+		$PKs = array();
+		$fields = array();
+		$columns = $conn->getColumns($this->getDBName(), $table);
+		foreach($columns as $column){
+			if($column->isPrimaryKey()) $PKs[] = $column->getName();
+			$fields[] = $column;
+		}
+		if(count($PKs)==1)
+			$PK = $PKs[0];
+
+		$class = "<?php
+/**
+ *	Created by Dan Blaisdell's Database->Object Mapper
+ *		             Based on Propel
+ *
+ *		Do not alter base files, as they will be overwritten.
+ *		To alter the objects, alter the extended clases in
+ *		the 'tables' folder.
+ *
+ */
+
+abstract class base$className extends BaseTable{
+";
+
+		$class .= '
+	/**
+	 * Name of the table
+	 */
+	protected static $_tableName = "'.$table.'";
+
+	/**
+	 * Array of all primary keys
+	 */
+	protected static $_primaryKeys = array(';
+		if($PKs)
+			foreach($PKs as $thePK){
+	 		$class .= '
+			"'.$thePK.'",';
+		}
+		$class .= '
+	);
+
+	/**
+	 * Primary Key
+	 */
+	 protected static $_primaryKey = "'.$PK.'";
+
+	/**
+	 * Array of all column names
+	 */
+	protected static $_columnNames = array(';
+		foreach($fields as $key=>$field){
+			$class .= "
+		'{$field->getName()}'";
+			if($key!=(count($fields)-1)) $class .= ",";
+		}
+$class .= '
+	);
+';
+		foreach($fields as $key=>$field){
+			$default = $field->getDefaultValue();
+			$class .= '	protected $'.$field->getName();
+			if(is_numeric($default))
+				$class .= ' = '.$default;
+			elseif($default!==NULL)
+				$class .= ' = "'.$default.'"';
+			$class .= ';
+';
+		}
+
+		$class .='
+	/**
+	 * Column Accessors and Mutators
+	 */
+';
+		foreach($fields as $key=>$field){
+			$default = $field->getDefaultValue();
+			$class .= '
+	function get'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'(){
+		return $this->'.$field->getName().';
+	}
+	function set'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'($theValue){';
+			if($field->isNumeric()){
+				if($options['empty_string_zero'] && $field->getName()!=$PK){
+					$class .= '
+		if($theValue==="")
+			$theValue = 0;';
+				}
+				else{
+					$class .= '
+		if($theValue==="")
+			$theValue = null;';
+				}
+			}
+
+			if($options['protect_not_null'] && $field->getName()!=$PK && $field->isNotNull()){
+				$class .= '
+		if($theValue===null){';
+				if($default){
+					$class .='
+			$pk = $this->getPrimaryKey();
+			if($pk && $this->$pk===null)
+				$theValue='.(is_numeric($default) ? $default : '"'.$default.'"').';
+			else{';
+				}
+
+				if($field->isNumeric())
+					$class .= '
+			$theValue = 0;';
+				else
+					$class .= '
+			$theValue = "";';
+
+				if($default){
+					$class .= '
+			}';
+				}
+				$class .= '
+		}';
+			}
+
+			$class .= '
+		if($this->'.$field->getName().' !== $theValue){
+			$this->_modifiedColumns[] = "'.$field->getName().'";
+			$this->'.$field->getName().' = $theValue;
+		}
+	}
+';
+		}
+
+		$class .= '
+
+	/**
+	 * @return DBAdapter
+	 */
+	static function getConnection(){
+		return DB::getConnection("'.$this->getConnectionName().'");
+	}
+
+	/**
+	 * Returns String representation of table name
+	 * @return String
+	 */
+	static function getTableName(){
+		return '.$className.'::$_tableName;
+	}
+
+	/**
+	 * Access to array of column names
+	 * @return Array
+	 */
+	static function getColumnNames(){
+		return '.$className.'::$_columnNames;
+	}
+
+	/**
+	 * Access to array of primary keys
+	 * @return Array
+	 */
+	static function getPrimaryKeys(){
+		return '.$className.'::$_primaryKeys;
+	}
+
+	/**
+	 * Access to name of primary key
+	 * @return Array
+	 */
+	static function getPrimaryKey(){
+		return '.$className.'::$_primaryKey;
+	}
+
+	/**
+	 * Searches the database for a row with the ID(primary key) that matches
+	 * the one input.
+	 * @return '.$className.'
+	 */
+	static function retrieveByPK( $thePK ){
+		if(!$thePK===null)return null;
+		$PKs = '.$className.'::getPrimaryKeys();
+		if(count($PKs)>1)
+			throw new Exception("This table has more than one primary key.  Use retrieveByPKs() instead.");
+		elseif(count($PKs)==0)
+			throw new Exception("This table does not have a primary key.");
+		$conn = '.$className.'::getConnection();
+		$pkColumn = $conn->quoteIdentifier($PKs[0]);
+		$query = "SELECT * FROM '.$tableWrapped.' WHERE $pkColumn=".$conn->checkInput($thePK);
+		$conn->applyLimit($query, 0, 1);
+		return '.$className.'::fetchSingle($query);
+	}
+
+	/**
+	 * Searches the database for a row with the primary keys that match
+	 * the ones input.
+	 * @return '.$className.'
+	 */
+	static function retrieveByPKs( ';
+		foreach($PKs as $key=>$value){
+			if($key == 0) $class .= '$PK'.$key;
+			if($key > 0) $class .= ', $PK'.$key;
+		}
+
+		$class .= ' ){
+		$conn = '.$className.'::getConnection();';
+		foreach($PKs as $key=>$value){
+			$class .= '
+		if($PK'.$key.'===null)return null;';
+		}
+		$class .= '
+		$queryString = "SELECT * FROM '.$tableWrapped.' WHERE ';
+
+		foreach($PKs as $key=>$value){
+			if($key == 0) $class .= $value.'=".$conn->checkInput($PK'.$key.')."';
+			if($key > 0) $class .= ' AND '.$value.'=".$conn->checkInput($PK'.$key.')."';
+		}
+
+		$class .= '";
+		$conn->applyLimit($queryString, 0, 1);
+		return '.$className.'::fetchSingle($queryString);
+	}
+
+	/**
+	 * Populates and returns an instance of '.$className.' with the
+	 * first result of a query.  If the query returns no results,
+	 * returns null.
+	 * @return '.$className.'
+	 */
+	static function fetchSingle($queryString){
+		return array_pop('.$className.'::fetch($queryString));
+	}
+
+	/**
+	 * Populates and returns an Array of '.$className.' Objects with the
+	 * results of a query.  If the query returns no results,
+	 * returns an empty Array.
+	 * @return Array
+	 */
+	static function fetch($queryString){
+		$conn = '.$className.'::getConnection();
+		$result = $conn->query($queryString);
+		return '.$className.'::fromResult($result);
+	}
+
+	/**
+	 * Returns an array of '.$className.' Objects from the rows of a PDOStatement(query result)
+	 * @return Array
+	 */
+	 static function fromResult(PDOStatement $result){
+		$objects = array();
+		foreach($result as $object){
+			$temp = new '.$className.';
+			$temp->fromArray($object);
+			$temp->resetModified();
+			$temp->setNew(false);
+			$objects[] = $temp;
+		}
+		return $objects;
+	 }
+
+	/**
+	 * Returns an Array of all '.$className.' Objects in the database.
+	 * $extra SQL can be appended to the query to limit,sort,group results.
+	 * If there are no results, returns an empty Array.
+	 * @param $extra String
+	 * @return Array
+	 */
+	static function getAll($extra = null){
+		return '.$className.'::fetch("SELECT * FROM '.$tableWrapped.' $extra ");
+	}
+
+	/**
+	 * @return Int
+	 */
+	static function doCount(Query $q){
+		$conn = '.$className.'::getConnection();
+		$q = clone $q;
+		if(!$q->getTable() || strrpos($q->getTable(), '.$className.'::getTableName())===false )
+			$q->setTable('.$className.'::getTableName());
+		return $q->doCount($conn);
+	}
+
+	/**
+	 * @return Int
+	 */
+	static function doDelete(Query $q){
+		$conn = '.$className.'::getConnection();
+		$q = clone $q;
+		if(!$q->getTable() || strrpos($q->getTable(), '.$className.'::getTableName())===false )
+			$q->setTable('.$className.'::getTableName());
+		return $q->doDelete($conn);
+	}
+
+	/**
+	 * @return Array
+	 */
+	static function doSelect(Query $q){
+		$conn = '.$className.'::getConnection();
+		$q = clone $q;
+		if(!$q->getTable() || strrpos($q->getTable(), '.$className.'::getTableName())===false )
+			$q->setTable('.$className.'::getTableName());
+		return '.$className.'::fromResult($q->doSelect($conn));
+	}
+';
+
+		$used_from = array();
+		foreach($conn->getForeignKeysFromTable($this->getDBName(), $table) as $r){
+			$to_table = $r['to_table'];
+			$to_className = $options['cap_class_names'] ? ucfirst($to_table) : $to_table;
+			$to_column = $r['to_column'];
+			$from_column = $r['from_column'];
+
+			if(@$used_from[$to_table]) continue;
+
+			$used_from[$to_table] = $from_column;
+
+			$class .= '
+	/**
+	 * @var '.$to_className.'
+	 */
+	private $'.$to_table.'_c;
+
+	/**
+	 * Returns a '.$to_table.' Object(row) from the '.$to_table.' table
+	 * with a '.$to_column.' that matches $this->'.$from_column.'.
+	 * When first called, this method will cache the result.
+	 * After that, if $this->'.$from_column.' is not modified, the
+	 * method will return the cached result instead of querying the database
+	 * a second time(for performance purposes).
+	 * @return '.$to_className.'
+	 */
+	function get'.$to_className.'(){
+		if($this->get'.$from_column.'()===null)
+			return null;
+		$conn = $this->getConnection();
+		$tableQuoted = $conn->quoteIdentifier('.$to_className.'::getTableName());
+		if($this->getCacheResults() && @$this->'.$to_table.'_c && !$this->isColumnModified("'.$from_column.'"))return $this->'.$to_table.'_c;
+		$queryString = "SELECT * FROM $tableQuoted WHERE '.$conn->quoteIdentifier($to_column).'=".$conn->checkInput($this->get'.$from_column.'());
+		$'.$to_table.' = '.$to_className.'::fetchSingle($queryString);
+		$this->'.$to_table.'_c = $'.$to_table.';
+		return $'.$to_table.';
+	}
+';
+		}
+
+		$used_to = array();
+		foreach($conn->getForeignKeysToTable($this->getDBName(), $table) as $r){
+			$from_table = $r['from_table'];
+			$from_className = $options['cap_class_names'] ? ucfirst($from_table) : $from_table;
+			$from_column = $r['from_column'];
+			$to_column = $r['to_column'];
+			if(@$used_to[$from_table]){
+				echo "WARNING: <b>$table.$to_column</b> USED BY MORE THAN ONE FOREIGN KEY IN TABLE: <b>$from_table</b>.
+						METHODS CREATED FOR <b>$from_table.".$used_to[$from_table]."</b> ONLY.<br />";
+				continue;
+			}
+			$used_to[$from_table]=$from_column;
+			$class .= '
+
+	/**
+	 * Returns a Query for selecting '.$from_table.' Objects(rows) from the '.$from_table.' table
+	 * with a '.$from_column.' that matches $this->'.$to_column.'.
+	 * @return Query
+	 */
+	function get'.$from_className.'sQuery(Query $q = null){
+		if($this->get'.$to_column.'()===null)
+			throw new Exception("NULL cannot be used to match keys.");
+		$column = "'.$from_column.'";
+		if($q){
+			$q = clone $q;
+			$alias = $q->getAlias();
+			if($q->getTableName()=="'.$from_table.'" && $alias)
+				$column = "$alias.'.$from_column.'";
+		}
+		else
+			$q = new Query;
+		$q->add($column, $this->get'.$to_column.'());
+		return $q;
+	}
+
+	/**
+	 * Returns the count of '.$from_className.' Objects(rows) from the '.$from_table.' table
+	 * with a '.$from_column.' that matches $this->'.$to_column.'.
+	 * @return Int
+	 */
+	function count'.$from_className.'s(Query $q = null){
+		if($this->get'.$to_column.'()===null)
+			return 0;
+		return '.$from_className.'::doCount($this->get'.$from_className.'sQuery($q));
+	}
+
+	/**
+	 * Deletes the '.$from_table.' Objects(rows) from the '.$from_table.' table
+	 * with a '.$from_column.' that matches $this->'.$to_column.'.
+	 * @return Int
+	 */
+	function delete'.$from_className.'s(Query $q = null){
+		if($this->get'.$to_column.'()===null)
+			return 0;
+		return '.$from_className.'::doDelete($this->get'.$from_className.'sQuery($q));
+	}
+
+	private $'.$from_table.'s_c = array();
+
+	/**
+	 * Returns an Array of '.$from_className.' Objects(rows) from the '.$from_table.' table
+	 * with a '.$from_column.' that matches $this->'.$to_column.'.
+	 * When first called, this method will cache the result.
+	 * After that, if $this->'.$to_column.' is not modified, the
+	 * method will return the cached result instead of querying the database
+	 * a second time(for performance purposes).
+	 * @return Array
+	 */
+	function get'.$from_className.'s($extra=NULL){
+		if($this->get'.$to_column.'()===null)
+			return array();
+
+		if($extra instanceof Query)
+			return '.$from_className.'::doSelect($this->get'.$from_table.'sQuery($extra));
+
+		if(!$extra && $this->getCacheResults() && @$this->'.$from_className.'s_c && !$this->isColumnModified("'.$to_column.'"))
+			return $this->'.$from_className.'s_c;
+
+		$conn = $this->getConnection();
+		$tableQuoted = $conn->quoteIdentifier('.$from_className.'::getTableName());
+		$queryString = "SELECT * FROM $tableQuoted WHERE '.$conn->quoteIdentifier($from_column).'=".$conn->checkInput($this->get'.$to_column.'())." $extra";
+		$'.$from_table.'s = '.$from_className.'::fetch($queryString);
+		if(!$extra)$this->'.$from_table.'s_c = $'.$from_table.'s;
+		return $'.$from_table.'s;
+	}
+';
+		}
+
+		$class .= '
+}
+
+?>';
+
+//<?php
+
+		return $class;
+	}
+
+	/**
+	 * Generates a String with the contents of the stub class
+	 * for the table, which is used for extending the Base class.
+	 * @param String $tableName
+	 * @param String $className
+	 * @param Array $options
+	 * @return String
+	 */
+	private function getClass($tableName, $className, $options){
+		$class = "<?php
+
+class ".$className." extends base$className{
+
+}
+
+?>";
+//<?ph
+
+		return $class;
+	}
+
+	/**
+	 * Generates a String with an html/php form for editing
+	 * objects in the given table.
+	 * @param String $tableName
+	 * @param String $className
+	 * @param Array $options
+	 * @return String
+	 */
+	public function getForm($tableName, $className, $options){
+		$instance = new $className;
+		$pk = $instance->getPrimaryKey();
+		$pkMethod = "get$pk";
+		$outputPKMethod = '<?= htmlentities($'.strtolower($className).'->'.$pkMethod.'()) ?>';
+		ob_start();
+if($pk){
+	echo "<?php\n";
+?>
+require_once 'config.php';
+
+$<?= strtolower($className) ?> = @$_REQUEST['<?= $pk ?>'] ? <?= $className ?>::retrieveByPK($_REQUEST['<?= $pk ?>']) : new <?= $className ?>;
+
+if(@$_REQUEST['action']=='save'){
+	$<?= strtolower($className) ?>->fromArray($_REQUEST);
+	$<?= strtolower($className) ?>->save();
+	header("Location: ?<?= $pk ?>={$<?= strtolower($className) ?>->get<?= $pk ?>()}");
+	die;
+}
+<?
+	echo "?>\n";
+}
+?>
+<form method="POST" action="">
+	<input type="hidden" name="action" value="save" />
+<?
+if($pk){
+?>
+	<input type="hidden" name="<?= $pk ?>" value="<?= $outputPKMethod ?>" />
+<?
+}
+?>
+	<table>
+		<tbody>
+<?
+		foreach($instance->getColumnNames() as $columnName){
+			if($columnName==$pk)continue;
+			$method = "get$columnName";
+			$output = '<?= htmlentities($'.strtolower($className).'->'.$method.'()) ?>';
+?>
+			<tr>
+				<th><?= $columnName ?></th>
+				<td><input type="text" name="<?= $columnName ?>" value="<?= $output ?>" /></td>
+			</tr>
+<?
+		}
+?>
+			<tr>
+				<td>
+					<input type="submit" value="Save" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</form>
+<?
+		return ob_get_clean();
+	}
+
+	/**
+	 * Generates a String with an html/php view for editing view MVC
+	 * objects in the given table.
+	 * @param String $tableName
+	 * @param String $className
+	 * @param Array $options
+	 * @return String
+	 */
+	public function getEditView($tableName, $className, $options){
+		$instance = new $className;
+		$pk = $instance->getPrimaryKey();
+		$pkMethod = "get$pk";
+		$outputPKMethod = '<?= htmlentities($'.strtolower($className).'->'.$pkMethod.'()) ?>';
+		ob_start();
+		$action = "";
+		if(@$options['ci_controller_urls'])
+			$action = "<?= site_url('".strtolower(self::pluralize($className))."/save') ?>";
+?>
+<form method="POST" action="<?= $action ?>">
+<?
+if($pk){
+?>
+	<input type="hidden" name="<?= $pk ?>" value="<?= $outputPKMethod ?>" />
+<?
+}
+?>
+	<table>
+		<tbody>
+<?
+		foreach($instance->getColumnNames() as $columnName){
+			if($columnName==$pk)continue;
+			$method = "get$columnName";
+			$output = '<?= htmlentities($'.strtolower($className).'->'.$method.'()) ?>';
+?>
+			<tr>
+				<th><?= $columnName ?></th>
+				<td><input type="text" name="<?= $columnName ?>" value="<?= $output ?>" /></td>
+			</tr>
+<?
+		}
+?>
+			<tr>
+				<td>
+					<input type="submit" value="Save" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</form>
+<?
+		return ob_get_clean();
+	}
+
+	/**
+	 * Generates a String with Controller class for MVC
+	 * @param String $tableName
+	 * @param String $className
+	 * @param Array $options
+	 * @return String
+	 */
+	public function getController($tableName, $className, $options){
+		ob_start();
+		echo "<?php\n";
+?>
+class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'] ? self::pluralize($className) : $className ?><?= @$options['controller_suffix'] ?> <? if(@$options['controllers_extend'])echo'extends '.$options['controllers_extend'] ?> {
+
+	function __construct(){
+		parent::Controller();
+	}
+
+	function save($id = null){
+		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
+		$<?= strtolower($className) ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
+		$<?= strtolower($className) ?>->fromArray($_POST);
+		$<?= strtolower($className) ?>->save();
+	}
+
+	function delete($id = null){
+		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
+		$<?= strtolower($className) ?> = <?= $className ?>::retrieveByPK($id);
+		$<?= strtolower($className) ?>->delete();
+	}
+
+	function edit($id = null){
+		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
+		$<?= strtolower($className) ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
+		$data['<?= strtolower($className) ?>'] = $<?= strtolower($className) ?>;
+		$this->load->view('<?= self::pluralize(strtolower($className)) ?>/edit', $data);
+	}
+
+}
+<?
+		return ob_get_clean();
+	}
+
+	/**
+	 * Generates Table classesd
+	 * @return
+	 * @param Array $options[optional]
+	 */
+	function generate($options = array()){
+
+		//Default options
+		$settings = array(
+			//set to true to generate forms
+			'generate_forms' => false,
+
+			//set to true to generate forms
+			'generate_views' => false,
+
+			//set to true to generate views
+			'view_path' => ROOT."views/",
+
+			'generate_controllers' => false,
+
+			'controllers_extend' => 'Controller',
+
+			'pluralize_controllers' => true,
+
+			'controller_path' => ROOT."classes/controllers/",
+
+			'controller_prefix' => '',
+
+			'controller_suffix' => '',
+
+			//target directory for generated table classes
+			'form_path' => ROOT."includes/sample_forms/",
+
+			//if attempting to set value of numeric column to empty string, convert it to a zero
+			'empty_string_zero' => false,
+
+			//add some logic to the setter methods to not allow column values to be null if the column cannot be null
+			'protect_not_null' => true,
+
+			//enforce an upper case first letter of classes
+			'cap_class_names' => true,
+
+			//enforce an upper case first letter of get and set methods
+			'cap_method_names' => true,
+
+			'class_prefix' => '',
+
+			'class_suffix' => '',
+
+			//target directory for generated table classes
+			'extended_class_path' => ROOT."classes/tables/",
+
+			//target directory for generated base table classes
+			'base_class_path' => ROOT."classes/tables/base/"
+		);
+
+		$options = array_merge($settings, $options);
+
+		$conn = $this->getConnection();
+		$db = $this->getDBName();
+
+		//Write php files for classes
+		foreach($conn->getTableNames($db) as $tableName){
+			$className = @$options['class_prefix'].($options['cap_class_names'] ? ucfirst($tableName) : $tableName).@$options['class_suffix'];
+			$baseClass = $this->getBaseClass($tableName, $className, $options);
+
+			$baseFile = "base$className.php";
+			$baseFile = $options['base_class_path'].$baseFile;
+
+			$fh = fopen($baseFile, 'w') or die("can't open file");
+			fwrite($fh, $baseClass);
+			fclose($fh);
+			chmod($baseFile, 0644);
+
+			$file = $options['extended_class_path'].$className.".php";
+
+			if (!file_exists($file)){
+				$class = $this->getClass($tableName, $className, $options);
+
+				$fh = fopen($file, 'w') or die("can't open file");
+				fwrite($fh, $class);
+				fclose($fh);
+				chmod($file, 0644);
+			}
+
+			if($options['generate_forms']){
+				$formFile = "$className.php";
+				$formFile = $options['form_path'].$formFile;
+
+				if(!file_exists($formFile)){
+					$form = $this->getForm($tableName, $className, $options);
+
+					$fh = fopen($formFile, 'w') or die("can't open file");
+					fwrite($fh, $form);
+					fclose($fh);
+					chmod($formFile, 0644);
+				}
+			}
+
+			if($options['generate_views']){
+				if(!is_dir($options['view_path']))
+					throw new Exception($options['view_path']." is not a directory.");
+
+				$target_dir = $options['view_path'].self::pluralize($className)."/";
+
+				if(!is_dir($target_dir))
+					mkdir($target_dir, 0755);
+
+				$formFile = "edit.php";
+				$formFile = $target_dir.$formFile;
+
+				if(!file_exists($formFile)){
+					$view = $this->getEditView($tableName, $className, $options);
+
+					$fh = fopen($formFile, 'w') or die("can't open file");
+					fwrite($fh, $view);
+					fclose($fh);
+					chmod($formFile, 0644);
+				}
+			}
+
+			if($options['generate_controllers']){
+				$target_dir = $options['controller_path'];
+
+				if(!is_dir($target_dir))
+					throw new Exception("$target_dir is not a directory.");
+
+				$formFile = self::pluralize($className).".php";
+				$formFile = $target_dir.$formFile;
+				if(!file_exists($formFile)){
+					$view = $this->getController($tableName, $className, $options);
+
+					$fh = fopen($formFile, 'w') or die("can't open file");
+					fwrite($fh, $view);
+					fclose($fh);
+					chmod($formFile, 0644);
+				}
+			}
+
+
+		}
+
+?>
+<div style="float:left;width:50%">
+<strong>Base<br /></strong>
+<?php
+foreach (glob($options['base_class_path']."*.php") as $filename){
+	echo basename($filename)."<br />";
+	require_once($filename);
+}
+?>
+</div>
+<div style="float:left;width:50%">
+<strong>Extended<br /></strong>
+<?php
+foreach (glob($options['extended_class_path']."*.php") as $filename){
+	echo basename($filename)."<br />";
+	require_once($filename);
+}
+?>
+</div>
+<div style="text-align:center;color:green;font-weight:bold">Success.</div>
+<?php
+	}
+
+	public static function pluralize( $string ){
+		$plural = array(
+			array( '/(quiz)$/i',                "$1zes"   ),
+			array( '/^(ox)$/i',                 "$1en"    ),
+			array( '/([m|l])ouse$/i',           "$1ice"   ),
+			array( '/(matr|vert|ind)ix|ex$/i',  "$1ices"  ),
+			array( '/(x|ch|ss|sh)$/i',          "$1es"    ),
+			array( '/([^aeiouy]|qu)y$/i',       "$1ies"   ),
+			array( '/([^aeiouy]|qu)ies$/i',     "$1y"     ),
+			array( '/(hive)$/i',                "$1s"     ),
+			array( '/(?:([^f])fe|([lr])f)$/i',  "$1$2ves" ),
+			array( '/sis$/i',                   "ses"     ),
+			array( '/([ti])um$/i',              "$1a"     ),
+			array( '/(buffal|tomat)o$/i',       "$1oes"   ),
+			array( '/(bu)s$/i',                 "$1ses"   ),
+			array( '/(alias|status|campus)$/i', "$1es"    ),
+			array( '/(octop|vir)us$/i',         "$1i"     ),
+			array( '/(ax|test)is$/i',           "$1es"    ),
+			array( '/s$/i',                     "s"       ),
+			array( '/$/',                       "s"       )
+		);
+
+		$irregular = array(
+			array( 'move',   'moves'    ),
+			array( 'sex',    'sexes'    ),
+			array( 'child',  'children' ),
+			array( 'man',    'men'      ),
+			array( 'person', 'people'   )
+		);
+
+		$uncountable = array(
+			'sheep',
+			'fish',
+			'series',
+			'species',
+			'money',
+			'rice',
+			'information',
+			'equipment'
+		);
+
+		// save some time in the case that singular and plural are the same
+		if ( in_array( strtolower( $string ), $uncountable ) )
+		return $string;
+
+		// check for irregular singular forms
+		foreach ( $irregular as $noun ){
+			if ( strtolower( $string ) == $noun[0] )
+			return $noun[1];
+		}
+
+		// check for matches using regular expressions
+		foreach ( $plural as $pattern ){
+			if ( preg_match( $pattern[0], $string ) )
+			return preg_replace( $pattern[0], $pattern[1], $string );
+		}
+
+		return $string;
+	}
+
+}
