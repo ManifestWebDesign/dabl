@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified July 22nd 2009
+ *    			Last Modified July 25th 2009
  */
 
 class DABLGenerator{
@@ -414,7 +414,7 @@ $class .= '
 	 */
 	 static function fromResult(PDOStatement $result){
 		$objects = array();
-		while($row = $result->fetch(PDO::FETCH_ASSOC))
+		while($row = $result->fetch(PDO::FETCH_ASSOC)){
 			$object = new '.$className.';
 			$object->fromArray($row);
 			$object->resetModified();
@@ -709,17 +709,15 @@ if($pk){
 		$pkMethod = "get$pk";
 		$outputPKMethod = '<?= htmlentities($'.strtolower($className).'->'.$pkMethod.'()) ?>';
 		ob_start();
-		$action = "";
-		if(@$options['ci_controller_urls'])
-			$action = "<?= site_url('".strtolower(self::pluralize($className))."/save') ?>";
+		$action = "<?= site_url('".strtolower(self::pluralize($className))."/save') ?>";
 ?>
 <form method="POST" action="<?= $action ?>">
 <?
-if($pk){
+		if($pk){
 ?>
 	<input type="hidden" name="<?= $pk ?>" value="<?= $outputPKMethod ?>" />
 <?
-}
+		}
 ?>
 	<table>
 		<tbody>
@@ -744,6 +742,61 @@ if($pk){
 		</tbody>
 	</table>
 </form>
+<?
+		return ob_get_clean();
+	}
+
+	public function getIndexView($tableName, $className, $options){
+		$instance = new $className;
+		$pk = $instance->getPrimaryKey();
+		$plural = strtolower(self::pluralize($className));
+		$single = strtolower($className);
+		ob_start();
+?>
+<table>
+	<thead>
+		<tr>
+<?
+		foreach($instance->getColumnNames() as $columnName){
+?>
+			<th><?= $columnName ?></th>
+<?
+		}
+		if($pk){
+?>
+			<th></th>
+			<th></th>
+<?
+		}
+?>
+		</tr>
+	</thead>
+	<tbody>
+<?= "<?" ?> foreach($<?= $plural ?> as $<?= $single ?>): <?= "?>" ?>
+
+		<tr>
+<?
+		foreach($instance->getColumnNames() as $columnName){
+			$output = '<?= htmlentities($'.$single.'->'."get$columnName".'()) ?>';
+?>
+			<td><?= $output ?></td>
+<?
+		}
+		if($pk){
+			$pkMethod = "get$pk";
+			$editURL = "<?= site_url('$plural/edit/'.$".$single."->".$pkMethod."()) ?>";
+			$deleteURL = "<?= site_url('$plural/delete/'.$".$single."->".$pkMethod."()) ?>";
+?>
+			<td><a href="<?= $editURL ?>">Edit</a></td>
+			<td><a href="<?= $deleteURL ?>">Delete</a></td>
+<?
+		}
+?>
+		</tr>
+<?= "<?" ?> endforeach; <?= "?>" ?>
+
+	</tbody>
+</table>
 <?
 		return ob_get_clean();
 	}
@@ -908,6 +961,18 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 					fclose($fh);
 					chmod($formFile, 0644);
 				}
+
+				$formFile = "index.php";
+				$formFile = $target_dir.$formFile;
+
+				if(!file_exists($formFile)){
+					$view = $this->getIndexView($tableName, $className, $options);
+
+					$fh = fopen($formFile, 'w') or die("can't open file");
+					fwrite($fh, $view);
+					fclose($fh);
+					chmod($formFile, 0644);
+				}
 			}
 
 			if($options['generate_controllers']){
@@ -927,7 +992,6 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 					chmod($formFile, 0644);
 				}
 			}
-
 
 		}
 
