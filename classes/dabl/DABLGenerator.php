@@ -772,9 +772,9 @@ if($pk){
 		</tr>
 	</thead>
 	<tbody>
-<?= "<?" ?> foreach($<?= $plural ?> as $<?= $single ?>): <?= "?>" ?>
+<?= "<?" ?> foreach($<?= $plural ?> as $key => $<?= $single ?>): <?= "?>" ?>
 
-		<tr>
+		<tr class="<?= '<?=' ?> is_int($key/2) ? 'odd' : 'even' <?= '?>' ?>">
 <?
 		foreach($instance->getColumnNames() as $columnName){
 			$output = '<?= htmlentities($'.$single.'->'."get$columnName".'()) ?>';
