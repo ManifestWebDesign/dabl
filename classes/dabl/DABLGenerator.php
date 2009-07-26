@@ -241,8 +241,8 @@ $class .= '
 			$class .='
 	}
 	function set'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'($theValue){';
-			if($field->isNumeric()){
-				if($options['empty_string_zero'] && $field->getName()!=$PK){
+			if($field->isNumeric() || $field->isTemporal()){
+				if($field->isNumeric() && $options['empty_string_zero'] && $field->getName()!=$PK){
 					$class .= '
 		if($theValue==="")
 			$theValue = 0;';
