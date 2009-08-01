@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified July 25th 2009
+ *    			Last Modified July 31st 2009
  */
 
 class DABLGenerator{
@@ -818,17 +818,24 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 		parent::Controller();
 	}
 
+	function index(){
+		$data['<?= self::pluralize(strtolower($className)) ?>'] = <?= $className ?>::getAll();
+		$this->load->view('<?= self::pluralize(strtolower($className)) ?>/index', $data);
+	}
+
 	function save($id = null){
 		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
 		$<?= strtolower($className) ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
 		$<?= strtolower($className) ?>->fromArray($_POST);
 		$<?= strtolower($className) ?>->save();
+		redirect('<?= self::pluralize(strtolower($className)) ?>');
 	}
 
 	function delete($id = null){
 		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
 		$<?= strtolower($className) ?> = <?= $className ?>::retrieveByPK($id);
 		$<?= strtolower($className) ?>->delete();
+		redirect('<?= self::pluralize(strtolower($className)) ?>');
 	}
 
 	function edit($id = null){
