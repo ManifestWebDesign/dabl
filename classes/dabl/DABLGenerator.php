@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified July 31st 2009
+ *    			Last Modified August 5th 2009
  */
 
 class DABLGenerator{
@@ -43,6 +43,10 @@ class DABLGenerator{
 		return $this->db_schema;
 	}
 
+	/**
+	 * Returns an array of all the table names in the XML schema
+	 * @return Array
+	 */
 	function getTableNames(){
 		$table_names = array();
 		$database = $this->getSchema()->getElementsByTagName('database')->item(0);
@@ -51,6 +55,10 @@ class DABLGenerator{
 		return $table_names;
 	}
 
+	/**
+	 * Returns an array of Column objects for a given table in the XML schema
+	 * @return Array
+	 */
 	function getColumns($table_name){
 		$columns = array();
 		$database_node = $this->getSchema()->getElementsByTagName('database')->item(0);
@@ -474,7 +482,7 @@ $class .= '
 		$used_from = array();
 		foreach($this->getForeignKeysFromTable($table) as $r){
 			$to_table = $r['to_table'];
-			$to_className = $options['cap_class_names'] ? ucfirst($to_table) : $to_table;
+			$to_className = self::getClassName($to_table, $options);
 			$to_column = $r['to_column'];
 			$from_column = $r['from_column'];
 
@@ -515,7 +523,7 @@ $class .= '
 		$used_to = array();
 		foreach($this->getForeignKeysToTable($table) as $r){
 			$from_table = $r['from_table'];
-			$from_className = $options['cap_class_names'] ? ucfirst($from_table) : $from_table;
+			$from_className = self::getClassName($from_table, $options);
 			$from_column = $r['from_column'];
 			$to_column = $r['to_column'];
 			if(@$used_to[$from_table]){
@@ -585,7 +593,7 @@ $class .= '
 			return array();
 
 		if($extra instanceof Query)
-			return '.$from_className.'::doSelect($this->get'.$from_table.'sQuery($extra));
+			return '.$from_className.'::doSelect($this->get'.$from_className.'sQuery($extra));
 
 		if(!$extra && $this->getCacheResults() && @$this->'.$from_className.'s_c && !$this->isColumnModified("'.$to_column.'"))
 			return $this->'.$from_className.'s_c;
@@ -636,7 +644,7 @@ class ".$className." extends base$className{
 	 * @param Array $options
 	 * @return String
 	 */
-	public function getForm($tableName, $className, $options){
+	function getForm($tableName, $className, $options){
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
 		$pkMethod = "get$pk";
@@ -703,13 +711,13 @@ if($pk){
 	 * @param Array $options
 	 * @return String
 	 */
-	public function getEditView($tableName, $className, $options){
+	function getEditView($tableName, $className, $controllerName, $options){
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
 		$pkMethod = "get$pk";
-		$outputPKMethod = '<?= htmlentities($'.strtolower($className).'->'.$pkMethod.'()) ?>';
+		$outputPKMethod = '<?= htmlentities($'.strtolower($tableName).'->'.$pkMethod.'()) ?>';
 		ob_start();
-		$action = "<?= site_url('".strtolower(self::pluralize($className))."/save') ?>";
+		$action = "<?= site_url('".strtolower($controllerName)."/save') ?>";
 ?>
 <form method="POST" action="<?= $action ?>">
 <?
@@ -725,7 +733,7 @@ if($pk){
 		foreach($instance->getColumnNames() as $columnName){
 			if($columnName==$pk)continue;
 			$method = "get$columnName";
-			$output = '<?= htmlentities($'.strtolower($className).'->'.$method.'()) ?>';
+			$output = '<?= htmlentities($'.strtolower($tableName).'->'.$method.'()) ?>';
 ?>
 			<tr>
 				<th><?= $columnName ?></th>
@@ -746,11 +754,19 @@ if($pk){
 		return ob_get_clean();
 	}
 
-	public function getIndexView($tableName, $className, $options){
+	/**
+	 * Generates a String with an html/php view showing all of the
+	 * objects from the given table in a grid
+	 * @param String $tableName
+	 * @param String $className
+	 * @param Array $options
+	 * @return String
+	 */
+	function getIndexView($tableName, $className, $controllerName, $options){
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
-		$plural = strtolower(self::pluralize($className));
-		$single = strtolower($className);
+		$plural = strtolower(self::pluralize($tableName));
+		$single = strtolower($tableName);
 		ob_start();
 ?>
 <table>
@@ -784,8 +800,8 @@ if($pk){
 		}
 		if($pk){
 			$pkMethod = "get$pk";
-			$editURL = "<?= site_url('$plural/edit/'.$".$single."->".$pkMethod."()) ?>";
-			$deleteURL = "<?= site_url('$plural/delete/'.$".$single."->".$pkMethod."()) ?>";
+			$editURL = "<?= site_url('".strtolower($controllerName)."/edit/'.$".$single."->".$pkMethod."()) ?>";
+			$deleteURL = "<?= site_url('".strtolower($controllerName)."/delete/'.$".$single."->".$pkMethod."()) ?>";
 ?>
 			<td><a href="<?= $editURL ?>">Edit</a></td>
 			<td><a href="<?= $deleteURL ?>">Delete</a></td>
@@ -808,11 +824,11 @@ if($pk){
 	 * @param Array $options
 	 * @return String
 	 */
-	public function getController($tableName, $className, $options){
+	function getController($tableName, $className, $controllerName, $options){
 		ob_start();
 		echo "<?php\n";
 ?>
-class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'] ? self::pluralize($className) : $className ?><?= @$options['controller_suffix'] ?> <? if(@$options['controllers_extend'])echo'extends '.$options['controllers_extend'] ?> {
+class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends '.$options['controllers_extend'] ?> {
 
 	function __construct(){
 		parent::Controller();
@@ -828,21 +844,21 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 		$<?= strtolower($className) ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
 		$<?= strtolower($className) ?>->fromArray($_POST);
 		$<?= strtolower($className) ?>->save();
-		redirect('<?= self::pluralize(strtolower($className)) ?>');
+		redirect('<?= $controllerName ?>');
 	}
 
 	function delete($id = null){
 		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
 		$<?= strtolower($className) ?> = <?= $className ?>::retrieveByPK($id);
 		$<?= strtolower($className) ?>->delete();
-		redirect('<?= self::pluralize(strtolower($className)) ?>');
+		redirect('<?= $controllerName ?>');
 	}
 
 	function edit($id = null){
 		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
 		$<?= strtolower($className) ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
 		$data['<?= strtolower($className) ?>'] = $<?= strtolower($className) ?>;
-		$this->load->view('<?= self::pluralize(strtolower($className)) ?>/edit', $data);
+		$this->load->view('<?= $controllerName ?>/edit', $data);
 	}
 
 }
@@ -859,6 +875,9 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 
 		//Default options
 		$settings = array(
+			//convert table and column names to title case
+			'title_case' => false,
+
 			//set to true to generate forms
 			'generate_forms' => false,
 
@@ -912,7 +931,13 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 
 		//Write php files for classes
 		foreach($this->getTableNames() as $tableName){
-			$className = @$options['class_prefix'].($options['cap_class_names'] ? ucfirst($tableName) : $tableName).@$options['class_suffix'];
+			$className = self::getClassName($tableName, $options);
+
+			$controllerName = str_replace(' ', '_', ucwords(strtolower(str_replace('_', ' ', $tableName))));
+			$controllerName = @$options['controller_prefix'].(@$options['pluralize_controllers'] ? self::pluralize($controllerName) : $controllerName).@$options['controller_suffix'];
+
+			$lower_case_table = strtolower($tableName);
+
 			$baseClass = $this->getBaseClass($tableName, $className, $options);
 
 			$baseFile = "base$className.php";
@@ -952,7 +977,7 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 				if(!is_dir($options['view_path']))
 					throw new Exception($options['view_path']." is not a directory.");
 
-				$target_dir = $options['view_path'].strtolower(self::pluralize($className)).DIRECTORY_SEPARATOR;
+				$target_dir = $options['view_path'].self::pluralize($lower_case_table).DIRECTORY_SEPARATOR;
 
 				if(!is_dir($target_dir))
 					mkdir($target_dir, 0755);
@@ -961,7 +986,7 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 				$formFile = $target_dir.$formFile;
 
 				if(!file_exists($formFile)){
-					$view = $this->getEditView($tableName, $className, $options);
+					$view = $this->getEditView($tableName, $className, $controllerName, $options);
 
 					$fh = fopen($formFile, 'w') or die("can't open file");
 					fwrite($fh, $view);
@@ -973,7 +998,7 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 				$formFile = $target_dir.$formFile;
 
 				if(!file_exists($formFile)){
-					$view = $this->getIndexView($tableName, $className, $options);
+					$view = $this->getIndexView($tableName, $className, $controllerName, $options);
 
 					$fh = fopen($formFile, 'w') or die("can't open file");
 					fwrite($fh, $view);
@@ -988,10 +1013,10 @@ class <?= @$options['controller_prefix'] ?><?= @$options['pluralize_controllers'
 				if(!is_dir($target_dir))
 					throw new Exception("$target_dir is not a directory.");
 
-				$formFile = strtolower(self::pluralize($className)).".php";
+				$formFile = self::pluralize($lower_case_table).".php";
 				$formFile = $target_dir.$formFile;
 				if(!file_exists($formFile)){
-					$view = $this->getController($tableName, $className, $options);
+					$view = $this->getController($tableName, $className, $controllerName,$options);
 
 					$fh = fopen($formFile, 'w') or die("can't open file");
 					fwrite($fh, $view);
@@ -1025,7 +1050,47 @@ foreach (glob($options['extended_class_path']."*.php") as $filename){
 <?php
 	}
 
-	public static function pluralize( $string ){
+	/**
+	 * Converts a table name to a class name using the given options.  Often used
+	 * to add class prefixes and/or suffixes, or to convert a class_name to a title case
+	 * ClassName
+	 * @param String $tableName
+	 * @param Array $options
+	 * @return String
+	 */
+	static function getClassName($tableName, $options){
+		$className = $tableName;
+		if(@$options['title_case'])
+			$className = self::titleCase($className);
+		if($options['cap_class_names'])
+			$className = ucfirst($className);
+		if(@$options['class_prefix'])
+			$className = $options['class_prefix'].$className;
+		if(@$options['class_suffix'])
+			$className = $className.$options['class_suffix'];
+		return $className;
+	}
+
+	/**
+	 * Converts a given string to title case
+	 * @param String $string
+	 * @return String
+	 */
+	static function titleCase($string){
+		$string = str_replace('_', ' ', $string);
+		$string = ucwords(strtolower($string));
+		$string = str_replace(' ', '', $string);
+		return $string;
+	}
+
+	/**
+	 * Returns the plural version of the given word.  If the plural version is
+	 * the same, then this method will simply add an 's' to the end of
+	 * the word.
+	 * @param String $string
+	 * @return String
+	 */
+	static function pluralize( $string ){
 		$plural = array(
 			array( '/(quiz)$/i',                "$1zes"   ),
 			array( '/^(ox)$/i',                 "$1en"    ),
