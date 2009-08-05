@@ -23,6 +23,7 @@ require_once 'Module.php';
 Module::addRepository('ROOT', substr(ROOT, 0, -1));
 Module::import('ROOT:classes');
 Module::import('ROOT:classes:dabl');
+Module::import('ROOT:classes:dabl:query');
 //Module::import('ROOT:classes:PDO'); //Uncomment if your server doesn't have PDO enabled
 Module::import('ROOT:classes:tables');
 Module::import('ROOT:classes:tables:base');
