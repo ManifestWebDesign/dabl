@@ -254,7 +254,7 @@ class DABLGenerator{
  *
  */
 
-abstract class base$className extends BaseTable{
+abstract class base$className extends BaseModel{
 ";
 
 		$class .= '

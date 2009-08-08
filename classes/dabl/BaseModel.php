@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Last Modified July 14th 2009
+ * Last Modified August 8th 2009
  */
 
-abstract class BaseTable {
+abstract class BaseModel {
 
 	/**
 	 * Array to contain names of modified columns
