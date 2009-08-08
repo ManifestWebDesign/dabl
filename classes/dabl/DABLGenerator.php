@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified August 5th 2009
+ *    			Last Modified August 6th 2009
  */
 
 class DABLGenerator{
@@ -57,7 +57,7 @@ class DABLGenerator{
 
 	/**
 	 * Returns an array of Column objects for a given table in the XML schema
-	 * @return Array
+	 * @return Column[]
 	 */
 	function getColumns($table_name){
 		$columns = array();
@@ -943,19 +943,16 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 			$baseFile = "base$className.php";
 			$baseFile = $options['base_class_path'].$baseFile;
 
-			$fh = fopen($baseFile, 'w') or die("can't open file");
-			fwrite($fh, $baseClass);
-			fclose($fh);
-			chmod($baseFile, 0644);
+			if(!file_exists($baseFile) || file_get_contents($baseFile)!=$baseClass){
+				file_put_contents($baseFile, $baseClass);
+				chmod($baseFile, 0644);
+			}
 
 			$file = $options['extended_class_path'].$className.".php";
 
 			if (!file_exists($file)){
 				$class = $this->getClass($tableName, $className, $options);
-
-				$fh = fopen($file, 'w') or die("can't open file");
-				fwrite($fh, $class);
-				fclose($fh);
+				file_put_contents($file, $class);
 				chmod($file, 0644);
 			}
 
@@ -965,10 +962,7 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 
 				if(!file_exists($formFile)){
 					$form = $this->getForm($tableName, $className, $options);
-
-					$fh = fopen($formFile, 'w') or die("can't open file");
-					fwrite($fh, $form);
-					fclose($fh);
+					file_put_contents($formFile, $form);
 					chmod($formFile, 0644);
 				}
 			}
@@ -987,10 +981,7 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 
 				if(!file_exists($formFile)){
 					$view = $this->getEditView($tableName, $className, $controllerName, $options);
-
-					$fh = fopen($formFile, 'w') or die("can't open file");
-					fwrite($fh, $view);
-					fclose($fh);
+					file_put_contents($formFile, $view);
 					chmod($formFile, 0644);
 				}
 
@@ -999,10 +990,7 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 
 				if(!file_exists($formFile)){
 					$view = $this->getIndexView($tableName, $className, $controllerName, $options);
-
-					$fh = fopen($formFile, 'w') or die("can't open file");
-					fwrite($fh, $view);
-					fclose($fh);
+					file_put_contents($formFile, $view);
 					chmod($formFile, 0644);
 				}
 			}
@@ -1017,10 +1005,7 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 				$formFile = $target_dir.$formFile;
 				if(!file_exists($formFile)){
 					$view = $this->getController($tableName, $className, $controllerName,$options);
-
-					$fh = fopen($formFile, 'w') or die("can't open file");
-					fwrite($fh, $view);
-					fclose($fh);
+					file_put_contents($formFile, $view);
 					chmod($formFile, 0644);
 				}
 			}
