@@ -1,15 +1,5 @@
 <?php
 require_once 'config.php';
-?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<title>DABL::Map Database</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-</head>
-<body>
-<?php
 
 //see DABLGenerator::construct() for default options
 $options = array(
@@ -33,6 +23,14 @@ $options = array(
 $generator = new DABLGenerator("main", DB_NAME);
 $generator->setOptions($options);
 ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>DABL::Map Database</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head>
+<body>
 	<h1>DABL Generator</h1>
 	<div>
 		Please choose which table to generate for.  Only the base models
