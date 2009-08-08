@@ -211,14 +211,21 @@ abstract class BaseModel {
 	//	$queryString = "INSERT INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $placeholders).") ";
 
 		try{
+			if($this->getPrimaryKey() && $conn->isGetIdBeforeInsert())
+				$id = $conn->lastInsertId();
+
 			$count = $conn->exec($queryString);
 	//		$stmnt = $conn->prepare($queryString);
 	//		$count = $stmnt->execute($values);
 
 			if($this->getPrimaryKey()){
 				$pk = $this->getPrimaryKey();
-				$id = $conn->lastInsertId();
-				if($id)$this->$pk = $id;
+				$setPK = "set$pk";
+
+				if($conn->isGetIdAfterInsert())
+					$id = $conn->lastInsertId();
+
+				$this->$setPK($id);
 			}
 			$this->resetModified();
 			$this->setNew(false);
