@@ -4,10 +4,15 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified August 6th 2009
+ *    			Last Modified August 8th 2009
  */
 
 class DABLGenerator{
+
+	/**
+	 * @var array
+	 */
+	 private $options;
 
 	/**
 	 * @var String
@@ -24,9 +29,72 @@ class DABLGenerator{
 	 * @param $conn_name String
 	 * @param $schema DOMDocument
 	 */
-	function __construct($conn_name = null, DOMDocument $schema = null){
-		if($conn_name)$this->setConnectionName($conn_name);
-		if($schema)$this->setSchema($schema);
+	function __construct($conn_name, $db_name){
+		$conn = DBManager::getConnection($conn_name);
+		$dbXML = new DBtoXML($conn, $db_name);
+
+		$this->setConnectionName($conn_name);
+		$this->setSchema($dbXML->getXMLDom());
+
+		$this->options = array(
+
+			/* forms */
+			'form_path' => ROOT."includes/sample_forms/",
+
+
+			/* Models */
+
+			//convert table and column names to title case
+			'title_case' => false,
+
+			//enforce an upper case first letter of classes
+			'cap_class_names' => true,
+
+			//enforce an upper case first letter of get and set methods
+			'cap_method_names' => true,
+
+			//if attempting to set value of numeric column to empty string, convert it to a zero
+			'empty_string_zero' => false,
+
+			//add some logic to the setter methods to not allow column values to be null if the column cannot be null
+			'protect_not_null' => true,
+
+			//prepend this to class name
+			'class_prefix' => '',
+
+			//append this to class name
+			'class_suffix' => '',
+
+			//target directory for generated table classes
+			'model_path' => ROOT."classes/tables/",
+
+			//target directory for generated base table classes
+			'base_model_path' => ROOT."classes/tables/base/",
+
+
+			/* views */
+
+			//set to true to generate views
+			'view_path' => ROOT."views/",
+
+
+			/* controllers */
+			
+			//class that each controller should extend
+			'controllers_extend' => 'Controller',
+
+			//controller classname is plural version of table name
+			'pluralize_controllers' => true,
+
+			//directory to save controller files in
+			'controller_path' => ROOT."classes/controllers/",
+
+			//prepend to controller class name
+			'controller_prefix' => '',
+
+			//append to controller class name
+			'controller_suffix' => '',
+		);
 	}
 
 	/**
@@ -43,9 +111,17 @@ class DABLGenerator{
 		return $this->db_schema;
 	}
 
+	function setOptions($options){
+		$this->options = array_merge($this->options, $options);
+	}
+
+	function getOptions(){
+		return $this->options;
+	}
+
 	/**
 	 * Returns an array of all the table names in the XML schema
-	 * @return Array
+	 * @return array
 	 */
 	function getTableNames(){
 		$table_names = array();
@@ -126,7 +202,7 @@ class DABLGenerator{
 	/**
 	 * @return String
 	 */
-	private function getDBName(){
+	function getDBName(){
 		foreach($this->getSchema()->getElementsByTagName('database') as $database)
 			return $database->getAttribute("name");
 	}
@@ -141,7 +217,7 @@ class DABLGenerator{
 	/**
 	 * @return String
 	 */
-	private function getConnectionName(){
+	function getConnectionName(){
 		return $this->connection_name;
 	}
 
@@ -149,17 +225,18 @@ class DABLGenerator{
 	 * Generates a String with the contents of the Base class
 	 * @param String $tableName
 	 * @param String $className
-	 * @param Array $options
+	 * @param array $options
 	 * @return String
 	 */
-	private function getBaseClass($table, $className, $options){
-
+	function getBaseClass($tableName){
+		$className = $this->getClassName($tableName);
+		$options = $this->options;
 		//Gather all the information about the table's columns from the database
 		$PK = null;
 		$numeric=array();
 		$null = array();
 		$PKs = array();
-		$fields = $this->getColumns($table);
+		$fields = $this->getColumns($tableName);
 		foreach($fields as $field)
 			if($field->isPrimaryKey()) $PKs[] = $field->getName();
 
@@ -184,7 +261,7 @@ abstract class base$className extends BaseTable{
 	/**
 	 * Name of the table
 	 */
-	protected static $_tableName = "'.$table.'";
+	protected static $_tableName = "'.$tableName.'";
 
 	/**
 	 * Array of all primary keys
@@ -321,7 +398,7 @@ $class .= '
 
 	/**
 	 * Access to array of column names
-	 * @return Array
+	 * @return array
 	 */
 	static function getColumnNames(){
 		return '.$className.'::$_columnNames;
@@ -329,7 +406,7 @@ $class .= '
 
 	/**
 	 * Access to array of primary keys
-	 * @return Array
+	 * @return array
 	 */
 	static function getPrimaryKeys(){
 		return '.$className.'::$_primaryKeys;
@@ -337,7 +414,7 @@ $class .= '
 
 	/**
 	 * Access to name of primary key
-	 * @return Array
+	 * @return array
 	 */
 	static function getPrimaryKey(){
 		return '.$className.'::$_primaryKey;
@@ -408,7 +485,7 @@ $class .= '
 	 * Populates and returns an Array of '.$className.' Objects with the
 	 * results of a query.  If the query returns no results,
 	 * returns an empty Array.
-	 * @return Array
+	 * @return array
 	 */
 	static function fetch($queryString){
 		$conn = '.$className.'::getConnection();
@@ -418,7 +495,7 @@ $class .= '
 
 	/**
 	 * Returns an array of '.$className.' Objects from the rows of a PDOStatement(query result)
-	 * @return Array
+	 * @return array
 	 */
 	 static function fromResult(PDOStatement $result){
 		$objects = array();
@@ -437,7 +514,7 @@ $class .= '
 	 * $extra SQL can be appended to the query to limit,sort,group results.
 	 * If there are no results, returns an empty Array.
 	 * @param $extra String
-	 * @return Array
+	 * @return array
 	 */
 	static function getAll($extra = null){
 		$conn = '.$className.'::getConnection();
@@ -468,7 +545,7 @@ $class .= '
 	}
 
 	/**
-	 * @return Array
+	 * @return array
 	 */
 	static function doSelect(Query $q){
 		$conn = '.$className.'::getConnection();
@@ -480,7 +557,7 @@ $class .= '
 ';
 
 		$used_from = array();
-		foreach($this->getForeignKeysFromTable($table) as $r){
+		foreach($this->getForeignKeysFromTable($tableName) as $r){
 			$to_table = $r['to_table'];
 			$to_className = self::getClassName($to_table, $options);
 			$to_column = $r['to_column'];
@@ -521,13 +598,13 @@ $class .= '
 		}
 
 		$used_to = array();
-		foreach($this->getForeignKeysToTable($table) as $r){
+		foreach($this->getForeignKeysToTable($tableName) as $r){
 			$from_table = $r['from_table'];
 			$from_className = self::getClassName($from_table, $options);
 			$from_column = $r['from_column'];
 			$to_column = $r['to_column'];
 			if(@$used_to[$from_table]){
-				echo "WARNING: <b>$table.$to_column</b> USED BY MORE THAN ONE FOREIGN KEY IN TABLE: <b>$from_table</b>.
+				echo "WARNING: <b>$tableName.$to_column</b> USED BY MORE THAN ONE FOREIGN KEY IN TABLE: <b>$from_table</b>.
 						METHODS CREATED FOR <b>$from_table.".$used_to[$from_table]."</b> ONLY.<br />";
 				continue;
 			}
@@ -586,7 +663,7 @@ $class .= '
 	 * After that, if $this->'.$to_column.' is not modified, the
 	 * method will return the cached result instead of querying the database
 	 * a second time(for performance purposes).
-	 * @return Array
+	 * @return array
 	 */
 	function get'.$from_className.'s($extra=NULL){
 		if($this->get'.$to_column.'()===null)
@@ -622,10 +699,11 @@ $class .= '
 	 * for the table, which is used for extending the Base class.
 	 * @param String $tableName
 	 * @param String $className
-	 * @param Array $options
 	 * @return String
 	 */
-	private function getClass($tableName, $className, $options){
+	function getClass($tableName){
+		$className = $this->getClassName($tableName);
+		$options = $this->options;
 		$class = "<?php
 
 class ".$className." extends base$className{
@@ -641,10 +719,10 @@ class ".$className." extends base$className{
 	 * objects in the given table.
 	 * @param String $tableName
 	 * @param String $className
-	 * @param Array $options
 	 * @return String
 	 */
-	function getForm($tableName, $className, $options){
+	function getForm($tableName, $className){
+		$options = $this->options;
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
 		$pkMethod = "get$pk";
@@ -708,10 +786,12 @@ if($pk){
 	 * objects in the given table.
 	 * @param String $tableName
 	 * @param String $className
-	 * @param Array $options
 	 * @return String
 	 */
-	function getEditView($tableName, $className, $controllerName, $options){
+	function getEditView($tableName){
+		$controllerName = $this->getControllerName($tableName);
+		$className = $this->getClassName($tableName);
+		$options = $this->options;
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
 		$pkMethod = "get$pk";
@@ -759,10 +839,12 @@ if($pk){
 	 * objects from the given table in a grid
 	 * @param String $tableName
 	 * @param String $className
-	 * @param Array $options
 	 * @return String
 	 */
-	function getIndexView($tableName, $className, $controllerName, $options){
+	function getIndexView($tableName){
+		$controllerName = $this->getControllerName($tableName);
+		$className = $this->getClassName($tableName);
+		$options = $this->options;
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
 		$plural = strtolower(self::pluralize($tableName));
@@ -821,10 +903,12 @@ if($pk){
 	 * Generates a String with Controller class for MVC
 	 * @param String $tableName
 	 * @param String $className
-	 * @param Array $options
 	 * @return String
 	 */
-	function getController($tableName, $className, $controllerName, $options){
+	function getController($tableName){
+		$controllerName = $this->getControllerName($tableName);
+		$className = $this->getClassName($tableName);
+		$options = $this->options;
 		ob_start();
 		echo "<?php\n";
 ?>
@@ -867,171 +951,163 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 	}
 
 	/**
-	 * Generates Table classesd
+	 * Generates Table classes
 	 * @return
-	 * @param Array $options[optional]
 	 */
-	function generate($options = array()){
+	function generateModels($tableNames = false){
+		if($tableNames===false)
+			$tableNames = $this->getTableNames();
+		elseif(empty($tableNames))
+			return;
 
-		//Default options
-		$settings = array(
-			//convert table and column names to title case
-			'title_case' => false,
-
-			//set to true to generate forms
-			'generate_forms' => false,
-
-			//set to true to generate forms
-			'generate_views' => false,
-
-			//set to true to generate views
-			'view_path' => ROOT."views/",
-
-			'generate_controllers' => false,
-
-			'controllers_extend' => 'Controller',
-
-			'pluralize_controllers' => true,
-
-			'controller_path' => ROOT."classes/controllers/",
-
-			'controller_prefix' => '',
-
-			'controller_suffix' => '',
-
-			//target directory for generated table classes
-			'form_path' => ROOT."includes/sample_forms/",
-
-			//if attempting to set value of numeric column to empty string, convert it to a zero
-			'empty_string_zero' => false,
-
-			//add some logic to the setter methods to not allow column values to be null if the column cannot be null
-			'protect_not_null' => true,
-
-			//enforce an upper case first letter of classes
-			'cap_class_names' => true,
-
-			//enforce an upper case first letter of get and set methods
-			'cap_method_names' => true,
-
-			'class_prefix' => '',
-
-			'class_suffix' => '',
-
-			//target directory for generated table classes
-			'extended_class_path' => ROOT."classes/tables/",
-
-			//target directory for generated base table classes
-			'base_class_path' => ROOT."classes/tables/base/"
-		);
-
-		$options = array_merge($settings, $options);
-
-		$db = $this->getDBName();
+		$options = $this->options;
 
 		//Write php files for classes
-		foreach($this->getTableNames() as $tableName){
+		foreach($tableNames as $tableName){
 			$className = self::getClassName($tableName, $options);
-
-			$controllerName = str_replace(' ', '_', ucwords(strtolower(str_replace('_', ' ', $tableName))));
-			$controllerName = @$options['controller_prefix'].(@$options['pluralize_controllers'] ? self::pluralize($controllerName) : $controllerName).@$options['controller_suffix'];
-
 			$lower_case_table = strtolower($tableName);
 
-			$baseClass = $this->getBaseClass($tableName, $className, $options);
+			$baseClass = $this->getBaseClass($tableName);
 
 			$baseFile = "base$className.php";
-			$baseFile = $options['base_class_path'].$baseFile;
+			$baseFile = $options['base_model_path'].$baseFile;
 
 			if(!file_exists($baseFile) || file_get_contents($baseFile)!=$baseClass){
 				file_put_contents($baseFile, $baseClass);
 				chmod($baseFile, 0644);
 			}
 
-			$file = $options['extended_class_path'].$className.".php";
+			$file = $options['model_path'].$className.".php";
 
 			if (!file_exists($file)){
-				$class = $this->getClass($tableName, $className, $options);
+				$class = $this->getClass($tableName);
 				file_put_contents($file, $class);
 				chmod($file, 0644);
 			}
-
-			if($options['generate_forms']){
-				$formFile = "$className.php";
-				$formFile = $options['form_path'].$formFile;
-
-				if(!file_exists($formFile)){
-					$form = $this->getForm($tableName, $className, $options);
-					file_put_contents($formFile, $form);
-					chmod($formFile, 0644);
-				}
-			}
-
-			if($options['generate_views']){
-				if(!is_dir($options['view_path']))
-					throw new Exception($options['view_path']." is not a directory.");
-
-				$target_dir = $options['view_path'].self::pluralize($lower_case_table).DIRECTORY_SEPARATOR;
-
-				if(!is_dir($target_dir))
-					mkdir($target_dir, 0755);
-
-				$formFile = "edit.php";
-				$formFile = $target_dir.$formFile;
-
-				if(!file_exists($formFile)){
-					$view = $this->getEditView($tableName, $className, $controllerName, $options);
-					file_put_contents($formFile, $view);
-					chmod($formFile, 0644);
-				}
-
-				$formFile = "index.php";
-				$formFile = $target_dir.$formFile;
-
-				if(!file_exists($formFile)){
-					$view = $this->getIndexView($tableName, $className, $controllerName, $options);
-					file_put_contents($formFile, $view);
-					chmod($formFile, 0644);
-				}
-			}
-
-			if($options['generate_controllers']){
-				$target_dir = $options['controller_path'];
-
-				if(!is_dir($target_dir))
-					throw new Exception("$target_dir is not a directory.");
-
-				$formFile = self::pluralize($lower_case_table).".php";
-				$formFile = $target_dir.$formFile;
-				if(!file_exists($formFile)){
-					$view = $this->getController($tableName, $className, $controllerName,$options);
-					file_put_contents($formFile, $view);
-					chmod($formFile, 0644);
-				}
-			}
-
 		}
+		//save xml to file
+		file_put_contents($options['model_path']."schema.xml", $this->getSchema()->saveXML());
+		$this->includeModelClasses();
+	}
 
+	/**
+	 * Generate views
+	 */
+	function generateViews($tableNames = false){
+		if($tableNames===false)
+			$tableNames = $this->getTableNames();
+		elseif(empty($tableNames))
+			return;
+
+		$options = $this->options;
+
+		foreach($tableNames as $tableName){
+			$lower_case_table = strtolower($tableName);
+			
+			if(!is_dir($options['view_path']))
+				throw new Exception($options['view_path']." is not a directory.");
+
+			$target_dir = $options['view_path'].self::pluralize($lower_case_table).DIRECTORY_SEPARATOR;
+
+			if(!is_dir($target_dir))
+				mkdir($target_dir, 0755);
+
+			$formFile = "edit.php";
+			$formFile = $target_dir.$formFile;
+
+			if(!file_exists($formFile)){
+				$view = $this->getEditView($tableName);
+				file_put_contents($formFile, $view);
+				chmod($formFile, 0644);
+			}
+
+			$formFile = "index.php";
+			$formFile = $target_dir.$formFile;
+
+			if(!file_exists($formFile)){
+				$view = $this->getIndexView($tableName);
+				file_put_contents($formFile, $view);
+				chmod($formFile, 0644);
+			}
+		}
+	}
+
+	/**
+	 * Generate controllers
+	 */
+	function generateControllers($tableNames = false){
+		if($tableNames===false)
+			$tableNames = $this->getTableNames();
+		elseif(empty($tableNames))
+			return;
+
+		$options = $this->options;
+
+		foreach($tableNames as $tableName){
+			$target_dir = $options['controller_path'];
+			$lower_case_table = strtolower($tableName);
+
+			if(!is_dir($target_dir))
+				throw new Exception("$target_dir is not a directory.");
+
+			$file = self::pluralize($lower_case_table).".php";
+			$file = $target_dir.$file;
+			if(!file_exists($file)){
+				$controller = $this->getController($tableName);
+				file_put_contents($file, $controller);
+				chmod($file, 0644);
+			}
+		}
+	}
+
+	/**
+	 * Generate html/php forms (basically an edit view with built in controller)
+	 */
+	function generateForms(){
+		$options = $this->options;
+
+		foreach($this->getTableNames() as $tableName){
+			$formFile = "$className.php";
+			$formFile = $options['form_path'].$formFile;
+
+			if(!file_exists($formFile)){
+				$form = $this->getForm($tableName, $className);
+				file_put_contents($formFile, $form);
+				chmod($formFile, 0644);
+			}
+		}
+	}
+
+	/**
+	 * Includes all of the model classes.  Mostly used to check for parse/syntax errors.
+	 */
+	function includeModelClasses(){
+		$options = $this->options;
 ?>
 <div style="float:left;width:50%">
 <strong>Base<br /></strong>
+
 <?php
-foreach (glob($options['base_class_path']."*.php") as $filename){
-	echo basename($filename)."<br />";
-	require_once($filename);
-}
+		foreach (glob($options['base_model_path']."*.php") as $filename){
+			echo basename($filename)."<br />";
+			require_once($filename);
+		}
 ?>
+
 </div>
 <div style="float:left;width:50%">
 <strong>Extended<br /></strong>
+
 <?php
-foreach (glob($options['extended_class_path']."*.php") as $filename){
-	echo basename($filename)."<br />";
-	require_once($filename);
-}
+		foreach (glob($options['model_path']."*.php") as $filename){
+			echo basename($filename)."<br />";
+			require_once($filename);
+		}
 ?>
+
 </div>
 <div style="text-align:center;color:green;font-weight:bold">Success.</div>
+
 <?php
 	}
 
@@ -1040,10 +1116,10 @@ foreach (glob($options['extended_class_path']."*.php") as $filename){
 	 * to add class prefixes and/or suffixes, or to convert a class_name to a title case
 	 * ClassName
 	 * @param String $tableName
-	 * @param Array $options
 	 * @return String
 	 */
-	static function getClassName($tableName, $options){
+	function getClassName($tableName){
+		$options = $this->options;
 		$className = $tableName;
 		if(@$options['title_case'])
 			$className = self::titleCase($className);
@@ -1054,6 +1130,26 @@ foreach (glob($options['extended_class_path']."*.php") as $filename){
 		if(@$options['class_suffix'])
 			$className = $className.$options['class_suffix'];
 		return $className;
+	}
+
+	/**
+	 * @param string $tableName
+	 * @return string
+	 */
+	function getControllerName($tableName){
+		$options = $this->options;
+		$controllerName = str_replace(' ', '_', ucwords(strtolower(str_replace('_', ' ', $tableName))));
+		
+		if(@$options['pluralize_controllers'])
+			$controllerName = self::pluralize($controllerName);
+
+		if(@$options['controller_prefix'])
+			$controllerName = @$options['controller_prefix'].$controllerName;
+
+		if(@$options['controller_suffix'])
+			$controllerName = $controllerName. @$options['controller_prefix'];
+
+		return $controllerName;
 	}
 
 	/**
