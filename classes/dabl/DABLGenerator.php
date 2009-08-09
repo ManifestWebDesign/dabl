@@ -79,7 +79,7 @@ class DABLGenerator{
 
 
 			/* controllers */
-			
+
 			//class that each controller should extend
 			'controllers_extend' => 'Controller',
 
@@ -791,19 +791,18 @@ if($pk){
 	function getEditView($tableName){
 		$controllerName = $this->getControllerName($tableName);
 		$className = $this->getClassName($tableName);
+		$plural = $this->getViewDirName($tableName);
+		$single = strtolower($tableName);
 		$options = $this->options;
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
-		$pkMethod = "get$pk";
-		$outputPKMethod = '<?= htmlentities($'.strtolower($tableName).'->'.$pkMethod.'()) ?>';
 		ob_start();
-		$action = "<?= site_url('".strtolower($controllerName)."/save') ?>";
 ?>
-<form method="POST" action="<?= $action ?>">
+<form method="POST" action="<?= "<?= site_url('".$plural."/save') ?>" ?>">
 <?
 		if($pk){
 ?>
-	<input type="hidden" name="<?= $pk ?>" value="<?= $outputPKMethod ?>" />
+	<input type="hidden" name="<?= $pk ?>" value="<?= '<?= htmlentities($'.$single.'->'."get$pk".'()) ?>' ?>" />
 <?
 		}
 ?>
@@ -813,7 +812,7 @@ if($pk){
 		foreach($instance->getColumnNames() as $columnName){
 			if($columnName==$pk)continue;
 			$method = "get$columnName";
-			$output = '<?= htmlentities($'.strtolower($tableName).'->'.$method.'()) ?>';
+			$output = '<?= htmlentities($'.$single.'->'.$method.'()) ?>';
 ?>
 			<tr>
 				<th><?= $columnName ?></th>
@@ -847,7 +846,7 @@ if($pk){
 		$options = $this->options;
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
-		$plural = strtolower(self::pluralize($tableName));
+		$plural = $this->getViewDirName($tableName);
 		$single = strtolower($tableName);
 		ob_start();
 ?>
@@ -882,8 +881,8 @@ if($pk){
 		}
 		if($pk){
 			$pkMethod = "get$pk";
-			$editURL = "<?= site_url('".strtolower($controllerName)."/edit/'.$".$single."->".$pkMethod."()) ?>";
-			$deleteURL = "<?= site_url('".strtolower($controllerName)."/delete/'.$".$single."->".$pkMethod."()) ?>";
+			$editURL = "<?= site_url('".$plural."/edit/'.$".$single."->".$pkMethod."()) ?>";
+			$deleteURL = "<?= site_url('".$plural."/delete/'.$".$single."->".$pkMethod."()) ?>";
 ?>
 			<td><a href="<?= $editURL ?>">Edit</a></td>
 			<td><a href="<?= $deleteURL ?>">Delete</a></td>
@@ -907,7 +906,9 @@ if($pk){
 	 */
 	function getController($tableName){
 		$controllerName = $this->getControllerName($tableName);
+		$plural = $this->getViewDirName($tableName);
 		$className = $this->getClassName($tableName);
+		$single = strtolower($tableName);
 		$options = $this->options;
 		ob_start();
 		echo "<?php\n";
@@ -920,29 +921,29 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 
 	function index(){
 		$data['<?= self::pluralize(strtolower($className)) ?>'] = <?= $className ?>::getAll();
-		$this->load->view('<?= self::pluralize(strtolower($className)) ?>/index', $data);
+		$this->load->view('<?= $plural ?>/index', $data);
 	}
 
 	function save($id = null){
 		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
-		$<?= strtolower($className) ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
-		$<?= strtolower($className) ?>->fromArray($_POST);
-		$<?= strtolower($className) ?>->save();
-		redirect('<?= $controllerName ?>');
+		$<?= $single ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
+		$<?= $single ?>->fromArray($_POST);
+		$<?= $single ?>->save();
+		redirect('<?= $plural ?>');
 	}
 
 	function delete($id = null){
 		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
-		$<?= strtolower($className) ?> = <?= $className ?>::retrieveByPK($id);
-		$<?= strtolower($className) ?>->delete();
-		redirect('<?= $controllerName ?>');
+		$<?= $single ?> = <?= $className ?>::retrieveByPK($id);
+		$<?= $single ?>->delete();
+		redirect('<?= $plural ?>');
 	}
 
 	function edit($id = null){
 		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
-		$<?= strtolower($className) ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
-		$data['<?= strtolower($className) ?>'] = $<?= strtolower($className) ?>;
-		$this->load->view('<?= $controllerName ?>/edit', $data);
+		$<?= $single ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
+		$data['<?= $single ?>'] = $<?= strtolower($tableName) ?>;
+		$this->load->view('<?= $plural ?>/edit', $data);
 	}
 
 }
@@ -1003,11 +1004,11 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 
 		foreach($tableNames as $tableName){
 			$lower_case_table = strtolower($tableName);
-			
+
 			if(!is_dir($options['view_path']))
 				throw new Exception($options['view_path']." is not a directory.");
 
-			$target_dir = $options['view_path'].self::pluralize($lower_case_table).DIRECTORY_SEPARATOR;
+			$target_dir = $options['view_path'].$this->getViewDirName($tableName).DIRECTORY_SEPARATOR;
 
 			if(!is_dir($target_dir))
 				mkdir($target_dir, 0755);
@@ -1136,10 +1137,18 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 	 * @param string $tableName
 	 * @return string
 	 */
+	function getViewDirName($tableName){
+		return strtolower(self::pluralize($tableName));
+	}
+
+	/**
+	 * @param string $tableName
+	 * @return string
+	 */
 	function getControllerName($tableName){
 		$options = $this->options;
 		$controllerName = str_replace(' ', '_', ucwords(strtolower(str_replace('_', ' ', $tableName))));
-		
+
 		if(@$options['pluralize_controllers'])
 			$controllerName = self::pluralize($controllerName);
 
