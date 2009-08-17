@@ -1,12 +1,16 @@
 <?php
 /**
- * Last Modified July 11th 2009
+ * Last Modified August 17th 2009
  */
 
 /**
  * Used to build query strings using OOP
  */
 class Query{
+
+	const ACTION_COUNT = "COUNT";
+	const ACTION_DELETE = "DELETE";
+	const ACTION_SELECT = "SELECT";
 
 	//Comparison types
 	const EQUAL = "=";
@@ -50,7 +54,7 @@ class Query{
 	const ASC = "ASC";
 	const DESC = "DESC";
 
-	private $_action = "SELECT";
+	private $_action = self::ACTION_SELECT;
 	private $_columns = array();
 	private $_table;
 	private $_joins = array();
@@ -366,14 +370,12 @@ class Query{
 			$table = $alias ? "`$table_name` $alias" : "`$table_name`";
 
 		switch(strtoupper($this->getAction())){
-			case "SELECT":
+			case self::ACTION_COUNT:
+			case self::ACTION_SELECT:
 				$query .="SELECT $columns \n FROM $table ";
 				break;
-			case "DELETE":
+			case self::ACTION_DELETE:
 				$query .="DELETE \n FROM $table ";
-				break;
-			case "COUNT":
-				$query .="SELECT count(*) \n FROM $table ";
 				break;
 			default:
 				break;
@@ -383,13 +385,18 @@ class Query{
 			$query .= "\n ".implode("\n ", $this->_joins)." ";
 
 		$where = $this->getWhere()->getClause();
-		if($where)$query .= "\n WHERE $where ";
-		if($this->_groups)$query .= "\n GROUP BY ".implode(', ',$this->_groups)." ";
-		if($this->_having)$query .= "\n HAVING ".$this->_having->getClause()." ";
+		
+		if($where)
+			$query .= "\n WHERE $where ";
 
-		if($this->getAction()!="COUNT"){
-			if($this->_orders)$query .= "\n ORDER BY ".implode(', ',$this->_orders)." ";
-		}
+		if($this->_groups)
+			$query .= "\n GROUP BY ".implode(', ',$this->_groups)." ";
+
+		if($this->_having)
+			$query .= "\n HAVING ".$this->_having->getClause()." ";
+
+		if($this->getAction()!=self::ACTION_COUNT && $this->_orders)
+			$query .= "\n ORDER BY ".implode(', ',$this->_orders)." ";
 
 		if($this->_limit){
 			if($conn)
@@ -397,6 +404,9 @@ class Query{
 			else
 				$query .= "\n LIMIT ".($this->_offset ? $this->_offset.", " : "").$this->_limit;
 		}
+
+		if($this->getAction()==self::ACTION_COUNT)
+			return "SELECT count(0) FROM ($query)";
 
 		return $query;
 	}
@@ -467,4 +477,3 @@ class Query{
 		return $conn->query($q);
 	}
 }
-?>
