@@ -1,6 +1,6 @@
-<?
+<?php
 /**
- * Last Modified July 11th 2009
+ * Last Modified September 11th 2009
  */
 
 /**
@@ -73,6 +73,8 @@ class Condition{
 
 		//$right can be an array
 		if(is_array($right)){
+			if(!$right)return "1<>1";
+
 			//Escape $right (recursive)
 			if($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH)
 				$right = DBManager::checkInput($right);
@@ -188,4 +190,3 @@ class Condition{
 		return $this->getClause();
 	}
 }
-?>

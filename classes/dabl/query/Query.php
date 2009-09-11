@@ -406,7 +406,7 @@ class Query{
 		}
 
 		if($this->getAction()==self::ACTION_COUNT)
-			return "SELECT count(0) FROM ($query)";
+			return "SELECT count(0) FROM ($query) a";
 
 		return $query;
 	}
