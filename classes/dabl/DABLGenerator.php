@@ -741,22 +741,22 @@ if(@$_REQUEST['action']=='save'){
 	header("Location: ?<?= $pk ?>={$<?= strtolower($className) ?>->get<?= $pk ?>()}");
 	die;
 }
-<?
+<?php
 	echo "?>\n";
 }
 ?>
 <form method="POST" action="">
 	<input type="hidden" name="action" value="save" />
-<?
+<?php
 if($pk){
 ?>
 	<input type="hidden" name="<?= $pk ?>" value="<?= $outputPKMethod ?>" />
-<?
+<?php
 }
 ?>
 	<table>
 		<tbody>
-<?
+<?php
 		foreach($instance->getColumnNames() as $columnName){
 			if($columnName==$pk)continue;
 			$method = "get$columnName";
@@ -766,7 +766,7 @@ if($pk){
 				<th><?= $columnName ?></th>
 				<td><input type="text" name="<?= $columnName ?>" value="<?= $output ?>" /></td>
 			</tr>
-<?
+<?php
 		}
 ?>
 			<tr>
@@ -777,7 +777,7 @@ if($pk){
 		</tbody>
 	</table>
 </form>
-<?
+<?php
 		return ob_get_clean();
 	}
 
@@ -799,16 +799,16 @@ if($pk){
 		ob_start();
 ?>
 <form method="POST" action="<?= "<?= site_url('".$plural."/save') ?>" ?>">
-<?
+<?php
 		if($pk){
 ?>
 	<input type="hidden" name="<?= $pk ?>" value="<?= '<?= htmlentities($'.$single.'->'."get$pk".'()) ?>' ?>" />
-<?
+<?php
 		}
 ?>
 	<table>
 		<tbody>
-<?
+<?php
 		foreach($instance->getColumnNames() as $columnName){
 			if($columnName==$pk)continue;
 			$method = "get$columnName";
@@ -818,7 +818,7 @@ if($pk){
 				<th><?= $columnName ?></th>
 				<td><input type="text" name="<?= $columnName ?>" value="<?= $output ?>" /></td>
 			</tr>
-<?
+<?php
 		}
 ?>
 			<tr>
@@ -829,7 +829,7 @@ if($pk){
 		</tbody>
 	</table>
 </form>
-<?
+<?php
 		return ob_get_clean();
 	}
 
@@ -853,17 +853,17 @@ if($pk){
 <table>
 	<thead>
 		<tr>
-<?
+<?php
 		foreach($instance->getColumnNames() as $columnName){
 ?>
 			<th><?= $columnName ?></th>
-<?
+<?php
 		}
 		if($pk){
 ?>
 			<th></th>
 			<th></th>
-<?
+<?php
 		}
 ?>
 		</tr>
@@ -872,12 +872,12 @@ if($pk){
 <?= "<?" ?> foreach($<?= $plural ?> as $key => $<?= $single ?>): <?= "?>" ?>
 
 		<tr class="<?= '<?=' ?> is_int($key/2) ? 'odd' : 'even' <?= '?>' ?>">
-<?
+<?php
 		foreach($instance->getColumnNames() as $columnName){
 			$output = '<?= htmlentities($'.$single.'->'."get$columnName".'()) ?>';
 ?>
 			<td><?= $output ?></td>
-<?
+<?php
 		}
 		if($pk){
 			$pkMethod = "get$pk";
@@ -886,7 +886,7 @@ if($pk){
 ?>
 			<td><a href="<?= $editURL ?>">Edit</a></td>
 			<td><a href="<?= $deleteURL ?>">Delete</a></td>
-<?
+<?php
 		}
 ?>
 		</tr>
@@ -894,7 +894,7 @@ if($pk){
 
 	</tbody>
 </table>
-<?
+<?php
 		return ob_get_clean();
 	}
 
@@ -947,7 +947,7 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 	}
 
 }
-<?
+<?php
 		return ob_get_clean();
 	}
 
