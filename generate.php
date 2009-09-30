@@ -29,6 +29,17 @@ $generator->setOptions($options);
 <head>
 	<title>DABL::Map Database</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<script>
+checkAll = function(name, checked){
+	var boxes = document.getElementsByTagName('input');
+	var length = boxes.length;
+	for(var x=0; x<length; x++){
+		var checkbox = boxes[x];
+		if(checkbox.type=='checkbox' && checkbox.name==name)
+			checkbox.checked = checked;
+	}
+}
+</script>
 </head>
 <body>
 	<h1>DABL Generator</h1>
@@ -43,9 +54,9 @@ $generator->setOptions($options);
 		<table>
 			<tr>
 				<th>Table Name</th>
-				<th>Model</th>
-				<th>View</th>
-				<th>Controller</th>
+				<th><input type="checkbox" checked="CHECKED" onclick="checkAll('Models[]', this.checked)" /> Model</th>
+				<th><input type="checkbox" onclick="checkAll('Views[]', this.checked)" /> View</th>
+				<th><input type="checkbox" onclick="checkAll('Controllers[]', this.checked)" /> Controller</th>
 			</tr>
 <?php
 foreach($generator->getTableNames() as $tableName){
@@ -73,7 +84,6 @@ if(@$_REQUEST['action']=='generate'){
 ?>
 	<h2>Generating Files...</h2>
 <?
-
 	$generator->generateModels(@$_REQUEST['Models']);
 	$generator->generateViews(@$_REQUEST['Views']);
 	$generator->generateControllers(@$_REQUEST['Controllers']);

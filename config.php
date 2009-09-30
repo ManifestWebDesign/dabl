@@ -3,7 +3,7 @@
 //These aren't required, but I find them useful
 ini_set('display_errors', true);
 ini_set('error_reporting', E_ALL);
-$config_loaded = true;
+define('CONFIG_LOADED', true);
 
 //Strip added slashes if needed
 if (get_magic_quotes_gpc()) {
@@ -22,12 +22,12 @@ require_once 'Module.php';
 
 Module::addRepository('ROOT', substr(ROOT, 0, -1));
 Module::import('ROOT:classes');
+Module::import('ROOT:models');
+Module::import('ROOT:models:base');
 Module::import('ROOT:classes:dabl');
+Module::import('ROOT:classes:dabl:adapter');
 Module::import('ROOT:classes:dabl:query');
 //Module::import('ROOT:classes:PDO'); //Uncomment if your server doesn't have PDO enabled
-Module::import('ROOT:classes:tables');
-Module::import('ROOT:classes:tables:base');
-Module::import('ROOT:classes:dabl:adapter');
 
 define('DB_DRIVER', 'mysql');
 define('DB_HOST', 'localhost');

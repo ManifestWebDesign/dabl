@@ -975,7 +975,6 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 
 			if(!file_exists($baseFile) || file_get_contents($baseFile)!=$baseClass){
 				file_put_contents($baseFile, $baseClass);
-				chmod($baseFile, 0644);
 			}
 
 			$file = $options['model_path'].$className.".php";
@@ -983,7 +982,6 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 			if (!file_exists($file)){
 				$class = $this->getClass($tableName);
 				file_put_contents($file, $class);
-				chmod($file, 0644);
 			}
 		}
 		//save xml to file
@@ -1019,7 +1017,6 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 			if(!file_exists($formFile)){
 				$view = $this->getEditView($tableName);
 				file_put_contents($formFile, $view);
-				chmod($formFile, 0644);
 			}
 
 			$formFile = "index.php";
@@ -1028,7 +1025,6 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 			if(!file_exists($formFile)){
 				$view = $this->getIndexView($tableName);
 				file_put_contents($formFile, $view);
-				chmod($formFile, 0644);
 			}
 		}
 	}
@@ -1056,7 +1052,6 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 			if(!file_exists($file)){
 				$controller = $this->getController($tableName);
 				file_put_contents($file, $controller);
-				chmod($file, 0644);
 			}
 		}
 	}
@@ -1074,7 +1069,6 @@ class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends 
 			if(!file_exists($formFile)){
 				$form = $this->getForm($tableName, $className);
 				file_put_contents($formFile, $form);
-				chmod($formFile, 0644);
 			}
 		}
 	}
