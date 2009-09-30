@@ -160,22 +160,22 @@ class DBtoXML {
 	),
 	);
 
-	public function setDbEncoding($v)
+	function setDbEncoding($v)
 	{
 		$this->dbEncoding = $v;
 	}
 
-	public function setOutputFile($v)
+	function setOutputFile($v)
 	{
 		$this->xmlSchema = $v;
 	}
 
-	public function setSamePhpName($v)
+	function setSamePhpName($v)
 	{
 		$this->samePhpName = $v;
 	}
 
-	public function setAddVendorInfo($v)
+	function setAddVendorInfo($v)
 	{
 		$this->addVendorInfo = (boolean) $v;
 	}
@@ -186,7 +186,7 @@ class DBtoXML {
 	 * @param      string $v The comma-separated list of which validators to add.
 	 * @return     void
 	 */
-	public function setAddValidators($v)
+	function setAddValidators($v)
 	{
 		$validKeys = array_keys(self::$validatorBitMap);
 
@@ -207,12 +207,12 @@ class DBtoXML {
 		$this->validatorBits = $bits;
 	}
 
-	public function isSamePhpName()
+	function isSamePhpName()
 	{
 		return $this->samePhpName;
 	}
 
-	public function log($var){
+	function log($var){
 	//	echo $var."<br />";
 	}
 
@@ -220,7 +220,7 @@ class DBtoXML {
 	 *
 	 * @param DBAdapter $conn
 	 */
-	public function __construct(DBAdapter $conn, $database_name){
+	function __construct(DBAdapter $conn, $database_name){
 		$this->conn = $conn;
 		$this->log("CreoleToXMLSchema starting");
 
@@ -232,11 +232,11 @@ class DBtoXML {
 		$this->log("CreoleToXMLSchema finished");
 	}
 
-	public function getXMLDom(){
+	function getXMLDom(){
 		return $this->doc;
 	}
 
-	public function getXMLString(){
+	function getXMLString(){
 		return $this->doc->saveXML();
 	}
 
@@ -246,7 +246,7 @@ class DBtoXML {
 	 * @return     void
 	 * @throws     Exception a generic exception.
 	 */
-	public function generateXML($database_name)
+	function generateXML($database_name)
 	{
 		// Establish db connection
 		$con = $this->getConnection();

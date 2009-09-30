@@ -38,7 +38,7 @@ class DBPostgres extends DBAdapter {
 	 * @param	  string $in The string to transform to upper case.
 	 * @return	 string The upper case string.
 	 */
-	public function toUpperCase($in)
+	function toUpperCase($in)
 	{
 		return "UPPER(" . $in . ")";
 	}
@@ -49,7 +49,7 @@ class DBPostgres extends DBAdapter {
 	 * @param	  in The string whose case to ignore.
 	 * @return	 The string in a case that can be ignored.
 	 */
-	public function ignoreCase($in)
+	function ignoreCase($in)
 	{
 		return "UPPER(" . $in . ")";
 	}
@@ -61,7 +61,7 @@ class DBPostgres extends DBAdapter {
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	public function concatString($s1, $s2)
+	function concatString($s1, $s2)
 	{
 		return "($s1 || $s2)";
 	}
@@ -74,7 +74,7 @@ class DBPostgres extends DBAdapter {
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	public function subString($s, $pos, $len)
+	function subString($s, $pos, $len)
 	{
 		return "substring($s from $pos" . ($len > -1 ? "for $len" : "") . ")";
 	}
@@ -85,7 +85,7 @@ class DBPostgres extends DBAdapter {
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	public function strLength($s)
+	function strLength($s)
 	{
 		return "char_length($s)";
 	}
@@ -101,7 +101,7 @@ class DBPostgres extends DBAdapter {
 	/**
 	 * Gets ID for specified sequence name.
 	 */
-	public function getId($name = null)
+	function getId($name = null)
 	{
 		if ($name === null) {
 			throw new Exception("Unable to fetch next sequence ID without sequence name.");
@@ -115,7 +115,7 @@ class DBPostgres extends DBAdapter {
 	 * Returns timestamp formatter string for use in date() function.
 	 * @return	 string
 	 */
-	public function getTimestampFormatter()
+	function getTimestampFormatter()
 	{
 		return "Y-m-d H:i:s O";
 	}
@@ -124,7 +124,7 @@ class DBPostgres extends DBAdapter {
 	 * Returns timestamp formatter string for use in date() function.
 	 * @return	 string
 	 */
-	public function getTimeFormatter()
+	function getTimeFormatter()
 	{
 		return "H:i:s O";
 	}
@@ -132,7 +132,7 @@ class DBPostgres extends DBAdapter {
 	/**
 	 * @see		DBAdapter::applyLimit()
 	 */
-	public function applyLimit(&$sql, $offset, $limit)
+	function applyLimit(&$sql, $offset, $limit)
 	{
 		if ( $limit > 0 ) {
 			$sql .= " LIMIT ".$limit;
@@ -145,7 +145,7 @@ class DBPostgres extends DBAdapter {
 	/**
 	 * @see		DBAdapter::random()
 	 */
-	public function random($seed=NULL)
+	function random($seed=NULL)
 	{
 		return 'random()';
 	}

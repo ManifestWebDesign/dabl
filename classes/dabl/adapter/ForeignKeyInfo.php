@@ -59,7 +59,7 @@ class ForeignKeyInfo {
 	 * Get foreign key name.
 	 * @return string
 	 */
-	public function getName()
+	function getName()
 	{
 		return $this->name;
 	}
@@ -69,7 +69,7 @@ class ForeignKeyInfo {
 	 * @param ColumnInfo $local
 	 * @param ColumnInfo $foreign
 	 */
-	public function addReference(ColumnInfo $local, ColumnInfo $foreign, $onDelete = self::NONE, $onUpdate = self::NONE)
+	function addReference(ColumnInfo $local, ColumnInfo $foreign, $onDelete = self::NONE, $onUpdate = self::NONE)
 	{
 		$this->references[] = array($local, $foreign, $onDelete, $onUpdate);
 	}
@@ -78,7 +78,7 @@ class ForeignKeyInfo {
 	 * Gets the local-foreign column mapping.
 	 * @return array array( [0] => array([0] => local ColumnInfo object, [1] => foreign ColumnInfo object, [2] => onDelete, [3] => onUpdate) )
 	 */
-	public function getReferences()
+	function getReferences()
 	{
 		return $this->references;
 	}
@@ -87,7 +87,7 @@ class ForeignKeyInfo {
 	 * Get vendor specific optional information for this primary key.
 	 * @return array vendorSpecificInfo[]
 	 */
-	public function getVendorSpecificInfo()
+	function getVendorSpecificInfo()
 	{
 		return $this->vendorSpecificInfo;
 	}
@@ -95,7 +95,7 @@ class ForeignKeyInfo {
 	/**
 	 * @return string
 	 */
-	public function toString()
+	function toString()
 	{
 		return $this->name;
 	}

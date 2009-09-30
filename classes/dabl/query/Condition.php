@@ -124,7 +124,7 @@ class Condition{
 	 * Alias of addAnd
 	 * @return Condition
 	 */
-	public function add($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+	function add($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
 		return $this->addAnd($left, $right, $operator, $quote);
 	}
 
@@ -136,7 +136,7 @@ class Condition{
 	 * @param $quote Int[optional]
 	 * @return Condition
 	 */
-	public function addAnd($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+	function addAnd($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
 		$condition = $this->processCondition($left, $right, $operator, $quote);
 		if($condition)
 			$this->ands[] = $condition;
@@ -151,7 +151,7 @@ class Condition{
 	 * @param $quote Int[optional]
 	 * @return Condition
 	 */
-	public function addOr($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+	function addOr($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
 		$condition = $this->processCondition($left, $right, $operator, $quote);
 		if($condition)
 			$this->ors[] = $condition;
@@ -162,7 +162,7 @@ class Condition{
 	 * Builds and returns a String representation of $this Condition
 	 * @return String
 	 */
-	public function getClause(){
+	function getClause(){
 		$where = null;
 
 		$ands = $this->ands;
@@ -186,7 +186,7 @@ class Condition{
 	 * Builds and returns a String representation of $this Condition
 	 * @return String
 	 */
-	public function __toString(){
+	function __toString(){
 		return $this->getClause();
 	}
 }

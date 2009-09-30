@@ -54,7 +54,7 @@ class QueryPager{
 	private $query;
 	private $classInstance;
 
-	public function __construct(Query $q, $limit=null, $page=null, $className = null){
+	function __construct(Query $q, $limit=null, $page=null, $className = null){
 		$this->setQuery($q);
 		if($className)
 			$this->setClass($className);
@@ -62,7 +62,7 @@ class QueryPager{
 		$this->setPageNum($page);
 	}
 	
-	public function setQuery(Query $q){
+	function setQuery(Query $q){
 		$this->query = $q;
 		$this->total = null;
 	}
@@ -71,14 +71,14 @@ class QueryPager{
 	 * Sets the name of the class to use for counting and selecting
 	 * results
 	 */
-	public function setClass($className){
+	function setClass($className){
 		$this->classInstance = new $className;
 	}
 
 	/**
 	 * Sets the current page number
 	 */
-	public function setPageNum($pageNumber){
+	function setPageNum($pageNumber){
 		if(!is_numeric($pageNumber) || $pageNumber<1)
 			$pageNumber = 1;
 		
@@ -91,17 +91,17 @@ class QueryPager{
 	/**
 	 * Gets the current page number
 	 */
-	public function getPageNum(){
+	function getPageNum(){
 		return $this->page;
 	}
 	
-	public function getPrevPageNum(){
+	function getPrevPageNum(){
 		if(!$this->isFirstPage())
 			return $this->page-1;
 		return 1;
 	}
 	
-	public function getNextPageNum(){
+	function getNextPageNum(){
 		if(!$this->isLastPage())
 			return $this->page+1;
 		return 1;
@@ -110,14 +110,14 @@ class QueryPager{
 	/**
 	 * Returns the maximum number of results per page
 	 */
-	public function getLimit(){
+	function getLimit(){
 		return $this->limit;
 	}
 	
 	/**
 	 * Sets the maximum number of results per page
 	 */
-	public function setLimit($per_page){
+	function setLimit($per_page){
 		if(!is_numeric($per_page) || $per_page<1)
 			$per_page = 50;
 		$this->limit = $per_page;
@@ -126,7 +126,7 @@ class QueryPager{
 	/**
 	 * Gets the offset for a query
 	 */
-	public function getOffset(){
+	function getOffset(){
 		$offset = ($this->getPageNum() * $this->limit) - $this->limit;
 		if($offset<0)$offset = 0;
 		return $offset;
@@ -135,7 +135,7 @@ class QueryPager{
 	/**
 	 * Gets the count of the results of the query
 	 */
-	public function getTotal(){
+	function getTotal(){
 		if($this->total!==null)return $this->total;
 		if($this->classInstance)
 			$total = $this->classInstance->doCount($this->query);
@@ -148,7 +148,7 @@ class QueryPager{
 	/**
 	 * Gets the number of the first record on the page
 	 */
-	public function getStart(){
+	function getStart(){
 		if($this->getTotal()==0)return 0;
 		return $this->getOffset()+1;
 	}
@@ -156,7 +156,7 @@ class QueryPager{
 	/**
 	 * Gets the number of the last record on the page
 	 */
-	public function getEnd(){
+	function getEnd(){
 		$end = $this->getPageNum() * $this->limit;
 		if($end>$this->getTotal())
 			return $this->getTotal();
@@ -167,21 +167,21 @@ class QueryPager{
 	 * Returns true if the current page is equal to
 	 * the total number of pages
 	 */
-	public function isLastPage(){
+	function isLastPage(){
 		return ($this->getPageCount()==$this->getPageNum());
 	}
 	
 	/**
 	 * Returns true if the current page is 1
 	 */
-	public function isFirstPage(){
+	function isFirstPage(){
 		return ($this->getPageNum()==1);
 	}
 
 	/**
 	 * Gets the total number of pages
 	 */
-	public function getPageCount(){
+	function getPageCount(){
 		$rem = ($this->getTotal()%$this->limit);
 		$rem = ($rem>=0) ? $rem : 0;
 		$total_pages = ($this->getTotal()-$rem)/$this->limit;
@@ -193,7 +193,7 @@ class QueryPager{
 	 * Executes the query for the current page and returns either 
 	 * an array of DABL objects (if a classname was provided) or a PDOStatement
 	 */
-	public function fetchPage(){
+	function fetchPage(){
 		$q = clone $this->query;
 		$q->setLimit($this->getLimit());
 		$q->setOffset($this->getOffset());
@@ -211,7 +211,7 @@ class QueryPager{
 	 * @param array  $linkText Ie: array("first" => "go to first page", "prev" => "previous", "next" => "next", "first" => "go to last page")
 	 * @return string Html paging content
 	 */
-	public function getPagerLinks($urlFormat, $limit = 20, $CSSClass='', $CSSClassCurrent='', $linkText=array()){
+	function getPagerLinks($urlFormat, $limit = 20, $CSSClass='', $CSSClassCurrent='', $linkText=array()){
 		$currentpage = $this->getPageNum();
 		if($limit)
 			$nbpages = min(array($this->getPageCount(), $limit));

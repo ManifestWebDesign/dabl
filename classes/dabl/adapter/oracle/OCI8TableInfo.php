@@ -31,7 +31,7 @@ class OCI8TableInfo extends TableInfo {
 	
 	private $schema;
 		
-	public function __construct(OCI8DatabaseInfo $database, $name)
+	function __construct(OCI8DatabaseInfo $database, $name)
 	{
 		$this->schema = strtoupper( $database->getSchema() );
 		parent::__construct($database, $name);

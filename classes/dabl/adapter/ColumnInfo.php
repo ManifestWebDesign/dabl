@@ -124,7 +124,7 @@ class ColumnInfo {
 	 * Get column name.
 	 * @return string
 	 */
-	public function getName()
+	function getName()
 	{
 		return $this->name;
 	}
@@ -133,7 +133,7 @@ class ColumnInfo {
 	 * Get column type.
 	 * @return int
 	 */
-	public function getType()
+	function getType()
 	{
 		return $this->type;
 	}
@@ -142,7 +142,7 @@ class ColumnInfo {
 	 * Gets the native type name.
 	 * @return string
 	 */
-	public function getNativeType()
+	function getNativeType()
 	{
 		return $this->nativeType;
 	}
@@ -151,7 +151,7 @@ class ColumnInfo {
 	 * Get column size.
 	 * @return int
 	 */
-	public function getSize()
+	function getSize()
 	{
 		return $this->size;
 	}
@@ -160,7 +160,7 @@ class ColumnInfo {
 	 * Get column precision.
 	 * @return int
 	 */
-	public function getPrecision()
+	function getPrecision()
 	{
 		return $this->precision;
 	}
@@ -171,7 +171,7 @@ class ColumnInfo {
 	 * to as precision, but precision is the total number of digits (i.e. length).
 	 * @return int
 	 */
-	public function getScale()
+	function getScale()
 	{
 		return $this->scale;
 	}
@@ -180,7 +180,7 @@ class ColumnInfo {
 	 * Get the default value.
 	 * @return mixed
 	 */
-	public function getDefaultValue()
+	function getDefaultValue()
 	{
 		return $this->defaultValue;
 	}
@@ -189,7 +189,7 @@ class ColumnInfo {
 	 * Is column nullable?
 	 * @return boolean
 	 */
-	public function isNullable()
+	function isNullable()
 	{
 		return $this->isNullable;
 	}
@@ -198,7 +198,7 @@ class ColumnInfo {
 	 * Is column of autoincrement type?
 	 * @return boolean
 	 */
-	public function isAutoIncrement()
+	function isAutoIncrement()
 	{
 		return $this->isAutoIncrement === true;
 	}
@@ -207,7 +207,7 @@ class ColumnInfo {
 	 * Get vendor specific optional information for this column.
 	 * @return array vendorSpecificInfo[]
 	 */
-	public function getVendorSpecificInfo()
+	function getVendorSpecificInfo()
 	{
 		return $this->vendorSpecificInfo;
 	}
@@ -215,7 +215,7 @@ class ColumnInfo {
 	/**
 	 * @return string
 	 */
-	public function toString()
+	function toString()
 	{
 		return $this->name;
 	}
@@ -224,7 +224,7 @@ class ColumnInfo {
 	 * Get parent table.
 	 * @return TableInfo
 	 */
-	public function getTable()
+	function getTable()
 	{
 		return $this->table;
 	}

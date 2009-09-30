@@ -30,7 +30,7 @@ class OCI8DatabaseInfo extends DatabaseInfo {
     
     private $schema;
            
-    public function __construct(DBAdapter $conn) {
+    function __construct(DBAdapter $conn) {
         parent::__construct($conn);
 
 		throw new Exception('This method needs a schema.  Maybe someone who knows Oracle will be able to know what to do here.');
@@ -45,7 +45,7 @@ class OCI8DatabaseInfo extends DatabaseInfo {
 		$this->schema = strtoupper( $this->schema );
     }
     
-    public function getSchema() {
+    function getSchema() {
         return $this->schema;
     }
     

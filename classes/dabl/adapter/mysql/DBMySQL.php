@@ -38,7 +38,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  in The string to transform to upper case.
 	 * @return	 The upper case string.
 	 */
-	public function toUpperCase($in)
+	function toUpperCase($in)
 	{
 		return "UPPER(" . $in . ")";
 	}
@@ -49,7 +49,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  in The string whose case to ignore.
 	 * @return	 The string in a case that can be ignored.
 	 */
-	public function ignoreCase($in)
+	function ignoreCase($in)
 	{
 		return "UPPER(" . $in . ")";
 	}
@@ -61,7 +61,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	public function concatString($s1, $s2)
+	function concatString($s1, $s2)
 	{
 		return "CONCAT($s1, $s2)";
 	}
@@ -74,7 +74,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	public function subString($s, $pos, $len)
+	function subString($s, $pos, $len)
 	{
 		return "SUBSTRING($s, $pos, $len)";
 	}
@@ -85,7 +85,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	public function strLength($s)
+	function strLength($s)
 	{
 		return "CHAR_LENGTH($s)";
 	}
@@ -98,7 +98,7 @@ class DBMySQL extends DBAdapter {
 	 * @throws	 PDOException No Statement could be created or
 	 * executed.
 	 */
-	public function lockTable($table)
+	function lockTable($table)
 	{
 		$this->exec("LOCK TABLE " . $table . " WRITE");
 	}
@@ -110,7 +110,7 @@ class DBMySQL extends DBAdapter {
 	 * @throws	 PDOException No Statement could be created or
 	 * executed.
 	 */
-	public function unlockTable($table)
+	function unlockTable($table)
 	{
 		$statement = $this->exec("UNLOCK TABLES");
 	}
@@ -118,7 +118,7 @@ class DBMySQL extends DBAdapter {
 	/**
 	 * @see		DBAdapter::quoteIdentifier()
 	 */
-	public function quoteIdentifier($text)
+	function quoteIdentifier($text)
 	{
 		return '`' . $text . '`';
 	}
@@ -126,7 +126,7 @@ class DBMySQL extends DBAdapter {
 	/**
 	 * @see		DBAdapter::useQuoteIdentifier()
 	 */
-	public function useQuoteIdentifier()
+	function useQuoteIdentifier()
 	{
 		return true;
 	}
@@ -134,7 +134,7 @@ class DBMySQL extends DBAdapter {
 	/**
 	 * @see		DBAdapter::applyLimit()
 	 */
-	public function applyLimit(&$sql, $offset, $limit)
+	function applyLimit(&$sql, $offset, $limit)
 	{
 		if ( $limit > 0 ) {
 			$sql .= " LIMIT " . ($offset > 0 ? $offset . ", " : "") . $limit;
@@ -146,7 +146,7 @@ class DBMySQL extends DBAdapter {
 	/**
 	 * @see		DBAdapter::random()
 	 */
-	public function random($seed = null)
+	function random($seed = null)
 	{
 		return 'rand('.((int) $seed).')';
 	}

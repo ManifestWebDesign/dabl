@@ -50,7 +50,7 @@ class PrimaryKeyInfo {
 	 * Get foreign key name.
 	 * @return string
 	 */
-	public function getName()
+	function getName()
 	{
 		return $this->name;
 	}
@@ -59,7 +59,7 @@ class PrimaryKeyInfo {
 	 * @param Column $column
 	 * @return void
 	 */
-	public function addColumn($column)
+	function addColumn($column)
 	{
 		$this->columns[] = $column;
 	}
@@ -67,7 +67,7 @@ class PrimaryKeyInfo {
 	/**
 	 * @return array Column[]
 	 */
-	public function getColumns()
+	function getColumns()
 	{
 		return $this->columns;
 	}
@@ -76,7 +76,7 @@ class PrimaryKeyInfo {
 	 * Get vendor specific optional information for this primary key.
 	 * @return array vendorSpecificInfo[]
 	 */
-	public function getVendorSpecificInfo()
+	function getVendorSpecificInfo()
 	{
 		return $this->vendorSpecificInfo;
 	}
@@ -84,7 +84,7 @@ class PrimaryKeyInfo {
 	/**
 	 * @return string
 	 */
-	public function toString()
+	function toString()
 	{
 		return $this->name;
 	}

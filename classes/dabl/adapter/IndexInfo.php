@@ -47,12 +47,12 @@ class IndexInfo {
 		$this->vendorSpecificInfo = $vendorInfo;
 	}
 
-	public function isUnique()
+	function isUnique()
 	{
 		return $this->isUnique;
 	}
 
-	public function getName()
+	function getName()
 	{
 		return $this->name;
 	}
@@ -61,22 +61,22 @@ class IndexInfo {
 	 * Get vendor specific optional information for this index.
 	 * @return array vendorSpecificInfo[]
 	 */
-	public function getVendorSpecificInfo()
+	function getVendorSpecificInfo()
 	{
 		return $this->vendorSpecificInfo;
 	}
 
-	public function addColumn($column)
+	function addColumn($column)
 	{
 		$this->columns[] = $column;
 	}
 
-	public function getColumns()
+	function getColumns()
 	{
 		return $this->columns;
 	}
 
-	public function toString()
+	function toString()
 	{
 		return $this->name;
 	}

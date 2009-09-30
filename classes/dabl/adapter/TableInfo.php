@@ -138,7 +138,7 @@ abstract class TableInfo {
 	 * @throws Exception - if foreign keys are unsupported by DB.
 	 * @return array ForeignKeyInfo[]
 	 */
-	public function getPrimaryKey()
+	function getPrimaryKey()
 	{
 		if(!$this->pkLoaded) $this->initPrimaryKey();
 		return $this->primaryKey;
@@ -150,7 +150,7 @@ abstract class TableInfo {
 	 * @return ColumnInfo
 	 * @throws SQLException - if column does not exist for this table.
 	 */
-	public function getColumn($name)
+	function getColumn($name)
 	{
 		if(!$this->colsLoaded) $this->initColumns();
 		if (!isset($this->columns[$name])) {
@@ -164,7 +164,7 @@ abstract class TableInfo {
 	 * @param string $name The column name.
 	 * @return boolean
 	 */
-	public function hasColumn($name)
+	function hasColumn($name)
 	{
 		if(!$this->colsLoaded) $this->initColumns();
 		return isset($this->columns[$name]);
@@ -174,7 +174,7 @@ abstract class TableInfo {
 	 * Get array of columns for this table.
 	 * @return array ColumnInfo[]
 	 */
-	public function getColumns()
+	function getColumns()
 	{
 		if(!$this->colsLoaded) $this->initColumns();
 		return array_values($this->columns); // re-key numerically
@@ -186,7 +186,7 @@ abstract class TableInfo {
 	 * @return ForeignKeyInfo
 	 * @throws SQLException - if fkey does not exist for this table.
 	 */
-	public function getForeignKey($name)
+	function getForeignKey($name)
 	{
 		if(!$this->fksLoaded) $this->initForeignKeys();
 		if (!isset($this->foreignKeys[$name])) {
@@ -199,7 +199,7 @@ abstract class TableInfo {
 	 * Get all foreign keys.
 	 * @return array ForeignKeyInfo[]
 	 */
-	public function getForeignKeys()
+	function getForeignKeys()
 	{
 		if(!$this->fksLoaded) $this->initForeignKeys();
 		return array_values($this->foreignKeys);
@@ -211,7 +211,7 @@ abstract class TableInfo {
 	 * @return IndexInfo
 	 * @throws SQLException - if index does not exist for this table.
 	 */
-	public function getIndex($name)
+	function getIndex($name)
 	{
 		if(!$this->indexesLoaded) $this->initIndexes();
 		if (!isset($this->indexes[$name])) {
@@ -224,7 +224,7 @@ abstract class TableInfo {
 	 * Get array of IndexInfo objects for this table.
 	 * @return array IndexInfo[]
 	 */
-	public function getIndexes()
+	function getIndexes()
 	{
 		if(!$this->indexesLoaded) $this->initIndexes();
 		return array_values($this->indexes);
@@ -234,7 +234,7 @@ abstract class TableInfo {
 	 * Alias for getIndexes() method.
 	 * @return array
 	 */
-	public function getIndices()
+	function getIndices()
 	{
 		return $this->getIndexes();
 	}
@@ -243,7 +243,7 @@ abstract class TableInfo {
 	 * Get table name.
 	 * @return string
 	 */
-	public function getName()
+	function getName()
 	{
 		return $this->name;
 	}
@@ -251,31 +251,31 @@ abstract class TableInfo {
 	/**
 	 * @return string
 	 */
-	public function toString()
+	function toString()
 	{
 		return $this->name;
 	}
 
 	/** Have foreign keys been loaded? */
-	public function foreignKeysLoaded()
+	function foreignKeysLoaded()
 	{
 		return $this->fksLoaded;
 	}
 
 	/** Has primary key info been loaded? */
-	public function primaryKeyLoaded()
+	function primaryKeyLoaded()
 	{
 		return $this->pkLoaded;
 	}
 
 	/** Have columns been loaded? */
-	public function columnsLoaded()
+	function columnsLoaded()
 	{
 		return $this->colsLoaded;
 	}
 
 	/** Has index information been loaded? */
-	public function indexesLoaded()
+	function indexesLoaded()
 	{
 		return $this->indexesLoaded;
 	}
@@ -284,14 +284,14 @@ abstract class TableInfo {
 	 * Get vendor specific optional information for this table.
 	 * @return array vendorSpecificInfo[]
 	 */
-	public function getVendorSpecificInfo()
+	function getVendorSpecificInfo()
 	{
 		if(!$this->vendorLoaded) $this->initVendorSpecificInfo();
 		return $this->vendorSpecificInfo;
 	}
 
 	/** Adds a column to this table. */
-	public function addColumn(ColumnInfo $column)
+	function addColumn(ColumnInfo $column)
 	{
 		$this->columns[$column->getName()] = $column;
 	}
@@ -300,7 +300,7 @@ abstract class TableInfo {
 	 * Get the parent DatabaseInfo object.
 	 * @return DatabaseInfo
 	 */
-	public function getDatabase()
+	function getDatabase()
 	{
 		return $this->database;
 	}

@@ -141,7 +141,7 @@ class Column {
 	 * @param      string $name The name of the column.
 	 * @param      TableMap containingTable TableMap of the table this column is in.
 	 */
-	public function __construct($name){
+	function __construct($name){
 		$this->columnName = $name;
 	//	$this->table = $containingTable;
 	}
@@ -151,7 +151,7 @@ class Column {
 	 *
 	 * @return     string A String with the column name.
 	 */
-	public function getName(){
+	function getName(){
 		return $this->columnName;
 	}
 
@@ -160,7 +160,7 @@ class Column {
 	 *
 	 * @return     string A String with the column name.
 	 */
-	public function getPhpName(){
+	function getPhpName(){
 		return $this->phpName;
 	}
 
@@ -170,7 +170,7 @@ class Column {
 	 * @param      string $phpName A string representing the PHP name.
 	 * @return     void
 	 */
-	public function setPhpName($phpName){
+	function setPhpName($phpName){
 		$this->phpName = $phpName;
 	}
 
@@ -179,7 +179,7 @@ class Column {
 	 *
 	 * @return     string A String with the full column name.
 	 */
-	public function getFullyQualifiedName(){
+	function getFullyQualifiedName(){
 		return $this->table->getName() . "." . $this->columnName;
 	}
 
@@ -187,7 +187,7 @@ class Column {
 	 * Get the table map this column belongs to.
 	 * @return     TableMap
 	 */
-	public function getTable(){
+	function getTable(){
 		return $this->table;
 	}
 
@@ -196,7 +196,7 @@ class Column {
 	 *
 	 * @return     string A String with the table name.
 	 */
-	public function getTableName(){
+	function getTableName(){
 		return $this->table->getName();
 	}
 
@@ -205,7 +205,7 @@ class Column {
 	 *
 	 * @return     string A string representing the Propel type (e.g. self::TYPE_DATE).
 	 */
-	public function getType(){
+	function getType(){
 		return $this->type;
 	}
 
@@ -215,7 +215,7 @@ class Column {
 	 * @param      string $type A string representing the Propel type (e.g. self::TYPE_DATE).
 	 * @return     void
 	 */
-	public function setType($type){
+	function setType($type){
 		$this->type = $type;
 	}
 
@@ -224,7 +224,7 @@ class Column {
 	 *
 	 * @return     int The PDO::PARMA_* value
 	 */
-	public function getPdoType(){
+	function getPdoType(){
 		return self::$propelToPdoMap[$this->type];
 	}
 
@@ -232,7 +232,7 @@ class Column {
 	 * Whether this is a BLOB, LONGVARBINARY, or VARBINARY.
 	 * @return     boolean
 	 */
-	public function isLob(){
+	function isLob(){
 		return ($this->type == self::TYPE_BLOB || $this->type == self::TYPE_VARBINARY || $this->type == self::TYPE_LONGVARBINARY);
 	}
 
@@ -245,7 +245,7 @@ class Column {
 	 * @return     boolean
 	 * @deprecated Propel supports non-epoch dates
 	 */
-	public function isEpochTemporal(){
+	function isEpochTemporal(){
 		return ($this->type == self::TYPE_TIMESTAMP || $this->type == self::TYPE_DATE || $this->type == self::TYPE_TIME);
 	}
 
@@ -253,7 +253,7 @@ class Column {
 	 * Whether this column is numeric (int, decimal, bigint etc).
 	 * @return     boolean
 	 */
-	public function isNumeric(){
+	function isNumeric(){
 		return ($this->type == self::TYPE_NUMERIC || $this->type == self::TYPE_DECIMAL || $this->type == self::TYPE_TINYINT || $this->type == self::TYPE_SMALLINT || $this->type == self::TYPE_INTEGER || $this->type == self::TYPE_BIGINT || $this->type == self::TYPE_REAL || $this->type == self::TYPE_FLOAT || $this->type == self::TYPE_DOUBLE);
 	}
 
@@ -263,7 +263,7 @@ class Column {
 	 * @return     boolean
 	 * @since      1.3
 	 */
-	public function isTemporal(){
+	function isTemporal(){
 		return ($this->type == self::TYPE_TIMESTAMP || $this->type == self::TYPE_DATE || $this->type == self::TYPE_TIME || $this->type == self::TYPE_BU_DATE  || $this->type == self::TYPE_BU_TIMESTAMP);
 	}
 
@@ -271,7 +271,7 @@ class Column {
 	 * Whether this column is a text column (varchar, char, longvarchar).
 	 * @return     boolean
 	 */
-	public function isText(){
+	function isText(){
 		return ($this->type == self::TYPE_VARCHAR || $this->type == self::TYPE_LONGVARCHAR || $this->type == self::TYPE_CHAR);
 	}
 
@@ -281,7 +281,7 @@ class Column {
 	 * @param      int $size An int specifying the size.
 	 * @return     void
 	 */
-	public function setSize($size){
+	function setSize($size){
 		$this->size = $size;
 	}
 
@@ -291,7 +291,7 @@ class Column {
 	 * @param      boolean $pk True if column is a primary key.
 	 * @return     void
 	 */
-	public function setPrimaryKey($pk){
+	function setPrimaryKey($pk){
 		$this->pk = (bool) $pk;
 	}
 
@@ -301,7 +301,7 @@ class Column {
 	 * @param      boolean nn True if column may be null.
 	 * @return     void
 	 */
-	public function setNotNull($nn){
+	function setNotNull($nn){
 		$this->notNull = (bool) $nn;
 	}
 
@@ -309,14 +309,14 @@ class Column {
 	 * Gets the default value for this column.
 	 * @return     mixed String or NULL
 	 */
-	public function getDefaultValue(){
+	function getDefaultValue(){
 		return $this->defaultValue;
 	}
 	
 	/**
 	 * Sets the default value for this column.
 	 */
-	public function setDefaultValue($value){
+	function setDefaultValue($value){
 		$this->defaultValue=$value;
 	}
 
@@ -327,7 +327,7 @@ class Column {
 	 * @param      string columnName The name of the column that is foreign.
 	 * @return     void
 	 */
-	public function setForeignKey($tableName, $columnName){
+	function setForeignKey($tableName, $columnName){
 		if ($tableName && $columnName) {
 			$this->relatedTableName = $tableName;
 			$this->relatedColumnName = $columnName;
@@ -337,15 +337,15 @@ class Column {
 		}
 	}
 
-	public function addValidator($validator){
+	function addValidator($validator){
 	  $this->validators[] = $validator;
 	}
 
-	public function hasValidators(){
+	function hasValidators(){
 	  return count($this->validators) > 0;
 	}
 
-	public function getValidators(){
+	function getValidators(){
 	  return $this->validators;
 	}
 
@@ -354,15 +354,15 @@ class Column {
 	 *
 	 * @return     int An int specifying the size.
 	 */
-	public function getSize(){
+	function getSize(){
 		return $this->size;
 	}
 
-	public function setAutoIncrement($bool){
+	function setAutoIncrement($bool){
 		$this->autoIncrement = (bool) $bool;
 	}
 	
-	public function isAutoIncrement(){
+	function isAutoIncrement(){
 		return (bool) $this->autoIncrement;
 	}
 
@@ -371,7 +371,7 @@ class Column {
 	 *
 	 * @return     boolean True if column is a primary key.
 	 */
-	public function isPrimaryKey(){
+	function isPrimaryKey(){
 		return $this->pk;
 	}
 
@@ -380,7 +380,7 @@ class Column {
 	 *
 	 * @return     boolean True if column may not be null.
 	 */
-	public function isNotNull(){
+	function isNotNull(){
 		return ($this->notNull || $this->isPrimaryKey());
 	}
 
@@ -389,7 +389,7 @@ class Column {
 	 *
 	 * @return     boolean True if column is a foreign key.
 	 */
-	public function isForeignKey(){
+	function isForeignKey(){
 		if ($this->relatedTableName) {
 			return true;
 		} else {
@@ -402,7 +402,7 @@ class Column {
 	 *
 	 * @return     string A String with the full name for the related column.
 	 */
-	public function getRelatedName(){
+	function getRelatedName(){
 		return $this->relatedTableName . "." . $this->relatedColumnName;
 	}
 
@@ -411,7 +411,7 @@ class Column {
 	 *
 	 * @return     string A String with the name for the related table.
 	 */
-	public function getRelatedTableName(){
+	function getRelatedTableName(){
 		return $this->relatedTableName;
 	}
 
@@ -420,7 +420,7 @@ class Column {
 	 *
 	 * @return     string A String with the name for the related column.
 	 */
-	public function getRelatedColumnName(){
+	function getRelatedColumnName(){
 		return $this->relatedColumnName;
 	}
 
@@ -429,7 +429,7 @@ class Column {
 	 * @param      string $str The expression we want to apply the ignore case formatting to (e.g. the column name).
 	 * @param      DBAdapter $db
 	 */
-	public function ignoreCase($str, DBAdapter $db){
+	function ignoreCase($str, DBAdapter $db){
 		if ($this->isText()) {
 			return $db->ignoreCase($str);
 		} else {

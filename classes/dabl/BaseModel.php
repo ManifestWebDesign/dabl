@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Last Modified August 8th 2009
+ * Last Modified September 30th 2009
  */
 
 abstract class BaseModel {
@@ -14,6 +14,8 @@ abstract class BaseModel {
 	protected $_cacheResults = true;
 
 	protected $_isNew = true;
+
+	protected $_validationErrors = array();
 
 	static function getPrimaryKey(){
 		throw new Exception("This should be replaced by an extension of this class.");
@@ -61,6 +63,10 @@ abstract class BaseModel {
 		return false;
 	}
 
+	/**
+	 * Returns an array of the names of modified columns
+	 * @return array
+	 */
 	function getModifiedColumns(){
 		return $this->_modifiedColumns ? $this->_modifiedColumns : array();
 	}
@@ -131,6 +137,22 @@ abstract class BaseModel {
 	}
 
 	/**
+	 * Returns true if the column values validate.
+	 * @return bool
+	 */
+	function validate(){
+		$this->_validationErrors = array();
+		return true;
+	}
+
+	/**
+	 * @return array
+	 */
+	function getValidationErrors(){
+		return $this->_validationErrors;
+	}
+
+	/**
 	 * Creates and executess DELETE Query for this object
 	 * Deletes any database rows with a primary key(s) that match $this
 	 * NOTE/BUG: If you alter pre-existing primary key(s) before deleting, then you will be
@@ -163,7 +185,10 @@ abstract class BaseModel {
 	 * leaving the original row unchanged(if it exists).
 	 * @todo find a way to solve the above issue
 	 */
-	public function save(){
+	function save(){
+		if(!$this->validate())
+			return 0;
+
 		if($this->getPrimaryKeys()){
 			if($this->isNew())
 				return $this->insert();

@@ -36,7 +36,7 @@ class DBSQLite extends DBAdapter {
 	 * @param	  string The charset encoding.
 	 * @throws	 Exception If the specified charset doesn't match sqlite_libencoding()
 	 */
-	public function setCharset($charset)
+	function setCharset($charset)
 	{
 	}
 
@@ -46,7 +46,7 @@ class DBSQLite extends DBAdapter {
 	 * @param	  in The string to transform to upper case.
 	 * @return	 The upper case string.
 	 */
-	public function toUpperCase($in)
+	function toUpperCase($in)
 	{
 		return 'UPPER(' . $in . ')';
 	}
@@ -57,7 +57,7 @@ class DBSQLite extends DBAdapter {
 	 * @param	  in The string whose case to ignore.
 	 * @return	 The string in a case that can be ignored.
 	 */
-	public function ignoreCase($in)
+	function ignoreCase($in)
 	{
 		return 'UPPER(' . $in . ')';
 	}
@@ -69,7 +69,7 @@ class DBSQLite extends DBAdapter {
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	public function concatString($s1, $s2)
+	function concatString($s1, $s2)
 	{
 		return "($s1 || $s2)";
 	}
@@ -82,7 +82,7 @@ class DBSQLite extends DBAdapter {
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	public function subString($s, $pos, $len)
+	function subString($s, $pos, $len)
 	{
 		return "substr($s, $pos, $len)";
 	}
@@ -93,7 +93,7 @@ class DBSQLite extends DBAdapter {
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	public function strLength($s)
+	function strLength($s)
 	{
 		return "length($s)";
 	}
@@ -101,7 +101,7 @@ class DBSQLite extends DBAdapter {
 	/**
 	 * @see		DBAdapter::quoteIdentifier()
 	 */
-	public function quoteIdentifier($text)
+	function quoteIdentifier($text)
 	{
 		return '[' . $text . ']';
 	}
@@ -109,7 +109,7 @@ class DBSQLite extends DBAdapter {
 	/**
 	 * @see		DBAdapter::applyLimit()
 	 */
-	public function applyLimit(&$sql, $offset, $limit)
+	function applyLimit(&$sql, $offset, $limit)
 	{
 		if ( $limit > 0 ) {
 			$sql .= " LIMIT " . $limit . ($offset > 0 ? " OFFSET " . $offset : "");
@@ -118,7 +118,7 @@ class DBSQLite extends DBAdapter {
 		}
 	}
 
-	public function random($seed=NULL)
+	function random($seed=NULL)
 	{
 		return 'random()';
 	}

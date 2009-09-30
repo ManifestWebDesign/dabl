@@ -60,7 +60,7 @@ abstract class DatabaseInfo {
 	/**
 	 * @param DBAdapter $dbh
 	 */
-	public function __construct(DBAdapter $conn, $database_name)
+	function __construct(DBAdapter $conn, $database_name)
 	{
 		$this->conn = $conn;
 		$this->dbname = $database_name;
@@ -70,7 +70,7 @@ abstract class DatabaseInfo {
 	 * Get name of database.
 	 * @return string
 	 */
-	public function getName()
+	function getName()
 	{
 		return $this->dbname;
 	}
@@ -109,7 +109,7 @@ abstract class DatabaseInfo {
 	 * Returns Connection being used.
 	 * @return DBAdapter
 	 */
-	public function getConnection()
+	function getConnection()
 	{
 		return $this->conn;
 	}
@@ -120,7 +120,7 @@ abstract class DatabaseInfo {
 	 * @return TableInfo
 	 * @throws SQLException - if table does not exist in this db.
 	 */
-	public function getTable($name)
+	function getTable($name)
 	{
 		if(!$this->tablesLoaded) $this->initTables();
 		if (!isset($this->tables[strtoupper($name)])) {
@@ -134,7 +134,7 @@ abstract class DatabaseInfo {
    * @param string $name The table name.
    * @return boolean
    */
-  public function hasTable($name)
+  function hasTable($name)
   {
 	return isset($this->tables[strtoupper($name)]);
   }
@@ -143,7 +143,7 @@ abstract class DatabaseInfo {
 	 * Gets array of TableInfo objects.
 	 * @return array TableInfo[]
 	 */
-	public function getTables()
+	function getTables()
 	{
 		if(!$this->tablesLoaded) $this->initTables();
 		return array_values($this->tables); //re-key [numerically]
@@ -154,7 +154,7 @@ abstract class DatabaseInfo {
 	 * Table name is case-insensitive.
 	 * @param TableInfo $table
 	 */
-	public function addTable(TableInfo $table)
+	function addTable(TableInfo $table)
 	{
 		$this->tables[strtoupper($table->getName())] = $table;
 	}
@@ -175,7 +175,7 @@ abstract class DatabaseInfo {
 	 * @return boolean
 	 * @throws SQLException
 	 */
-	public function isSequence($key)
+	function isSequence($key)
 	{
 		if(!$this->seqsLoaded) $this->initSequences();
 		return isset($this->sequences[ strtoupper($key) ]);
@@ -185,7 +185,7 @@ abstract class DatabaseInfo {
 	 * Gets array of ? objects.
 	 * @return array ?[]
 	 */
-	public function getSequences()
+	function getSequences()
 	{
 		if(!$this->seqsLoaded) $this->initSequences();
 		return array_values($this->sequences); //re-key [numerically]
@@ -195,7 +195,7 @@ abstract class DatabaseInfo {
 	 * Get vendor specific optional information for this primary key.
 	 * @return array vendorSpecificInfo[]
 	 */
-	public function getVendorSpecificInfo()
+	function getVendorSpecificInfo()
 	{
 		return $this->vendorSpecificInfo;
 	}

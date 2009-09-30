@@ -35,7 +35,7 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  in The string to transform to upper case.
 	 * @return	 The upper case string.
 	 */
-	public function toUpperCase($in)
+	function toUpperCase($in)
 	{
 		return "UPPER(" . $in . ")";
 	}
@@ -46,7 +46,7 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  in The string whose case to ignore.
 	 * @return	 The string in a case that can be ignored.
 	 */
-	public function ignoreCase($in)
+	function ignoreCase($in)
 	{
 		return "UPPER(" . $in . ")";
 	}
@@ -58,7 +58,7 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	public function concatString($s1, $s2)
+	function concatString($s1, $s2)
 	{
 		return "($s1 + $s2)";
 	}
@@ -71,7 +71,7 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	public function subString($s, $pos, $len)
+	function subString($s, $pos, $len)
 	{
 		return "SUBSTRING($s, $pos, $len)";
 	}
@@ -82,7 +82,7 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	public function strLength($s)
+	function strLength($s)
 	{
 		return "LEN($s)";
 	}
@@ -90,7 +90,7 @@ class DBMSSQL extends DBAdapter {
 	/**
 	 * @see		DBAdapter::quoteIdentifier()
 	 */
-	public function quoteIdentifier($text)
+	function quoteIdentifier($text)
 	{
 		return '[' . $text . ']';
 	}
@@ -98,7 +98,7 @@ class DBMSSQL extends DBAdapter {
 	/**
 	 * @see		DBAdapter::random()
 	 */
-	public function random($seed = null)
+	function random($seed = null)
 	{
 		return 'rand('.((int) $seed).')';
 	}
@@ -109,7 +109,7 @@ class DBMSSQL extends DBAdapter {
 	* @see		DBAdapter::applyLimit()
 	* @author	 Justin Carlson <justin.carlson@gmail.com>
 	*/
-	public function applyLimit(&$sql, $offset, $limit)
+	function applyLimit(&$sql, $offset, $limit)
 	{
 		// make sure offset and limit are numeric
 		if (!is_numeric($offset) || !is_numeric($limit)){
@@ -203,7 +203,7 @@ class DBMSSQL extends DBAdapter {
 
 	}
 	
-	public function lastInsertId() {
+	function lastInsertId() {
 		$query = "SELECT scope_identity() as ID";
 		$result = $this->query($query);
 		foreach($result as $r)

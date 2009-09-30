@@ -97,7 +97,7 @@ abstract class DBAdapter extends PDO {
 		}
 	}
 
-	public function getDatabaseInfo($database_name){
+	function getDatabaseInfo($database_name){
 		$reader = self::$schema_readers[get_class($this)];
 		$reader = new $reader($this, $database_name);
 		return $reader;
@@ -115,7 +115,7 @@ abstract class DBAdapter extends PDO {
 	 * @param	  array An array of settings.
 	 * @see		setCharset()
 	 */
-	public function initConnection(array $settings){
+	function initConnection(array $settings){
 		if (isset($settings['charset']['value'])) {
 			$this->setCharset($settings['charset']['value']);
 		}
@@ -137,7 +137,7 @@ abstract class DBAdapter extends PDO {
 	 * @param	  string The charset encoding.
 	 * @see		initConnection()
 	 */
-	public function setCharset($charset){
+	function setCharset($charset){
 		$this->exec("SET NAMES '" . $charset . "'");
 	}
 
@@ -156,11 +156,11 @@ abstract class DBAdapter extends PDO {
 	 *
 	 * @return	 string The text delimeter.
 	 */
-	public function getStringDelimiter(){
+	function getStringDelimiter(){
 		return '\'';
 	}
 
-	public function checkInput($value){
+	function checkInput($value){
 		if (is_array($value)){
 			foreach ($value as $k => $v)
 				$value[$k] = $this->checkInput($v);
@@ -194,7 +194,7 @@ abstract class DBAdapter extends PDO {
 	 * @param	  string $in The string whose case to ignore.
 	 * @return	 string The string in a case that can be ignored.
 	 */
-	public function ignoreCaseInOrderBy($in){
+	function ignoreCaseInOrderBy($in){
 		return $this->ignoreCase($in);
 	}
 
@@ -230,7 +230,7 @@ abstract class DBAdapter extends PDO {
 	 * @param	  string $text The identifier to quote.
 	 * @return	 string The quoted identifier.
 	 */
-	public function quoteIdentifier($text){
+	function quoteIdentifier($text){
 		return '"' . $text . '"';
 	}
 
@@ -239,7 +239,7 @@ abstract class DBAdapter extends PDO {
 	 * @param	  string $table The table name to quo
 	 * @return	 string The quoted table name
 	 **/
-	public function quoteIdentifierTable($table) {
+	function quoteIdentifierTable($table) {
 		return implode(" ", array_map(array($this, "quoteIdentifier"), explode(" ", $table) ) );
 	}
 
@@ -255,7 +255,7 @@ abstract class DBAdapter extends PDO {
 	 * Whether this adapter uses an ID generation system that requires getting ID _before_ performing INSERT.
 	 * @return	 boolean
 	 */
-	public function isGetIdBeforeInsert(){
+	function isGetIdBeforeInsert(){
 		return ($this->getIdMethod() === DBAdapter::ID_METHOD_SEQUENCE);
 	}
 
@@ -263,7 +263,7 @@ abstract class DBAdapter extends PDO {
 	 * Whether this adapter uses an ID generation system that requires getting ID _before_ performing INSERT.
 	 * @return	 boolean
 	 */
-	public function isGetIdAfterInsert(){
+	function isGetIdAfterInsert(){
 		return ($this->getIdMethod() === DBAdapter::ID_METHOD_AUTOINCREMENT);
 	}
 
@@ -271,7 +271,7 @@ abstract class DBAdapter extends PDO {
 	 * Gets the generated ID (either last ID for autoincrement or next sequence ID).
 	 * @return	 mixed
 	 */
-	public function getId($name = null){
+	function getId($name = null){
 		return $this->lastInsertId($name);
 	}
 
@@ -279,7 +279,7 @@ abstract class DBAdapter extends PDO {
 	 * Returns timestamp formatter string for use in date() function.
 	 * @return	 string
 	 */
-	public function getTimestampFormatter(){
+	function getTimestampFormatter(){
 		return "Y-m-d H:i:s";
 	}
 
@@ -287,7 +287,7 @@ abstract class DBAdapter extends PDO {
 	 * Returns date formatter string for use in date() function.
 	 * @return	 string
 	 */
-	public function getDateFormatter(){
+	function getDateFormatter(){
 		return "Y-m-d";
 	}
 
@@ -295,7 +295,7 @@ abstract class DBAdapter extends PDO {
 	 * Returns time formatter string for use in date() function.
 	 * @return	 string
 	 */
-	public function getTimeFormatter(){
+	function getTimeFormatter(){
 		return "H:i:s";
 	}
 
@@ -309,7 +309,7 @@ abstract class DBAdapter extends PDO {
 	 * @return	 boolean
 	 * @deprecated
 	 */
-	public function useQuoteIdentifier(){
+	function useQuoteIdentifier(){
 		return false;
 	}
 

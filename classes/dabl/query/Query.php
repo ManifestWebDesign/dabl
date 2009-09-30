@@ -73,13 +73,13 @@ class Query{
 	 * @param $tableName Mixed[optional]
 	 * @param $alias String[optional]
 	 */
-	public function __construct($tableName=null, $alias=null){
+	function __construct($tableName=null, $alias=null){
 		$this->setWhere(new Condition);
 		$this->setTable($tableName, $alias);
 		return $this;
 	}
 
-	public function __clone(){
+	function __clone(){
 		if($this->_where instanceof Condition)
 			$this->_where = clone $this->_where;
 		if($this->_having instanceof Condition)
@@ -90,7 +90,7 @@ class Query{
 	 * Specify whether to select only distinct rows
 	 * @param Bool $bool
 	 */
-	public function setDistinct($bool){
+	function setDistinct($bool){
 		$this->_distinct = (bool) $bool;
 	}
 
@@ -99,7 +99,7 @@ class Query{
 	 * @return Query
 	 * @param $action String
 	 */
-	public function setAction($action){
+	function setAction($action){
 		$this->_action = $action;
 		return $this;
 	}
@@ -108,7 +108,7 @@ class Query{
 	 * Returns the action of the query.  Should be SELECT, DELETE, or COUNT.
 	 * @return String
 	 */
-	public function getAction(){
+	function getAction(){
 		return $this->_action;
 	}
 
@@ -117,7 +117,7 @@ class Query{
 	 * @param String $columnName
 	 * @return Query
 	 */
-	public function addColumn($columnName){
+	function addColumn($columnName){
 		$this->_columns[$columnName] = $columnName;
 		return $this;
 	}
@@ -129,7 +129,7 @@ class Query{
 	 * @param $tableName Mixed
 	 * @param $alias String[optional]
 	 */
-	public function setTable($tableName, $alias=null){
+	function setTable($tableName, $alias=null){
 		if($tableName instanceof Query){
 			if(!$alias)
 				throw new Exception("The nested query must have an alias.");
@@ -146,7 +146,7 @@ class Query{
 	 * alias if present.
 	 * @return String
 	 */
-	public function getTable(){
+	function getTable(){
 		return $this->_table;
 	}
 
@@ -155,7 +155,7 @@ class Query{
 	 * its alias.
 	 * @return String
 	 */
-	public function getTableName(){
+	function getTableName(){
 		$table = $this->_table;
 		$table_parts = explode(" ", $table);
 		if(count($table_parts)==1)
@@ -168,7 +168,7 @@ class Query{
 	 * Returns a String of the alias of the talbe being queried, if present
 	 * @return String
 	 */
-	public function getAlias(){
+	function getAlias(){
 		$table = $this->_table;
 		$table_parts = explode(" ", $table);
 		if(count($table_parts)>1)
@@ -180,7 +180,7 @@ class Query{
 	 * @return Query
 	 * @param $w Condition
 	 */
-	public function setWhere(Condition $w){
+	function setWhere(Condition $w){
 		$this->_where = $w;
 		return $this;
 	}
@@ -189,7 +189,7 @@ class Query{
 	 * Returns the Condition object that generates the WHERE clause of the query
 	 * @return Condition
 	 */
-	public function getWhere(){
+	function getWhere(){
 		return $this->_where;
 	}
 
@@ -197,7 +197,7 @@ class Query{
 	 * Short version of addJoin();
 	 * @return Query
 	 */
-	public function join($table, $onClause=null, $joinType=self::JOIN){
+	function join($table, $onClause=null, $joinType=self::JOIN){
 		return $this->addJoin($table, $onClause, $joinType);
 	}
 
@@ -210,7 +210,7 @@ class Query{
 	 * @param $onClause Mixed[optional]
 	 * @param $joinType String[optional]
 	 */
-	public function addJoin($table, $onClause=null, $joinType=self::JOIN){
+	function addJoin($table, $onClause=null, $joinType=self::JOIN){
 		if(!$onClause)
 			$this->_joins[] = $table;
 		else{
@@ -234,7 +234,7 @@ class Query{
 	 * Short version of addAnd();
 	 * @return Query
 	 */
-	public function add($column, $value=null, $operator=self::EQUAL, $quote = Condition::QUOTE_RIGHT){
+	function add($column, $value=null, $operator=self::EQUAL, $quote = Condition::QUOTE_RIGHT){
 		return $this->addAnd($column, $value, $operator, $quote);
 	}
 
@@ -246,7 +246,7 @@ class Query{
 	 * @param $operator String[optional]
 	 * @param $quote Int[optional]
 	 */
-	public function addAnd($column, $value=null, $operator=self::EQUAL, $quote = Condition::QUOTE_RIGHT){
+	function addAnd($column, $value=null, $operator=self::EQUAL, $quote = Condition::QUOTE_RIGHT){
 		$this->_where->addAnd($column, $value, $operator, $quote);
 		return $this;
 	}
@@ -259,7 +259,7 @@ class Query{
 	 * @param $operator String[optional]
 	 * @param $quote Int[optional]
 	 */
-	public function addOr($column, $value=null, $operator=self::EQUAL, $quote = Condition::QUOTE_RIGHT){
+	function addOr($column, $value=null, $operator=self::EQUAL, $quote = Condition::QUOTE_RIGHT){
 		$this->_where->addOr($column, $value, $operator, $quote);
 		return $this;
 	}
@@ -268,7 +268,7 @@ class Query{
 	 * Shortcut to addGroup() method
 	 * @return Query
 	 */
-	public function group($column){
+	function group($column){
 		return $this->addGroup($column);
 	}
 
@@ -277,7 +277,7 @@ class Query{
 	 * @return Query
 	 * @param $column String
 	 */
-	public function addGroup($column){
+	function addGroup($column){
 		$this->_groups[] = $column;
 		return $this;
 	}
@@ -287,7 +287,7 @@ class Query{
 	 * @return Query
 	 * @param $w Condition
 	 */
-	public function setHaving(Condition $where){
+	function setHaving(Condition $where){
 		$this->_having=$where;
 		return $this;
 	}
@@ -296,7 +296,7 @@ class Query{
 	 * Returns the Condition object that generates the HAVING clause of the query
 	 * @return Condition
 	 */
-	public function getHaving(){
+	function getHaving(){
 		return $this->_having;
 	}
 
@@ -304,7 +304,7 @@ class Query{
 	 * Shortcut for addOrder()
 	 * @return Query
 	 */
-	public function order($column, $dir=null){
+	function order($column, $dir=null){
 		return $this->addOrder($column, $dir);
 	}
 
@@ -313,7 +313,7 @@ class Query{
 	 * @return Query
 	 * @param $column String
 	 */
-	public function addOrder($column, $dir=null){
+	function addOrder($column, $dir=null){
 		$dir = strtoupper($dir);
 		$allowed = array(self::DESC, self::ASC);
 		if($dir && !in_array($dir, $allowed))
@@ -327,7 +327,7 @@ class Query{
 	 * @return Query
 	 * @param $limit Int
 	 */
-	public function setLimit($limit){
+	function setLimit($limit){
 		$this->_limit = (int)$limit;
 		return $this;
 	}
@@ -338,7 +338,7 @@ class Query{
 	 * @return Query
 	 * @param $offset Int
 	 */
-	public function setOffset($offset){
+	function setOffset($offset){
 		$this->_offset = (int)$offset;
 		return $this;
 	}
@@ -347,7 +347,7 @@ class Query{
 	 * Builds and returns the query string
 	 * @return String
 	 */
-	public function getQuery($conn = null){
+	function getQuery($conn = null){
 		$table_name = $this->getTableName();
 		$alias = $this->getAlias();
 
@@ -414,7 +414,7 @@ class Query{
 	/**
 	 * @return String
 	 */
-	public function __toString(){
+	function __toString(){
 		$q = clone $this;
 		if(!$q->getTable())
 			$q->setTable('{UNSPECIFIED-TABLE}');
@@ -426,7 +426,7 @@ class Query{
 	 * @return Int
 	 * @param $conn PDO[optional]
 	 */
-	public function doCount(PDO $conn = null){
+	function doCount(PDO $conn = null){
 		$q = clone $this;
 
 		if(!$conn)
@@ -447,7 +447,7 @@ class Query{
 	 * @return Int
 	 * @param $conn PDO[optional]
 	 */
-	public function doDelete(PDO $conn = null){
+	function doDelete(PDO $conn = null){
 		$q = clone $this;
 
 		if(!$q->getTable())
@@ -466,7 +466,7 @@ class Query{
 	 * @return PDOStatement
 	 * @param $conn PDO[optional]
 	 */
-	public function doSelect(PDO $conn = null){
+	function doSelect(PDO $conn = null){
 		$q = clone $this;
 		if(!$q->getTable())
 			throw new Exception("No table specified.");

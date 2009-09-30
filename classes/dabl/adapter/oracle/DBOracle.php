@@ -40,7 +40,7 @@ class DBOracle extends DBAdapter {
 	 * @param	  string $in The string to transform to upper case.
 	 * @return	 string The upper case string.
 	 */
-	public function toUpperCase($in)
+	function toUpperCase($in)
 	{
 		return "UPPER(" . $in . ")";
 	}
@@ -51,7 +51,7 @@ class DBOracle extends DBAdapter {
 	 * @param	  string $in The string whose case to ignore.
 	 * @return	 string The string in a case that can be ignored.
 	 */
-	public function ignoreCase($in)
+	function ignoreCase($in)
 	{
 		return "UPPER(" . $in . ")";
 	}
@@ -63,7 +63,7 @@ class DBOracle extends DBAdapter {
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	public function concatString($s1, $s2)
+	function concatString($s1, $s2)
 	{
 		return "CONCAT($s1, $s2)";
 	}
@@ -76,7 +76,7 @@ class DBOracle extends DBAdapter {
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	public function subString($s, $pos, $len)
+	function subString($s, $pos, $len)
 	{
 		return "SUBSTR($s, $pos, $len)";
 	}
@@ -87,7 +87,7 @@ class DBOracle extends DBAdapter {
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	public function strLength($s)
+	function strLength($s)
 	{
 		return "LENGTH($s)";
 	}
@@ -95,7 +95,7 @@ class DBOracle extends DBAdapter {
 	/**
 	 * @see		DBAdapter::applyLimit()
 	 */
-	public function applyLimit(&$sql, $offset, $limit)
+	function applyLimit(&$sql, $offset, $limit)
 	{
 		 $sql =
 			'SELECT B.* FROM (  '
@@ -122,7 +122,7 @@ class DBOracle extends DBAdapter {
 		return DBAdapter::ID_METHOD_SEQUENCE;
 	}
 
-	public function getId($name = null)
+	function getId($name = null)
 	{
 		if ($name === null) {
 			throw new Exception("Unable to fetch next sequence ID without sequence name.");
@@ -134,7 +134,7 @@ class DBOracle extends DBAdapter {
 		return $row[0];
 	}
 
-	public function random($seed=NULL)
+	function random($seed=NULL)
 	{
 		return 'dbms_random.value';
 	}
