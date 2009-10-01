@@ -66,10 +66,10 @@ class DABLGenerator{
 			'class_suffix' => '',
 
 			//target directory for generated table classes
-			'model_path' => ROOT."classes/tables/",
+			'model_path' => ROOT."models/",
 
 			//target directory for generated base table classes
-			'base_model_path' => ROOT."classes/tables/base/",
+			'base_model_path' => ROOT."models/base/",
 
 
 			/* views */
@@ -87,7 +87,7 @@ class DABLGenerator{
 			'pluralize_controllers' => true,
 
 			//directory to save controller files in
-			'controller_path' => ROOT."classes/controllers/",
+			'controller_path' => ROOT."controllers/",
 
 			//prepend to controller class name
 			'controller_prefix' => '',
