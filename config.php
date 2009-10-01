@@ -16,25 +16,25 @@ if (get_magic_quotes_gpc()) {
 
 define('ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 
-set_include_path(ROOT."classes".PATH_SEPARATOR.get_include_path());
+set_include_path(ROOT."library".PATH_SEPARATOR.get_include_path());
 
 require_once 'Module.php';
 
 Module::addRepository('ROOT', substr(ROOT, 0, -1));
-Module::import('ROOT:classes');
+Module::import('ROOT:library');
 Module::import('ROOT:models');
 Module::import('ROOT:models:base');
-Module::import('ROOT:classes:dabl');
-Module::import('ROOT:classes:dabl:adapter');
-Module::import('ROOT:classes:dabl:query');
-//Module::import('ROOT:classes:PDO'); //Uncomment if your server doesn't have PDO enabled
+Module::import('ROOT:library:dabl');
+Module::import('ROOT:library:dabl:adapter');
+Module::import('ROOT:library:dabl:query');
+//Module::import('ROOT:library:PDO'); //Uncomment if your server doesn't have PDO enabled
 
 define('DB_DRIVER', 'mysql');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'example');
 define('DB_USER', 'root');
 define('DB_PASSWORD', '');
-Module::import('ROOT:classes:dabl:adapter:'.DB_DRIVER);
+Module::import('ROOT:library:dabl:adapter:'.DB_DRIVER);
 
 try{
 	//DBAdapter::factory($driver, $dsn, $username, $password)
