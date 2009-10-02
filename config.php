@@ -1,9 +1,17 @@
 <?php
 
+define('CONFIG_LOADED', true);
+define('ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
+define('DB_DRIVER', 'mysql');
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'example');
+define('DB_USER', 'root');
+define('DB_PASSWORD', '');
+
 //These aren't required, but I find them useful
 ini_set('display_errors', true);
 ini_set('error_reporting', E_ALL);
-define('CONFIG_LOADED', true);
+set_include_path(ROOT."library".PATH_SEPARATOR.get_include_path());
 
 //Strip added slashes if needed
 if (get_magic_quotes_gpc()) {
@@ -14,27 +22,17 @@ if (get_magic_quotes_gpc()) {
     $_REQUEST = stripslashes_array($_REQUEST);
 }
 
-define('ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
-
-set_include_path(ROOT."library".PATH_SEPARATOR.get_include_path());
-
 require_once 'Module.php';
 
 Module::addRepository('ROOT', substr(ROOT, 0, -1));
 Module::import('ROOT:library');
 Module::import('ROOT:models');
 Module::import('ROOT:models:base');
-Module::import('ROOT:library:dabl');
-Module::import('ROOT:library:dabl:adapter');
-Module::import('ROOT:library:dabl:query');
+Module::import('ROOT:libraries:dabl');
+Module::import('ROOT:libraries:dabl:adapter');
+Module::import('ROOT:libraries:dabl:query');
+Module::import('ROOT:libraries:dabl:adapter:'.DB_DRIVER);
 //Module::import('ROOT:library:PDO'); //Uncomment if your server doesn't have PDO enabled
-
-define('DB_DRIVER', 'mysql');
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'example');
-define('DB_USER', 'root');
-define('DB_PASSWORD', '');
-Module::import('ROOT:library:dabl:adapter:'.DB_DRIVER);
 
 try{
 	//DBAdapter::factory($driver, $dsn, $username, $password)
