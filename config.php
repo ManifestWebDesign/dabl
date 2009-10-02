@@ -11,7 +11,7 @@ define('DB_PASSWORD', '');
 //These aren't required, but I find them useful
 ini_set('display_errors', true);
 ini_set('error_reporting', E_ALL);
-set_include_path(ROOT."library".PATH_SEPARATOR.get_include_path());
+set_include_path(ROOT."libraries".PATH_SEPARATOR.get_include_path());
 
 //Strip added slashes if needed
 if (get_magic_quotes_gpc()) {
@@ -25,7 +25,7 @@ if (get_magic_quotes_gpc()) {
 require_once 'Module.php';
 
 Module::addRepository('ROOT', substr(ROOT, 0, -1));
-Module::import('ROOT:library');
+Module::import('ROOT:libraries');
 Module::import('ROOT:models');
 Module::import('ROOT:models:base');
 Module::import('ROOT:libraries:dabl');
