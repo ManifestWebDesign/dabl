@@ -160,21 +160,18 @@ abstract class DBAdapter extends PDO {
 		return '\'';
 	}
 
+	/**
+	 * @param mixed $value
+	 * @return mixed
+	 */
 	function checkInput($value){
 		if (is_array($value)){
-			foreach ($value as $k => $v)
-				$value[$k] = $this->checkInput($v);
+			foreach ($value as $k => $v) $value[$k] = $this->checkInput($v);
 			return $value;
 		}
 
 		if($value===null) return "NULL";
-
-		if(is_bool($value)) return $value ? 1 : 0;
-
-		if(!is_numeric($value) || (strlen($value) && substr($value,0,1)=='0'))
-			return $this->quote($value);
-
-		return $value;
+		return $this->quote($value);
 	}
 
 	/**
