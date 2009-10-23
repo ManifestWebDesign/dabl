@@ -71,6 +71,24 @@ abstract class BaseModel {
 		return $this->_modifiedColumns ? $this->_modifiedColumns : array();
 	}
 
+	function hasColumn(){
+
+	}
+
+	function  __set($name,  $value) {
+		if(in_array(strtolower($name), array_map('strtolower', $this->getColumnNames()))){
+			$set_method = "set$name";
+			return $this->$set_method($value);
+		}
+	}
+
+	function  __get($name) {
+		if(in_array(strtolower($name), array_map('strtolower', $this->getColumnNames()))){
+			$get_method = "get$name";
+			return $this->$get_method();
+		}
+	}
+
 	/**
 	 * Clears the array of modified column names
 	 */

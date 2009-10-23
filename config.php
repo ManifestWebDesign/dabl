@@ -4,7 +4,7 @@ define('CONFIG_LOADED', true);
 define('ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 define('DB_DRIVER', 'mysql');
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'example');
+define('DB_NAME', 'test');
 define('DB_USER', 'root');
 define('DB_PASSWORD', '');
 
