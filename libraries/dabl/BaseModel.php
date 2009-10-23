@@ -80,6 +80,7 @@ abstract class BaseModel {
 			$set_method = "set$name";
 			return $this->$set_method($value);
 		}
+		throw new Exception("Property $name does not exist in class ".__CLASS__);
 	}
 
 	function  __get($name) {
@@ -87,6 +88,7 @@ abstract class BaseModel {
 			$get_method = "get$name";
 			return $this->$get_method();
 		}
+		throw new Exception("Property $name does not exist in class ".__CLASS__);
 	}
 
 	/**
