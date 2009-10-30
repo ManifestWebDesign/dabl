@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Last Modified September 30th 2009
+ * Last Modified October 30th 2009
  */
 
 abstract class BaseModel {
@@ -175,7 +175,8 @@ abstract class BaseModel {
 	}
 
 	/**
-	 * @return array
+	 * See $this->validate()
+	 * @return array Array of errors that occured when validating object
 	 */
 	function getValidationErrors(){
 		return $this->_validationErrors;
