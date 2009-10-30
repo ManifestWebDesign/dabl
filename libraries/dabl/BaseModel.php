@@ -44,13 +44,22 @@ abstract class BaseModel {
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
 
-	function __clone(){
-		$class = $this->getTableName();
-		$new = new $class;
-		$newValues = $this->toArray();
-		$this->fromArray($new->toArray());
-		$this->fromArray($newValues);
-		$this->setNew(true);
+	/**
+	 * Creates new instance of $this and
+	 * @return BaseModel
+	 */
+	function copy(){
+		$class = get_class($this);
+		$new_object = new $class;
+		$new_object->fromArray($this->toArray());
+
+		if($this->getPrimaryKey()){
+			$pk = $this->getPrimaryKey();
+			$set_pk_method = "set$pk";
+			$new_object->$set_pk_method(null);
+		}
+
+		return $new_object;
 	}
 
 	/**
