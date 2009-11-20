@@ -709,7 +709,7 @@ $class .= '
 class ".$className." extends base$className{
 
 }";
-//<?ph
+//<?php
 
 		return $class;
 	}
@@ -726,19 +726,19 @@ class ".$className." extends base$className{
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
 		$pkMethod = "get$pk";
-		$outputPKMethod = '<?= htmlentities($'.strtolower($className).'->'.$pkMethod.'()) ?>';
+		$outputPKMethod = '<?php echo htmlentities($'.strtolower($className).'->'.$pkMethod.'()) ?>';
 		ob_start();
 if($pk){
 	echo "<?php\n";
 ?>
 require_once 'config.php';
 
-$<?= strtolower($className) ?> = @$_REQUEST['<?= $pk ?>'] ? <?= $className ?>::retrieveByPK($_REQUEST['<?= $pk ?>']) : new <?= $className ?>;
+$<?php echo strtolower($className) ?> = @$_REQUEST['<?php echo $pk ?>'] ? <?php echo $className ?>::retrieveByPK($_REQUEST['<?php echo $pk ?>']) : new <?php echo $className ?>;
 
 if(@$_REQUEST['action']=='save'){
-	$<?= strtolower($className) ?>->fromArray($_REQUEST);
-	$<?= strtolower($className) ?>->save();
-	header("Location: ?<?= $pk ?>={$<?= strtolower($className) ?>->get<?= $pk ?>()}");
+	$<?php echo strtolower($className) ?>->fromArray($_REQUEST);
+	$<?php echo strtolower($className) ?>->save();
+	header("Location: ?<?php echo $pk ?>={$<?php echo strtolower($className) ?>->get<?php echo $pk ?>()}");
 	die;
 }
 <?php
@@ -750,7 +750,7 @@ if(@$_REQUEST['action']=='save'){
 <?php
 if($pk){
 ?>
-	<input type="hidden" name="<?= $pk ?>" value="<?= $outputPKMethod ?>" />
+	<input type="hidden" name="<?php echo $pk ?>" value="<?php echo $outputPKMethod ?>" />
 <?php
 }
 ?>
@@ -760,11 +760,11 @@ if($pk){
 		foreach($instance->getColumnNames() as $columnName){
 			if($columnName==$pk)continue;
 			$method = "get$columnName";
-			$output = '<?= htmlentities($'.strtolower($className).'->'.$method.'()) ?>';
+			$output = '<?php echo htmlentities($'.strtolower($className).'->'.$method.'()) ?>';
 ?>
 			<tr>
-				<th><?= $columnName ?></th>
-				<td><input type="text" name="<?= $columnName ?>" value="<?= $output ?>" /></td>
+				<th><?php echo $columnName ?></th>
+				<td><input type="text" name="<?php echo $columnName ?>" value="<?php echo $output ?>" /></td>
 			</tr>
 <?php
 		}
@@ -798,11 +798,11 @@ if($pk){
 		$pk = $instance->getPrimaryKey();
 		ob_start();
 ?>
-<form method="POST" action="<?= "<?= site_url('".$plural."/save') ?>" ?>">
+<form method="POST" action="<?php echo "<?php echo site_url('".$plural."/save') ?>" ?>">
 <?php
 		if($pk){
 ?>
-	<input type="hidden" name="<?= $pk ?>" value="<?= '<?= htmlentities($'.$single.'->'."get$pk".'()) ?>' ?>" />
+	<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo htmlentities($'.$single.'->'."get$pk".'()) ?>' ?>" />
 <?php
 		}
 ?>
@@ -812,11 +812,11 @@ if($pk){
 		foreach($instance->getColumnNames() as $columnName){
 			if($columnName==$pk)continue;
 			$method = "get$columnName";
-			$output = '<?= htmlentities($'.$single.'->'.$method.'()) ?>';
+			$output = '<?php echo htmlentities($'.$single.'->'.$method.'()) ?>';
 ?>
 			<tr>
-				<th><?= $columnName ?></th>
-				<td><input type="text" name="<?= $columnName ?>" value="<?= $output ?>" /></td>
+				<th><?php echo $columnName ?></th>
+				<td><input type="text" name="<?php echo $columnName ?>" value="<?php echo $output ?>" /></td>
 			</tr>
 <?php
 		}
@@ -856,7 +856,7 @@ if($pk){
 <?php
 		foreach($instance->getColumnNames() as $columnName){
 ?>
-			<th><?= $columnName ?></th>
+			<th><?php echo $columnName ?></th>
 <?php
 		}
 		if($pk){
@@ -869,28 +869,28 @@ if($pk){
 		</tr>
 	</thead>
 	<tbody>
-<?= "<?" ?> foreach($<?= $plural ?> as $key => $<?= $single ?>): <?= "?>" ?>
+<?php echo "<?" ?> foreach($<?php echo $plural ?> as $key => $<?php echo $single ?>): <?php echo "?>" ?>
 
-		<tr class="<?= '<?=' ?> is_int($key/2) ? 'odd' : 'even' <?= '?>' ?>">
+		<tr class="<?php echo '<?php echo' ?> is_int($key/2) ? 'odd' : 'even' <?php echo '?>' ?>">
 <?php
 		foreach($instance->getColumnNames() as $columnName){
-			$output = '<?= htmlentities($'.$single.'->'."get$columnName".'()) ?>';
+			$output = '<?php echo htmlentities($'.$single.'->'."get$columnName".'()) ?>';
 ?>
-			<td><?= $output ?></td>
+			<td><?php echo $output ?></td>
 <?php
 		}
 		if($pk){
 			$pkMethod = "get$pk";
-			$editURL = "<?= site_url('".$plural."/edit/'.$".$single."->".$pkMethod."()) ?>";
-			$deleteURL = "<?= site_url('".$plural."/delete/'.$".$single."->".$pkMethod."()) ?>";
+			$editURL = "<?php echo site_url('".$plural."/edit/'.$".$single."->".$pkMethod."()) ?>";
+			$deleteURL = "<?php echo site_url('".$plural."/delete/'.$".$single."->".$pkMethod."()) ?>";
 ?>
-			<td><a href="<?= $editURL ?>">Edit</a></td>
-			<td><a href="<?= $deleteURL ?>">Delete</a></td>
+			<td><a href="<?php echo $editURL ?>">Edit</a></td>
+			<td><a href="<?php echo $deleteURL ?>">Delete</a></td>
 <?php
 		}
 ?>
 		</tr>
-<?= "<?" ?> endforeach; <?= "?>" ?>
+<?php echo "<?" ?> endforeach; <?php echo "?>" ?>
 
 	</tbody>
 </table>
@@ -913,37 +913,37 @@ if($pk){
 		ob_start();
 		echo "<?php\n";
 ?>
-class <?= $controllerName ?> <? if(@$options['controllers_extend'])echo'extends '.$options['controllers_extend'] ?> {
+class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'extends '.$options['controllers_extend'] ?> {
 
 	function __construct(){
 		parent::Controller();
 	}
 
 	function index(){
-		$data['<?= self::pluralize(strtolower($className)) ?>'] = <?= $className ?>::getAll();
-		$this->load->view('<?= $plural ?>/index', $data);
+		$data['<?php echo self::pluralize(strtolower($className)) ?>'] = <?php echo $className ?>::getAll();
+		$this->load->view('<?php echo $plural ?>/index', $data);
 	}
 
 	function save($id = null){
-		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
-		$<?= $single ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
-		$<?= $single ?>->fromArray($_POST);
-		$<?= $single ?>->save();
-		redirect('<?= $plural ?>');
+		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
+		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
+		$<?php echo $single ?>->fromArray($_POST);
+		$<?php echo $single ?>->save();
+		redirect('<?php echo $plural ?>');
 	}
 
 	function delete($id = null){
-		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
-		$<?= $single ?> = <?= $className ?>::retrieveByPK($id);
-		$<?= $single ?>->delete();
-		redirect('<?= $plural ?>');
+		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
+		$<?php echo $single ?> = <?php echo $className ?>::retrieveByPK($id);
+		$<?php echo $single ?>->delete();
+		redirect('<?php echo $plural ?>');
 	}
 
 	function edit($id = null){
-		$id = $id ? $id : @$_POST[<?= $className ?>::getPrimaryKey()];
-		$<?= $single ?> = $id ? <?= $className ?>::retrieveByPK($id) : new <?= $className ?>;
-		$data['<?= $single ?>'] = $<?= strtolower($tableName) ?>;
-		$this->load->view('<?= $plural ?>/edit', $data);
+		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
+		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
+		$data['<?php echo $single ?>'] = $<?php echo strtolower($tableName) ?>;
+		$this->load->view('<?php echo $plural ?>/edit', $data);
 	}
 
 }

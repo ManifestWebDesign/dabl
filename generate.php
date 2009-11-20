@@ -30,7 +30,7 @@ $generator->setOptions($options);
 	<title>DABL::Map Database</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <script>
-checkAll = function(name, checked){
+function checkAll(name, checked){
 	var boxes = document.getElementsByTagName('input');
 	var length = boxes.length;
 	for(var x=0; x<length; x++){
@@ -62,15 +62,15 @@ checkAll = function(name, checked){
 foreach($generator->getTableNames() as $tableName){
 ?>
 		<tr>
-			<td><?= $tableName ?></td>
+			<td><?php echo $tableName ?></td>
 			<td>
-				<input checked="CHECKED" type="checkbox" value="<?= $tableName ?>" name="Models[]" />
+				<input checked="CHECKED" type="checkbox" value="<?php echo $tableName ?>" name="Models[]" />
 			</td>
 			<td>
-				<input type="checkbox" value="<?= $tableName ?>" name="Views[]" />
+				<input type="checkbox" value="<?php echo $tableName ?>" name="Views[]" />
 			</td>
 			<td>
-				<input type="checkbox" value="<?= $tableName ?>" name="Controllers[]" />
+				<input type="checkbox" value="<?php echo $tableName ?>" name="Controllers[]" />
 			</td>
 		</tr>
 <?
@@ -79,11 +79,11 @@ foreach($generator->getTableNames() as $tableName){
 		</table>
 		<input type="submit" value="Generate Files!" />
 	</form>
-<?
+<?php
 if(@$_REQUEST['action']=='generate'){
 ?>
 	<h2>Generating Files...</h2>
-<?
+<?php
 	$generator->generateModels(@$_REQUEST['Models']);
 	$generator->generateViews(@$_REQUEST['Views']);
 	$generator->generateControllers(@$_REQUEST['Controllers']);
