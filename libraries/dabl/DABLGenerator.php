@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified August 8th 2009
+ *    			Last Modified November 24th 2009
  */
 
 class DABLGenerator{
@@ -571,7 +571,7 @@ $class .= '
 	/**
 	 * @var '.$to_className.'
 	 */
-	private $'.$to_table.'_c;
+	private $'.$to_className.'_c;
 
 	/**
 	 * Returns a '.$to_table.' Object(row) from the '.$to_table.' table
@@ -588,10 +588,10 @@ $class .= '
 		$conn = $this->getConnection();
 		$columnQuoted = $conn->quoteIdentifier("'.$to_column.'");
 		$tableQuoted = $conn->quoteIdentifier('.$to_className.'::getTableName());
-		if($this->getCacheResults() && @$this->'.$to_table.'_c && !$this->isColumnModified("'.$from_column.'"))return $this->'.$to_table.'_c;
+		if($this->getCacheResults() && @$this->'.$to_className.'_c && !$this->isColumnModified("'.$from_column.'"))return $this->'.$to_className.'_c;
 		$queryString = "SELECT * FROM $tableQuoted WHERE $columnQuoted=".$conn->checkInput($this->get'.$from_column.'());
 		$'.$to_table.' = '.$to_className.'::fetchSingle($queryString);
-		$this->'.$to_table.'_c = $'.$to_table.';
+		$this->'.$to_className.'_c = $'.$to_table.';
 		return $'.$to_table.';
 	}
 ';
@@ -654,7 +654,7 @@ $class .= '
 		return '.$from_className.'::doDelete($this->get'.$from_className.'sQuery($q));
 	}
 
-	private $'.$from_table.'s_c = array();
+	private $'.$from_className.'s_c = array();
 
 	/**
 	 * Returns an Array of '.$from_className.' Objects(rows) from the '.$from_table.' table
@@ -680,7 +680,7 @@ $class .= '
 		$columnQuoted = $conn->quoteIdentifier("'.$from_column.'");
 		$queryString = "SELECT * FROM $tableQuoted WHERE $columnQuoted=".$conn->checkInput($this->get'.$to_column.'())." $extra";
 		$'.$from_table.'s = '.$from_className.'::fetch($queryString);
-		if(!$extra)$this->'.$from_table.'s_c = $'.$from_table.'s;
+		if(!$extra)$this->'.$from_className.'s_c = $'.$from_table.'s;
 		return $'.$from_table.'s;
 	}
 ';
