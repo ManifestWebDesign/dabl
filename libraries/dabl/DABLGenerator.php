@@ -1162,7 +1162,7 @@ class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'e
 	 */
 	static function titleCase($string){
 		$string = str_replace('_', ' ', $string);
-		$string = ucwords(strtolower($string));
+		$string = ucwords($string);
 		$string = str_replace(' ', '', $string);
 		return $string;
 	}
