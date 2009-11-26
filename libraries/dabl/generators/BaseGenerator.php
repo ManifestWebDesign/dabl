@@ -220,7 +220,7 @@ abstract class BaseGenerator{
 		$options = $this->options;
 		//Gather all the information about the table's columns from the database
 		$PK = null;
-		$numeric=array();
+		$numeric = array();
 		$null = array();
 		$PKs = array();
 		$fields = $this->getColumns($tableName);
