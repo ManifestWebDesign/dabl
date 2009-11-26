@@ -80,10 +80,6 @@ abstract class BaseModel {
 		return $this->_modifiedColumns ? $this->_modifiedColumns : array();
 	}
 
-	function hasColumn(){
-
-	}
-
 	function  __set($name,  $value) {
 		if(in_array(strtolower($name), array_map('strtolower', $this->getColumnNames()))){
 			$set_method = "set$name";
