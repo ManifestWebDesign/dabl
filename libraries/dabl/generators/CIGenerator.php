@@ -5,7 +5,8 @@ class CIGenerator extends BaseGenerator {
 	function getViews($tableName){
 		return array(
 			'edit.php' => $this->getEditView($tableName),
-			'index.php' => $this->getIndexView($tableName)
+			'index.php' => $this->getIndexView($tableName),
+			'show.php' => $this->getShowView($tableName)
 		);
 	}
 	
@@ -76,6 +77,9 @@ class CIGenerator extends BaseGenerator {
 		$single = strtolower($tableName);
 		ob_start();
 ?>
+<a href="<?php echo "<?php echo site_url('".$plural."/edit') ?>" ?>">
+	new <?php echo str_replace('_', ' ', $single) ?>
+</a>
 <table>
 	<thead>
 		<tr>
@@ -87,8 +91,9 @@ class CIGenerator extends BaseGenerator {
 		}
 		if($pk){
 ?>
-			<th></th>
-			<th></th>
+			<th>&nbsp;</th>
+			<th>&nbsp;</th>
+			<th>&nbsp;</th>
 <?php
 		}
 ?>
@@ -107,9 +112,11 @@ class CIGenerator extends BaseGenerator {
 		}
 		if($pk){
 			$pkMethod = "get$pk";
+			$showURL = "<?php echo site_url('".$plural."/show/'.$".$single."->".$pkMethod."()) ?>";
 			$editURL = "<?php echo site_url('".$plural."/edit/'.$".$single."->".$pkMethod."()) ?>";
 			$deleteURL = "<?php echo site_url('".$plural."/delete/'.$".$single."->".$pkMethod."()) ?>";
 ?>
+			<td><a href="<?php echo $showURL ?>">Show</a></td>
 			<td><a href="<?php echo $editURL ?>">Edit</a></td>
 			<td><a href="<?php echo $deleteURL ?>">Delete</a></td>
 <?php
@@ -120,6 +127,42 @@ class CIGenerator extends BaseGenerator {
 
 	</tbody>
 </table>
+<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Generates a String with an html/php view for show view MVC
+	 * objects in the given table.
+	 * @param String $tableName
+	 * @param String $className
+	 * @return String
+	 */
+	function getShowView($tableName){
+		$controllerName = $this->getControllerName($tableName);
+		$className = $this->getModelName($tableName);
+		$plural = $this->getViewDirName($tableName);
+		$single = strtolower($tableName);
+		$instance = new $className;
+		$pk = $instance->getPrimaryKey();
+		ob_start();
+?>
+	<table>
+		<tbody>
+<?php
+		foreach($instance->getColumnNames() as $columnName){
+			if($columnName==$pk)continue;
+			$method = "get$columnName";
+?>
+			<tr>
+				<th><?php echo $columnName ?></th>
+				<td><?php echo '<?php echo htmlentities($'.$single.'->'.$method.'()) ?>' ?></td>
+			</tr>
+<?php
+		}
+?>
+		</tbody>
+	</table>
 <?php
 		return ob_get_clean();
 	}
@@ -162,6 +205,13 @@ class <?php echo $controllerName ?> extends Controller {
 		$<?php echo $single ?> = <?php echo $className ?>::retrieveByPK($id);
 		$<?php echo $single ?>->delete();
 		redirect('<?php echo $plural ?>');
+	}
+
+	function show($id = null){
+		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
+		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
+		$data['<?php echo $single ?>'] = $<?php echo $single ?>;
+		$this->load->view('<?php echo $plural ?>/show', $data);
 	}
 
 	function edit($id = null){
