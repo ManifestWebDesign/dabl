@@ -42,3 +42,9 @@ try{
 catch(Exception $e){
 	throw new Exception($e->getMessage());
 }
+
+define('BASE_URL', '/dabl/');
+define('DEFAULT_CONTROLLER', 'index');
+
+//load functions
+foreach (glob(ROOT."functions/*.php") as $filename) require_once($filename);

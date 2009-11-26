@@ -4,15 +4,15 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified November 24th 2009
+ *    			Last Modified November 25th 2009
  */
 
-class DABLGenerator{
+abstract class BaseGenerator{
 
 	/**
 	 * @var array
 	 */
-	 private $options;
+	private $options;
 
 	/**
 	 * @var String
@@ -38,17 +38,13 @@ class DABLGenerator{
 
 		$this->options = array(
 
-			/* forms */
-			'form_path' => ROOT."includes/sample_forms/",
-
-
 			/* Models */
 
 			//convert table and column names to title case
 			'title_case' => false,
 
 			//enforce an upper case first letter of classes
-			'cap_class_names' => true,
+			'cap_model_names' => true,
 
 			//enforce an upper case first letter of get and set methods
 			'cap_method_names' => true,
@@ -60,10 +56,10 @@ class DABLGenerator{
 			'protect_not_null' => true,
 
 			//prepend this to class name
-			'class_prefix' => '',
+			'model_prefix' => '',
 
 			//append this to class name
-			'class_suffix' => '',
+			'model_suffix' => '',
 
 			//target directory for generated table classes
 			'model_path' => ROOT."models/",
@@ -71,29 +67,12 @@ class DABLGenerator{
 			//target directory for generated base table classes
 			'base_model_path' => ROOT."models/base/",
 
-
-			/* views */
-
+			
 			//set to true to generate views
 			'view_path' => ROOT."views/",
 
-
-			/* controllers */
-
-			//class that each controller should extend
-			'controllers_extend' => 'Controller',
-
-			//controller classname is plural version of table name
-			'pluralize_controllers' => true,
-
 			//directory to save controller files in
 			'controller_path' => ROOT."controllers/",
-
-			//prepend to controller class name
-			'controller_prefix' => '',
-
-			//append to controller class name
-			'controller_suffix' => '',
 		);
 	}
 
@@ -161,6 +140,10 @@ class DABLGenerator{
 		return $columns;
 	}
 
+	/**
+	 * @param string $table_name
+	 * @return array
+	 */
 	function getForeignKeysFromTable($table_name){
 		$references = array();
 
@@ -180,6 +163,10 @@ class DABLGenerator{
 		return $references;
 	}
 
+	/**
+	 * @param string $table_name
+	 * @return array
+	 */
 	function getForeignKeysToTable($table_name){
 		$references = array();
 
@@ -228,8 +215,8 @@ class DABLGenerator{
 	 * @param array $options
 	 * @return String
 	 */
-	function getBaseClass($tableName){
-		$className = $this->getClassName($tableName);
+	function getBaseModel($tableName){
+		$className = $this->getModelName($tableName);
 		$options = $this->options;
 		//Gather all the information about the table's columns from the database
 		$PK = null;
@@ -559,7 +546,7 @@ $class .= '
 		$used_from = array();
 		foreach($this->getForeignKeysFromTable($tableName) as $r){
 			$to_table = $r['to_table'];
-			$to_className = self::getClassName($to_table, $options);
+			$to_className = $this->getModelName($to_table);
 			$to_column = $r['to_column'];
 			$from_column = $r['from_column'];
 
@@ -600,7 +587,7 @@ $class .= '
 		$used_to = array();
 		foreach($this->getForeignKeysToTable($tableName) as $r){
 			$from_table = $r['from_table'];
-			$from_className = self::getClassName($from_table, $options);
+			$from_className = $this->getModelName($from_table);
 			$from_column = $r['from_column'];
 			$to_column = $r['to_column'];
 			if(@$used_to[$from_table]){
@@ -701,8 +688,8 @@ $class .= '
 	 * @param String $className
 	 * @return String
 	 */
-	function getClass($tableName){
-		$className = $this->getClassName($tableName);
+	function getModel($tableName){
+		$className = $this->getModelName($tableName);
 		$options = $this->options;
 		$class = "<?php
 
@@ -714,242 +701,13 @@ class ".$className." extends base$className{
 		return $class;
 	}
 
-	/**
-	 * Generates a String with an html/php form for editing
-	 * objects in the given table.
-	 * @param String $tableName
-	 * @param String $className
-	 * @return String
-	 */
-	function getForm($tableName, $className){
-		$options = $this->options;
-		$instance = new $className;
-		$pk = $instance->getPrimaryKey();
-		$pkMethod = "get$pk";
-		$outputPKMethod = '<?php echo htmlentities($'.strtolower($className).'->'.$pkMethod.'()) ?>';
-		ob_start();
-if($pk){
-	echo "<?php\n";
-?>
-require_once 'config.php';
+	abstract function getViews($tableName);
 
-$<?php echo strtolower($className) ?> = @$_REQUEST['<?php echo $pk ?>'] ? <?php echo $className ?>::retrieveByPK($_REQUEST['<?php echo $pk ?>']) : new <?php echo $className ?>;
+	abstract function getController($tableName);
 
-if(@$_REQUEST['action']=='save'){
-	$<?php echo strtolower($className) ?>->fromArray($_REQUEST);
-	$<?php echo strtolower($className) ?>->save();
-	header("Location: ?<?php echo $pk ?>={$<?php echo strtolower($className) ?>->get<?php echo $pk ?>()}");
-	die;
-}
-<?php
-	echo "?>\n";
-}
-?>
-<form method="POST" action="">
-	<input type="hidden" name="action" value="save" />
-<?php
-if($pk){
-?>
-	<input type="hidden" name="<?php echo $pk ?>" value="<?php echo $outputPKMethod ?>" />
-<?php
-}
-?>
-	<table>
-		<tbody>
-<?php
-		foreach($instance->getColumnNames() as $columnName){
-			if($columnName==$pk)continue;
-			$method = "get$columnName";
-			$output = '<?php echo htmlentities($'.strtolower($className).'->'.$method.'()) ?>';
-?>
-			<tr>
-				<th><?php echo $columnName ?></th>
-				<td><input type="text" name="<?php echo $columnName ?>" value="<?php echo $output ?>" /></td>
-			</tr>
-<?php
-		}
-?>
-			<tr>
-				<td>
-					<input type="submit" value="Save" />
-				</td>
-			</tr>
-		</tbody>
-	</table>
-</form>
-<?php
-		return ob_get_clean();
-	}
+	abstract function getControllerName($tableName);
 
-	/**
-	 * Generates a String with an html/php view for editing view MVC
-	 * objects in the given table.
-	 * @param String $tableName
-	 * @param String $className
-	 * @return String
-	 */
-	function getEditView($tableName){
-		$controllerName = $this->getControllerName($tableName);
-		$className = $this->getClassName($tableName);
-		$plural = $this->getViewDirName($tableName);
-		$single = strtolower($tableName);
-		$options = $this->options;
-		$instance = new $className;
-		$pk = $instance->getPrimaryKey();
-		ob_start();
-?>
-<form method="POST" action="<?php echo "<?php echo site_url('".$plural."/save') ?>" ?>">
-<?php
-		if($pk){
-?>
-	<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo htmlentities($'.$single.'->'."get$pk".'()) ?>' ?>" />
-<?php
-		}
-?>
-	<table>
-		<tbody>
-<?php
-		foreach($instance->getColumnNames() as $columnName){
-			if($columnName==$pk)continue;
-			$method = "get$columnName";
-			$output = '<?php echo htmlentities($'.$single.'->'.$method.'()) ?>';
-?>
-			<tr>
-				<th><?php echo $columnName ?></th>
-				<td><input type="text" name="<?php echo $columnName ?>" value="<?php echo $output ?>" /></td>
-			</tr>
-<?php
-		}
-?>
-			<tr>
-				<td>
-					<input type="submit" value="Save" />
-				</td>
-			</tr>
-		</tbody>
-	</table>
-</form>
-<?php
-		return ob_get_clean();
-	}
-
-	/**
-	 * Generates a String with an html/php view showing all of the
-	 * objects from the given table in a grid
-	 * @param String $tableName
-	 * @param String $className
-	 * @return String
-	 */
-	function getIndexView($tableName){
-		$controllerName = $this->getControllerName($tableName);
-		$className = $this->getClassName($tableName);
-		$options = $this->options;
-		$instance = new $className;
-		$pk = $instance->getPrimaryKey();
-		$plural = $this->getViewDirName($tableName);
-		$single = strtolower($tableName);
-		ob_start();
-?>
-<table>
-	<thead>
-		<tr>
-<?php
-		foreach($instance->getColumnNames() as $columnName){
-?>
-			<th><?php echo $columnName ?></th>
-<?php
-		}
-		if($pk){
-?>
-			<th></th>
-			<th></th>
-<?php
-		}
-?>
-		</tr>
-	</thead>
-	<tbody>
-<?php echo "<?" ?> foreach($<?php echo $plural ?> as $key => $<?php echo $single ?>): <?php echo "?>" ?>
-
-		<tr class="<?php echo '<?php echo' ?> is_int($key/2) ? 'odd' : 'even' <?php echo '?>' ?>">
-<?php
-		foreach($instance->getColumnNames() as $columnName){
-			$output = '<?php echo htmlentities($'.$single.'->'."get$columnName".'()) ?>';
-?>
-			<td><?php echo $output ?></td>
-<?php
-		}
-		if($pk){
-			$pkMethod = "get$pk";
-			$editURL = "<?php echo site_url('".$plural."/edit/'.$".$single."->".$pkMethod."()) ?>";
-			$deleteURL = "<?php echo site_url('".$plural."/delete/'.$".$single."->".$pkMethod."()) ?>";
-?>
-			<td><a href="<?php echo $editURL ?>">Edit</a></td>
-			<td><a href="<?php echo $deleteURL ?>">Delete</a></td>
-<?php
-		}
-?>
-		</tr>
-<?php echo "<?" ?> endforeach; <?php echo "?>" ?>
-
-	</tbody>
-</table>
-<?php
-		return ob_get_clean();
-	}
-
-	/**
-	 * Generates a String with Controller class for MVC
-	 * @param String $tableName
-	 * @param String $className
-	 * @return String
-	 */
-	function getController($tableName){
-		$controllerName = $this->getControllerName($tableName);
-		$plural = $this->getViewDirName($tableName);
-		$className = $this->getClassName($tableName);
-		$single = strtolower($tableName);
-		$options = $this->options;
-		ob_start();
-		echo "<?php\n";
-?>
-class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'extends '.$options['controllers_extend'] ?> {
-
-	function __construct(){
-		parent::Controller();
-	}
-
-	function index(){
-		$data['<?php echo self::pluralize(strtolower($className)) ?>'] = <?php echo $className ?>::getAll();
-		$this->load->view('<?php echo $plural ?>/index', $data);
-	}
-
-	function save($id = null){
-		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
-		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
-		$<?php echo $single ?>->fromArray($_POST);
-		$<?php echo $single ?>->save();
-		redirect('<?php echo $plural ?>');
-	}
-
-	function delete($id = null){
-		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
-		$<?php echo $single ?> = <?php echo $className ?>::retrieveByPK($id);
-		$<?php echo $single ?>->delete();
-		redirect('<?php echo $plural ?>');
-	}
-
-	function edit($id = null){
-		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
-		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
-		$data['<?php echo $single ?>'] = $<?php echo strtolower($tableName) ?>;
-		$this->load->view('<?php echo $plural ?>/edit', $data);
-	}
-
-}
-<?php
-		return ob_get_clean();
-	}
+	abstract function getControllerFileName($tableName);
 
 	/**
 	 * Generates Table classes
@@ -965,10 +723,10 @@ class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'e
 
 		//Write php files for classes
 		foreach($tableNames as $tableName){
-			$className = self::getClassName($tableName, $options);
+			$className = $this->getModelName($tableName);
 			$lower_case_table = strtolower($tableName);
 
-			$baseClass = $this->getBaseClass($tableName);
+			$baseClass = $this->getBaseModel($tableName);
 
 			$baseFile = "base$className.php";
 			$baseFile = $options['base_model_path'].$baseFile;
@@ -980,13 +738,12 @@ class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'e
 			$file = $options['model_path'].$className.".php";
 
 			if (!file_exists($file)){
-				$class = $this->getClass($tableName);
+				$class = $this->getModel($tableName);
 				file_put_contents($file, $class);
 			}
 		}
 		//save xml to file
 		file_put_contents($options['model_path']."schema.xml", $this->getSchema()->saveXML());
-		$this->includeModelClasses();
 	}
 
 	/**
@@ -995,12 +752,10 @@ class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'e
 	function generateViews($tableNames = false){
 		if($tableNames===false)
 			$tableNames = $this->getTableNames();
-		elseif(empty($tableNames))
-			return;
 
-		$options = $this->options;
+		$options = $this->getOptions();
 
-		foreach($tableNames as $tableName){
+		foreach((array)$tableNames as $tableName){
 			$lower_case_table = strtolower($tableName);
 
 			if(!is_dir($options['view_path']))
@@ -1011,20 +766,11 @@ class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'e
 			if(!is_dir($target_dir))
 				mkdir($target_dir, 0755);
 
-			$formFile = "edit.php";
-			$formFile = $target_dir.$formFile;
+			foreach($this->getViews($tableName) as $file_name => $contents){
+				$file_name = $target_dir.$file_name;
 
-			if(!file_exists($formFile)){
-				$view = $this->getEditView($tableName);
-				file_put_contents($formFile, $view);
-			}
-
-			$formFile = "index.php";
-			$formFile = $target_dir.$formFile;
-
-			if(!file_exists($formFile)){
-				$view = $this->getIndexView($tableName);
-				file_put_contents($formFile, $view);
+				if(!file_exists($file_name))
+					file_put_contents($file_name, $contents);
 			}
 		}
 	}
@@ -1047,7 +793,7 @@ class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'e
 			if(!is_dir($target_dir))
 				throw new Exception("$target_dir is not a directory.");
 
-			$file = self::pluralize($lower_case_table).".php";
+			$file = $this->getControllerFileName($tableName);
 			$file = $target_dir.$file;
 			if(!file_exists($file)){
 				$controller = $this->getController($tableName);
@@ -1057,73 +803,23 @@ class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'e
 	}
 
 	/**
-	 * Generate html/php forms (basically an edit view with built in controller)
-	 */
-	function generateForms(){
-		$options = $this->options;
-
-		foreach($this->getTableNames() as $tableName){
-			$formFile = "$className.php";
-			$formFile = $options['form_path'].$formFile;
-
-			if(!file_exists($formFile)){
-				$form = $this->getForm($tableName, $className);
-				file_put_contents($formFile, $form);
-			}
-		}
-	}
-
-	/**
-	 * Includes all of the model classes.  Mostly used to check for parse/syntax errors.
-	 */
-	function includeModelClasses(){
-		$options = $this->options;
-?>
-<div style="float:left;width:50%">
-<strong>Base<br /></strong>
-
-<?php
-		foreach (glob($options['base_model_path']."*.php") as $filename){
-			echo basename($filename)."<br />";
-			require_once($filename);
-		}
-?>
-
-</div>
-<div style="float:left;width:50%">
-<strong>Extended<br /></strong>
-
-<?php
-		foreach (glob($options['model_path']."*.php") as $filename){
-			echo basename($filename)."<br />";
-			require_once($filename);
-		}
-?>
-
-</div>
-<div style="text-align:center;color:green;font-weight:bold">Success.</div>
-
-<?php
-	}
-
-	/**
 	 * Converts a table name to a class name using the given options.  Often used
 	 * to add class prefixes and/or suffixes, or to convert a class_name to a title case
 	 * ClassName
 	 * @param String $tableName
 	 * @return String
 	 */
-	function getClassName($tableName){
+	function getModelName($tableName){
 		$options = $this->options;
 		$className = $tableName;
 		if(@$options['title_case'])
 			$className = self::titleCase($className);
-		if($options['cap_class_names'])
+		if($options['cap_model_names'])
 			$className = ucfirst($className);
-		if(@$options['class_prefix'])
-			$className = $options['class_prefix'].$className;
-		if(@$options['class_suffix'])
-			$className = $className.$options['class_suffix'];
+		if(@$options['model_prefix'])
+			$className = $options['model_prefix'].$className;
+		if(@$options['model_suffix'])
+			$className = $className.$options['model_suffix'];
 		return $className;
 	}
 
@@ -1133,26 +829,6 @@ class <?php echo $controllerName ?> <? if(@$options['controllers_extend'])echo'e
 	 */
 	function getViewDirName($tableName){
 		return strtolower(self::pluralize($tableName));
-	}
-
-	/**
-	 * @param string $tableName
-	 * @return string
-	 */
-	function getControllerName($tableName){
-		$options = $this->options;
-		$controllerName = str_replace(' ', '_', ucwords(strtolower(str_replace('_', ' ', $tableName))));
-
-		if(@$options['pluralize_controllers'])
-			$controllerName = self::pluralize($controllerName);
-
-		if(@$options['controller_prefix'])
-			$controllerName = @$options['controller_prefix'].$controllerName;
-
-		if(@$options['controller_suffix'])
-			$controllerName = $controllerName. @$options['controller_prefix'];
-
-		return $controllerName;
 	}
 
 	/**

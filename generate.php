@@ -12,23 +12,21 @@ $options = array(
 	'model_path' => ROOT."models/",
 
 	//set to true to generate views
-	//currently controllers and views are built for codeigniter
 	'view_path' => ROOT."views/",
 
 	//directory to save controller files in
-	//currently controllers and views are built for codeigniter
 	'controller_path' => ROOT."controllers/",
 );
 
+Module::import('ROOT:libraries:dabl:generators');
 $generator = new DABLGenerator("main", DB_NAME);
 $generator->setOptions($options);
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<title>DABL::Map Database</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <script>
 function checkAll(name, checked){
 	var boxes = document.getElementsByTagName('input');
@@ -84,9 +82,31 @@ if(@$_REQUEST['action']=='generate'){
 ?>
 	<h2>Generating Files...</h2>
 <?php
+	$options = $generator->getOptions();
 	$generator->generateModels(@$_REQUEST['Models']);
 	$generator->generateViews(@$_REQUEST['Views']);
 	$generator->generateControllers(@$_REQUEST['Controllers']);
+?>
+<div style="float:left;width:50%">
+	<strong>Base<br /></strong>
+<?php
+	foreach (glob($options['base_model_path']."*.php") as $filename){
+		echo basename($filename)."<br />";
+		require_once($filename);
+	}
+?>
+</div>
+<div style="float:left;width:50%">
+	<strong>Extended<br /></strong>
+<?php
+	foreach (glob($options['model_path']."*.php") as $filename){
+		echo basename($filename)."<br />";
+		require_once($filename);
+	}
+?>
+</div>
+<div style="text-align:center;color:green;font-weight:bold">Success.</div>
+<?php
 }
 ?>
 </body>
