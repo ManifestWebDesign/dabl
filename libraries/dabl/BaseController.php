@@ -32,6 +32,7 @@ abstract class BaseController {
 
 		switch($output_format){
 			case 'json':
+				header('Content-type: text/json');
 				die(json_encode($vars));
 				break;
 			case 'html':
@@ -40,6 +41,8 @@ abstract class BaseController {
 				$vars['content'] = load_view($view, $vars, $has_layout);
 				if($has_layout)
 					load_view($this->layout, $vars);
+
+				flush();
 				break;
 			default:
 				file_not_found($view);
