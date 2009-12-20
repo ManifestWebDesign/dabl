@@ -1,4 +1,4 @@
 RewriteEngine On
 RewriteBase /dabl/
-RewriteCond $1 !^(index\.php|generate\.php|js|css|images|robots\.txt)
+RewriteCond $1 !^(index\.php|generate\.php|js|css|images|sitemap\.xml|favicon\.ico|robots\.txt)
 RewriteRule ^(.*)$ index.php [L]

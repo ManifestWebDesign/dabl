@@ -1,29 +1,30 @@
 <?php
 
-function load_view($view, $params = array(), $layout = null){
+/**
+ * @param string $view
+ * @param array $params
+ * @param bool $return_output
+ * @return string
+ */
+function load_view($view, $params = array(), $return_output = false){
 	foreach($params as $var => $value)
 		$$var = $value;
 
-	if(substr($view, -1)=='/')
-		$view = substr($view, 0, -1);
+	$view = trim($view, "/".DIRECTORY_SEPARATOR);
 
-	if(is_dir(ROOT."views/$view"))
-		$view = "$view/index";
+	if(is_dir(ROOT."views".DIRECTORY_SEPARATOR."$view"))
+		$view = "$view".DIRECTORY_SEPARATOR."index";
 
-	$view = ROOT."views/$view.php";
+	$view = ROOT."views".DIRECTORY_SEPARATOR."$view.php";
 
-	if(!file_exists($view)){
-		throw new Exception("$view not found");
-		if(!headers_sent())
-			header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
-		die("$view not found");
-	}
+	if(!file_exists($view))
+		file_not_found($view);
 
-	if($layout)ob_start();
+	if($return_output)
+		ob_start();
+
 	require $view;
-	if($layout){
-		$params['content'] = ob_get_clean();
-		load_view($layout, $params);
-	}
 
+	if($return_output)
+		return ob_get_clean();
 }

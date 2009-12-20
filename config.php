@@ -1,7 +1,8 @@
 <?php
 
 define('CONFIG_LOADED', true);
-define('ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
+$root = str_replace('C:', '', dirname(__FILE__).DIRECTORY_SEPARATOR);
+define('ROOT', $root);
 define('DB_DRIVER', 'mysql');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'test');

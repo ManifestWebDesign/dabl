@@ -77,9 +77,7 @@ class DABLGenerator extends BaseGenerator {
 		$single = strtolower($tableName);
 		ob_start();
 ?>
-<a href="<?php echo "<?php echo site_url('".$plural."/edit') ?>" ?>">
-	new <?php echo str_replace('_', ' ', $single) ?>
-</a>
+<a href="<?php echo "<?php echo site_url('".$plural."/edit') ?>" ?>">new <?php echo str_replace('_', ' ', $single) ?></a>
 <table>
 	<thead>
 		<tr>
@@ -182,11 +180,10 @@ class DABLGenerator extends BaseGenerator {
 		echo "<?php\n";
 ?>
 
-class <?php echo $controllerName ?> {
+class <?php echo $controllerName ?> extends BaseController {
 
 	function index(){
-		$data['<?php echo $plural ?>'] = <?php echo $className ?>::getAll();
-		load_view('<?php echo $plural ?>/index', $data);
+		$this-><?php echo $plural ?> = <?php echo $className ?>::getAll();
 	}
 
 	function save($id = null){
@@ -207,15 +204,13 @@ class <?php echo $controllerName ?> {
 	function show($id = null){
 		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
 		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
-		$data['<?php echo $single ?>'] = $<?php echo $single ?>;
-		load_view('<?php echo $plural ?>/show', $data);
+		$this-><?php echo $single ?> = $<?php echo $single ?>;
 	}
 
 	function edit($id = null){
 		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
 		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
-		$data['<?php echo $single ?>'] = $<?php echo $single ?>;
-		load_view('<?php echo $plural ?>/edit', $data);
+		$this-><?php echo $single ?> = $<?php echo $single ?>;
 	}
 
 }
