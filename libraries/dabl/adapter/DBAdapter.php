@@ -2,13 +2,10 @@
 
 /**
  * Modified version of DBAdapter from Propel Runtime
+ * Last Modified January 1st 2010 by Dan Blaisdell
  */
 
 /*
- * Last Modified May 19th 2009
- *
- * $Id: DBAdapter.php 1011 2008-03-20 11:36:27Z hans $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -53,6 +50,9 @@ abstract class DBAdapter extends PDO {
 	const ID_METHOD_NONE = 0;
 	const ID_METHOD_AUTOINCREMENT = 1;
 	const ID_METHOD_SEQUENCE = 2;
+
+	protected $_logged_queries = array();
+	protected $_log_queries = false;
 
 	/**
 	 * Creole driver to database adapter map.
@@ -101,6 +101,31 @@ abstract class DBAdapter extends PDO {
 		$reader = self::$schema_readers[get_class($this)];
 		$reader = new $reader($this, $database_name);
 		return $reader;
+	}
+
+	function getLoggedQueries(){
+		return $this->_logged_queries;
+	}
+
+	function printQueryLog(){
+?>
+<pre>
+<?
+$queries = $this->getLoggedQueries();
+echo count($queries)." queries executed\n";
+echo implode("\n\n", $queries);
+?>
+</pre>
+<?
+	}
+
+	function query(){
+		$args = func_get_args();
+		if($this->_log_queries){
+			$query = (string)$args[0];
+			$this->_logged_queries[] = $query;
+		}
+		return call_user_func_array('parent::query', $args);
 	}
 
 	/**
