@@ -7,47 +7,60 @@ abstract class BaseController {
 	 */
 	public $layout = 'layouts/main';
 	public $view_prefix = '';
+	public $output_format = 'html';
+	public $render_view = true;
+	public $render_partial = false;
+	private $params = array();
+
+	function __get($var){
+		return $this->params[$var];
+	}
+
+	function __set($var, $value){
+		$this->params[$var] = $value;
+	}
+
+	function getParams(){
+		return $this->params;
+	}
+
+	function setParams($params){
+		$this->params = $params;
+	}
+
+	function getViewPath(){
+		$controller_view_dir = str_replace('controller', '', strtolower(get_class($this)));
+		$view = trim($this->view_prefix, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+		if($controller_view_dir != DEFAULT_CONTROLLER)
+			$view .= $controller_view_dir.DIRECTORY_SEPARATOR;
+		return $view;
+	}
+
+	function renderView($view){
+		$output_format = $this->output_format;
+		$params = $this->getParams();
+
+		$has_layout = ($this->layout && !$this->render_partial && $output_format == 'html');
+
+		$params['content'] = load_view($view, $params, $has_layout, $output_format);
+
+		if($has_layout)
+			load_view($this->layout, $params, false, $output_format);
+	}
 
 	/**
 	 * @param string $action_name
 	 * @param array $params
-	 * @param string $output_format
 	 */
-	function doAction($action_name, $params = array(), $output_format = 'html'){
-		$controller_view_dir = str_replace('controller', '', strtolower(get_class($this)));
-		$view = $this->view_prefix;
-		if($controller_view_dir == DEFAULT_CONTROLLER)
-			$view .= $action_name;
-		else
-			$view .= $controller_view_dir.DIRECTORY_SEPARATOR.$action_name;
+	function doAction($action_name, $params = array()){
+		$view = $this->getViewPath($action_name).$action_name;
 
 		method_exists($this, $action_name) || file_not_found($view);
 
 		call_user_func_array(array($this, $action_name), $params);
 
-		if(headers_sent())
-			return;
-
-		$vars = get_object_vars($this);
-
-		switch($output_format){
-			case 'json':
-				header('Content-type: text/json');
-				die(json_encode($vars));
-				break;
-			case 'html':
-				$has_layout = (bool)$this->layout;
-
-				$vars['content'] = load_view($view, $vars, $has_layout);
-				if($has_layout)
-					load_view($this->layout, $vars);
-
-				flush();
-				break;
-			default:
-				file_not_found($view);
-				break;
-		}
+		if(!$this->render_view)return;
+		$this->renderView($view);
 	}
 
 }

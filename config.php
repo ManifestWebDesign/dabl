@@ -14,6 +14,7 @@ define('DEFAULT_CONTROLLER', 'index');
 //These aren't required, but I find them useful
 ini_set('display_errors', true);
 ini_set('error_reporting', E_ALL);
+ini_set('error_log', ROOT.'error_log');
 
 require_once ROOT.'libraries/Module.php';
 
