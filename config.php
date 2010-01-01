@@ -11,9 +11,9 @@ define('DB_PASSWORD', '');
 define('BASE_URL', '/dabl/');
 define('DEFAULT_CONTROLLER', 'index');
 
-//These aren't required, but I find them useful
 ini_set('display_errors', true);
 ini_set('error_reporting', E_ALL);
+ini_set('log_errors', true);
 ini_set('error_log', ROOT.'error_log');
 
 require_once ROOT.'libraries/Module.php';
@@ -21,6 +21,7 @@ require_once ROOT.'libraries/Module.php';
 Module::addRepository('ROOT', substr(ROOT, 0, -1));
 Module::import('ROOT:libraries');
 Module::import('ROOT:models');
+Module::import('ROOT:controllers');
 Module::import('ROOT:models:base');
 Module::import('ROOT:libraries:dabl');
 Module::import('ROOT:libraries:dabl:adapter');
