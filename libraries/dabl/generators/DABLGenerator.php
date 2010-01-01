@@ -180,7 +180,7 @@ class DABLGenerator extends BaseGenerator {
 		echo "<?php\n";
 ?>
 
-class <?php echo $controllerName ?> extends BaseController {
+class <?php echo $controllerName ?> extends ApplicationController {
 
 	function index(){
 		$this-><?php echo $plural ?> = <?php echo $className ?>::getAll();
@@ -223,7 +223,7 @@ class <?php echo $controllerName ?> extends BaseController {
 	 * @return string
 	 */
 	function getControllerName($tableName){
-		$controllerName = str_replace(' ', '_', ucwords(strtolower(str_replace('_', ' ', $tableName))));
+		$controllerName = str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName)));
 		$controllerName = self::pluralize($controllerName);
 		$controllerName = $controllerName.'Controller';
 		return $controllerName;
