@@ -66,7 +66,6 @@ abstract class BaseGenerator{
 
 			//target directory for generated base table classes
 			'base_model_path' => ROOT."models/base/",
-
 			
 			//set to true to generate views
 			'view_path' => ROOT."views/",
@@ -721,19 +720,23 @@ class ".$className." extends base$className{
 
 		$options = $this->options;
 
+		if(!is_dir($options['model_path']) && !mkdir($options['model_path']))
+			die('The directory '.$options['model_path'].' does not exist.');
+		
+		if(!is_dir($options['base_model_path']) && !mkdir($options['base_model_path']))
+			die('The directory '.$options['base_model_path'].' does not exist.');
+	
 		//Write php files for classes
 		foreach($tableNames as $tableName){
 			$className = $this->getModelName($tableName);
 			$lower_case_table = strtolower($tableName);
-
+			
 			$baseClass = $this->getBaseModel($tableName);
-
 			$baseFile = "base$className.php";
 			$baseFile = $options['base_model_path'].$baseFile;
 
-			if(!file_exists($baseFile) || file_get_contents($baseFile)!=$baseClass){
+			if(!file_exists($baseFile) || file_get_contents($baseFile)!=$baseClass)
 				file_put_contents($baseFile, $baseClass);
-			}
 
 			$file = $options['model_path'].$className.".php";
 
