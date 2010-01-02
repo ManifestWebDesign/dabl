@@ -1,0 +1,13 @@
+clone project
+git clone git@manifestwebdesign.com:dabl
+
+config.php
+set database connection and BASE_URL constants
+
+.htaccess
+Modify RewriteBase to match BASE_URL in config.php
+
+generate.php
+point your brower to http://yourwebsite.com/your-base-url/generate.php
+if you have no base-url, it will be something like
+http://yourwebsite.com/generate.php
