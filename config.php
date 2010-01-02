@@ -3,13 +3,13 @@
 define('CONFIG_LOADED', true);
 $root = str_replace('C:', '', dirname(__FILE__).DIRECTORY_SEPARATOR);
 define('ROOT', $root);
+define('DEFAULT_CONTROLLER', 'index');
 define('DB_DRIVER', 'mysql');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'test');
 define('DB_USER', 'root');
 define('DB_PASSWORD', '');
 define('BASE_URL', '/dabl/');
-define('DEFAULT_CONTROLLER', 'index');
 
 ini_set('display_errors', true);
 ini_set('error_reporting', E_ALL);

@@ -1,4 +1,13 @@
 RewriteEngine On
+
+#base of the url after the domain name.  usually this is /
 RewriteBase /dabl/
-RewriteCond $1 !^(index\.php|generate\.php|js|css|images|sitemap\.xml|favicon\.ico|robots\.txt)
+
+#allowed extensions
+RewriteCond $1 !\.(swf|flv)$
+
+#allowed files and directories
+RewriteCond $1 !^(generate\.php|js|css|images|sitemap\.xml|favicon\.ico|robots\.txt)
+
+#everything else goes through index.php
 RewriteRule ^(.*)$ index.php [L]
