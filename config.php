@@ -6,7 +6,7 @@ define('ROOT', $root);
 define('DEFAULT_CONTROLLER', 'index');
 define('DB_DRIVER', 'mysql');
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'test');
+define('DB_NAME', 'test1');
 define('DB_USER', 'root');
 define('DB_PASSWORD', '');
 define('BASE_URL', '/dabl/');
@@ -32,7 +32,7 @@ Module::import('ROOT:libraries:dabl:adapter:'.DB_DRIVER);
 try{
 	//DBAdapter::factory($driver, $dsn, $username, $password)
 	$conn = DBAdapter::factory(DB_DRIVER, DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME, DB_USER, DB_PASSWORD);
-	DBManager::addConnection("main", $conn);
+	DBManager::addConnection(DB_NAME, $conn);
 }
 catch(Exception $e){
 	throw new Exception($e->getMessage());

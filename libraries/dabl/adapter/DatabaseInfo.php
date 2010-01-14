@@ -18,7 +18,7 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the LGPL. For more information please see
  * <http://creole.phpdb.org>.
- */
+*/
 
 /**
  * "Info" metadata class for a database.
@@ -60,18 +60,16 @@ abstract class DatabaseInfo {
 	/**
 	 * @param DBAdapter $dbh
 	 */
-	function __construct(DBAdapter $conn, $database_name)
-	{
+	function __construct(DBAdapter $conn, $database_name) {
 		$this->conn = $conn;
 		$this->dbname = $database_name;
 	}
-
+	
 	/**
 	 * Get name of database.
 	 * @return string
 	 */
-	function getName()
-	{
+	function getName() {
 		return $this->dbname;
 	}
 
@@ -81,8 +79,7 @@ abstract class DatabaseInfo {
 	 * the serialization and unserialization of this object.
 	 * @return array The class variables that should be serialized (all must be public!).
 	 */
-	function __sleep()
-	{
+	function __sleep() {
 		return array('tables','sequences','conn');
 	}
 
@@ -90,8 +87,7 @@ abstract class DatabaseInfo {
 	 * This method is invoked upon unserialize().
 	 * This method re-hydrates the object and restores the recursive hierarchy.
 	 */
-	function __wakeup()
-	{
+	function __wakeup() {
 		// Re-init vars from serialized connection
 		$this->dbname = $conn->database;
 		$this->dblink = $conn->connection;
@@ -109,8 +105,7 @@ abstract class DatabaseInfo {
 	 * Returns Connection being used.
 	 * @return DBAdapter
 	 */
-	function getConnection()
-	{
+	function getConnection() {
 		return $this->conn;
 	}
 
@@ -120,8 +115,7 @@ abstract class DatabaseInfo {
 	 * @return TableInfo
 	 * @throws SQLException - if table does not exist in this db.
 	 */
-	function getTable($name)
-	{
+	function getTable($name) {
 		if(!$this->tablesLoaded) $this->initTables();
 		if (!isset($this->tables[strtoupper($name)])) {
 			throw new SQLException("Database `".$this->dbname."` has no table `".$name."`");
@@ -129,22 +123,20 @@ abstract class DatabaseInfo {
 		return $this->tables[ strtoupper($name) ];
 	}
 
-  /**
-   * Return whether database contains specified table.
-   * @param string $name The table name.
-   * @return boolean
-   */
-  function hasTable($name)
-  {
-	return isset($this->tables[strtoupper($name)]);
-  }
+	/**
+	 * Return whether database contains specified table.
+	 * @param string $name The table name.
+	 * @return boolean
+	 */
+	function hasTable($name) {
+		return isset($this->tables[strtoupper($name)]);
+	}
 
 	/**
 	 * Gets array of TableInfo objects.
 	 * @return array TableInfo[]
 	 */
-	function getTables()
-	{
+	function getTables() {
 		if(!$this->tablesLoaded) $this->initTables();
 		return array_values($this->tables); //re-key [numerically]
 	}
@@ -154,8 +146,7 @@ abstract class DatabaseInfo {
 	 * Table name is case-insensitive.
 	 * @param TableInfo $table
 	 */
-	function addTable(TableInfo $table)
-	{
+	function addTable(TableInfo $table) {
 		$this->tables[strtoupper($table->getName())] = $table;
 	}
 
@@ -175,8 +166,7 @@ abstract class DatabaseInfo {
 	 * @return boolean
 	 * @throws SQLException
 	 */
-	function isSequence($key)
-	{
+	function isSequence($key) {
 		if(!$this->seqsLoaded) $this->initSequences();
 		return isset($this->sequences[ strtoupper($key) ]);
 	}
@@ -185,8 +175,7 @@ abstract class DatabaseInfo {
 	 * Gets array of ? objects.
 	 * @return array ?[]
 	 */
-	function getSequences()
-	{
+	function getSequences() {
 		if(!$this->seqsLoaded) $this->initSequences();
 		return array_values($this->sequences); //re-key [numerically]
 	}
@@ -195,8 +184,7 @@ abstract class DatabaseInfo {
 	 * Get vendor specific optional information for this primary key.
 	 * @return array vendorSpecificInfo[]
 	 */
-	function getVendorSpecificInfo()
-	{
+	function getVendorSpecificInfo() {
 		return $this->vendorSpecificInfo;
 	}
 }

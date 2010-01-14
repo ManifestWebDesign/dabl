@@ -38,8 +38,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  in The string to transform to upper case.
 	 * @return	 The upper case string.
 	 */
-	function toUpperCase($in)
-	{
+	function toUpperCase($in){
 		return "UPPER(" . $in . ")";
 	}
 
@@ -49,8 +48,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  in The string whose case to ignore.
 	 * @return	 The string in a case that can be ignored.
 	 */
-	function ignoreCase($in)
-	{
+	function ignoreCase($in){
 		return "UPPER(" . $in . ")";
 	}
 
@@ -61,8 +59,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	function concatString($s1, $s2)
-	{
+	function concatString($s1, $s2){
 		return "CONCAT($s1, $s2)";
 	}
 
@@ -74,8 +71,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	function subString($s, $pos, $len)
-	{
+	function subString($s, $pos, $len){
 		return "SUBSTRING($s, $pos, $len)";
 	}
 
@@ -85,8 +81,7 @@ class DBMySQL extends DBAdapter {
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	function strLength($s)
-	{
+	function strLength($s){
 		return "CHAR_LENGTH($s)";
 	}
 
@@ -98,8 +93,7 @@ class DBMySQL extends DBAdapter {
 	 * @throws	 PDOException No Statement could be created or
 	 * executed.
 	 */
-	function lockTable($table)
-	{
+	function lockTable($table){
 		$this->exec("LOCK TABLE " . $table . " WRITE");
 	}
 
@@ -110,32 +104,28 @@ class DBMySQL extends DBAdapter {
 	 * @throws	 PDOException No Statement could be created or
 	 * executed.
 	 */
-	function unlockTable($table)
-	{
+	function unlockTable($table){
 		$statement = $this->exec("UNLOCK TABLES");
 	}
 
 	/**
 	 * @see		DBAdapter::quoteIdentifier()
 	 */
-	function quoteIdentifier($text)
-	{
+	function quoteIdentifier($text){
 		return '`' . $text . '`';
 	}
 
 	/**
 	 * @see		DBAdapter::useQuoteIdentifier()
 	 */
-	function useQuoteIdentifier()
-	{
+	function useQuoteIdentifier(){
 		return true;
 	}
 
 	/**
 	 * @see		DBAdapter::applyLimit()
 	 */
-	function applyLimit(&$sql, $offset, $limit)
-	{
+	function applyLimit(&$sql, $offset, $limit){
 		if ( $limit > 0 ) {
 			$sql .= " LIMIT " . ($offset > 0 ? $offset . ", " : "") . $limit;
 		} else if ( $offset > 0 ) {
@@ -146,8 +136,7 @@ class DBMySQL extends DBAdapter {
 	/**
 	 * @see		DBAdapter::random()
 	 */
-	function random($seed = null)
-	{
+	function random($seed = null){
 		return 'rand('.((int) $seed).')';
 	}
 

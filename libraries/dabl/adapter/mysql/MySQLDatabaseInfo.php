@@ -32,8 +32,7 @@ class MySQLDatabaseInfo extends DatabaseInfo {
 	 * @throws SQLException
 	 * @return void
 	 */
-	protected function initTables()
-	{
+	protected function initTables(){
 		$result = $this->getConnection()->query("SHOW TABLES FROM `" . $this->dbname. "`");
 
 		while ($row = $result->fetch()) {
@@ -51,8 +50,7 @@ class MySQLDatabaseInfo extends DatabaseInfo {
 	 * @return void
 	 * @throws SQLException
 	 */
-	protected function initSequences()
-	{
+	protected function initSequences(){
 		// throw new SQLException("MySQL does not support sequences natively.");
 	}
 }

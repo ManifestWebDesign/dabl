@@ -3,7 +3,7 @@
 /*
  * This is a simplified version of the PropelCreoleTransformTask class
  * from the Propel Generator
- */
+*/
 
 /*
  *  $Id: PropelCreoleTransformTask.php 989 2008-03-11 14:29:30Z heltem $
@@ -23,7 +23,7 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the LGPL. For more information please see
  * <http://propel.phpdb.org>.
- */
+*/
 
 /**
  * This class generates an XML schema of an existing database from
@@ -122,13 +122,13 @@ class DBtoXML {
 	 * @var        array
 	 */
 	static protected $validatorBitMap = array (
-		'none' => self::VALIDATORS_NONE,
-		'maxlength' => self::VALIDATORS_MAXLENGTH,
-		'maxvalue' => self::VALIDATORS_MAXVALUE,
-		'type' => self::VALIDATORS_TYPE,
-		'required' => self::VALIDATORS_REQUIRED,
-		'unique' => self::VALIDATORS_UNIQUE,
-		'all' => self::VALIDATORS_ALL,
+			'none' => self::VALIDATORS_NONE,
+			'maxlength' => self::VALIDATORS_MAXLENGTH,
+			'maxvalue' => self::VALIDATORS_MAXVALUE,
+			'type' => self::VALIDATORS_TYPE,
+			'required' => self::VALIDATORS_REQUIRED,
+			'unique' => self::VALIDATORS_UNIQUE,
+			'all' => self::VALIDATORS_ALL,
 	);
 
 	/**
@@ -138,45 +138,41 @@ class DBtoXML {
 	 * @var        array
 	 */
 	static protected $validatorMessages = array (
-		'maxlength' => array (
-			'msg' => 'The field %s must be not longer than %s characters.',
-			'var' => array('colName', 'value')
-	),
-		'maxvalue' => array (
-			'msg' => 'The field %s must be not greater than %s.',
-			'var' => array('colName', 'value')
-	),
-		'type' => array (
-			'msg' => 'The field %s is not a valid value.',
-			'var' => array('colName')
-	),
-		'required' => array (
-			'msg' => 'The field %s is required.',
-			'var' => array('colName')
-	),
-		'unique' => array (
-			'msg' => 'This %s already exists in table %s.',
-			'var' => array('colName', 'tableName')
-	),
+			'maxlength' => array (
+							'msg' => 'The field %s must be not longer than %s characters.',
+							'var' => array('colName', 'value')
+			),
+			'maxvalue' => array (
+							'msg' => 'The field %s must be not greater than %s.',
+							'var' => array('colName', 'value')
+			),
+			'type' => array (
+							'msg' => 'The field %s is not a valid value.',
+							'var' => array('colName')
+			),
+			'required' => array (
+							'msg' => 'The field %s is required.',
+							'var' => array('colName')
+			),
+			'unique' => array (
+							'msg' => 'This %s already exists in table %s.',
+							'var' => array('colName', 'tableName')
+			),
 	);
 
-	function setDbEncoding($v)
-	{
+	function setDbEncoding($v) {
 		$this->dbEncoding = $v;
 	}
 
-	function setOutputFile($v)
-	{
+	function setOutputFile($v) {
 		$this->xmlSchema = $v;
 	}
 
-	function setSamePhpName($v)
-	{
+	function setSamePhpName($v) {
 		$this->samePhpName = $v;
 	}
 
-	function setAddVendorInfo($v)
-	{
+	function setAddVendorInfo($v) {
 		$this->addVendorInfo = (boolean) $v;
 	}
 
@@ -186,8 +182,7 @@ class DBtoXML {
 	 * @param      string $v The comma-separated list of which validators to add.
 	 * @return     void
 	 */
-	function setAddValidators($v)
-	{
+	function setAddValidators($v) {
 		$validKeys = array_keys(self::$validatorBitMap);
 
 		// lowercase input
@@ -207,20 +202,19 @@ class DBtoXML {
 		$this->validatorBits = $bits;
 	}
 
-	function isSamePhpName()
-	{
+	function isSamePhpName() {
 		return $this->samePhpName;
 	}
 
-	function log($var){
-	//	echo $var."<br />";
+	function log($var) {
+		//	echo $var."<br />";
 	}
 
 	/**
 	 *
 	 * @param DBAdapter $conn
 	 */
-	function __construct(DBAdapter $conn, $database_name){
+	function __construct(DBAdapter $conn, $database_name) {
 		$this->conn = $conn;
 		$this->log("CreoleToXMLSchema starting");
 
@@ -232,11 +226,11 @@ class DBtoXML {
 		$this->log("CreoleToXMLSchema finished");
 	}
 
-	function getXMLDom(){
+	function getXMLDom() {
 		return $this->doc;
 	}
 
-	function getXMLString(){
+	function getXMLString() {
 		return $this->doc->saveXML();
 	}
 
@@ -246,8 +240,7 @@ class DBtoXML {
 	 * @return     void
 	 * @throws     Exception a generic exception.
 	 */
-	function generateXML($database_name)
-	{
+	function generateXML($database_name) {
 		// Establish db connection
 		$con = $this->getConnection();
 
@@ -393,8 +386,7 @@ class DBtoXML {
 	 * @param      int $creoleType Creole type (e.g. CreoleTypes::CHAR)
 	 * @return     string Equivalent Propel type (e.g. Column::TYPE_CHAR)
 	 */
-	protected static function getMappedPropelType($creoleType)
-	{
+	protected static function getMappedPropelType($creoleType) {
 		static $creoleToPropelTypeMap;
 		if ($creoleToPropelTypeMap === null) {
 			$creoleToPropelTypeMap = array();
@@ -458,19 +450,19 @@ class DBtoXML {
 		$node->setAttribute("type", self::getMappedPropelType($colType));
 
 		if ($colSize > 0 && (
-		$colType == CreoleTypes::CHAR
-		|| $colType == CreoleTypes::VARCHAR
-		|| $colType == CreoleTypes::LONGVARCHAR
-		|| $colType == CreoleTypes::DECIMAL
-		|| $colType == CreoleTypes::FLOAT
-		|| $colType == CreoleTypes::NUMERIC)) {
+				$colType == CreoleTypes::CHAR
+						|| $colType == CreoleTypes::VARCHAR
+						|| $colType == CreoleTypes::LONGVARCHAR
+						|| $colType == CreoleTypes::DECIMAL
+						|| $colType == CreoleTypes::FLOAT
+						|| $colType == CreoleTypes::NUMERIC)) {
 			$node->setAttribute("size", (string) $colSize);
 		}
 
 		if ($colScale > 0 && (
-		$colType == CreoleTypes::DECIMAL
-		|| $colType == CreoleTypes::FLOAT
-		|| $colType == CreoleTypes::NUMERIC)) {
+				$colType == CreoleTypes::DECIMAL
+						|| $colType == CreoleTypes::FLOAT
+						|| $colType == CreoleTypes::NUMERIC)) {
 			$node->setAttribute("scale", (string) $colScale);
 		}
 
@@ -641,24 +633,24 @@ class DBtoXML {
 			$this->validatorInfos[$tableName][$colName][] = $ruleInfo;
 		}
 		if ($this->isValidatorRequired(self::VALIDATORS_MAXLENGTH) &&
-		$colSize > 0 && in_array($colType, array(
-		CreoleTypes::CHAR,
-		CreoleTypes::VARCHAR,
-		CreoleTypes::LONGVARCHAR))) {
+				$colSize > 0 && in_array($colType, array(
+				CreoleTypes::CHAR,
+				CreoleTypes::VARCHAR,
+				CreoleTypes::LONGVARCHAR))) {
 			$ruleInfo = array('type' => 'maxLength', 'value' => $colSize);
 			$this->validatorInfos[$tableName][$colName][] = $ruleInfo;
 		}
 		if ($this->isValidatorRequired(self::VALIDATORS_MAXVALUE) &&
-		$colSize > 0 && in_array($colType, array(
-		CreoleTypes::SMALLINT,
-		CreoleTypes::TINYINT,
-		CreoleTypes::INTEGER,
-		CreoleTypes::BIGINT,
-		CreoleTypes::FLOAT,
-		CreoleTypes::DOUBLE,
-		CreoleTypes::NUMERIC,
-		CreoleTypes::DECIMAL,
-		CreoleTypes::REAL))) {
+				$colSize > 0 && in_array($colType, array(
+				CreoleTypes::SMALLINT,
+				CreoleTypes::TINYINT,
+				CreoleTypes::INTEGER,
+				CreoleTypes::BIGINT,
+				CreoleTypes::FLOAT,
+				CreoleTypes::DOUBLE,
+				CreoleTypes::NUMERIC,
+				CreoleTypes::DECIMAL,
+				CreoleTypes::REAL))) {
 
 			// TODO: how to evaluate the appropriate size??
 			$this->log("WARNING: maxValue validator added for column $colName. You will have to adjust the size value manually.", Project::MSG_WARN);
@@ -666,21 +658,21 @@ class DBtoXML {
 			$this->validatorInfos[$tableName][$colName][] = $ruleInfo;
 		}
 		if ($this->isValidatorRequired(self::VALIDATORS_TYPE) &&
-		$colSize > 0 && in_array($colType, array(
-		CreoleTypes::SMALLINT,
-		CreoleTypes::TINYINT,
-		CreoleTypes::INTEGER,
-		CreoleTypes::TIMESTAMP))) {
+				$colSize > 0 && in_array($colType, array(
+				CreoleTypes::SMALLINT,
+				CreoleTypes::TINYINT,
+				CreoleTypes::INTEGER,
+				CreoleTypes::TIMESTAMP))) {
 			$ruleInfo = array('type' => 'type', 'value' => '[^\d]+');
 			$this->validatorInfos[$tableName][$colName][] = $ruleInfo;
 		}
 		if ($this->isValidatorRequired(self::VALIDATORS_TYPE) &&
-		$colSize > 0 && in_array($colType, array(
-		CreoleTypes::FLOAT,
-		CreoleTypes::DOUBLE,
-		CreoleTypes::NUMERIC,
-		CreoleTypes::DECIMAL,
-		CreoleTypes::REAL))) {
+				$colSize > 0 && in_array($colType, array(
+				CreoleTypes::FLOAT,
+				CreoleTypes::DOUBLE,
+				CreoleTypes::NUMERIC,
+				CreoleTypes::DECIMAL,
+				CreoleTypes::REAL))) {
 			// TODO: is this always true??
 			$ruleInfo = array('type' => 'type', 'value' => '[^\d\.]+');
 			$this->validatorInfos[$tableName][$colName][] = $ruleInfo;
@@ -737,8 +729,7 @@ class DBtoXML {
 	 * @param      array   $vendorInfo The validator info
 	 * @return     object|boolean The vendor info instance or false
 	 */
-	protected function createVendorInfoNode($vendorInfo)
-	{
+	protected function createVendorInfoNode($vendorInfo) {
 		if (!$vendorInfo OR !$this->addVendorInfo) {
 			return false;
 		}

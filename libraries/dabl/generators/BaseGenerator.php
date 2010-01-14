@@ -26,14 +26,14 @@ abstract class BaseGenerator{
 
 	/**
 	 * Constructor function
-	 * @param $conn_name String
+	 * @param $db_name String
 	 * @param $schema DOMDocument
 	 */
-	function __construct($conn_name, $db_name){
-		$conn = DBManager::getConnection($conn_name);
+	function __construct($db_name){
+		$conn = DBManager::getConnection($db_name);
 		$dbXML = new DBtoXML($conn, $db_name);
 
-		$this->setConnectionName($conn_name);
+		$this->setConnectionName($db_name);
 		$this->setSchema($dbXML->getXMLDom());
 
 		$this->options = array(
@@ -746,7 +746,7 @@ class ".$className." extends base$className{
 			}
 		}
 		//save xml to file
-		file_put_contents($options['model_path']."schema.xml", $this->getSchema()->saveXML());
+		file_put_contents($options['model_path'].$this->getDBName()."-schema.xml", $this->getSchema()->saveXML());
 	}
 
 	/**

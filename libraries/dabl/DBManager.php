@@ -4,7 +4,7 @@
  */
 
 class DBManager{
-	private static $connections = null;
+	private static $connections = array();
 
 	private function __construct() {
 	}
@@ -13,23 +13,37 @@ class DBManager{
 	}
 
 	/**
-	 * @param String $name
+	 * @return array
+	 */
+	static function getConnections(){
+		return self::$connections;
+	}
+
+	/**
+	 * @return array
+	 */
+	static function getConnectionNames(){
+		return array_keys(self::$connections);
+	}
+
+	/**
+	 * @param String $db_name
 	 * @return DBAdapter
 	 */
-	public static function getConnection($name=null) {
-		if($name===null){
+	static function getConnection($db_name=null) {
+		if($db_name===null){
 			foreach(self::$connections as $conn)
 				return $conn;
 		}
-		return self::$connections[$name];
+		return self::$connections[$db_name];
 	}
 
-	public static function addConnection($name, DBAdapter $conn){
+	static function addConnection($db_name, DBAdapter $conn){
 		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		self::$connections[$name] = $conn;
+		self::$connections[$db_name] = $conn;
 	}
 
-	public static function checkInput($value){
+	static function checkInput($value){
 		return self::getConnection()->checkInput($value);
 	}
 }

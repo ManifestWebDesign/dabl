@@ -87,7 +87,7 @@ abstract class DBAdapter extends PDO {
 	 * @return	 DBAdapter An instance of a database adapter.
 	 * @throws	 Exception if the adapter could not be instantiated.
 	 */
-	public static function factory($driver, $dsn, $username, $password) {
+	static function factory($driver, $dsn, $username, $password) {
 		$adapterClass = isset(self::$adapters[$driver]) ? self::$adapters[$driver] : null;
 		if ($adapterClass !== null) {
 			$a = new $adapterClass($dsn, $username, $password);
@@ -172,7 +172,7 @@ echo implode("\n\n", $queries);
 	 * @param	  string The string to transform to upper case.
 	 * @return	 string The upper case string.
 	 */
-	public abstract function toUpperCase($in);
+	abstract function toUpperCase($in);
 
 	/**
 	 * Returns the character used to indicate the beginning and end of
@@ -205,7 +205,7 @@ echo implode("\n\n", $queries);
 	 * @param	  string $in The string whose case to ignore.
 	 * @return	 string The string in a case that can be ignored.
 	 */
-	public abstract function ignoreCase($in);
+	abstract function ignoreCase($in);
 
 	/**
 	 * This method is used to ignore case in an ORDER BY clause.
@@ -227,7 +227,7 @@ echo implode("\n\n", $queries);
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	public abstract function concatString($s1, $s2);
+	abstract function concatString($s1, $s2);
 
 	/**
 	 * Returns SQL which extracts a substring.
@@ -237,7 +237,7 @@ echo implode("\n\n", $queries);
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	public abstract function subString($s, $pos, $len);
+	abstract function subString($s, $pos, $len);
 
 	/**
 	 * Returns SQL which calculates the length (in chars) of a string.
@@ -245,7 +245,7 @@ echo implode("\n\n", $queries);
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	public abstract function strLength($s);
+	abstract function strLength($s);
 
 	/**
 	 * Quotes database object identifiers (table names, col names, sequences, etc.).
@@ -338,13 +338,13 @@ echo implode("\n\n", $queries);
 	/**
 	 * Modifies the passed-in SQL to add LIMIT and/or OFFSET.
 	 */
-	public abstract function applyLimit(&$sql, $offset, $limit);
+	abstract function applyLimit(&$sql, $offset, $limit);
 
 	/**
 	 * Gets the SQL string that this adapter uses for getting a random number.
 	 *
 	 * @param	  mixed $seed (optional) seed value for databases that support this
 	 */
-	public abstract function random($seed = null);
+	abstract function random($seed = null);
 
 }

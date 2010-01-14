@@ -437,5 +437,3 @@ class Column {
 		}
 	}
 }
-
-?>
