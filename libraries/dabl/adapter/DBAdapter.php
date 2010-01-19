@@ -119,13 +119,19 @@ echo implode("\n\n", $queries);
 <?
 	}
 
-	function query(){
-		$args = func_get_args();
-		if($this->_log_queries){
-			$query = (string)$args[0];
-			$this->_logged_queries[] = $query;
-		}
-		return call_user_func_array('parent::query', $args);
+	/**
+	 * Override of PDO::query() to provide query logging functionality
+	 * @param string $arg1
+	 * @param int $arg2
+	 * @param mixed $arg3
+	 * @param mixed $arg4
+	 * @return PDOStatement
+	 */
+	function query($arg1, $arg2, $arg3, $arg4){
+		$arg1 = (string)$arg1;
+		if($this->_log_queries)
+			$this->_logged_queries[] = $arg1;
+		return parent::query($arg1, $arg2, $arg3, $arg4);
 	}
 
 	/**
