@@ -127,11 +127,13 @@ echo implode("\n\n", $queries);
 	 * @param mixed $arg4
 	 * @return PDOStatement
 	 */
-	function query($arg1, $arg2, $arg3, $arg4){
-		$arg1 = (string)$arg1;
+	function query(){
+		$args = func_get_args();
+
 		if($this->_log_queries)
-			$this->_logged_queries[] = $arg1;
-		return parent::query($arg1, $arg2, $arg3, $arg4);
+			$this->_logged_queries[] = (string)$args[0];
+
+		return call_user_func_array(array('parent', 'query'), $args);
 	}
 
 	/**
