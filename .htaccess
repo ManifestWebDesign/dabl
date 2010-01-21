@@ -1,7 +1,7 @@
 RewriteEngine On
 
 #base of the url after the domain name.  usually this is /
-RewriteBase /dabl/
+RewriteBase /
 
 #allowed extensions
 RewriteCond $1 !\.(swf|flv)$

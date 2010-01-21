@@ -9,7 +9,7 @@ define('DB_HOST', 'localhost');
 define('DB_NAME', 'test1');
 define('DB_USER', 'root');
 define('DB_PASSWORD', '');
-define('BASE_URL', '/dabl/');
+define('BASE_URL', '/');
 
 ini_set('display_errors', true);
 ini_set('error_reporting', E_ALL);
@@ -27,7 +27,7 @@ Module::import('ROOT:libraries:dabl');
 Module::import('ROOT:libraries:dabl:adapter');
 Module::import('ROOT:libraries:dabl:query');
 Module::import('ROOT:libraries:dabl:adapter:'.DB_DRIVER);
-//Module::import('ROOT:library:PDO'); //Uncomment if your server doesn't have PDO enabled
+//Module::import('ROOT:libraries:PDO'); //Uncomment if your server doesn't have PDO enabled
 
 try{
 	//DBAdapter::factory($driver, $dsn, $username, $password)
@@ -38,14 +38,8 @@ catch(Exception $e){
 	throw new Exception($e->getMessage());
 }
 
-//Strip added slashes if needed
-if (get_magic_quotes_gpc()) {
-    function stripslashes_array($array) { return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array); }
-    $_COOKIE = stripslashes_array($_COOKIE);
-    $_GET = stripslashes_array($_GET);
-    $_POST = stripslashes_array($_POST);
-    $_REQUEST = stripslashes_array($_REQUEST);
-}
-
 //load functions
 foreach (glob(ROOT."functions/*.php") as $filename) require_once($filename);
+
+//Strip added slashes if needed
+if (get_magic_quotes_gpc()) strip_request_slashes();
