@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified November 25th 2009
+ *    			Last Modified January 27th 2010
  */
 
 abstract class BaseGenerator{
@@ -412,7 +412,7 @@ $class .= '
 	 * @return '.$className.'
 	 */
 	static function retrieveByPK( $thePK ){
-		if(!$thePK===null)return null;
+		if($thePK===null)return null;
 		$PKs = '.$className.'::getPrimaryKeys();
 		if(count($PKs)>1)
 			throw new Exception("This table has more than one primary key.  Use retrieveByPKs() instead.");
