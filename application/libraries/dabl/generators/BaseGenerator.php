@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified January 27th 2010
+ *    			Last Modified February 1st 2010
  */
 
 abstract class BaseGenerator{
@@ -31,15 +31,12 @@ abstract class BaseGenerator{
 	 */
 	function __construct($db_name){
 		$conn = DBManager::getConnection($db_name);
-		$dbXML = new DBtoXML($conn, $db_name);
-
 		$this->setConnectionName($db_name);
+
+		$dbXML = new DBtoXML($conn, $db_name);
 		$this->setSchema($dbXML->getXMLDom());
 
 		$this->options = array(
-
-			/* Models */
-
 			//convert table and column names to title case
 			'title_case' => false,
 
@@ -66,7 +63,7 @@ abstract class BaseGenerator{
 
 			//target directory for generated base table classes
 			'base_model_path' => ROOT."models/base/",
-			
+
 			//set to true to generate views
 			'view_path' => ROOT."views/",
 
@@ -294,6 +291,7 @@ $class .= '
 	 * Column Accessors and Mutators
 	 */
 ';
+
 		foreach($fields as $key=>$field){
 			$default = $field->getDefaultValue();
 			$class .= '
@@ -302,6 +300,8 @@ $class .= '
 				$class .= '
 		if($this->'.$field->getName().'===null || !$format)
 			return $this->'.$field->getName().';
+		if(strpos($this->'.$field->getName().', "0000-00-00")===0)
+			return null;
 		$dateTime = new DateTime($this->'.$field->getName().');
 		return $dateTime->format($format);';
 			}
@@ -722,15 +722,15 @@ class ".$className." extends base$className{
 
 		if(!is_dir($options['model_path']) && !mkdir($options['model_path']))
 			die('The directory '.$options['model_path'].' does not exist.');
-		
+
 		if(!is_dir($options['base_model_path']) && !mkdir($options['base_model_path']))
 			die('The directory '.$options['base_model_path'].' does not exist.');
-	
+
 		//Write php files for classes
 		foreach($tableNames as $tableName){
 			$className = $this->getModelName($tableName);
 			$lower_case_table = strtolower($tableName);
-			
+
 			$baseClass = $this->getBaseModel($tableName);
 			$baseFile = "base$className.php";
 			$baseFile = $options['base_model_path'].$baseFile;
