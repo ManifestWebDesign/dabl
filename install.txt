@@ -1,16 +1,12 @@
-clone project
-git clone git@manifestwebdesign.com:dabl
-
 config.php
 Set database connection and BASE_URL constants
 
 .htaccess
 Modify RewriteBase to match BASE_URL in config.php
 
-generate.php
-Point your brower to http://yourwebsite.com/your-base-url/generate.php.
-if you have no base-url, it will be something like http://yourwebsite.com/generate.php.
-You can generate models, views or controllers.  Other than the base models and schema.xml
-file, this script will ignore any files that already exist.  If you want to regenerate
+generator
+Point your brower to http://yourwebsite.com/your-base-url/generator
+if you have no base-url, it will be something like http://yourwebsite.com/generator
+You can generate models, views or controllers.  If you want to regenerate
 views or controllers that already exist, you'll need to delete or rename those files
-before running generate.php.
+before running generate.php.  This page should probably be password protected.

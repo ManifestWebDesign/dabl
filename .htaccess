@@ -1,13 +1,14 @@
 RewriteEngine On
 
 #base of the url after the domain name.  usually this is /
+#this should generally match the BASE_URL defined in config.php
 RewriteBase /
 
-#allowed extensions
-RewriteCond $1 !\.(swf|flv)$
+#allowed extensions (separated with | )
+RewriteCond $1 !\.(swf|flv|txt|xml|ico|html|css|js)$
 
-#allowed files and directories
-RewriteCond $1 !^(generate\.php|js|css|images|sitemap\.xml|favicon\.ico|robots\.txt)
+#allowed files and directories (separated with | )
+RewriteCond $1 !^(images)
 
-#everything else goes through index.php
+#everything else goes to index.php
 RewriteRule ^(.*)$ index.php [L]

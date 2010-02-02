@@ -1,6 +1,6 @@
 <?php
 
-function redirect($url){
+function redirect($url = ''){
 	header('Location: '.site_url($url));
 	die;
 }
