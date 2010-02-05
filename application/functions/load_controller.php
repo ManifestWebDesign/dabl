@@ -36,7 +36,7 @@ function load_controller($route){
 		$c_class_file = $c_dir.$c_class.'.php';
 
 		//check if file exists
-		if(file_exists($c_class_file)){
+		if(is_file($c_class_file)){
 			require_once $c_class_file;
 			unset($params[$key]);
 			$instance = new $c_class;
@@ -58,7 +58,7 @@ function load_controller($route){
 		//fallback check if default index exists in directory
 		$alternate_c_class = ucwords(DEFAULT_CONTROLLER).'Controller';
 		$alternate_c_class_file = $c_dir.$alternate_c_class.'.php';
-		if(file_exists($alternate_c_class_file)){
+		if(is_file($alternate_c_class_file)){
 			require_once $alternate_c_class_file;
 			$instance = new $alternate_c_class;
 			break;

@@ -19,8 +19,8 @@ class Module {
 			$new_class_path = MODULE::$root_modules[$root] . $ds . $ns_path . $ds . $class_name . '.php';
 
 			// include path
-			if ( file_exists ( $class_path )) require_once $class_path;
-			if ( file_exists ( $new_class_path )) require_once $new_class_path;
+			if ( is_file ( $class_path )) require_once $class_path;
+			if ( is_file ( $new_class_path )) require_once $new_class_path;
 		}
 	}
 

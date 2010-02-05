@@ -26,7 +26,7 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 
 			$view = ROOT."views".DIRECTORY_SEPARATOR."$view.php";
 
-			if(!file_exists($view))
+			if(!is_file($view))
 				file_not_found($view);
 
 			require $view;
