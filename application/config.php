@@ -19,7 +19,7 @@ define('DB_PASSWORD', '');
 
 //the path to your application that follows the domain name with leading and trailing slashes
 //default to /index.php/ if your server doesn't support .htaccess with apache mod_rewrite
-define('BASE_URL', '/index.php/');
+define('BASE_URL', '/');
 
 ini_set('display_errors', true);
 ini_set('error_reporting', E_ALL);

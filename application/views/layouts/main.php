@@ -3,6 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title><?= $title ?></title>
+		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/styles.css') ?>" />
 	</head>
 	<body>
 
