@@ -59,8 +59,10 @@ class QueryStatement {
 				$pdo_type = PDO::PARAM_INT;
 			elseif(is_null($value))
 				$pdo_type = PDO::PARAM_NULL;
-			elseif(is_bool($value))
-				$pdo_type = PDO::PARAM_BOOL;
+			elseif(is_bool($value)){
+				$value = $value ? 1 : 0;
+				$pdo_type = PDO::PARAM_INT;
+			}
 			$result->bindValue($key + 1, $value, $pdo_type);
 		}
 		$result->execute();

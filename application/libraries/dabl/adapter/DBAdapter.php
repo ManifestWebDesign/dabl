@@ -2,7 +2,7 @@
 
 /**
  * Modified version of DBAdapter from Propel Runtime
- * Last Modified January 1st 2010 by Dan Blaisdell
+ * Last Modified February 8th 2010 by Dan Blaisdell
  */
 
 /*
@@ -21,7 +21,7 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the LGPL. For more information please see
  * <http://propel.phpdb.org>.
- */
+*/
 
 /**
  * DBAdapter</code> defines the interface for a Propel database adapter.
@@ -97,26 +97,26 @@ abstract class DBAdapter extends PDO {
 		}
 	}
 
-	function getDatabaseInfo($database_name){
+	function getDatabaseInfo($database_name) {
 		$reader = self::$schema_readers[get_class($this)];
 		$reader = new $reader($this, $database_name);
 		return $reader;
 	}
 
-	function getLoggedQueries(){
+	function getLoggedQueries() {
 		return $this->_logged_queries;
 	}
 
-	function printQueryLog(){
-?>
+	function printQueryLog() {
+		?>
 <pre>
 <?
-$queries = $this->getLoggedQueries();
-echo count($queries)." queries executed\n";
-echo implode("\n\n", $queries);
+		$queries = $this->getLoggedQueries();
+		echo count($queries)." queries executed\n";
+		echo implode("\n\n", $queries);
 ?>
 </pre>
-<?
+		<?
 	}
 
 	/**
@@ -127,7 +127,7 @@ echo implode("\n\n", $queries);
 	 * @param mixed $arg4
 	 * @return PDOStatement
 	 */
-	function query(){
+	function query() {
 		$args = func_get_args();
 
 		if($this->_log_queries)
@@ -148,10 +148,9 @@ echo implode("\n\n", $queries);
 	 * @param	  array An array of settings.
 	 * @see		setCharset()
 	 */
-	function initConnection(array $settings){
-		if (isset($settings['charset']['value'])) {
+	function initConnection(array $settings) {
+		if (isset($settings['charset']['value']))
 			$this->setCharset($settings['charset']['value']);
-		}
 		if (isset($settings['queries']) && is_array($settings['queries'])) {
 			foreach ($settings['queries'] as $queries) {
 				foreach ((array)$queries as $query) {
@@ -170,7 +169,7 @@ echo implode("\n\n", $queries);
 	 * @param	  string The charset encoding.
 	 * @see		initConnection()
 	 */
-	function setCharset($charset){
+	function setCharset($charset) {
 		$this->exec("SET NAMES '" . $charset . "'");
 	}
 
@@ -189,7 +188,7 @@ echo implode("\n\n", $queries);
 	 *
 	 * @return	 string The text delimeter.
 	 */
-	function getStringDelimiter(){
+	function getStringDelimiter() {
 		return '\'';
 	}
 
@@ -197,11 +196,17 @@ echo implode("\n\n", $queries);
 	 * @param mixed $value
 	 * @return mixed
 	 */
-	function checkInput($value){
+	function checkInput($value) {
 		if (is_array($value)){
 			foreach ($value as $k => $v) $value[$k] = $this->checkInput($v);
 			return $value;
 		}
+
+		if(is_int($value))
+			return $value;
+
+		if(is_bool($value))
+			return $value ? 1 : 0;
 
 		if($value===null) return "NULL";
 		return $this->quote($value);
@@ -224,7 +229,7 @@ echo implode("\n\n", $queries);
 	 * @param	  string $in The string whose case to ignore.
 	 * @return	 string The string in a case that can be ignored.
 	 */
-	function ignoreCaseInOrderBy($in){
+	function ignoreCaseInOrderBy($in) {
 		return $this->ignoreCase($in);
 	}
 
@@ -260,7 +265,7 @@ echo implode("\n\n", $queries);
 	 * @param	  string $text The identifier to quote.
 	 * @return	 string The quoted identifier.
 	 */
-	function quoteIdentifier($text){
+	function quoteIdentifier($text) {
 		return '"' . $text . '"';
 	}
 
@@ -277,7 +282,7 @@ echo implode("\n\n", $queries);
 	 * Returns the native ID method for this RDBMS.
 	 * @return	 int one of DBAdapter:ID_METHOD_SEQUENCE, DBAdapter::ID_METHOD_AUTOINCREMENT.
 	 */
-	protected function getIdMethod(){
+	protected function getIdMethod() {
 		return DBAdapter::ID_METHOD_AUTOINCREMENT;
 	}
 
@@ -285,7 +290,7 @@ echo implode("\n\n", $queries);
 	 * Whether this adapter uses an ID generation system that requires getting ID _before_ performing INSERT.
 	 * @return	 boolean
 	 */
-	function isGetIdBeforeInsert(){
+	function isGetIdBeforeInsert() {
 		return ($this->getIdMethod() === DBAdapter::ID_METHOD_SEQUENCE);
 	}
 
@@ -293,7 +298,7 @@ echo implode("\n\n", $queries);
 	 * Whether this adapter uses an ID generation system that requires getting ID _before_ performing INSERT.
 	 * @return	 boolean
 	 */
-	function isGetIdAfterInsert(){
+	function isGetIdAfterInsert() {
 		return ($this->getIdMethod() === DBAdapter::ID_METHOD_AUTOINCREMENT);
 	}
 
@@ -301,7 +306,7 @@ echo implode("\n\n", $queries);
 	 * Gets the generated ID (either last ID for autoincrement or next sequence ID).
 	 * @return	 mixed
 	 */
-	function getId($name = null){
+	function getId($name = null) {
 		return $this->lastInsertId($name);
 	}
 
@@ -309,7 +314,7 @@ echo implode("\n\n", $queries);
 	 * Returns timestamp formatter string for use in date() function.
 	 * @return	 string
 	 */
-	function getTimestampFormatter(){
+	function getTimestampFormatter() {
 		return "Y-m-d H:i:s";
 	}
 
@@ -317,7 +322,7 @@ echo implode("\n\n", $queries);
 	 * Returns date formatter string for use in date() function.
 	 * @return	 string
 	 */
-	function getDateFormatter(){
+	function getDateFormatter() {
 		return "Y-m-d";
 	}
 
@@ -325,7 +330,7 @@ echo implode("\n\n", $queries);
 	 * Returns time formatter string for use in date() function.
 	 * @return	 string
 	 */
-	function getTimeFormatter(){
+	function getTimeFormatter() {
 		return "H:i:s";
 	}
 
@@ -339,7 +344,7 @@ echo implode("\n\n", $queries);
 	 * @return	 boolean
 	 * @deprecated
 	 */
-	function useQuoteIdentifier(){
+	function useQuoteIdentifier() {
 		return false;
 	}
 
@@ -354,5 +359,5 @@ echo implode("\n\n", $queries);
 	 * @param	  mixed $seed (optional) seed value for databases that support this
 	 */
 	abstract function random($seed = null);
-
+	
 }

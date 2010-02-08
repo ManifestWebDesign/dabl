@@ -69,7 +69,7 @@ class Condition{
 		}
 
 		$is_array = false;
-		if(is_array($right) || $right instanceof Query && $right->getLimit()!==1)
+		if(is_array($right) || ($right instanceof Query && $right->getLimit()!==1))
 			$is_array = true;
 
 		//Right can be a Query, if you're trying to nest queries, like "WHERE MyColumn = (SELECT OtherColumn From MyTable LIMIT 1)"
@@ -89,23 +89,19 @@ class Condition{
 
 		//$right can be an array
 		if($is_array){
-			
 			//BETWEEN
 			if(is_array($right) && count($right)==2 && $operator==Query::BETWEEN){
+				if(!$right){
+					$statement->setString('0');
+					return $statement;
+				}
 				$statement->setString("$left $operator ? AND ?");
 				$statement->addParams($right);
 				return $statement;
 			}
 
-			//IN or NOT_IN
-			if($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH){
-				$statement->addParams($right);
-				$placeholders = array();
-				foreach($right as $r)
-					$placeholders[] = '?';
-				$right = '('.implode(',', $placeholders).')';
-			}
-
+			//Convert any sort of equal operator to something suitable
+			//for arrays
 			switch($operator){
 				//Various forms of equal
 				case Query::IN:
@@ -120,6 +116,25 @@ class Condition{
 					break;
 				default:
 					throw new Exception("$operator unknown for comparing an array.");
+			}
+
+			//Handle empty arrays
+			if(is_array($right) && !$right){
+				if($operator==Query::IN){
+					$statement->setString('0');
+					return $statement;
+				}
+				elseif($operator==Query::NOT_IN)
+					return null;
+			}
+
+			//IN or NOT_IN
+			if($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH){
+				$statement->addParams($right);
+				$placeholders = array();
+				foreach($right as $r)
+					$placeholders[] = '?';
+				$right = '('.implode(',', $placeholders).')';
 			}
 		}
 		else{
