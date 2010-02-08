@@ -35,14 +35,15 @@ class Query{
 	const CUSTOM_EQUAL = "CUSTOM_EQUAL";
 
 	//PostgreSQL comparison types
-	const ILIKE = " ILIKE ";
-	const NOT_ILIKE = " NOT ILIKE ";
+	const ILIKE = "ILIKE";
+	const NOT_ILIKE = "NOT ILIKE";
 
 	//JOIN TYPES
 	const JOIN = "JOIN";
 	const LEFT_JOIN = "LEFT JOIN";
 	const RIGHT_JOIN = "RIGHT JOIN";
 	const INNER_JOIN = "INNER JOIN";
+	const OUTER_JOIN = "OUTER JOIN";
 
 	//Binary AND
 	const BINARY_AND = "&";
@@ -157,7 +158,7 @@ class Query{
 	 */
 	function getTableName(){
 		$table = $this->_table;
-		$table_parts = explode(" ", $table);
+		$table_parts = explode(' ', $table);
 		if(count($table_parts)==1)
 			return $table;
 		else
@@ -170,7 +171,7 @@ class Query{
 	 */
 	function getAlias(){
 		$table = $this->_table;
-		$table_parts = explode(" ", $table);
+		$table_parts = explode(' ', $table);
 		if(count($table_parts)>1)
 			return array_pop($table_parts);
 	}
@@ -217,7 +218,7 @@ class Query{
 			if($onClause instanceof Condition)
 				$onClause = $onClause->getClause();
 
-			$table_parts = explode(" ", str_replace("`","",trim($table)));
+			$table_parts = explode(' ', str_replace("`","",trim($table)));
 			if(count($table_parts)==1)
 				$table = "`$table`";
 			else{
@@ -332,6 +333,10 @@ class Query{
 		return $this;
 	}
 
+	function getLimit(){
+		return $this->_limit;
+	}
+
 	/**
 	 * Sets the offset for the rows returned.  Used to build
 	 * the LIMIT part of the query.
@@ -349,12 +354,15 @@ class Query{
 	 */
 	function getQuery($conn = null){
 		$table_name = $this->getTableName();
-		$alias = $this->getAlias();
 
 		if(!$table_name)
 			throw new Exception("No table specified.");
 
-		$query = "";
+		$alias = $this->getAlias();
+		if(!$conn) $conn = DBManager::getConnection();
+		$query_s = "";
+		$statement = new QueryStatement;
+		$statement->setConnection($conn);
 
 		if($this->_columns)
 			$columns = implode(', ',$this->_columns);
@@ -365,50 +373,58 @@ class Query{
 			$columns = "DISTINCT $columns";
 
 		if($conn)
-			$table = $alias ? $conn->quoteIdentifier($table)." $alias" : $conn->quoteIdentifier($table);
+			$table = $alias ? $conn->quoteIdentifier($table_name)." $alias" : $conn->quoteIdentifier($table_name);
 		else
 			$table = $alias ? "`$table_name` $alias" : "`$table_name`";
 
 		switch(strtoupper($this->getAction())){
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
-				$query .="SELECT $columns \n FROM $table ";
+				$query_s .="SELECT $columns \n FROM $table ";
 				break;
 			case self::ACTION_DELETE:
-				$query .="DELETE \n FROM $table ";
+				$query_s .="DELETE \n FROM $table ";
 				break;
 			default:
 				break;
 		}
 
 		if($this->_joins)
-			$query .= "\n ".implode("\n ", $this->_joins)." ";
+			$query_s .= "\n ".implode("\n ", $this->_joins).' ';
 
-		$where = $this->getWhere()->getClause();
+		$where_statement = $this->getWhere()->getClause();
 		
-		if($where)
-			$query .= "\n WHERE $where ";
+		if($where_statement){
+			$query_s .= "\n WHERE ".$where_statement->getString().' ';
+			$statement->addParams($where_statement->getParams());
+		}
 
 		if($this->_groups)
-			$query .= "\n GROUP BY ".implode(', ',$this->_groups)." ";
+			$query_s .= "\n GROUP BY ".implode(', ',$this->_groups).' ';
 
-		if($this->_having)
-			$query .= "\n HAVING ".$this->_having->getClause()." ";
+		if($this->getHaving()){
+			$having_statement = $this->getHaving()->getClause();
+			if($having_statement){
+				$query_s .= "\n HAVING ".$having_statement->getString().' ';
+				$statement->addParams($having_statement->getParams());
+			}
+		}
 
 		if($this->getAction()!=self::ACTION_COUNT && $this->_orders)
-			$query .= "\n ORDER BY ".implode(', ',$this->_orders)." ";
+			$query_s .= "\n ORDER BY ".implode(', ',$this->_orders).' ';
 
 		if($this->_limit){
 			if($conn)
-				$conn->applyLimit($query, $this->_offset, $this->_limit);
+				$conn->applyLimit($query_s, $this->_offset, $this->_limit);
 			else
-				$query .= "\n LIMIT ".($this->_offset ? $this->_offset.", " : "").$this->_limit;
+				$query_s .= "\n LIMIT ".($this->_offset ? $this->_offset.', ' : '').$this->_limit;
 		}
 
 		if($this->getAction()==self::ACTION_COUNT)
-			return "SELECT count(0) FROM ($query) a";
+			$query_s = "SELECT count(0) FROM ($query_s) a";
 
-		return $query;
+		$statement->setString($query_s);
+		return $statement;
 	}
 
 	/**
@@ -418,33 +434,30 @@ class Query{
 		$q = clone $this;
 		if(!$q->getTable())
 			$q->setTable('{UNSPECIFIED-TABLE}');
-		return $q->getQuery();
+		return (string)$q->getQuery();
 	}
 
 	/**
 	 * Returns a count of rows for result
-	 * @return Int
+	 * @return int
 	 * @param $conn PDO[optional]
 	 */
 	function doCount(PDO $conn = null){
 		$q = clone $this;
 
-		if(!$conn)
-			$conn = DBManager::getConnection();
-
-		$q->setAction("COUNT");
+		$q->setAction(self::ACTION_COUNT);
 		if(!$q->getTable())
 			throw new Exception("No table specified.");
 
-		$result = $conn->query($q);
-		foreach($result as $r)
-			return $r[0];
+		$qs = $q->getQuery($conn);
+		$result = $qs->bindAndExecute();
+		return $result->fetchColumn();
 	}
 
 	/**
 	 * Executes DELETE query and returns count of
 	 * rows deleted.
-	 * @return Int
+	 * @return int
 	 * @param $conn PDO[optional]
 	 */
 	function doDelete(PDO $conn = null){
@@ -453,12 +466,11 @@ class Query{
 		if(!$q->getTable())
 			throw new Exception("No table specified.");
 
-		$q->setAction("DELETE");
-		if(!$conn)
-			$conn = DBManager::getConnection();
+		$q->setAction(self::ACTION_DELETE);
 
-		$rows = $conn->exec($q);
-		return $rows;
+		$qs = $q->getQuery($conn);
+		$result = $qs->bindAndExecute();
+		return $result->rowCount();
 	}
 
 	/**
@@ -471,9 +483,11 @@ class Query{
 		if(!$q->getTable())
 			throw new Exception("No table specified.");
 
-		$q->setAction("SELECT");
-		if(!$conn)
-			$conn = DBManager::getConnection();
-		return $conn->query($q);
+		$q->setAction(self::ACTION_SELECT);
+
+		$qs = $q->getQuery($conn);
+		$result = $qs->bindAndExecute();
+		return $result;
 	}
+
 }

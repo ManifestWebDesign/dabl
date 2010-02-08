@@ -36,26 +36,21 @@ class Condition{
 	private $ors = array();
 
 	/**
-	 * Used by the addAnd and addOr methods to translate the arguments into a condition String
-	 * @param $left Mixed
-	 * @param $right Mixed[optional]
-	 * @param $operator String[optional]
-	 * @param $quote Int[optional]
-	 * @return String
+	 * @return string
 	 */
-	private function processCondition($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+	private function processCondition($left = null, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+		$statement = new QueryStatement;
+
+		if($left===null)
+			return null;
+
 		//Left can be a Condition
 		if($left instanceof self){
-			if(!$left->getClause())
+			$clause_statement = $left->getClause();
+			if(!$clause_statement)
 				return null;
-			return "(".$left->getClause().")";
-		}
-
-		//Right can be a Query, if you're trying to nest queries, like "WHERE MyColumn = (SELECT OtherColumn From MyTable LIMIT 1)"
-		if($right instanceof Query){
-			if(!$right->getTable())
-				throw new Exception("$right does not have a table, so it cannot be nested.");
-			$right = "($right)";
+			$clause_statement->setString('('.$clause_statement->getString().')');
+			return $clause_statement;
 		}
 
 		//You can skip $operator and specify $quote with parameter 3
@@ -68,23 +63,48 @@ class Condition{
 		$operator = trim($operator);
 
 		//Escape $left
-		if($quote == self::QUOTE_LEFT || $quote == self::QUOTE_BOTH)
-			$left = DBManager::checkInput($left);
+		if($quote == self::QUOTE_LEFT || $quote == self::QUOTE_BOTH){
+			$statement->addParam($left);
+			$left = '?';
+		}
+
+		$is_array = false;
+		if(is_array($right) || $right instanceof Query && $right->getLimit()!==1)
+			$is_array = true;
+
+		//Right can be a Query, if you're trying to nest queries, like "WHERE MyColumn = (SELECT OtherColumn From MyTable LIMIT 1)"
+		if($right instanceof Query){
+			if(!$right->getTable())
+				throw new Exception("$right does not have a table, so it cannot be nested.");
+
+			$clause_statement = $right->getQuery();
+			if(!$clause_statement)
+				return null;
+
+			$right = '('.$clause_statement->getString().')';
+			$statement->addParams($clause_statement->getParams());
+			if($quote != self::QUOTE_LEFT)
+				$quote = self::QUOTE_NONE;
+		}
 
 		//$right can be an array
-		if(is_array($right)){
-			if(!$right)return "1<>1";
-
-			//Escape $right (recursive)
-			if($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH)
-				$right = DBManager::checkInput($right);
-
+		if($is_array){
+			
 			//BETWEEN
-			if(count($right)==2 && $operator==Query::BETWEEN)
-				return "$left $operator ".$right[0]." AND ".$right[1];
+			if(is_array($right) && count($right)==2 && $operator==Query::BETWEEN){
+				$statement->setString("$left $operator ? AND ?");
+				$statement->addParams($right);
+				return $statement;
+			}
 
 			//IN or NOT_IN
-			$right = "(".implode(',',$right).")";
+			if($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH){
+				$statement->addParams($right);
+				$placeholders = array();
+				foreach($right as $r)
+					$placeholders[] = '?';
+				$right = '('.implode(',', $placeholders).')';
+			}
 
 			switch($operator){
 				//Various forms of equal
@@ -101,23 +121,26 @@ class Condition{
 				default:
 					throw new Exception("$operator unknown for comparing an array.");
 			}
-			return "$left $operator $right";
 		}
+		else{
+			//IS NOT NULL
+			if($right===null && ($operator==Query::NOT_EQUAL || $operator==Query::ALT_NOT_EQUAL))
+				$operator=Query::IS_NOT_NULL;
 
-		//IS NOT NULL
-		if($right===null && ($operator==Query::NOT_EQUAL || $operator==Query::ALT_NOT_EQUAL))
-			$operator=Query::IS_NOT_NULL;
+			//IS NULL
+			elseif($right===null && $operator==Query::EQUAL)
+				$operator=Query::IS_NULL;
 
-		//IS NULL
-		elseif($right===null && $operator=="=")
-			$operator=Query::IS_NULL;
+			if($operator==Query::IS_NULL || $operator==Query::IS_NOT_NULL)
+				$right=null;
+			elseif($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH){
+				$statement->addParam($right);
+				$right = '?';
+			}
+		}
+		$statement->setString("$left $operator $right");
 
-		if($operator==Query::IS_NULL || $operator==Query::IS_NOT_NULL)
-			$right=null;
-		elseif($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH)
-			$right = DBManager::checkInput($right);
-
-		return "$left $operator $right";
+		return $statement;
 	}
 
 	/**
@@ -130,10 +153,10 @@ class Condition{
 
 	/**
 	 * Adds an "AND" condition to the array of conditions.
-	 * @param $left Mixed
-	 * @param $right Mixed[optional]
-	 * @param $operator String[optional]
-	 * @param $quote Int[optional]
+	 * @param $left mixed
+	 * @param $right mixed[optional]
+	 * @param $operator string[optional]
+	 * @param $quote int[optional]
 	 * @return Condition
 	 */
 	function addAnd($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
@@ -145,10 +168,10 @@ class Condition{
 
 	/**
 	 * Adds an "OR" condition to the array of conditions
-	 * @param $left Mixed
-	 * @param $right Mixed[optional]
-	 * @param $operator String[optional]
-	 * @param $quote Int[optional]
+	 * @param $left mixed
+	 * @param $right mixed[optional]
+	 * @param $operator string[optional]
+	 * @param $quote int[optional]
 	 * @return Condition
 	 */
 	function addOr($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
@@ -159,34 +182,45 @@ class Condition{
 	}
 
 	/**
-	 * Builds and returns a String representation of $this Condition
-	 * @return String
+	 * Builds and returns a string representation of $this Condition
+	 * @return QueryStatement
 	 */
 	function getClause(){
-		$where = null;
+		$statement = new QueryStatement;
+		$string = "";
 
-		$ands = $this->ands;
-		$ors = $this->ors;
-
-		if($ands || $ors){
-			if($ands) $AND = implode(" AND ", $ands);
-			if($ors) $OR = implode(" OR ", $ors);
-			if($ands && $ors)
-				$where .= " $AND OR $OR ";
-			elseif($ands)
-				$where .= " $AND ";
-			elseif($ors)
-				$where .= " $OR ";
+		$and_strings = array();
+		foreach($this->ands as $and_statement){
+			$and_strings[] = $and_statement->getString();
+			$statement->addParams($and_statement->getParams());
 		}
+		if($and_strings) $AND = implode(" AND ", $and_strings);
 
-		return $where;
+		$or_strings = array();
+		foreach($this->ors as $or_statement){
+			$or_strings[] = $or_statement->getString();
+			$statement->addParams($or_statement->getParams());
+		}
+		if($or_strings) $OR = implode(" OR ", $or_strings);
+
+		if($and_strings || $or_strings){
+			if($and_strings && $or_strings)
+				$string .= " $AND OR $OR ";
+			elseif($and_strings)
+				$string .= " $AND ";
+			elseif($or_strings)
+				$string .= " $OR ";
+			$statement->setString($string);
+			return $statement;
+		}
+		return null;
 	}
 
 	/**
-	 * Builds and returns a String representation of $this Condition
-	 * @return String
+	 * Builds and returns a string representation of $this Condition
+	 * @return string
 	 */
 	function __toString(){
-		return $this->getClause();
+		return (string)$this->getClause();
 	}
 }
