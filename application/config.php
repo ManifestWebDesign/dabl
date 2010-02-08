@@ -13,7 +13,7 @@ define('DEFAULT_CONTROLLER', 'index');
 //database connection information
 define('DB_DRIVER', 'mysql');
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'test1');
+define('DB_NAME', 'test');
 define('DB_USER', 'root');
 define('DB_PASSWORD', '');
 
