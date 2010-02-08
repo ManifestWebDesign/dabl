@@ -91,10 +91,6 @@ class Condition{
 		if($is_array){
 			//BETWEEN
 			if(is_array($right) && count($right)==2 && $operator==Query::BETWEEN){
-				if(!$right){
-					$statement->setString('0');
-					return $statement;
-				}
 				$statement->setString("$left $operator ? AND ?");
 				$statement->addParams($right);
 				return $statement;
