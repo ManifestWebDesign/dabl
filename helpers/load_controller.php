@@ -5,7 +5,9 @@
  */
 function load_controller($route){
 	$render_partial = false;
+	$route = str_replace('\\', '/', $route);
 	$route = trim($route, '/');
+
 	$params = explode('/', $route);
 
 	if(@$params[0]=='partial'){

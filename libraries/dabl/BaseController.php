@@ -31,9 +31,11 @@ abstract class BaseController {
 
 	function getViewPath(){
 		$controller_view_dir = $this->view_dir ? $this->view_dir : str_replace('controller', '', strtolower(get_class($this)));
-		$view = trim($this->view_prefix, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+		$view = str_replace('\\', '/', $this->view_prefix);
+		$view = trim($view, '/').'/';
 		if($controller_view_dir != DEFAULT_CONTROLLER)
-			$view .= $controller_view_dir.DIRECTORY_SEPARATOR;
+			$view .= $controller_view_dir.'/';
+
 		return $view;
 	}
 
@@ -42,7 +44,6 @@ abstract class BaseController {
 		$params = $this->getParams();
 
 		$has_layout = ($this->layout && !$this->render_partial && $output_format == 'html');
-
 		$params['content'] = load_view($view, $params, $has_layout, $output_format);
 
 		if($has_layout)
