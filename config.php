@@ -38,7 +38,8 @@ Module::import('ROOT:libraries:dabl');
 Module::import('ROOT:libraries:dabl:adapter');
 Module::import('ROOT:libraries:dabl:query');
 Module::import('ROOT:libraries:dabl:adapter:'.DB_DRIVER);
-//Module::import('ROOT:libraries:PDO'); //Uncomment if your server doesn't have PDO enabled
+if(!class_exists('PDO'))
+	Module::import('ROOT:libraries:PDO');
 
 //attempt to connect to the database
 try{
