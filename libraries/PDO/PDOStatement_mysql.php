@@ -32,24 +32,7 @@ class PDOStatement_mysql extends PDOStatement{
 	protected $__fetchmode = PDO::FETCH_BOTH;
 	protected $__errorCode = '';
 	protected $__errorInfo = Array('');
-	protected $__boundParams = Array();
-	
-	/**
-	 * Public method:
-	 * Replace ? or :named values to execute prepared query
-	 * this->bindParam( $mixed:Mixed, &$variable:Mixed, $type:Integer, $lenght:Integer ):Void
-	 * @Param	Mixed		Integer or String to replace prepared value
-	 * @Param	Mixed		variable to replace
-	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
-	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
-	 */
-	function bindParam($mixed, &$variable, $type = null, $lenght = null) {
-		if(is_string($mixed))
-			$this->__boundParams[$mixed] = $variable;
-		else
-			array_push($this->__boundParams, $variable);
-	}
-	
+
 	/**
 	 * Public method:
 	 * Checks if query was valid and returns how may fields returns
@@ -191,7 +174,7 @@ class PDOStatement_mysql extends PDOStatement{
 	 *                                    if this param is omitted
 	 * @Return	Array		An array with all fetched rows
 	 */
-	function fetchAll($mode = PDO::FETCH_BOTH) {
+	function fetchAll($mode = PDO::FETCH_BOTH, $column_index = 0) {
 		$result = array();
 		if(!is_null($this->__result)) {
 			switch($mode) {
@@ -201,7 +184,11 @@ class PDOStatement_mysql extends PDOStatement{
 					break;
 				case PDO::FETCH_ASSOC:
 					while($r = mysql_fetch_assoc($this->__result))
-						array_push($result, $r);
+						
+					break;
+				case PDO::FETCH_COLUMN:
+					for($x = 0; $x < mysql_num_rows($this->__result); $x++)
+						array_push($result, mysql_result($this->__result, $x, $column_index));
 					break;
 				case PDO::FETCH_OBJ:
 					while($r = mysql_fetch_object($this->__result))
@@ -321,10 +308,9 @@ class PDOStatement_mysql extends PDOStatement{
 			$errno = mysql_errno($this->__connection);
 			$errst = mysql_error($this->__connection);
 		}
-		if($this->__connection->__throwExceptions)
-			throw new Exception("Database error ($errno): $errst");
+		throw new PDOException("Database error ($errno): $errst");
 		$this->__errorCode = &$er;
-		$this->__errorInfo = Array($this->__errorCode, $errno, $errst);
+		$this->__errorInfo = array($this->__errorCode, $errno, $errst);
 		$this->__result = null;
 	}
 	
@@ -339,4 +325,3 @@ class PDOStatement_mysql extends PDOStatement{
 	}
 	
 }
-?>

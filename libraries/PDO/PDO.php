@@ -61,6 +61,7 @@ class PDO {
 	const FETCH_NUM = 3;
 	const FETCH_BOTH = 4;
 	const FETCH_OBJ = 5;
+	const FETCH_COLUMN = 7;
 	const FETCH_LAZY = 1;
 	const FETCH_BOUND = 6;
 	const ATTR_SERVER_VERSION = 4;
@@ -69,6 +70,12 @@ class PDO {
 	const ATTR_PERSISTENT = 12;
 	const ATTR_ERRMODE = 3;
 	const ERRMODE_EXCEPTION = 2;
+
+	const PARAM_BOOL = 5;
+	const PARAM_NULL = 0;
+	const PARAM_INT = 1;
+	const PARAM_STR = 2;
+	const PARAM_LOB = 3;
 	
 	/**
 	 * 'protected' variables:
@@ -81,7 +88,7 @@ class PDO {
 	 *	http://us2.php.net/manual/en/function.pdo-construct.php
 	 */
 	function __construct($string_dsn, $string_username = '', $string_password = '', $array_driver_options = null) {
-		$con = &$this->__getDNS($string_dsn);
+		$con = &$this->__getDSN($string_dsn);
 		switch($con['dbtype']){
 			case 'mysql':
 				if(isset($con['port']))
@@ -210,7 +217,7 @@ class PDO {
 	}
 	
 	// PRIVATE METHOD [uncommented]
-	function __getDNS(&$string) {
+	function __getDSN(&$string) {
 		$result = array();
 		$pos = strpos($string, ':');
 		$parameters = explode(';', substr($string, ($pos + 1)));
@@ -225,5 +232,3 @@ class PDO {
 		return $result;
 	}
 }
-
-?>

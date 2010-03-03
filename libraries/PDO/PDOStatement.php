@@ -7,6 +7,7 @@ abstract class PDOStatement implements Iterator {
 	protected $__query = '';
 	protected $__position = 0;
 	protected $__result = null;
+	protected $__boundParams = Array();
 	
 	/**
 	 * Public constructor:
@@ -40,6 +41,38 @@ abstract class PDOStatement implements Iterator {
 		++$this->__position;
 	}
 
+	/**
+	 * Public method:
+	 * Replace ? or :named values to execute prepared query
+	 * this->bindParam( $mixed:Mixed, &$variable:Mixed, $type:Integer, $length:Integer ):Void
+	 * @Param	Mixed		Integer or String to replace prepared value
+	 * @Param	Mixed		variable to replace
+	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
+	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
+	 */
+	function bindParam($mixed, &$variable, $type = null, $length = null) {
+		if(is_string($mixed))
+			$this->__boundParams[$mixed] = $variable;
+		else
+			array_push($this->__boundParams, $variable);
+	}
+
+	/**
+	 * Public method:
+	 * Replace ? or :named values to execute prepared query
+	 * this->bindParam( $mixed:Mixed, $variable:Mixed, $type:Integer, $length:Integer ):Void
+	 * @Param	Mixed		Integer or String to replace prepared value
+	 * @Param	Mixed		variable to replace
+	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
+	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
+	 */
+	function bindValue($mixed, $variable, $type = null, $length = null) {
+		if(is_string($mixed))
+			$this->__boundParams[$mixed] = $variable;
+		else
+			array_push($this->__boundParams, $variable);
+	}
+
 	function current($mode = PDO::FETCH_BOTH) {
 		return $this->fetch();
 	}
@@ -50,11 +83,8 @@ abstract class PDOStatement implements Iterator {
 
 	function valid() {
 		if($this->__num_rows===null)
-			throw new Exception("Row count not specified");
+			throw new PDOException("Row count not specified");
 		return ($this->__position < $this->__num_rows);
 	}
 
 }
-
-
-?>

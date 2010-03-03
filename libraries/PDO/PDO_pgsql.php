@@ -236,7 +236,7 @@ class PDO_pgsql {
 			$errno = 1;
 			$errst = pg_last_error($this->__connection);
 		}
-		if($this->__throwExceptions) throw new Exception("Database error ($errno): $errst");
+		throw new PDOException("Database error ($errno): $errst");
 		$this->__errorCode = &$er;
 		$this->__errorInfo = Array($this->__errorCode, $errno, $errst);
 	}
@@ -249,4 +249,3 @@ class PDO_pgsql {
 		return $this->__result;
 	}
 }
-?>

@@ -31,23 +31,6 @@ class PDOStatement_sqlite extends PDOStatement {
 	protected $__fetchmode = PDO::FETCH_BOTH;
 	protected $__errorCode = '';
 	protected $__errorInfo = Array('');
-	protected $__boundParams = Array();
-	
-	/**
-	 * Public method:
-	 *	Replace ? or :named values to execute prepared query
-	 *       	this->bindParam( $mixed:Mixed, &$variable:Mixed, $type:Integer, $lenght:Integer ):Void
-	 * @Param	Mixed		Integer or String to replace prepared value
-	 * @Param	Mixed		variable to replace
-	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
-	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
-	 */
-	function bindParam($mixed, &$variable, $type = null, $lenght = null) {
-		if(is_string($mixed))
-			$this->__boundParams[$mixed] = $variable;
-		else
-			array_push($this->__boundParams, $variable);
-	}
 	
 	/**
 	 * Public method:
@@ -142,6 +125,10 @@ class PDOStatement_sqlite extends PDOStatement {
 				case PDO::FETCH_ASSOC:
 					$result = sqlite_fetch_array($this->__result, SQLITE_ASSOC);
 					break;
+				case PDO::FETCH_COLUMN:
+					$result = sqlite_fetch_array($this->__result, SQLITE_NUM);
+					$result = @$result[$offset];
+					break;
 				case PDO::FETCH_OBJ:
 					$result = sqlite_fetch_object($this->__result);
 					break;
@@ -176,6 +163,10 @@ class PDOStatement_sqlite extends PDOStatement {
 				case PDO::FETCH_ASSOC:
 					while($r = sqlite_fetch_array($this->__result, SQLITE_ASSOC))
 						array_push($result, $r);
+					break;
+				case PDO::FETCH_COLUMN:
+					while($r = sqlite_fetch_array($this->__result, SQLITE_NUM))
+						array_push($result, $r[$column_index]);
 					break;
 				case PDO::FETCH_OBJ:
 					while($r = sqlite_fetch_object($this->__result))
@@ -310,7 +301,7 @@ class PDOStatement_sqlite extends PDOStatement {
 			$errno = sqlite_last_error($this->__connection);
 			$errst = sqlite_error_string($errno);
 		}
-		if($this->__connection->__throwExceptions)throw new Exception("Database error ($errno): $errst");
+		throw new PDOException("Database error ($errno): $errst");
 		$this->__errorCode = &$er;
 		$this->__errorInfo = Array($this->__errorCode, $errno, $errst);
 		$this->__result = null;
@@ -327,4 +318,3 @@ class PDOStatement_sqlite extends PDOStatement {
 	}
 	
 }
-?>

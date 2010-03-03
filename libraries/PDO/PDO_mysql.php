@@ -195,7 +195,7 @@ class PDO_mysql {
      */
     function setAttribute($attribute, $mixed) {
         $result = false;
-		if($attribute === PDO::ATTR_ERRMODE && $mixed ===PDO::ERRMODE_EXCEPTION){
+		if($attribute == PDO::ATTR_ERRMODE && $mixed ==PDO::ERRMODE_EXCEPTION){
 			$this->__throwExceptions = true;
 		}
         if($attribute === PDO::ATTR_PERSISTENT && $mixed != $this->__persistent) {
@@ -236,7 +236,7 @@ class PDO_mysql {
             $errno = mysql_errno($this->__connection);
             $errst = mysql_error($this->__connection);
         }
-		if($this->__throwExceptions) throw new Exception("Database error ($errno): $errst");
+		throw new PDOException("Database error ($errno): $errst");
         $this->__errorCode = &$er;
         $this->__errorInfo = Array($this->__errorCode, $errno, $errst);
     }
@@ -249,4 +249,3 @@ class PDO_mysql {
         return $query;
     }
 }
-?>

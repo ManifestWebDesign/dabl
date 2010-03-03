@@ -31,23 +31,6 @@ class PDOStatement_pgsql extends PDOStatement{
 	protected $__fetchmode = PDO::FETCH_BOTH;
 	protected $__errorCode = '';
 	protected $__errorInfo = Array('');
-	protected $__boundParams = Array();
-	
-	/**
-	 * Public method:
-	 *	Replace ? or :named values to execute prepared query
-	 *	   	this->bindParam( $mixed:Mixed, &$variable:Mixed, $type:Integer, $lenght:Integer ):Void
-	 * @Param	Mixed		Integer or String to replace prepared value
-	 * @Param	Mixed		variable to replace
-	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
-	 * @Param	Integer		this variable is not used but respects PDO original accepted parameters
-	 */
-	function bindParam($mixed, &$variable, $type = null, $lenght = null) {
-		if(is_string($mixed))
-			$this->__boundParams[$mixed] = $variable;
-		else
-			array_push($this->__boundParams, $variable);
-	}
 	
 	/**
 	 * Public method:
@@ -165,7 +148,7 @@ class PDOStatement_pgsql extends PDOStatement{
 	 *									if this param is omitted
 	 * @Return	Array		An array with all fetched rows
 	 */
-	function fetchAll($mode = PDO_FETCH_BOTH) {
+	function fetchAll($mode = PDO_FETCH_BOTH, $column_index = 0) {
 		$result = array();
 		if(!is_null($this->__result)) {
 			switch($mode) {
@@ -176,6 +159,10 @@ class PDOStatement_pgsql extends PDOStatement{
 				case PDO::FETCH_ASSOC:
 					while($r = pg_fetch_assoc($this->__result))
 						array_push($result, $r);
+					break;
+				case PDO::FETCH_COLUMN:
+					while ($r = pg_fetch_row($result))
+						array_push($result, $r[$column_index]);
 					break;
 				case PDO::FETCH_OBJ:
 					while($r = pg_fetch_object($this->__result))
@@ -318,7 +305,7 @@ class PDOStatement_pgsql extends PDOStatement{
 			$errno = 1;
 			$errst = pg_last_error($this->__connection);
 		}
-		if($this->__connection->__throwExceptions)throw new Exception("Database error ($errno): $errst");
+		throw new PDOException("Database error ($errno): $errst");
 		$this->__errorCode = &$er;
 		$this->__errorInfo = Array($this->__errorCode, $errno, $errst);
 	}
@@ -334,4 +321,3 @@ class PDOStatement_pgsql extends PDOStatement{
 	}
 	
 }
-?>

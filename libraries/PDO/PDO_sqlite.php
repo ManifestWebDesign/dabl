@@ -229,7 +229,7 @@ class PDO_sqlite {
 			$errno = sqlite_last_error($this->__connection);
 			$errst = sqlite_error_string($errno);
 		}
-		if($this->__throwExceptions) throw new Exception("Database error ($errno): $errst");
+		throw new PDOException("Database error ($errno): $errst");
 		$this->__errorCode = &$er;
 		$this->__errorInfo = Array($this->__errorCode, $errno, $errst);
 	}
@@ -242,4 +242,3 @@ class PDO_sqlite {
 		return $query;
 	}
 }
-?>
