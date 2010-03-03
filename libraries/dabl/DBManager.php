@@ -31,10 +31,8 @@ class DBManager{
 	 * @return DBAdapter
 	 */
 	static function getConnection($db_name=null) {
-		if($db_name===null){
-			foreach(self::$connections as $conn)
-				return $conn;
-		}
+		if($db_name===null)
+			return reset(self::$connections);
 		return self::$connections[$db_name];
 	}
 
