@@ -393,7 +393,7 @@ class Query{
 			$query_s .= "\n ".implode("\n ", $this->_joins).' ';
 
 		$where_statement = $this->getWhere()->getClause();
-		
+
 		if($where_statement){
 			$query_s .= "\n WHERE ".$where_statement->getString().' ';
 			$statement->addParams($where_statement->getParams());
@@ -445,9 +445,10 @@ class Query{
 	function doCount(PDO $conn = null){
 		$q = clone $this;
 
-		$q->setAction(self::ACTION_COUNT);
 		if(!$q->getTable())
 			throw new Exception("No table specified.");
+
+		$q->setAction(self::ACTION_COUNT);
 
 		$qs = $q->getQuery($conn);
 		$result = $qs->bindAndExecute();

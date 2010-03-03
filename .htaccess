@@ -1,14 +1,5 @@
-RewriteEngine On
-
-#base of the url after the domain name.  usually this is /
-#this should generally match the BASE_URL defined in config.php
-RewriteBase /
-
-#allowed extensions (separated with | )
-RewriteCond $1 !\.(swf|flv|txt|xml|ico|html|css|js)$
-
-#allowed files and directories (separated with | )
-RewriteCond $1 !^(images)
-
-#everything else goes to index.php
-RewriteRule ^(.*)$ index.php [L]
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteRule ^$ public/    [L]
+	RewriteRule (.*) public/$1 [L]
+</IfModule>

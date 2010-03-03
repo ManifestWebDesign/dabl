@@ -51,7 +51,7 @@ catch(Exception $e){
 }
 
 //load functions
-foreach (glob(ROOT."functions/*.php") as $filename) require_once($filename);
+foreach (glob(ROOT."helpers/*.php") as $filename) require_once($filename);
 
 //Strip added slashes if needed
 if (get_magic_quotes_gpc()) strip_request_slashes();
