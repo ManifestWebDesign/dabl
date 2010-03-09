@@ -1,6 +1,6 @@
 <?php
 /**
- * Last Modified February 8th 2010
+ * Last Modified March 8th 2010
  */
 
 /**
@@ -85,6 +85,13 @@ class Query{
 			$this->_where = clone $this->_where;
 		if($this->_having instanceof Condition)
 			$this->_having = clone $this->_having;
+	}
+
+	/**
+	 * @return Query
+	 */
+	function getInstance(){
+		return new self;
 	}
 
 	/**

@@ -6,10 +6,13 @@ class QueryStatement {
 	private $params = array();
 	private $connection;
 
-	function setConnection($conn){
+	function setConnection(PDO $conn){
 		$this->connection = $conn;
 	}
 
+	/**
+	 * @return PDO
+	 */
 	function getConnection(){
 		return $this->connection;
 	}
@@ -18,6 +21,9 @@ class QueryStatement {
 		$this->string = $string;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getString(){
 		return $this->string;
 	}
@@ -34,10 +40,16 @@ class QueryStatement {
 		$this->params[] = $param;
 	}
 
+	/**
+	 * @return array
+	 */
 	function getParams(){
 		return $this->params;
 	}
 
+	/**
+	 * @return string
+	 */
 	function __toString(){
 		$string = $this->string;
 		$params = $this->params;
@@ -50,6 +62,9 @@ class QueryStatement {
 		return $string;
 	}
 
+	/**
+	 * @return PDOStatement
+	 */
 	function bindAndExecute(){
 		$conn = $this->getConnection();
 		$result = $conn->prepare($this->getString());
