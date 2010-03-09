@@ -1,50 +1,29 @@
 <?php
-/*
- *  $Id: OCI8TableInfo.php,v 1.13 2006/01/06 00:02:38 sethr Exp $
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information please see
- * <http://creole.phpdb.org>.
- */
- 
+
 /**
  * Oracle (OCI8) implementation of TableInfo.
- * 
+ *
  * @author	David Giffin <david@giffin.org>
  * @author	Hans Lellelid <hans@xmpl.org>
  * @version   $Revision$
  * @package   creole.drivers.oracle.metadata
  */
 class OCI8TableInfo extends TableInfo {
-	
+
 	private $schema;
-		
-	function __construct(OCI8DatabaseInfo $database, $name)
-	{
+
+	function __construct(OCI8DatabaseInfo $database, $name) {
 		$this->schema = strtoupper( $database->getSchema() );
 		parent::__construct($database, $name);
 		$this->name = strtoupper( $this->name );
 	}
-	
+
 	/** Loads the columns for this table. */
-	protected function initColumns() 
-	{
-		// To get all of the attributes we need, we'll actually do 
+	protected function initColumns() {
+		// To get all of the attributes we need, we'll actually do
 		// two separate queries.  The first gets names and default values
 		// the second will fill in some more details.
-		
+
 		$sql = "
 			SELECT column_name
 				, data_type
@@ -62,26 +41,25 @@ class OCI8TableInfo extends TableInfo {
 		while ( $row = $result->fetch() ) {
 			$row = array_change_key_case($row, CASE_LOWER);
 			$this->columns[$row['column_name']] = new ColumnInfo( $this
-				, $row['column_name']
-				, OCI8Types::getType($row['data_type'])
-				, $row['data_type']
-				, $row['data_length']
-				, $row['data_precision']
-				, $row['data_scale']
-				, $row['nullable']
-				, $row['data_default']
+					, $row['column_name']
+					, OCI8Types::getType($row['data_type'])
+					, $row['data_type']
+					, $row['data_length']
+					, $row['data_precision']
+					, $row['data_scale']
+					, $row['nullable']
+					, $row['data_default']
 			);
 		}
-				
+
 		$this->colsLoaded = true;
 	}
-	
+
 	/** Loads the primary key information for this table. */
-	protected function initPrimaryKey()
-	{
+	protected function initPrimaryKey() {
 		// columns have to be loaded first
 		if (!$this->colsLoaded) $this->initColumns();
-		
+
 
 		// Primary Keys Query
 		$sql = "SELECT a.owner, a.table_name,
@@ -91,7 +69,7 @@ class OCI8TableInfo extends TableInfo {
 						AND a.constraint_name = b.constraint_name
 						AND b.table_name = '{$this->name}'
 			AND b.owner = '{$this->schema}'
-			";
+				";
 
 		$result = $this->getDatabase()->getConnection()->query($sql);
 
@@ -106,14 +84,14 @@ class OCI8TableInfo extends TableInfo {
 
 			$this->primaryKey->addColumn($this->columns[$name]);
 		}
-		
+
 		$this->pkLoaded = true;
 	}
-	
+
 	/** Loads the indexes for this table. */
 	protected function initIndexes() {
 		// columns have to be loaded first
-		if (!$this->colsLoaded) $this->initColumns();		
+		if (!$this->colsLoaded) $this->initColumns();
 
 		// Indexes
 		$sql = "SELECT
@@ -150,16 +128,16 @@ class OCI8TableInfo extends TableInfo {
 
 			$this->indexes[$name]->addColumn($this->columns[ $index_col_name ]);
 		}
-		
-				
+
+
 		$this->indexesLoaded = true;
 	}
-	
+
 	/** Load foreign keys */
 	protected function initForeignKeys() {
 		// columns have to be loaded first
-		if (!$this->colsLoaded) $this->initColumns();		
-		
+		if (!$this->colsLoaded) $this->initColumns();
+
 		// Foreign keys
 		// TODO resolve cross schema references
 		// use all_cons... to do so, however, very slow queries then
@@ -185,7 +163,7 @@ class OCI8TableInfo extends TableInfo {
 				AND a.constraint_type='R'
 				AND a.table_name = '{$this->name}'
 				AND a.owner = '{$this->schema}'
-		";
+				";
 
 		$result = $this->getDatabase()->getConnection()->query($sql);
 
@@ -195,20 +173,19 @@ class OCI8TableInfo extends TableInfo {
 		while ( $row = $result->fetch() ) {
 			$row = array_change_key_case($row,CASE_LOWER);
 
-			$name = $row['foreign_key_name'];			
+			$name = $row['foreign_key_name'];
 
 			$foreignTable = $this->database->getTable($row['foreign_table']);
 			$foreignColumn = $foreignTable->getColumn($row['foreign_column']);
 
-			$localTable   = $this->database->getTable($row['local_table']);	
+			$localTable   = $this->database->getTable($row['local_table']);
 			$localColumn   = $localTable->getColumn($row['local_column']);
 
 			if (!isset($this->foreignKeys[$name])) {
 				$this->foreignKeys[$name] = new ForeignKeyInfo($name);
 			}
 
-			switch ( $row[ 'on_delete' ] )
-			{
+			switch ( $row[ 'on_delete' ] ) {
 				case 'CASCADE':
 					$onDelete	= ForeignKeyInfo::CASCADE;
 					break;
@@ -226,13 +203,13 @@ class OCI8TableInfo extends TableInfo {
 			// addReference( local, foreign, onDelete, onUpdate )
 			// Oracle doesn't support 'on update'
 			$this->foreignKeys[ $name ]->addReference(
-				$localColumn
-				, $foreignColumn
-				, $onDelete
+					$localColumn
+					, $foreignColumn
+					, $onDelete
 			);
 		}
-		
+
 		$this->fksLoaded = true;
 	}
-	
+
 }

@@ -1,25 +1,5 @@
 <?php
 
-/*
- *  $Id: TableInfo.php,v 1.16 2005/10/17 19:05:10 dlawson_mi Exp $
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information please see
- * <http://creole.phpdb.org>.
- */
-
 /**
  * Represents a table.
  *
@@ -28,7 +8,7 @@
  * @package   creole.metadata
  */
 abstract class TableInfo {
-
+	
 	protected $name;
 	protected $columns = array();
 	protected $foreignKeys = array();
@@ -83,8 +63,7 @@ abstract class TableInfo {
 	 * the serialization and unserialization of this object.
 	 * @return array The class variables that should be serialized (all must be public!).
 	 */
-	function __sleep()
-	{
+	function __sleep() {
 		return array('name', 'columns', 'foreignKeys', 'indexes', 'primaryKey');
 	}
 
@@ -92,8 +71,7 @@ abstract class TableInfo {
 	 * This "magic" method is invoked upon unserialize().
 	 * This method re-hydrates the object and restores the recursive hierarchy.
 	 */
-	function __wakeup()
-	{
+	function __wakeup() {
 		// restore chaining
 		foreach($this->columns as $col) {
 			$col->table = $this;
@@ -131,15 +109,16 @@ abstract class TableInfo {
 	//it must be asbtract and be implemented in every vendor specific driver,
 	//however since it's an experimental stuff it has an empty body in order
 	//not to break BC
-	/*abstract*/ protected function initVendorSpecificInfo(){}
+	/*abstract*/
+	protected function initVendorSpecificInfo() {
+	}
 
 	/**
 	 * Get parimary key in this table.
 	 * @throws Exception - if foreign keys are unsupported by DB.
 	 * @return array ForeignKeyInfo[]
 	 */
-	function getPrimaryKey()
-	{
+	function getPrimaryKey() {
 		if(!$this->pkLoaded) $this->initPrimaryKey();
 		return $this->primaryKey;
 	}
@@ -150,8 +129,7 @@ abstract class TableInfo {
 	 * @return ColumnInfo
 	 * @throws SQLException - if column does not exist for this table.
 	 */
-	function getColumn($name)
-	{
+	function getColumn($name) {
 		if(!$this->colsLoaded) $this->initColumns();
 		if (!isset($this->columns[$name])) {
 			throw new SQLException("Table `".$this->name."` has no column `".$name."`");
@@ -164,8 +142,7 @@ abstract class TableInfo {
 	 * @param string $name The column name.
 	 * @return boolean
 	 */
-	function hasColumn($name)
-	{
+	function hasColumn($name) {
 		if(!$this->colsLoaded) $this->initColumns();
 		return isset($this->columns[$name]);
 	}
@@ -174,8 +151,7 @@ abstract class TableInfo {
 	 * Get array of columns for this table.
 	 * @return array ColumnInfo[]
 	 */
-	function getColumns()
-	{
+	function getColumns() {
 		if(!$this->colsLoaded) $this->initColumns();
 		return array_values($this->columns); // re-key numerically
 	}
@@ -186,8 +162,7 @@ abstract class TableInfo {
 	 * @return ForeignKeyInfo
 	 * @throws SQLException - if fkey does not exist for this table.
 	 */
-	function getForeignKey($name)
-	{
+	function getForeignKey($name) {
 		if(!$this->fksLoaded) $this->initForeignKeys();
 		if (!isset($this->foreignKeys[$name])) {
 			throw new SQLException("Table `".$this->name."` has no foreign key `".$name."`");
@@ -199,8 +174,7 @@ abstract class TableInfo {
 	 * Get all foreign keys.
 	 * @return array ForeignKeyInfo[]
 	 */
-	function getForeignKeys()
-	{
+	function getForeignKeys() {
 		if(!$this->fksLoaded) $this->initForeignKeys();
 		return array_values($this->foreignKeys);
 	}
@@ -211,8 +185,7 @@ abstract class TableInfo {
 	 * @return IndexInfo
 	 * @throws SQLException - if index does not exist for this table.
 	 */
-	function getIndex($name)
-	{
+	function getIndex($name) {
 		if(!$this->indexesLoaded) $this->initIndexes();
 		if (!isset($this->indexes[$name])) {
 			throw new SQLException("Table `".$this->name."` has no index `".$name."`");
@@ -224,8 +197,7 @@ abstract class TableInfo {
 	 * Get array of IndexInfo objects for this table.
 	 * @return array IndexInfo[]
 	 */
-	function getIndexes()
-	{
+	function getIndexes() {
 		if(!$this->indexesLoaded) $this->initIndexes();
 		return array_values($this->indexes);
 	}
@@ -234,8 +206,7 @@ abstract class TableInfo {
 	 * Alias for getIndexes() method.
 	 * @return array
 	 */
-	function getIndices()
-	{
+	function getIndices() {
 		return $this->getIndexes();
 	}
 
@@ -243,40 +214,34 @@ abstract class TableInfo {
 	 * Get table name.
 	 * @return string
 	 */
-	function getName()
-	{
+	function getName() {
 		return $this->name;
 	}
 
 	/**
 	 * @return string
 	 */
-	function toString()
-	{
+	function toString() {
 		return $this->name;
 	}
 
 	/** Have foreign keys been loaded? */
-	function foreignKeysLoaded()
-	{
+	function foreignKeysLoaded() {
 		return $this->fksLoaded;
 	}
 
 	/** Has primary key info been loaded? */
-	function primaryKeyLoaded()
-	{
+	function primaryKeyLoaded() {
 		return $this->pkLoaded;
 	}
 
 	/** Have columns been loaded? */
-	function columnsLoaded()
-	{
+	function columnsLoaded() {
 		return $this->colsLoaded;
 	}
 
 	/** Has index information been loaded? */
-	function indexesLoaded()
-	{
+	function indexesLoaded() {
 		return $this->indexesLoaded;
 	}
 
@@ -284,15 +249,13 @@ abstract class TableInfo {
 	 * Get vendor specific optional information for this table.
 	 * @return array vendorSpecificInfo[]
 	 */
-	function getVendorSpecificInfo()
-	{
+	function getVendorSpecificInfo() {
 		if(!$this->vendorLoaded) $this->initVendorSpecificInfo();
 		return $this->vendorSpecificInfo;
 	}
 
 	/** Adds a column to this table. */
-	function addColumn(ColumnInfo $column)
-	{
+	function addColumn(ColumnInfo $column) {
 		$this->columns[$column->getName()] = $column;
 	}
 
@@ -300,8 +263,8 @@ abstract class TableInfo {
 	 * Get the parent DatabaseInfo object.
 	 * @return DatabaseInfo
 	 */
-	function getDatabase()
-	{
+	function getDatabase() {
 		return $this->database;
 	}
+
 }

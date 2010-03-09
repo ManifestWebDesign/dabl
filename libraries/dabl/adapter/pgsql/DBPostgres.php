@@ -1,25 +1,5 @@
 <?php
 
-/*
- *  $Id: DBPostgres.php 1011 2008-03-20 11:36:27Z hans $
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information please see
- * <http://propel.phpdb.org>.
- */
-
 /**
  * This is used to connect to PostgresQL databases.
  *
@@ -38,8 +18,7 @@ class DBPostgres extends DBAdapter {
 	 * @param	  string $in The string to transform to upper case.
 	 * @return	 string The upper case string.
 	 */
-	function toUpperCase($in)
-	{
+	function toUpperCase($in) {
 		return "UPPER(" . $in . ")";
 	}
 
@@ -49,8 +28,7 @@ class DBPostgres extends DBAdapter {
 	 * @param	  in The string whose case to ignore.
 	 * @return	 The string in a case that can be ignored.
 	 */
-	function ignoreCase($in)
-	{
+	function ignoreCase($in) {
 		return "UPPER(" . $in . ")";
 	}
 
@@ -61,8 +39,7 @@ class DBPostgres extends DBAdapter {
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	function concatString($s1, $s2)
-	{
+	function concatString($s1, $s2) {
 		return "($s1 || $s2)";
 	}
 
@@ -74,8 +51,7 @@ class DBPostgres extends DBAdapter {
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	function subString($s, $pos, $len)
-	{
+	function subString($s, $pos, $len) {
 		return "substring($s from $pos" . ($len > -1 ? "for $len" : "") . ")";
 	}
 
@@ -85,24 +61,21 @@ class DBPostgres extends DBAdapter {
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	function strLength($s)
-	{
+	function strLength($s) {
 		return "char_length($s)";
 	}
 
 	/**
 	 * @see		DBAdapter::getIdMethod()
 	 */
-	protected function getIdMethod()
-	{
+	protected function getIdMethod() {
 		return DBAdapter::ID_METHOD_SEQUENCE;
 	}
 
 	/**
 	 * Gets ID for specified sequence name.
 	 */
-	function getId($name = null)
-	{
+	function getId($name = null) {
 		if ($name === null) {
 			throw new Exception("Unable to fetch next sequence ID without sequence name.");
 		}
@@ -115,8 +88,7 @@ class DBPostgres extends DBAdapter {
 	 * Returns timestamp formatter string for use in date() function.
 	 * @return	 string
 	 */
-	function getTimestampFormatter()
-	{
+	function getTimestampFormatter() {
 		return "Y-m-d H:i:s O";
 	}
 
@@ -124,16 +96,14 @@ class DBPostgres extends DBAdapter {
 	 * Returns timestamp formatter string for use in date() function.
 	 * @return	 string
 	 */
-	function getTimeFormatter()
-	{
+	function getTimeFormatter() {
 		return "H:i:s O";
 	}
 
 	/**
 	 * @see		DBAdapter::applyLimit()
 	 */
-	function applyLimit(&$sql, $offset, $limit)
-	{
+	function applyLimit(&$sql, $offset, $limit) {
 		if ( $limit > 0 ) {
 			$sql .= " LIMIT ".$limit;
 		}
@@ -141,12 +111,11 @@ class DBPostgres extends DBAdapter {
 			$sql .= " OFFSET ".$offset;
 		}
 	}
-	
+
 	/**
 	 * @see		DBAdapter::random()
 	 */
-	function random($seed=NULL)
-	{
+	function random($seed=NULL) {
 		return 'random()';
 	}
 }

@@ -1,23 +1,4 @@
 <?php
-/*
- *  $Id: MySQLTableInfo.php,v 1.20 2006/01/17 19:44:39 hlellelid Exp $
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information please see
- * <http://creole.phpdb.org>.
- */
 
 /**
  * MySQL implementation of TableInfo.
@@ -29,14 +10,12 @@
 class MySQLTableInfo extends TableInfo {
 
 	/** Loads the columns for this table. */
-	protected function initColumns()
-	{
+	protected function initColumns() {
 		// To get all of the attributes we need, we use
 		// the MySQL "SHOW COLUMNS FROM $tablename" SQL.  We cannot
 		// use the API functions (e.g. mysql_list_fields() because they
 		// do not return complete information -- e.g. precision / scale, default
 		// values).
-
 		$res = $this->getDatabase()->getConnection()->query("SHOW COLUMNS FROM `" . $this->name . "`");
 
 		$defaults = array();
@@ -50,7 +29,7 @@ class MySQLTableInfo extends TableInfo {
 			$size = null;
 			$precision = null;
 			$scale = null;
-			
+
 			if (preg_match('/^(\w+)[\(]?([\d,]*)[\)]?( |$)/', $row['Type'], $matches)) {
 				//			colname[1]   size/precision[2]
 				$nativeType = $matches[1];
@@ -71,24 +50,23 @@ class MySQLTableInfo extends TableInfo {
 			//BLOBs can't have any default values in MySQL
 			$default = preg_match('~blob|text~', $nativeType) ? null : $row['Default'];
 			$this->columns[$name] = new ColumnInfo($this,
-													 $name,
-													 MySQLTypes::getType($nativeType),
-													 $nativeType,
-													 $size,
-													 $precision,
-													 $scale,
-													 $is_nullable,
-													 $default,
-													 $is_auto_increment,
-													 $row);
+					$name,
+					MySQLTypes::getType($nativeType),
+					$nativeType,
+					$size,
+					$precision,
+					$scale,
+					$is_nullable,
+					$default,
+					$is_auto_increment,
+					$row);
 		}
 
 		$this->colsLoaded = true;
 	}
 
 	/** Loads the primary key information for this table. */
-	protected function initPrimaryKey()
-	{
+	protected function initPrimaryKey() {
 		// columns have to be loaded first
 		if (!$this->colsLoaded) $this->initColumns();
 
@@ -97,7 +75,6 @@ class MySQLTableInfo extends TableInfo {
 
 		// Loop through the returned results, grouping the same key_name together
 		// adding each column for that key.
-
 		while($row = $res->fetch()) {
 			// Skip any non-primary keys.
 			if ($row['Key_name'] !== 'PRIMARY') {
@@ -123,7 +100,6 @@ class MySQLTableInfo extends TableInfo {
 
 		// Loop through the returned results, grouping the same key_name together
 		// adding each column for that key.
-
 		while($row = $res->fetch()) {
 			$colName = $row["Column_name"];
 			$name = $row["Key_name"];
@@ -142,83 +118,82 @@ class MySQLTableInfo extends TableInfo {
 		$this->indexesLoaded = true;
 	}
 
-  /**
-   * Load foreign keys for supporting versions of MySQL.
-   * @author Tony Bibbs
-   */
-  protected function initForeignKeys() {
+	/**
+	 * Load foreign keys for supporting versions of MySQL.
+	 * @author Tony Bibbs
+	 */
+	protected function initForeignKeys() {
 
-	// First make sure we have supported version of MySQL:
-	$res = $this->getDatabase()->getConnection()->query("SELECT VERSION()");
-	$row = $res->fetch();
+		// First make sure we have supported version of MySQL:
+		$res = $this->getDatabase()->getConnection()->query("SELECT VERSION()");
+		$row = $res->fetch();
 
-	// Yes, it is OK to hardcode this...this was the first version of MySQL
-	// that supported foreign keys
-	if ($row[0] < '3.23.44') {
-		 $this->fksLoaded = true;
-		 return;
-	}
+		// Yes, it is OK to hardcode this...this was the first version of MySQL
+		// that supported foreign keys
+		if ($row[0] < '3.23.44') {
+			$this->fksLoaded = true;
+			return;
+		}
 
-	// columns have to be loaded first
-	if (!$this->colsLoaded) $this->initColumns();
-	
-	 // Get the CREATE TABLE syntax
-	$res = $this->getDatabase()->getConnection()->query("SHOW CREATE TABLE `" . $this->name . "`");
-	$row = $res->fetch();
+		// columns have to be loaded first
+		if (!$this->colsLoaded) $this->initColumns();
 
-	// Get the information on all the foreign keys
-	$regEx = '/FOREIGN KEY \(`([^`]*)`\) REFERENCES `([^`]*)` \(`([^`]*)`\)(.*)/';
-	if (preg_match_all($regEx,$row[1],$matches)) {
-		$tmpArray = array_keys($matches[0]);
-		foreach ($tmpArray as $curKey) {
-			$name = $matches[1][$curKey];
-			$ftbl = $matches[2][$curKey];
-			$fcol = $matches[3][$curKey];
-			$fkey = $matches[4][$curKey];
-			if (!isset($this->foreignKeys[$name])) {
-				$this->foreignKeys[$name] = new ForeignKeyInfo($name);
-				if ($this->database->hasTable($ftbl)) {
-					$foreignTable = $this->database->getTable($ftbl);
-				} else {
-					$foreignTable = new MySQLTableInfo($this->database, $ftbl);
-					$this->database->addTable($foreignTable);
-				}
-				if ($foreignTable->hasColumn($fcol)) {
-					$foreignCol = $foreignTable->getColumn($fcol);
-				} else {
-					$foreignCol = new ColumnInfo($foreignTable, $fcol);
-					$foreignTable->addColumn($foreignCol);
-				}
+		// Get the CREATE TABLE syntax
+		$res = $this->getDatabase()->getConnection()->query("SHOW CREATE TABLE `" . $this->name . "`");
+		$row = $res->fetch();
 
-				//typical for mysql is RESTRICT
-				$fkactions = array(
-				'ON DELETE'	=> ForeignKeyInfo::RESTRICT,
-				'ON UPDATE'	=> ForeignKeyInfo::RESTRICT,
-				);
+		// Get the information on all the foreign keys
+		$regEx = '/FOREIGN KEY \(`([^`]*)`\) REFERENCES `([^`]*)` \(`([^`]*)`\)(.*)/';
+		if (preg_match_all($regEx,$row[1],$matches)) {
+			$tmpArray = array_keys($matches[0]);
+			foreach ($tmpArray as $curKey) {
+				$name = $matches[1][$curKey];
+				$ftbl = $matches[2][$curKey];
+				$fcol = $matches[3][$curKey];
+				$fkey = $matches[4][$curKey];
+				if (!isset($this->foreignKeys[$name])) {
+					$this->foreignKeys[$name] = new ForeignKeyInfo($name);
+					if ($this->database->hasTable($ftbl)) {
+						$foreignTable = $this->database->getTable($ftbl);
+					} else {
+						$foreignTable = new MySQLTableInfo($this->database, $ftbl);
+						$this->database->addTable($foreignTable);
+					}
+					if ($foreignTable->hasColumn($fcol)) {
+						$foreignCol = $foreignTable->getColumn($fcol);
+					} else {
+						$foreignCol = new ColumnInfo($foreignTable, $fcol);
+						$foreignTable->addColumn($foreignCol);
+					}
 
-				if ($fkey) {
-					//split foreign key information -> search for ON DELETE and afterwords for ON UPDATE action
-					foreach (array_keys($fkactions) as $fkaction) {
-						$result = NULL;
-						preg_match('/' . $fkaction . ' (' . ForeignKeyInfo::CASCADE . '|' . ForeignKeyInfo::SETNULL . ')/', $fkey, $result);
-						if ($result && is_array($result) && isset($result[1])) {
-							$fkactions[$fkaction] = $result[1];
+					//typical for mysql is RESTRICT
+					$fkactions = array(
+							'ON DELETE'	=> ForeignKeyInfo::RESTRICT,
+							'ON UPDATE'	=> ForeignKeyInfo::RESTRICT,
+					);
+
+					if ($fkey) {
+						//split foreign key information -> search for ON DELETE and afterwords for ON UPDATE action
+						foreach (array_keys($fkactions) as $fkaction) {
+							$result = NULL;
+							preg_match('/' . $fkaction . ' (' . ForeignKeyInfo::CASCADE . '|' . ForeignKeyInfo::SETNULL . ')/', $fkey, $result);
+							if ($result && is_array($result) && isset($result[1])) {
+								$fkactions[$fkaction] = $result[1];
+							}
 						}
 					}
+					$this->foreignKeys[$name]->addReference($this->columns[$name], $foreignCol, $fkactions['ON DELETE'], $fkactions['ON UPDATE']);
 				}
-				$this->foreignKeys[$name]->addReference($this->columns[$name], $foreignCol, $fkactions['ON DELETE'], $fkactions['ON UPDATE']);
 			}
 		}
-	}
-	$this->fksLoaded = true;
-	
-  }
+		$this->fksLoaded = true;
 
-  protected function initVendorSpecificInfo()
-  {
+	}
+
+	protected function initVendorSpecificInfo() {
 		$res = $this->getDatabase()->getConnection()->query("SHOW TABLE STATUS LIKE '" . $this->name . "'");
 		$this->vendorSpecificInfo = $res->fetch();
 		$this->vendorLoaded = true;
-  }
+	}
 
 }

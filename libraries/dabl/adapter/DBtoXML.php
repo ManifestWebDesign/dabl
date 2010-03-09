@@ -5,26 +5,6 @@
  * from the Propel Generator
 */
 
-/*
- *  $Id: PropelCreoleTransformTask.php 989 2008-03-11 14:29:30Z heltem $
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information please see
- * <http://propel.phpdb.org>.
-*/
-
 /**
  * This class generates an XML schema of an existing database from
  * Creole metadata.
@@ -122,13 +102,13 @@ class DBtoXML {
 	 * @var        array
 	 */
 	static protected $validatorBitMap = array (
-			'none' => self::VALIDATORS_NONE,
-			'maxlength' => self::VALIDATORS_MAXLENGTH,
-			'maxvalue' => self::VALIDATORS_MAXVALUE,
-			'type' => self::VALIDATORS_TYPE,
-			'required' => self::VALIDATORS_REQUIRED,
-			'unique' => self::VALIDATORS_UNIQUE,
-			'all' => self::VALIDATORS_ALL,
+		'none' => self::VALIDATORS_NONE,
+		'maxlength' => self::VALIDATORS_MAXLENGTH,
+		'maxvalue' => self::VALIDATORS_MAXVALUE,
+		'type' => self::VALIDATORS_TYPE,
+		'required' => self::VALIDATORS_REQUIRED,
+		'unique' => self::VALIDATORS_UNIQUE,
+		'all' => self::VALIDATORS_ALL,
 	);
 
 	/**
@@ -138,26 +118,26 @@ class DBtoXML {
 	 * @var        array
 	 */
 	static protected $validatorMessages = array (
-			'maxlength' => array (
-							'msg' => 'The field %s must be not longer than %s characters.',
-							'var' => array('colName', 'value')
-			),
-			'maxvalue' => array (
-							'msg' => 'The field %s must be not greater than %s.',
-							'var' => array('colName', 'value')
-			),
-			'type' => array (
-							'msg' => 'The field %s is not a valid value.',
-							'var' => array('colName')
-			),
-			'required' => array (
-							'msg' => 'The field %s is required.',
-							'var' => array('colName')
-			),
-			'unique' => array (
-							'msg' => 'This %s already exists in table %s.',
-							'var' => array('colName', 'tableName')
-			),
+		'maxlength' => array (
+			'msg' => 'The field %s must be not longer than %s characters.',
+			'var' => array('colName', 'value')
+		),
+		'maxvalue' => array (
+			'msg' => 'The field %s must be not greater than %s.',
+			'var' => array('colName', 'value')
+		),
+		'type' => array (
+			'msg' => 'The field %s is not a valid value.',
+			'var' => array('colName')
+		),
+		'required' => array (
+			'msg' => 'The field %s is required.',
+			'var' => array('colName')
+		),
+		'unique' => array (
+			'msg' => 'This %s already exists in table %s.',
+			'var' => array('colName', 'tableName')
+		),
 	);
 
 	function setDbEncoding($v) {

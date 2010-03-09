@@ -1,25 +1,5 @@
 <?php
 
-/*
-*  $Id: DBMSSQL.php 989 2008-03-11 14:29:30Z heltem $
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-* A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-* OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-* SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-* LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-* DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-* THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*
-* This software consists of voluntary contributions made by many individuals
-* and is licensed under the LGPL. For more information please see
-* <http://propel.phpdb.org>.
-*/
-
 /**
  * This is used to connect to a MSSQL database.
  *
@@ -35,8 +15,7 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  in The string to transform to upper case.
 	 * @return	 The upper case string.
 	 */
-	function toUpperCase($in)
-	{
+	function toUpperCase($in){
 		return "UPPER(" . $in . ")";
 	}
 
@@ -46,8 +25,7 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  in The string whose case to ignore.
 	 * @return	 The string in a case that can be ignored.
 	 */
-	function ignoreCase($in)
-	{
+	function ignoreCase($in){
 		return "UPPER(" . $in . ")";
 	}
 
@@ -58,8 +36,7 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	function concatString($s1, $s2)
-	{
+	function concatString($s1, $s2){
 		return "($s1 + $s2)";
 	}
 
@@ -71,8 +48,7 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	function subString($s, $pos, $len)
-	{
+	function subString($s, $pos, $len){
 		return "SUBSTRING($s, $pos, $len)";
 	}
 
@@ -82,24 +58,21 @@ class DBMSSQL extends DBAdapter {
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	function strLength($s)
-	{
+	function strLength($s){
 		return "LEN($s)";
 	}
 
 	/**
 	 * @see		DBAdapter::quoteIdentifier()
 	 */
-	function quoteIdentifier($text)
-	{
+	function quoteIdentifier($text){
 		return '[' . $text . ']';
 	}
 
 	/**
 	 * @see		DBAdapter::random()
 	 */
-	function random($seed = null)
-	{
+	function random($seed = null){
 		return 'rand('.((int) $seed).')';
 	}
 
@@ -109,8 +82,7 @@ class DBMSSQL extends DBAdapter {
 	* @see		DBAdapter::applyLimit()
 	* @author	 Justin Carlson <justin.carlson@gmail.com>
 	*/
-	function applyLimit(&$sql, $offset, $limit)
-	{
+	function applyLimit(&$sql, $offset, $limit){
 		// make sure offset and limit are numeric
 		if (!is_numeric($offset) || !is_numeric($limit)){
 			throw new Exception("DBMSSQL ::applyLimit() expects a number for argument 2 and 3");
@@ -118,8 +90,7 @@ class DBMSSQL extends DBAdapter {
 
 		// obtain the original select statement
 		preg_match('/\A(.*)select(.*)from/si',$sql,$select_segment);
-		if (count($select_segment)>0)
-		{
+		if (count($select_segment)>0){
 			$original_select = $select_segment[0];
 		} else {
 			throw new Exception("DBMSSQL ::applyLimit() could not locate the select statement at the start of the query. ");
@@ -128,28 +99,23 @@ class DBMSSQL extends DBAdapter {
 
 		// obtain the original order by clause, or create one if there isn't one
 		preg_match('/order by(.*)\Z/si',$sql,$order_segment);
-		if (count($order_segment)>0)
-		{
+		if (count($order_segment)>0){
 			$order_by = $order_segment[0];
 		} else {
 
 			// no order by clause, if there are columns we can attempt to sort by the columns in the select statement
 			$select_items = split(',',$modified_select);
-			if (count($select_items)>0)
-			{
+			if (count($select_items)>0){
 				$item_number = 0;
 				$order_by = null;
-				while ($order_by === null && $item_number<count($select_items))
-				{
-					if ($select_items[$item_number]!='*' && !strstr($select_items[$item_number],'('))
-					{
+				while ($order_by === null && $item_number<count($select_items)){
+					if ($select_items[$item_number]!='*' && !strstr($select_items[$item_number],'(')){
 						$order_by = 'order by ' . $select_items[0] . ' asc';
 					}
 					$item_number++;
 				}
 			}
-			if ($order_by === null)
-			{
+			if ($order_by === null){
 				throw new Exception("DBMSSQL ::applyLimit() could not locate the order by statement at the end of your query or any columns at the start of your query. ");
 			} else {
 				$sql.= ' ' . $order_by;
@@ -165,8 +131,7 @@ class DBMSSQL extends DBAdapter {
 		$order_columns = split(',',str_ireplace('order by ','',$order_by));
 		$original_order_by = $order_by;
 		$order_by = '';
-		foreach ($order_columns as $column)
-		{
+		foreach ($order_columns as $column){
 			// strip "table." from order by columns
 			$column = array_reverse(split("\.",$column));
 			$column = $column[0];
@@ -178,8 +143,7 @@ class DBMSSQL extends DBAdapter {
 			}
 
 			// put together order for paging wrapper
-			if (stristr($column,' desc'))
-			{
+			if (stristr($column,' desc')){
 				$order_by .= $column;
 				$inverted_order .= str_ireplace(' desc',' asc',$column);
 			} elseif (stristr($column,' asc')) {
@@ -206,11 +170,9 @@ class DBMSSQL extends DBAdapter {
 	function lastInsertId() {
 		$query = "SELECT scope_identity() as ID";
 		$result = $this->query($query);
-		foreach($result as $r)
-		{
+		foreach($result as $r){
 			return (int)$r['ID'];
 		}
-		
 	}
 
 }

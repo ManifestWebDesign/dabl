@@ -1,25 +1,5 @@
 <?php
 
-/*
- *  $Id: DBOracle.php 718 2007-10-26 01:31:34Z heltem $
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information please see
- * <http://propel.phpdb.org>.
- */
-
 /**
  * Oracle adapter.
  *
@@ -40,8 +20,7 @@ class DBOracle extends DBAdapter {
 	 * @param	  string $in The string to transform to upper case.
 	 * @return	 string The upper case string.
 	 */
-	function toUpperCase($in)
-	{
+	function toUpperCase($in){
 		return "UPPER(" . $in . ")";
 	}
 
@@ -51,8 +30,7 @@ class DBOracle extends DBAdapter {
 	 * @param	  string $in The string whose case to ignore.
 	 * @return	 string The string in a case that can be ignored.
 	 */
-	function ignoreCase($in)
-	{
+	function ignoreCase($in){
 		return "UPPER(" . $in . ")";
 	}
 
@@ -63,8 +41,7 @@ class DBOracle extends DBAdapter {
 	 * @param	  string String to append.
 	 * @return	 string
 	 */
-	function concatString($s1, $s2)
-	{
+	function concatString($s1, $s2){
 		return "CONCAT($s1, $s2)";
 	}
 
@@ -76,8 +53,7 @@ class DBOracle extends DBAdapter {
 	 * @param	  int Number of characters to extract.
 	 * @return	 string
 	 */
-	function subString($s, $pos, $len)
-	{
+	function subString($s, $pos, $len){
 		return "SUBSTR($s, $pos, $len)";
 	}
 
@@ -87,16 +63,14 @@ class DBOracle extends DBAdapter {
 	 * @param	  string String to calculate length of.
 	 * @return	 string
 	 */
-	function strLength($s)
-	{
+	function strLength($s){
 		return "LENGTH($s)";
 	}
 
 	/**
 	 * @see		DBAdapter::applyLimit()
 	 */
-	function applyLimit(&$sql, $offset, $limit)
-	{
+	function applyLimit(&$sql, $offset, $limit){
 		 $sql =
 			'SELECT B.* FROM (  '
 			.  'SELECT A.*, rownum AS PROPEL$ROWNUM FROM (  '
@@ -117,13 +91,11 @@ class DBOracle extends DBAdapter {
 		}
 	}
 
-	protected function getIdMethod()
-	{
+	protected function getIdMethod(){
 		return DBAdapter::ID_METHOD_SEQUENCE;
 	}
 
-	function getId($name = null)
-	{
+	function getId($name = null){
 		if ($name === null) {
 			throw new Exception("Unable to fetch next sequence ID without sequence name.");
 		}
@@ -134,10 +106,8 @@ class DBOracle extends DBAdapter {
 		return $row[0];
 	}
 
-	function random($seed=NULL)
-	{
+	function random($seed=NULL){
 		return 'dbms_random.value';
 	}
-
 
 }

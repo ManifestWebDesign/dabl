@@ -1,25 +1,5 @@
 <?php
 
-/*
- *  $Id: ColumnInfo.php,v 1.13 2005/02/25 15:47:02 pachanga Exp $
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information please see
- * <http://creole.phpdb.org>.
- */
-
 /**
  * Represents a Column.
  *
@@ -29,10 +9,10 @@
  */
 class ColumnInfo {
 
-	 // FIXME
-	 //	- Currently all member attributes are public.  This should be fixed
-	 // when PHP's magic __sleep() and __wakeup() functions & serialization support
-	 // handles protected/private members. (if ever)
+	// FIXME
+	//	- Currently all member attributes are public.  This should be fixed
+	// when PHP's magic __sleep() and __wakeup() functions & serialization support
+	// handles protected/private members. (if ever)
 
 	/** Column name */
 	public $name;
@@ -45,7 +25,7 @@ class ColumnInfo {
 
 	/** Column length */
 	public $size;
-	
+
 	/** Column presision */
 	public $precision;
 
@@ -84,18 +64,17 @@ class ColumnInfo {
 	 * @param boolean $is_auto_increment Whether col is of autoIncrement type.
 	 */
 	function __construct(TableInfo
-						 $table,
-						 $name,
-						 $type = null,
-						 $nativeType = null,
-						 $size = null,
-						 $precision=null,
-						 $scale = null,
-						 $is_nullable = null,
-						 $default = null,
-						 $is_auto_increment = null,
-						 $vendorInfo = array())
-	{
+			$table,
+			$name,
+			$type = null,
+			$nativeType = null,
+			$size = null,
+			$precision=null,
+			$scale = null,
+			$is_nullable = null,
+			$default = null,
+			$is_auto_increment = null,
+			$vendorInfo = array()) {
 		$this->table = $table;
 		$this->name = $name;
 		$this->type = $type;
@@ -115,8 +94,7 @@ class ColumnInfo {
 	 * the serialization and unserialization of this object.
 	 * @return array The class variables that should be serialized (all must be public!).
 	 */
-	function __sleep()
-	{
+	function __sleep() {
 		return array('name', 'type', 'nativeType', 'size', 'precision', 'isNullable', 'defaultValue');
 	}
 
@@ -124,8 +102,7 @@ class ColumnInfo {
 	 * Get column name.
 	 * @return string
 	 */
-	function getName()
-	{
+	function getName() {
 		return $this->name;
 	}
 
@@ -133,17 +110,15 @@ class ColumnInfo {
 	 * Get column type.
 	 * @return int
 	 */
-	function getType()
-	{
+	function getType() {
 		return $this->type;
 	}
-
+	
 	/**
 	 * Gets the native type name.
 	 * @return string
 	 */
-	function getNativeType()
-	{
+	function getNativeType() {
 		return $this->nativeType;
 	}
 
@@ -151,8 +126,7 @@ class ColumnInfo {
 	 * Get column size.
 	 * @return int
 	 */
-	function getSize()
-	{
+	function getSize() {
 		return $this->size;
 	}
 
@@ -160,8 +134,7 @@ class ColumnInfo {
 	 * Get column precision.
 	 * @return int
 	 */
-	function getPrecision()
-	{
+	function getPrecision() {
 		return $this->precision;
 	}
 
@@ -171,8 +144,7 @@ class ColumnInfo {
 	 * to as precision, but precision is the total number of digits (i.e. length).
 	 * @return int
 	 */
-	function getScale()
-	{
+	function getScale() {
 		return $this->scale;
 	}
 
@@ -180,8 +152,7 @@ class ColumnInfo {
 	 * Get the default value.
 	 * @return mixed
 	 */
-	function getDefaultValue()
-	{
+	function getDefaultValue() {
 		return $this->defaultValue;
 	}
 
@@ -189,8 +160,7 @@ class ColumnInfo {
 	 * Is column nullable?
 	 * @return boolean
 	 */
-	function isNullable()
-	{
+	function isNullable() {
 		return $this->isNullable;
 	}
 
@@ -198,8 +168,7 @@ class ColumnInfo {
 	 * Is column of autoincrement type?
 	 * @return boolean
 	 */
-	function isAutoIncrement()
-	{
+	function isAutoIncrement() {
 		return $this->isAutoIncrement === true;
 	}
 
@@ -207,16 +176,14 @@ class ColumnInfo {
 	 * Get vendor specific optional information for this column.
 	 * @return array vendorSpecificInfo[]
 	 */
-	function getVendorSpecificInfo()
-	{
+	function getVendorSpecificInfo() {
 		return $this->vendorSpecificInfo;
 	}
 
 	/**
 	 * @return string
 	 */
-	function toString()
-	{
+	function toString() {
 		return $this->name;
 	}
 
@@ -224,8 +191,7 @@ class ColumnInfo {
 	 * Get parent table.
 	 * @return TableInfo
 	 */
-	function getTable()
-	{
+	function getTable() {
 		return $this->table;
 	}
 

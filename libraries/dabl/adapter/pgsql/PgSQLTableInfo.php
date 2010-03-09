@@ -1,23 +1,4 @@
 <?php
-/*
- *  $Id: PgSQLTableInfo.php,v 1.31 2006/01/17 19:44:40 hlellelid Exp $
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information please see
- * <http://creole.phpdb.org>.
- */
 
 /**
  * PgSQL implementation of TableInfo.
@@ -36,13 +17,13 @@
  * @package   creole.drivers.pgsql.metadata
  */
 class PgSQLTableInfo extends TableInfo {
-	
+
 	/**
 	 * Database Version.
 	 * @var String
 	 */
 	private $version;
-	
+
 	/**
 	 * Table OID
 	 * @var Integer
@@ -66,7 +47,7 @@ class PgSQLTableInfo extends TableInfo {
 
 		// Get the columns, types, etc.
 		// Based on code from pgAdmin3 (http://www.pgadmin.org/)
-		$sql = sprintf ("SELECT 
+		$sql = sprintf ("SELECT
 							att.attname,
 							att.atttypmod,
 							att.atthasdef,
@@ -91,20 +72,18 @@ class PgSQLTableInfo extends TableInfo {
 		$result = $this->getDatabase()->getConnection()->query($sql);
 
 		while($row = $result->fetch()) {
-			
+
 			$size = null;
 			$precision = null;
 			$scale = null;
-			
+
 			// Check to ensure that this column isn't an array data type
-			if (((int) $row['isarray']) === 1)
-			{
+			if (((int) $row['isarray']) === 1) {
 				throw new Exception (sprintf ("Array datatypes are not currently supported [%s.%s]", $this->name, $row['attname']));
 			} // if (((int) $row['isarray']) === 1)
 			$name = $row['attname'];
 			// If they type is a domain, Process it
-			if (strtolower ($row['typtype']) == 'd')
-			{
+			if (strtolower ($row['typtype']) == 'd') {
 				$arrDomain = $this->processDomain ($row['typname']);
 				$type = $arrDomain['type'];
 				$size = $arrDomain['length'];
@@ -115,8 +94,7 @@ class PgSQLTableInfo extends TableInfo {
 				$is_nullable = (strlen (trim ($row['attnotnull'])) > 0) ? $row['attnotnull'] : $arrDomain['notnull'];
 				$is_nullable = (($is_nullable == 't') ? false : true);
 			} // if (strtolower ($row['typtype']) == 'd')
-			else
-			{
+			else {
 				$type = $row['typname'];
 				$arrLengthPrecision = $this->processLengthScale ($row['atttypmod'], $type);
 				$size = $arrLengthPrecision['length'];
@@ -128,23 +106,19 @@ class PgSQLTableInfo extends TableInfo {
 			} // else (strtolower ($row['typtype']) == 'd')
 
 			$autoincrement = null;
-					   
+
 			// if column has a default
-			if (($boolHasDefault == 't') && (strlen (trim ($default)) > 0))
-			{
-				if (!preg_match('/^nextval\(/', $default))
-				{
+			if (($boolHasDefault == 't') && (strlen (trim ($default)) > 0)) {
+				if (!preg_match('/^nextval\(/', $default)) {
 					$strDefault= preg_replace ('/::[\W\D]*/', '', $default);
 					$default = str_replace ("'", '', $strDefault);
 				} // if (!preg_match('/^nextval\(/', $row['atthasdef']))
-				else
-				{
+				else {
 					$autoincrement = true;
 					$default = null;
 				} // else
 			} // if (($boolHasDefault == 't') && (strlen (trim ($default)) > 0))
-			else
-			{
+			else {
 				$default = null;
 			} // else (($boolHasDefault == 't') && (strlen (trim ($default)) > 0))
 
@@ -154,47 +128,39 @@ class PgSQLTableInfo extends TableInfo {
 		$this->colsLoaded = true;
 	} // protected function initColumns ()
 
-	private function processLengthScale ($intTypmod, $strName)
-	{
+	private function processLengthScale ($intTypmod, $strName) {
 		// Define the return array
 		$arrRetVal = array ('length'=>null, 'scale'=>null);
 
 		// Some datatypes don't have a Typmod
-		if ($intTypmod == -1)
-		{
+		if ($intTypmod == -1) {
 			return $arrRetVal;
 		} // if ($intTypmod == -1)
 
 		// Numeric Datatype?
-		if ($strName == PgSQLTypes::getNativeType (CreoleTypes::NUMERIC))
-		{
+		if ($strName == PgSQLTypes::getNativeType (CreoleTypes::NUMERIC)) {
 			$intLen = ($intTypmod - 4) >> 16;
 			$intPrec = ($intTypmod - 4) & 0xffff;
 			$intLen = sprintf ("%ld", $intLen);
-			if ($intPrec)
-			{
+			if ($intPrec) {
 				$intPrec = sprintf ("%ld", $intPrec);
 			} // if ($intPrec)
 			$arrRetVal['length'] = $intLen;
 			$arrRetVal['scale'] = $intPrec;
 		} // if ($strName == PgSQLTypes::getNativeType (CreoleTypes::NUMERIC))
 		elseif ($strName == PgSQLTypes::getNativeType (CreoleTypes::TIME) || $strName == 'timetz'
-			|| $strName == PgSQLTypes::getNativeType (CreoleTypes::TIMESTAMP) || $strName == 'timestamptz'
-			|| $strName == 'interval' || $strName == 'bit')
-		{
+				|| $strName == PgSQLTypes::getNativeType (CreoleTypes::TIMESTAMP) || $strName == 'timestamptz'
+				|| $strName == 'interval' || $strName == 'bit') {
 			$arrRetVal['length'] = sprintf ("%ld", $intTypmod);
 		} // elseif (TIME, TIMESTAMP, INTERVAL, BIT)
-		else
-		{
+		else {
 			$arrRetVal['length'] = sprintf ("%ld", ($intTypmod - 4));
 		} // else
 		return $arrRetVal;
 	} // private function processLengthScale ($intTypmod, $strName)
 
-	private function processDomain ($strDomain)
-	{
-		if (strlen (trim ($strDomain)) < 1)
-		{
+	private function processDomain ($strDomain) {
+		if (strlen (trim ($strDomain)) < 1) {
 			throw new Exception ("Invalid domain name [" . $strDomain . "]");
 		} // if (strlen (trim ($strDomain)) < 1)
 
@@ -213,7 +179,7 @@ class PgSQLTableInfo extends TableInfo {
 						ORDER BY d.typname", $strDomain);
 		$result = $this->getDatabase()->getConnection()->query($sql);
 		$row = $result->fetch();
-		if (!$row){
+		if (!$row) {
 			throw new Exception ("Domain [" . $strDomain . "] not found.");
 		} // if (!$row)
 		$arrDomain = array ();
@@ -230,8 +196,7 @@ class PgSQLTableInfo extends TableInfo {
 	} // private function processDomain ($strDomain)
 
 	/** Load foreign keys for this table. */
-	protected function initForeignKeys()
-	{
+	protected function initForeignKeys() {
 		$sql =  sprintf ("SELECT
 							  conname,
 							  confupdtype,
@@ -262,33 +227,43 @@ class PgSQLTableInfo extends TableInfo {
 
 			// On Update
 			switch ($row['confupdtype']) {
-			  case 'c':
-				$onupdate = ForeignKeyInfo::CASCADE; break;
-			  case 'd':
-				$onupdate = ForeignKeyInfo::SETDEFAULT; break;
-			  case 'n':
-				$onupdate = ForeignKeyInfo::SETNULL; break;
-			  case 'r':
-				$onupdate = ForeignKeyInfo::RESTRICT; break;
-			  default:
-			  case 'a':
+				case 'c':
+					$onupdate = ForeignKeyInfo::CASCADE;
+					break;
+				case 'd':
+					$onupdate = ForeignKeyInfo::SETDEFAULT;
+					break;
+				case 'n':
+					$onupdate = ForeignKeyInfo::SETNULL;
+					break;
+				case 'r':
+					$onupdate = ForeignKeyInfo::RESTRICT;
+					break;
+				default:
+				case 'a':
 				//NOACTION is the postgresql default
-				$onupdate = ForeignKeyInfo::NONE; break;
+					$onupdate = ForeignKeyInfo::NONE;
+					break;
 			}
 			// On Delete
 			switch ($row['confdeltype']) {
-			  case 'c':
-				$ondelete = ForeignKeyInfo::CASCADE; break;
-			  case 'd':
-				$ondelete = ForeignKeyInfo::SETDEFAULT; break;
-			  case 'n':
-				$ondelete = ForeignKeyInfo::SETNULL; break;
-			  case 'r':
-				$ondelete = ForeignKeyInfo::RESTRICT; break;
-			  default:
-			  case 'a':
+				case 'c':
+					$ondelete = ForeignKeyInfo::CASCADE;
+					break;
+				case 'd':
+					$ondelete = ForeignKeyInfo::SETDEFAULT;
+					break;
+				case 'n':
+					$ondelete = ForeignKeyInfo::SETNULL;
+					break;
+				case 'r':
+					$ondelete = ForeignKeyInfo::RESTRICT;
+					break;
+				default:
+				case 'a':
 				//NOACTION is the postgresql default
-				$ondelete = ForeignKeyInfo::NONE; break;
+					$ondelete = ForeignKeyInfo::NONE;
+					break;
 			}
 
 
@@ -308,12 +283,11 @@ class PgSQLTableInfo extends TableInfo {
 	}
 
 	/** Load indexes for this table */
-	protected function initIndexes()
-	{
+	protected function initIndexes() {
 
 		// columns have to be loaded first
 		if (!$this->colsLoaded) $this->initColumns();
-		
+
 		$sql = sprintf ("SELECT
 							  DISTINCT ON(cls.relname)
 							  cls.relname as idxname,
@@ -332,8 +306,7 @@ class PgSQLTableInfo extends TableInfo {
 				$this->indexes[$name] = new IndexInfo($name, $unique);
 			}
 			$arrColumns = explode (' ', $row['indkey']);
-			foreach ($arrColumns as $intColNum)
-			{
+			foreach ($arrColumns as $intColNum) {
 				$sql2 = sprintf ("SELECT a.attname
 								FROM pg_catalog.pg_class c JOIN pg_catalog.pg_attribute a ON a.attrelid = c.oid
 								WHERE c.oid = '%s' AND a.attnum = %d AND NOT a.attisdropped
@@ -349,7 +322,7 @@ class PgSQLTableInfo extends TableInfo {
 
 	/** Loads the primary keys for this table. */
 	protected function initPrimaryKey() {
-		
+
 		// columns have to be loaded first
 		if (!$this->colsLoaded) $this->initColumns();
 
@@ -365,8 +338,7 @@ class PgSQLTableInfo extends TableInfo {
 
 		while($row = $result->fetch()) {
 			$arrColumns = explode (' ', $row['indkey']);
-			foreach ($arrColumns as $intColNum)
-			{
+			foreach ($arrColumns as $intColNum) {
 				$sql2 = sprintf ("SELECT a.attname
 								FROM pg_catalog.pg_class c JOIN pg_catalog.pg_attribute a ON a.attrelid = c.oid
 								WHERE c.oid = '%s' AND a.attnum = %d AND NOT a.attisdropped
