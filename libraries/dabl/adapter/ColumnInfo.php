@@ -63,18 +63,7 @@ class ColumnInfo {
 	 * @param mixed $default Default value.
 	 * @param boolean $is_auto_increment Whether col is of autoIncrement type.
 	 */
-	function __construct(TableInfo
-			$table,
-			$name,
-			$type = null,
-			$nativeType = null,
-			$size = null,
-			$precision=null,
-			$scale = null,
-			$is_nullable = null,
-			$default = null,
-			$is_auto_increment = null,
-			$vendorInfo = array()) {
+	function __construct(TableInfo $table, $name, $type = null, $nativeType = null, $size = null, $precision=null, $scale = null, $is_nullable = null, $default = null, $is_auto_increment = null, $vendorInfo = array()) {
 		$this->table = $table;
 		$this->name = $name;
 		$this->type = $type;

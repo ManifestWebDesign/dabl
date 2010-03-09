@@ -49,17 +49,7 @@ class MySQLTableInfo extends TableInfo {
 			}
 			//BLOBs can't have any default values in MySQL
 			$default = preg_match('~blob|text~', $nativeType) ? null : $row['Default'];
-			$this->columns[$name] = new ColumnInfo($this,
-					$name,
-					MySQLTypes::getType($nativeType),
-					$nativeType,
-					$size,
-					$precision,
-					$scale,
-					$is_nullable,
-					$default,
-					$is_auto_increment,
-					$row);
+			$this->columns[$name] = new ColumnInfo($this, $name, MySQLTypes::getType($nativeType), $nativeType, $size, $precision, $scale, $is_nullable, $default, $is_auto_increment, $row);
 		}
 
 		$this->colsLoaded = true;

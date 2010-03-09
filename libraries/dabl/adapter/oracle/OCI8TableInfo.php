@@ -40,16 +40,7 @@ class OCI8TableInfo extends TableInfo {
 
 		while ( $row = $result->fetch() ) {
 			$row = array_change_key_case($row, CASE_LOWER);
-			$this->columns[$row['column_name']] = new ColumnInfo( $this
-					, $row['column_name']
-					, OCI8Types::getType($row['data_type'])
-					, $row['data_type']
-					, $row['data_length']
-					, $row['data_precision']
-					, $row['data_scale']
-					, $row['nullable']
-					, $row['data_default']
-			);
+			$this->columns[$row['column_name']] = new ColumnInfo( $this, $row['column_name'], OCI8Types::getType($row['data_type']), $row['data_type'], $row['data_length'], $row['data_precision'], $row['data_scale'], $row['nullable'], $row['data_default'] );
 		}
 
 		$this->colsLoaded = true;
