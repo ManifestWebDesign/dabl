@@ -180,7 +180,7 @@ class PDOStatement_pgsql extends PDOStatement{
 	}
 	
 	/**
-	 * @Return	Mixed		Null or next row's first column
+	 * @Return	Mixed
 	 */
 	function fetchColumn($column_number = 0) {
 		$result = null;
