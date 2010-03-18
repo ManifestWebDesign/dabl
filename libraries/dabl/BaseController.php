@@ -1,6 +1,6 @@
 <?php
 
-abstract class BaseController {
+abstract class BaseController extends ArrayObject {
 
 	/**
 	 * @var string
@@ -11,24 +11,33 @@ abstract class BaseController {
 	public $output_format = 'html';
 	public $render_view = true;
 	public $render_partial = false;
-	private $params = array();
 
+	/**
+	 * @param string $var
+	 * @return mixed
+	 */
 	function __get($var){
-		return $this->params[$var];
+		return $this[$var];
 	}
 
+	/**
+	 * @param string $var
+	 * @param mixed $value
+	 */
 	function __set($var, $value){
-		$this->params[$var] = $value;
+		$this[$var] = $value;
 	}
 
+	/**
+	 * @return array
+	 */
 	function getParams(){
-		return $this->params;
+		return (array)$this;
 	}
 
-	function setParams($params){
-		$this->params = $params;
-	}
-
+	/**
+	 * @return string
+	 */
 	function getViewPath(){
 		$controller_view_dir = $this->view_dir ? $this->view_dir : str_replace('controller', '', strtolower(get_class($this)));
 		$view = str_replace('\\', '/', $this->view_prefix);
@@ -43,10 +52,10 @@ abstract class BaseController {
 		$output_format = $this->output_format;
 		$params = $this->getParams();
 
-		$has_layout = ($this->layout && !$this->render_partial && $output_format == 'html');
-		$params['content'] = load_view($view, $params, $has_layout, $output_format);
+		$use_layout = ($this->layout && $this->render_partial===false && $output_format == 'html');
+		$params['content'] = load_view($view, $params, $use_layout, $output_format);
 
-		if($has_layout)
+		if($use_layout)
 			load_view($this->layout, $params, false, $output_format);
 	}
 

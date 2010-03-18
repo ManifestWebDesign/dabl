@@ -149,24 +149,6 @@ class PDOStatement_mysql extends PDOStatement{
 	
 	/**
 	 * Public method:
-	 * Returns, if present, first column of next row of executed query
-	 * this->fetchSingle( void ):Mixed
-	 * @Return	Mixed		Null or next row's first column
-	 */
-	function fetchSingle() {
-		$result = null;
-		if(!is_null($this->__result)) {
-			$result = @mysql_fetch_row($this->__result);
-			if($result)
-				$result = $result[0];
-			else
-				$this->__result = null;
-		}
-		return $result;
-	}
-	
-	/**
-	 * Public method:
 	 *	Returns an array with all rows of executed query.
 	 * this->fetchAll( $mode:Integer ):Array
 	 * @Param	Integer		PDO_FETCH_* constant to know how to read all rows, default PDO_FETCH_BOTH
@@ -204,7 +186,22 @@ class PDOStatement_mysql extends PDOStatement{
 		$this->__result = null;
 		return $result;
 	}
-	
+
+	/**
+	 * @Return	Mixed		Null or next row's first column
+	 */
+	function fetchColumn($column_number = 0) {
+		$result = null;
+		if(!is_null($this->__result)) {
+			$result = @mysql_fetch_row($this->__result);
+			if($result)
+				$result = $result[$column_number];
+			else
+				$this->__result = null;
+		}
+		return $result;
+	}
+
 	/**
 	 * Public method:
 	 * Returns number of last affected database rows

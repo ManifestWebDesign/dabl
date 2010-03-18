@@ -71,9 +71,17 @@ function load_controller($route){
 	}
 
 	$action = $params ? array_shift($params) : DEFAULT_CONTROLLER;
-	$instance->view_prefix = $view_prefix;
-	$instance->view_dir = $view_dir;
+	
+	if(!$instance->view_prefix)
+		$instance->view_prefix = $view_prefix;
+
+	if(!$instance->view_dir)
+		$instance->view_dir = $view_dir;
+
+	if($render_partial)
+		$instance->render_partial = $render_partial;
+	
 	$instance->output_format = $extension;
-	$instance->render_partial = $render_partial;
+
 	$instance->doAction($action, $params);
 }

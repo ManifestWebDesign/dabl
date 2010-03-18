@@ -41,6 +41,20 @@ abstract class PDOStatement implements Iterator {
 		++$this->__position;
 	}
 
+	function current($mode = PDO::FETCH_BOTH) {
+		return $this->fetch();
+	}
+
+	function key() {
+		return $this->__position;
+	}
+
+	function valid() {
+		if($this->__num_rows===null)
+			throw new PDOException("Row count not specified");
+		return ($this->__position < $this->__num_rows);
+	}
+
 	/**
 	 * Public method:
 	 * Replace ? or :named values to execute prepared query
@@ -71,20 +85,6 @@ abstract class PDOStatement implements Iterator {
 			$this->__boundParams[$mixed] = $variable;
 		else
 			array_push($this->__boundParams, $variable);
-	}
-
-	function current($mode = PDO::FETCH_BOTH) {
-		return $this->fetch();
-	}
-
-	function key() {
-		return $this->__position;
-	}
-
-	function valid() {
-		if($this->__num_rows===null)
-			throw new PDOException("Row count not specified");
-		return ($this->__position < $this->__num_rows);
 	}
 
 }
