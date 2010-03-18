@@ -166,7 +166,7 @@ class PDOStatement_mysql extends PDOStatement{
 					break;
 				case PDO::FETCH_ASSOC:
 					while($r = mysql_fetch_assoc($this->__result))
-						
+						array_push($result, $r);
 					break;
 				case PDO::FETCH_COLUMN:
 					for($x = 0; $x < mysql_num_rows($this->__result); $x++)
