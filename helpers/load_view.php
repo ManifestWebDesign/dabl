@@ -15,6 +15,9 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 		case 'json':
 			echo json_encode_all($params);
 			break;
+		case 'xml':
+			echo xml_encode_all($params);
+			break;
 		case 'html':
 			foreach($params as $var => $value)
 				$$var = $value;

@@ -32,7 +32,7 @@ abstract class BaseController extends ArrayObject {
 	 * @return array
 	 */
 	function getParams(){
-		return (array)$this;
+		return $this->getArrayCopy();
 	}
 
 	/**
