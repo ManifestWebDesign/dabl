@@ -29,10 +29,19 @@ abstract class BaseController extends ArrayObject {
 	}
 
 	/**
+	 * Returns an array with the view parameters
 	 * @return array
 	 */
 	function getParams(){
 		return $this->getArrayCopy();
+	}
+
+	/**
+	 * Replaces the view parameters with the given array
+	 * @param array $array
+	 */
+	function setParams($array){
+		$this->exchangeArray($array);
 	}
 
 	/**

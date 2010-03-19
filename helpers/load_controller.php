@@ -65,10 +65,10 @@ function load_controller($route){
 			$instance = new $alternate_c_class;
 			break;
 		}
-
-		//we tried...but 404
-		file_not_found($route);
 	}
+	//if no instance of a Controller, 404
+	if(!$instance)
+		file_not_found($route);
 
 	$action = $params ? array_shift($params) : DEFAULT_CONTROLLER;
 	
@@ -82,6 +82,18 @@ function load_controller($route){
 		$instance->render_partial = $render_partial;
 	
 	$instance->output_format = $extension;
+
+	//Start session of it's not there
+	if(!isset($_SESSION) && !headers_sent())
+		session_start();
+
+	//Restore Flash params
+	if(isset($_SESSION)){
+		if(!isset($_SESSION['Flash']))
+			$_SESSION['Flash'] = array();
+		$instance->setParams(array_merge($_SESSION['Flash'], $instance->getParams()));
+		$_SESSION['Flash'] = array();
+	}
 
 	$instance->doAction($action, $params);
 }
