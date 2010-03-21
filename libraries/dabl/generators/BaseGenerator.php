@@ -25,6 +25,12 @@ abstract class BaseGenerator{
 	private $db_schema;
 
 	/**
+	 *
+	 * @var Database
+	 */
+	private $database;
+
+	/**
 	 * Constructor function
 	 * @param $db_name String
 	 * @param $schema DOMDocument
@@ -32,9 +38,12 @@ abstract class BaseGenerator{
 	function __construct($connection_name){
 		$this->setConnectionName($connection_name);
 		$conn = DBManager::getConnection($connection_name);
+		$this->database = $conn->getDatabaseSchema();
 
-		$dbXML = new DBtoXML($conn);
-		$this->setSchema($dbXML->getXMLDom());
+		$dom = new DOMDocument('1.0', 'utf-8');
+		$this->database->appendXml($dom);
+		$dom->formatOutput = true;
+		$this->setSchema($dom);
 
 		$this->options = array(
 			//convert table and column names to title case
@@ -100,9 +109,8 @@ abstract class BaseGenerator{
 	 */
 	function getTableNames(){
 		$table_names = array();
-		$database = $this->getSchema()->getElementsByTagName('database')->item(0);
-		foreach($database->getElementsByTagName('table') as $table)
-			$table_names[] = $table->getAttribute("name");
+		foreach($this->database->getTables() as $table)
+			$table_names[] = $table->getName();
 		return $table_names;
 	}
 
@@ -111,29 +119,8 @@ abstract class BaseGenerator{
 	 * @return Column[]
 	 */
 	function getColumns($table_name){
-		$columns = array();
-		$database_node = $this->getSchema()->getElementsByTagName('database')->item(0);
-		foreach($database_node->getElementsByTagName('table') as $table_node){
-			if($table_node->getAttribute("name")!==$table_name)continue;
-			foreach($table_node->getElementsByTagName('column') as $column_node){
-				$column = new Column($column_node->getAttribute('name'));
-
-				if($column_node->hasAttribute('size'))
-					$column->setSize($column_node->getAttribute('size'));
-
-				$column->setType($column_node->getAttribute('type'));
-				$column->setPrimaryKey(($column_node->getAttribute('primaryKey')=="true"));
-				$column->setAutoIncrement(($column_node->getAttribute('autoIncrement=')=="true"));
-
-				if($column_node->hasAttribute('default'))
-					$column->setDefaultValue($column_node->getAttribute('default'));
-
-				$column->setNotNull(($column_node->getAttribute('required')=='true'));
-
-				$columns[] = $column;
-			}
-		}
-		return $columns;
+		$table = $this->database->getTable($table_name);
+		return $table->getColumns();
 	}
 
 	/**
@@ -294,8 +281,8 @@ $class .= '
 		foreach($fields as $key=>$field){
 			$default = $field->getDefaultValue();
 			$class .= '
-	function get'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'('.($field->isTemporal() ? '$format = null' : '').'){';
-			if($field->isTemporal()){
+	function get'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'('.($field->isTemporalType() ? '$format = null' : '').'){';
+			if($field->isTemporalType()){
 				$class .= '
 		if($this->'.$field->getName().'===null || !$format)
 			return $this->'.$field->getName().';
@@ -311,8 +298,8 @@ $class .= '
 			$class .='
 	}
 	function set'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'($theValue){';
-			if($field->isNumeric() || $field->isTemporal()){
-				if($field->isNumeric() && $options['empty_string_zero'] && $field->getName()!=$PK){
+			if($field->isNumericType() || $field->isTemporalType()){
+				if($field->isNumericType() && $options['empty_string_zero'] && $field->getName()!=$PK){
 					$class .= '
 		if($theValue==="")
 			$theValue = 0;';
@@ -335,7 +322,7 @@ $class .= '
 			else{';
 				}
 
-				if($field->isNumeric())
+				if($field->isNumericType())
 					$class .= '
 			$theValue = 0;';
 				else

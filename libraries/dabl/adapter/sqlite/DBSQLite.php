@@ -94,4 +94,25 @@ class DBSQLite extends DBAdapter {
 		return 'random()';
 	}
 
+	/**
+	 * @return Database
+	 */
+	function getDatabaseSchema(){
+
+		Module::import('ROOT:libraries:propel');
+		Module::import('ROOT:libraries:propel:database');
+		Module::import('ROOT:libraries:propel:database:model');
+		Module::import('ROOT:libraries:propel:database:reverse');
+		Module::import('ROOT:libraries:propel:database:reverse:sqlite');
+		Module::import('ROOT:libraries:propel:database:tranform');
+		Module::import('ROOT:libraries:propel:platform');
+
+		$parser = new SqliteSchemaParser();
+		$parser->setConnection($this);
+		$database = new Database($this->getDBName());
+		$database->setPlatform(new SqlitePlatform());
+		$parser->parse($database);
+		return $database;
+	}
+
 }

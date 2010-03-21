@@ -120,4 +120,25 @@ class DBMySQL extends DBAdapter {
 		return 'rand('.((int) $seed).')';
 	}
 
+	/**
+	 * @return Database
+	 */
+	function getDatabaseSchema(){
+		
+		Module::import('ROOT:libraries:propel');
+		Module::import('ROOT:libraries:propel:database');
+		Module::import('ROOT:libraries:propel:database:model');
+		Module::import('ROOT:libraries:propel:database:reverse');
+		Module::import('ROOT:libraries:propel:database:reverse:mysql');
+		Module::import('ROOT:libraries:propel:database:tranform');
+		Module::import('ROOT:libraries:propel:platform');
+
+		$parser = new MysqlSchemaParser();
+		$parser->setConnection($this);
+		$database = new Database($this->getDBName());
+		$database->setPlatform(new MysqlPlatform());
+		$parser->parse($database);
+		return $database;
+	}
+
 }

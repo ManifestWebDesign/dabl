@@ -14,18 +14,6 @@ abstract class DBAdapter extends PDO {
 	protected $_log_queries = false;
 	protected $_db_name = null;
 
-	/**
-	 * Creole driver to database adapter map.
-	 * @var		array
-	 */
-	private static $schema_readers = array(
-		'DBMSSQL' => 'MSSQLDatabaseInfo',
-		'DBMySQL' => 'MySQLDatabaseInfo',
-		'DBOracle' => 'OCI8DatabaseInfo',
-		'DBPostgres' => 'PgSQLDatabaseInfo',
-		'DBSQLite' => 'SQLiteDatabaseInfo'
-	);
-
 	function setDBName($db_name){
 		$this->_db_name = $db_name;
 	}
@@ -98,15 +86,6 @@ abstract class DBAdapter extends PDO {
 		}
 		$conn->setDBName(@$connection_params['dbname']);
 		return $conn;
-	}
-
-	function getDatabaseInfo($database_name = null) {
-		if($database_name == null)
-			$database_name = $this->getDBName();
-
-		$reader = self::$schema_readers[get_class($this)];
-		$reader = new $reader($this, $database_name);
-		return $reader;
 	}
 
 	function getLoggedQueries() {
@@ -365,5 +344,7 @@ abstract class DBAdapter extends PDO {
 	 * @param	  mixed $seed (optional) seed value for databases that support this
 	 */
 	abstract function random($seed = null);
+
+	abstract function getDatabaseSchema();
 	
 }

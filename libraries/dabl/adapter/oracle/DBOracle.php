@@ -110,4 +110,25 @@ class DBOracle extends DBAdapter {
 		return 'dbms_random.value';
 	}
 
+	/**
+	 * @return Database
+	 */
+	function getDatabaseSchema(){
+
+		Module::import('ROOT:libraries:propel');
+		Module::import('ROOT:libraries:propel:database');
+		Module::import('ROOT:libraries:propel:database:model');
+		Module::import('ROOT:libraries:propel:database:reverse');
+		Module::import('ROOT:libraries:propel:database:reverse:oracle');
+		Module::import('ROOT:libraries:propel:database:tranform');
+		Module::import('ROOT:libraries:propel:platform');
+
+		$parser = new OracleSchemaParser();
+		$parser->setConnection($this);
+		$database = new Database($this->getDBName());
+		$database->setPlatform(new OraclePlatform());
+		$parser->parse($database);
+		return $database;
+	}
+
 }
