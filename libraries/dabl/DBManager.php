@@ -36,9 +36,10 @@ class DBManager{
 		return self::$connections[$db_name];
 	}
 
-	static function addConnection($db_name, DBAdapter $conn){
+	static function addConnection($connection_name, $connection_params){
+		$conn = DBAdapter::factory($connection_params);
 		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		self::$connections[$db_name] = $conn;
+		self::$connections[$connection_name] = $conn;
 	}
 
 	static function checkInput($value){

@@ -4,47 +4,6 @@
  * Modified version of DBAdapter from Propel Runtime
  * Last Modified February 8th 2010 by Dan Blaisdell
  */
-
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information please see
- * <http://propel.phpdb.org>.
-*/
-
-/**
- * DBAdapter</code> defines the interface for a Propel database adapter.
- *
- * <p>Support for new databases is added by subclassing
- * <code>DBAdapter</code> and implementing its abstract interface, and by
- * registering the new database adapter and corresponding Creole
- * driver in the private adapters map (array) in this class.</p>
- *
- * <p>The Propel database adapters exist to present a uniform
- * interface to database access across all available databases.  Once
- * the necessary adapters have been written and configured,
- * transparent swapping of databases is theoretically supported with
- * <i>zero code change</i> and minimal configuration file
- * modifications.</p>
- *
- * @author	 Hans Lellelid <hans@xmpl.org> (Propel)
- * @author	 Jon S. Stevens <jon@latchkey.com> (Torque)
- * @author	 Brett McLaughlin <bmclaugh@algx.net> (Torque)
- * @author	 Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @version	$Revision: 1011 $
- * @package	propel.adapter
- */
 abstract class DBAdapter extends PDO {
 
 	const ID_METHOD_NONE = 0;
@@ -53,18 +12,7 @@ abstract class DBAdapter extends PDO {
 
 	protected $_logged_queries = array();
 	protected $_log_queries = false;
-
-	/**
-	 * Creole driver to database adapter map.
-	 * @var		array
-	 */
-	private static $adapters = array(
-		'mysql' => 'DBMySQL',
-		'mssql' => 'DBMSSQL',
-		'oracle' => 'DBOracle',
-		'pgsql' => 'DBPostgres',
-		'sqlite' => 'DBSQLite'
-	);
+	protected $_db_name = null;
 
 	/**
 	 * Creole driver to database adapter map.
@@ -78,26 +26,84 @@ abstract class DBAdapter extends PDO {
 		'DBSQLite' => 'SQLiteDatabaseInfo'
 	);
 
+	function setDBName($db_name){
+		$this->_db_name = $db_name;
+	}
+
+	function getDBName(){
+		return $this->_db_name;
+	}
+
 	/**
 	 * Creates a new instance of the database adapter associated
 	 * with the specified Creole driver.
 	 *
-	 * @param	  string $driver The name of the Propel/Creole driver to
-	 * create a new adapter instance for or a shorter form adapter key.
-	 * @return	 DBAdapter An instance of a database adapter.
-	 * @throws	 Exception if the adapter could not be instantiated.
 	 */
-	static function factory($driver, $dsn, $username, $password) {
-		$adapterClass = isset(self::$adapters[$driver]) ? self::$adapters[$driver] : null;
-		if ($adapterClass !== null) {
-			$a = new $adapterClass($dsn, $username, $password);
-			return $a;
-		} else {
-			throw new Exception("Unsupported database driver: " . $driver . ": Check your configuration file");
+	static function factory($connection_params) {
+		try{
+			switch($connection_params['driver']){
+				case 'sqlite':
+					$dsn = 'sqlite:'.$connection_params['dbname'];
+					$conn = new DBSQLite($dsn);
+					break;
+
+				case 'mysql':
+					$parts = array();
+					if(@$connection_params['host']) $parts[] = 'host='.$connection_params['host'];
+					if(@$connection_params['port']) $parts[] = 'port='.$connection_params['port'];
+					if(@$connection_params['unix_socket']) $parts[] = 'unix_socket='.$connection_params['unix_socket'];
+					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
+					$dsn = 'mysql:'.implode(';', $parts);
+					$conn = new DBMySQL($dsn, @$connection_params['user'], @$connection_params['password']);
+					break;
+
+				case 'oracle':
+				case 'oci':
+					$parts = array();
+					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
+					if(@$connection_params['charset']) $parts[] = 'charset='.$connection_params['charset'];
+					$dsn = 'oci:'.implode(';', $parts);
+					$conn = new DBOracle($dsn, @$connection_params['user'], @$connection_params['password']);
+					break;
+
+				case 'pgsql':
+					$parts = array();
+					if(@$connection_params['host']) $parts[] = 'host='.$connection_params['host'];
+					if(@$connection_params['port']) $parts[] = 'port='.$connection_params['port'];
+					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
+					if(@$connection_params['user']) $parts[] = 'user='.$connection_params['user'];
+					if(@$connection_params['password']) $parts[] = 'password='.$connection_params['password'];
+					$dsn = 'pgsql:'.implode(' ', $parts);
+					$conn = new DBPostgres($dsn);
+					break;
+
+				case 'mssql':
+				case 'sybase':
+				case 'dblib':
+					if(@$connection_params['host']) $parts[] = 'host='.$connection_params['host'];
+					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
+					if(@$connection_params['charset']) $parts[] = 'charset='.$connection_params['charset'];
+					if(@$connection_params['appname']) $parts[] = 'appname='.$connection_params['appname'];
+					$dsn = $connection_params['driver'].':'.implode(';', $parts);
+					$conn = new DBMSSQL($dsn, @$connection_params['user'], @$connection_params['password']);
+					break;
+				
+				default:
+					throw new Exception("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
+					break;
+			}
 		}
+		catch(Exception $e){
+			throw new Exception($e->getMessage());
+		}
+		$conn->setDBName(@$connection_params['dbname']);
+		return $conn;
 	}
 
-	function getDatabaseInfo($database_name) {
+	function getDatabaseInfo($database_name = null) {
+		if($database_name == null)
+			$database_name = $this->getDBName();
+
 		$reader = self::$schema_readers[get_class($this)];
 		$reader = new $reader($this, $database_name);
 		return $reader;

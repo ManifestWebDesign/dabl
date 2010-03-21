@@ -245,46 +245,44 @@ abstract class BaseModel {
 	 */
 	protected function insert(){
 		$conn = $this->getConnection();
-		$quotedTable = $conn->quoteIdentifier($this->getTableName());
-
+		$pk = $this->getPrimaryKey();
+		
 		$fields = array();
 		$values = array();
+		$placeholders = array();
 		foreach($this->getColumnNames() as $column){
-			if(!$this->isColumnModified($column))
+			$value = $this->$column;
+			if($value===null && !$this->isColumnModified($column))
 				continue;
 			$fields[] = $conn->quoteIdentifier($column);
-			$values[] = $conn->checkInput($this->$column);
-	//		$values[] = $this->$column;
-	//		$placeholders[] = '?';
+			$values[] = $value;
+			$placeholders[] = '?';
 		}
 
-		$queryString = "INSERT INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $values).") ";
-	//	$queryString = "INSERT INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $placeholders).") ";
+		$quotedTable = $conn->quoteIdentifier($this->getTableName());
+		$queryString = "INSERT INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $placeholders).") ";
+		
+		$statement = new QueryStatement($conn);
+		$statement->setString($queryString);
+		$statement->setParams($values);
 
-		try{
-			if($this->getPrimaryKey() && $conn->isGetIdBeforeInsert())
+		if($pk && $conn->isGetIdBeforeInsert())
+			$id = $conn->getId($this->getTableName(), $pk);
+
+		$result = $statement->bindAndExecute();
+		$count = $result->rowCount();
+
+		if($pk){
+			$setPK = "set$pk";
+
+			if($conn->isGetIdAfterInsert())
 				$id = $conn->lastInsertId();
 
-			$count = $conn->exec($queryString);
-	//		$stmnt = $conn->prepare($queryString);
-	//		$count = $stmnt->execute($values);
-
-			if($this->getPrimaryKey()){
-				$pk = $this->getPrimaryKey();
-				$setPK = "set$pk";
-
-				if($conn->isGetIdAfterInsert())
-					$id = $conn->lastInsertId();
-
-				$this->$setPK($id);
-			}
-			$this->resetModified();
-			$this->setNew(false);
-			return $count;
+			$this->$setPK($id);
 		}
-		catch(PDOException $e){
-			throw new PDOException($e->getMessage().$queryString);
-		}
+		$this->resetModified();
+		$this->setNew(false);
+		return $count;
 	}
 
 	/**

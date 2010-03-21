@@ -75,13 +75,9 @@ class DBPostgres extends DBAdapter {
 	/**
 	 * Gets ID for specified sequence name.
 	 */
-	function getId($name = null) {
-		if ($name === null) {
-			throw new Exception("Unable to fetch next sequence ID without sequence name.");
-		}
-		$stmt = $this->query("SELECT nextval(".$this->quote($name).")");
-		$row = $stmt->fetch(PDO::FETCH_NUM);
-		return $row[0];
+	function getId($table_name, $column_name) {
+		$stmt = $this->query("SELECT nextval(pg_get_serial_sequence({$this->quote($table_name)}, {$this->quote($column_name)}))");
+		return $stmt->fetchColumn(0);
 	}
 
 	/**

@@ -30,10 +30,10 @@ class GeneratorController extends ApplicationController {
 		Module::import('ROOT:libraries:dabl:generators');
 
 		$generators = array();
-		foreach(DBManager::getConnectionNames() as $db_name){
-			$generator = new DABLGenerator($db_name);
+		foreach(DBManager::getConnectionNames() as $connection_name){
+			$generator = new DABLGenerator($connection_name);
 			$generator->setOptions($options);
-			$generators[] = $generator;
+			$generators[$connection_name] = $generator;
 		}
 		$this->options = $options;
 		$this->generators = $generators;

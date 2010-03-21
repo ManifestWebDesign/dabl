@@ -33,7 +33,7 @@ class Module {
 	}
 
 	static function addRepository ( $name, $module_path ) {
-		self::$root_modules[$name] = $module_path;
+		self::$root_modules[$name] = rtrim($module_path, '\\/');
 	}
 }
 

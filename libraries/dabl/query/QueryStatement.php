@@ -6,6 +6,19 @@ class QueryStatement {
 	private $params = array();
 	private $connection;
 
+	/**
+	 * @param PDO $conn
+	 */
+	function  __construct(PDO $conn = null) {
+		if($conn !==null)
+			$this->setConnection($conn);
+	}
+
+	/**
+	 * Sets the PDO connection to be used for preparing and
+	 * executing the query
+	 * @param PDO $conn
+	 */
 	function setConnection(PDO $conn){
 		$this->connection = $conn;
 	}
@@ -17,6 +30,10 @@ class QueryStatement {
 		return $this->connection;
 	}
 
+	/**
+	 * Sets the SQL string to be used in a query
+	 * @param string $string
+	 */
 	function setString($string){
 		$this->string = $string;
 	}
@@ -28,14 +45,26 @@ class QueryStatement {
 		return $this->string;
 	}
 
+	/**
+	 * Merges given array into params
+	 * @param array $params
+	 */
 	function addParams($params){
 		$this->params = array_merge($this->params, $params);
 	}
 
+	/**
+	 * Replaces params with given array
+	 * @param array $params
+	 */
 	function setParams($params){
 		$this->params = $params;
 	}
 
+	/**
+	 * Adds given param to param array
+	 * @param mixed $param
+	 */
 	function addParam($param){
 		$this->params[] = $param;
 	}
@@ -63,6 +92,8 @@ class QueryStatement {
 	}
 
 	/**
+	 * Creates a PDOStatment using the string. Loops through param array, and binds each value.
+	 * Executes and returns the prepared statement.
 	 * @return PDOStatement
 	 */
 	function bindAndExecute(){

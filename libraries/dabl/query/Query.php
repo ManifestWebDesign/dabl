@@ -368,8 +368,7 @@ class Query{
 		$alias = $this->getAlias();
 		if(!$conn) $conn = DBManager::getConnection();
 		$query_s = "";
-		$statement = new QueryStatement;
-		$statement->setConnection($conn);
+		$statement = new QueryStatement($conn);
 
 		if($this->_columns)
 			$columns = implode(', ',$this->_columns);

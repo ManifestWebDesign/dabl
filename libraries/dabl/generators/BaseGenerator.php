@@ -29,11 +29,11 @@ abstract class BaseGenerator{
 	 * @param $db_name String
 	 * @param $schema DOMDocument
 	 */
-	function __construct($db_name){
-		$conn = DBManager::getConnection($db_name);
-		$this->setConnectionName($db_name);
+	function __construct($connection_name){
+		$this->setConnectionName($connection_name);
+		$conn = DBManager::getConnection($connection_name);
 
-		$dbXML = new DBtoXML($conn, $db_name);
+		$dbXML = new DBtoXML($conn);
 		$this->setSchema($dbXML->getXMLDom());
 
 		$this->options = array(
@@ -186,8 +186,7 @@ abstract class BaseGenerator{
 	 * @return String
 	 */
 	function getDBName(){
-		foreach($this->getSchema()->getElementsByTagName('database') as $database)
-			return $database->getAttribute("name");
+		return DBManager::getConnection($this->getConnectionName())->getDBName();
 	}
 
 	/**
@@ -746,7 +745,7 @@ class ".$className." extends base$className{
 			}
 		}
 		//save xml to file
-		file_put_contents($options['model_path'].$this->getDBName()."-schema.xml", $this->getSchema()->saveXML());
+		file_put_contents($options['model_path'].$this->getConnectionName()."-schema.xml", $this->getSchema()->saveXML());
 	}
 
 	/**
