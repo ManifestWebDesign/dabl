@@ -76,8 +76,7 @@ class DBPostgres extends DBAdapter {
 	 * Gets ID for specified sequence name.
 	 */
 	function getId($table_name, $column_name) {
-		$stmt = $this->query("SELECT nextval(pg_get_serial_sequence({$this->quote($table_name)}, {$this->quote($column_name)}))");
-		return $stmt->fetchColumn(0);
+		return $this->query("SELECT currval(pg_get_serial_sequence({$this->quote($table_name)}, {$this->quote($column_name)}))")->fetchColumn(0);
 	}
 
 	/**

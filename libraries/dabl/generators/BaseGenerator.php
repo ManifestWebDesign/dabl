@@ -447,7 +447,7 @@ $class .= '
 		$queryString = "SELECT * FROM $tableWrapped WHERE ';
 
 		foreach($PKs as $key=>$value){
-			if($key == 0) $class .= $value.'=".$conn->checkInput($PK'.$key.')."';
+			if($key == 0) $class .= '".$conn->quoteIdentifier(\''.$value.'\')."=".$conn->checkInput($PK'.$key.')."';
 			if($key > 0) $class .= ' AND '.$value.'=".$conn->checkInput($PK'.$key.')."';
 		}
 
@@ -604,12 +604,13 @@ $class .= '
 	function get'.$from_className.'sQuery(Query $q = null){
 		if($this->get'.$to_column.'()===null)
 			throw new Exception("NULL cannot be used to match keys.");
-		$column = "'.$from_column.'";
+		$conn = $this->getConnection();
+		$column = $conn->quoteIdentifier("'.$from_column.'");
 		if($q){
 			$q = clone $q;
 			$alias = $q->getAlias();
-			if($q->getTableName()=="'.$from_table.'" && $alias)
-				$column = "$alias.'.$from_column.'";
+			if($alias && $q->getTableName()=="'.$from_table.'")
+				$column = "$alias.$column";
 		}
 		else
 			$q = new Query;
@@ -654,7 +655,7 @@ $class .= '
 		if($this->get'.$to_column.'()===null)
 			return array();
 
-		if($extra instanceof Query)
+		if(!$extra || $extra instanceof Query)
 			return '.$from_className.'::doSelect($this->get'.$from_className.'sQuery($extra));
 
 		if(!$extra && $this->getCacheResults() && @$this->'.$from_className.'s_c && !$this->isColumnModified("'.$to_column.'"))

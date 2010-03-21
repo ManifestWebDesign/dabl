@@ -165,7 +165,7 @@ class Query{
 	 */
 	function getTableName(){
 		$table = $this->_table;
-		$table_parts = explode(' ', $table);
+		$table_parts = explode(' ', $table, 2);
 		if(count($table_parts)==1)
 			return $table;
 		else

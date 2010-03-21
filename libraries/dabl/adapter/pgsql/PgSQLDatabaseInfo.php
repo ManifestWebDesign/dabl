@@ -27,12 +27,12 @@ class PgSQLDatabaseInfo extends DatabaseInfo {
 		$result = null;
 
 		$sql = "SELECT c.oid,
-				case when n.nspname='public' then c.relname else n.nspname||'.'||c.relname end as relname 
+					case when n.nspname='public' then c.relname else n.nspname||'.'||c.relname end as relname
 				FROM pg_class c join pg_namespace n on (c.relnamespace=n.oid)
-				WHERE c.relkind = 'r'
-				  AND n.nspname NOT IN ('information_schema','pg_catalog')
-				  AND n.nspname NOT LIKE 'pg_temp%'
-				  AND n.nspname NOT LIKE 'pg_toast%'
+					WHERE c.relkind = 'r'
+					AND n.nspname NOT IN ('information_schema','pg_catalog')
+					AND n.nspname NOT LIKE 'pg_temp%'
+					AND n.nspname NOT LIKE 'pg_toast%'
 				ORDER BY relname";
 		$result = $this->getConnection()->query($sql);
 
@@ -52,13 +52,13 @@ class PgSQLDatabaseInfo extends DatabaseInfo {
 	protected function initSequences() {
 		$this->sequences = array();
 		$sql = "SELECT c.oid,
-				case when n.nspname='public' then c.relname else n.nspname||'.'||c.relname end as relname
+					case when n.nspname='public' then c.relname else n.nspname||'.'||c.relname end as relname
 				FROM pg_class c join pg_namespace n on (c.relnamespace=n.oid)
 				WHERE c.relkind = 'S'
-				  AND n.nspname NOT IN ('information_schema','pg_catalog')
-				  AND n.nspname NOT LIKE 'pg_temp%'
-				  AND n.nspname NOT LIKE 'pg_toast%'
-				ORDER BY name";
+					AND n.nspname NOT IN ('information_schema','pg_catalog')
+					AND n.nspname NOT LIKE 'pg_temp%'
+					AND n.nspname NOT LIKE 'pg_toast%'
+				ORDER BY relname";
 		$result = $this->getConnection()->query($sql);
 
 		while ($row = $result->fetch()) {

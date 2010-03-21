@@ -327,10 +327,15 @@ class PgSQLTableInfo extends TableInfo {
 		if (!$this->colsLoaded) $this->initColumns();
 
 		// Primary Keys
-		$sql = sprintf ("SELECT a.attname
-						FROM pg_catalog.pg_class c JOIN pg_catalog.pg_attribute a ON a.attrelid = c.oid
-						WHERE c.oid = '%s' AND a.attnum = %d AND NOT a.attisdropped
-						ORDER BY a.attnum", $this->oid, $intColNum);
+		$sql = sprintf ("SELECT
+							  DISTINCT ON(cls.relname)
+							  cls.relname as idxname,
+							  indkey,
+							  indisunique
+						FROM pg_index idx
+							 JOIN pg_class cls ON cls.oid=indexrelid
+						WHERE indrelid = %s AND indisprimary
+						ORDER BY cls.relname", $this->oid);
 		$result = $this->getDatabase()->getConnection()->query($sql);
 
 		// Loop through the returned results, grouping the same key_name together

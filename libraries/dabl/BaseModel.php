@@ -266,16 +266,15 @@ abstract class BaseModel {
 		$statement->setString($queryString);
 		$statement->setParams($values);
 
-		if($pk && $conn->isGetIdBeforeInsert())
-			$id = $conn->getId($this->getTableName(), $pk);
-
 		$result = $statement->bindAndExecute();
 		$count = $result->rowCount();
 
 		if($pk){
 			$setPK = "set$pk";
 
-			if($conn->isGetIdAfterInsert())
+			if($conn instanceof DBPostgres)
+				$id = $conn->getId($this->getTableName(), $pk);
+			elseif($conn->isGetIdAfterInsert())
 				$id = $conn->lastInsertId();
 
 			$this->$setPK($id);
@@ -305,23 +304,18 @@ abstract class BaseModel {
 		$queryString = "REPLACE INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $values).") ";
 	//	$queryString = "REPLACE INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $placeholders).") ";
 
-		try{
-			$count = $conn->exec($queryString);
-	//		$stmnt = $conn->prepare($queryString);
-	//		$count = $stmnt->execute($values);
+		$count = $conn->exec($queryString);
+//		$stmnt = $conn->prepare($queryString);
+//		$count = $stmnt->execute($values);
 
-			if($this->getPrimaryKey()){
-				$pk = $this->getPrimaryKey();
-				$id = $conn->lastInsertId();
-				if($id)$this->$pk = $id;
-			}
-			$this->resetModified();
-			$this->setNew(false);
-			return $count;
+		if($this->getPrimaryKey()){
+			$pk = $this->getPrimaryKey();
+			$id = $conn->lastInsertId();
+			if($id)$this->$pk = $id;
 		}
-		catch(PDOException $e){
-			throw new PDOException($e->getMessage().$queryString);
-		}
+		$this->resetModified();
+		$this->setNew(false);
+		return $count;
 	}
 
 	/**
@@ -334,36 +328,37 @@ abstract class BaseModel {
 		$quotedTable = $conn->quoteIdentifier($this->getTableName());
 
 		if(!$this->getPrimaryKeys())
-			throw new Exception("This table has no primary keys");
+			throw new Exception('This table has no primary keys');
 
-		$updateValues = array();
+		$fields = array();
+		$values = array();
 		foreach($this->getColumnNames() as $column){
 			if(!$this->isColumnModified($column))
 				continue;
-			$updateValues[] = $conn->quoteIdentifier($column)."=".$conn->checkInput($this->$column);
+			$fields[] = $conn->quoteIdentifier($column).'=?';
+			$values[] = $this->$column;
 		}
 
 		//If array is empty there is nothing to update
-		if(!$updateValues)
-			return 0;
+		if(!$fields) return 0;
 
 		$pkWhere = array();
 		foreach($this->getPrimaryKeys() as $pk){
 			if($this->$pk===null)
-				throw new Exception("Cannot update with NULL primary key.");
-			$pkWhere[] = "$pk=".$conn->checkInput($this->$pk);
+				throw new Exception('Cannot update with NULL primary key.');
+			$pkWhere[] = $conn->quoteIdentifier($pk).'=?';
+			$values[] = $this->$pk;
 		}
 
-		$queryString = "UPDATE $quotedTable SET ".implode(", ", $updateValues)." WHERE ".implode(" AND ", $pkWhere);
+		$queryString = "UPDATE $quotedTable SET ".implode(", ", $fields)." WHERE ".implode(" AND ", $pkWhere);
+		$statement = new QueryStatement($conn);
+		$statement->setString($queryString);
+		$statement->setParams($values);
+//		die($statement);
+		$result = $statement->bindAndExecute();
 
-		try{
-			$count = $conn->exec($queryString);
-			$this->resetModified();
-			return $count;
-		}
-		catch(PDOException $e){
-			throw new PDOException($e->getMessage().$queryString);
-		}
+		$this->resetModified();
+		return $result->rowCount();
 	}
 
 }
