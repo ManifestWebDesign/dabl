@@ -1,26 +1,3 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<title>DABL::Map Database</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<style>
-* {
-	font-family: Verdana;
-}
-body{
-	font-size:12px;
-}
-h1, h2, h3, h4{
-	margin:0;
-	padding:4px 0;
-}
-h3{
-	background:#eee;
-}
-th, td{
-	text-align: left;
-}
-</style>
 <script>
 function checkAll(name, connection, checked){
 	var boxes = document.getElementsByTagName('input');
@@ -32,53 +9,49 @@ function checkAll(name, connection, checked){
 	}
 }
 </script>
-</head>
-<body>
-	<h1>DABL Generator</h1>
-	<div>
-		Please choose which table to generate for.  Only the base models
-		can be overwritten.  Models, views and controllers will not be overwritten if
-		they already exist.  Generating a view or controller without generating the model is not recommended.
-	</div>
-	<br />
-	<form action="<?= site_url('generator/generate') ?>/" method="POST">
-		<input type="hidden" name="action" value="generate" />
-		<table>
-			<tbody>
+<h1>DABL Generator</h1>
+<div>
+	Please choose which table to generate for.  Only the base models
+	can be overwritten.  Models, views and controllers will not be overwritten if
+	they already exist.  Generating a view or controller without generating the model is not recommended.
+</div>
+<br />
+<form action="<?= site_url('generator/generate') ?>/" method="POST">
+	<input type="hidden" name="action" value="generate" />
+	<table>
+		<tbody>
 				
 <?php foreach($generators as $connection_name => $generator): ?>
 
-				<tr><th colspan="100"><h3>Database: <?php echo $generator->getDBName() ?> (<?php echo $connection_name ?>)</h3></th></tr>
-				<tr>
-					<th>&nbsp;</th>
-					<th><input type="checkbox" checked="CHECKED" onclick="checkAll('Models', '<?php echo $connection_name ?>', this.checked)" /> Models</th>
-					<th><input type="checkbox" onclick="checkAll('Views', '<?php echo $connection_name ?>', this.checked)" /> Views</th>
-					<th><input type="checkbox" onclick="checkAll('Controllers', '<?php echo $connection_name ?>', this.checked)" /> Controllers</th>
-				</tr>
+			<tr><th colspan="100"><h3>Database: <?php echo $generator->getDBName() ?> (<?php echo $connection_name ?>)</h3></th></tr>
+			<tr>
+				<th>&nbsp;</th>
+				<th><input type="checkbox" checked="CHECKED" onclick="checkAll('Models', '<?php echo $connection_name ?>', this.checked)" /> Models</th>
+				<th><input type="checkbox" onclick="checkAll('Views', '<?php echo $connection_name ?>', this.checked)" /> Views</th>
+				<th><input type="checkbox" onclick="checkAll('Controllers', '<?php echo $connection_name ?>', this.checked)" /> Controllers</th>
+			</tr>
 
 	<?php foreach($generator->getTableNames() as $tableName): ?>
 
-				<tr>
-					<td><?php echo $tableName ?></td>
-					<td>
-						<input type="checkbox" value="<?php echo $tableName ?>" name="Models[<?php echo $connection_name ?>][]" checked="CHECKED" />
-					</td>
-					<td>
-						<input type="checkbox" value="<?php echo $tableName ?>" name="Views[<?php echo $connection_name ?>][]" />
-					</td>
-					<td>
-						<input type="checkbox" value="<?php echo $tableName ?>" name="Controllers[<?php echo $connection_name ?>][]" />
-					</td>
-				</tr>
+			<tr>
+				<td><?php echo $tableName ?></td>
+				<td>
+					<input type="checkbox" value="<?php echo $tableName ?>" name="Models[<?php echo $connection_name ?>][]" checked="CHECKED" />
+				</td>
+				<td>
+					<input type="checkbox" value="<?php echo $tableName ?>" name="Views[<?php echo $connection_name ?>][]" />
+				</td>
+				<td>
+					<input type="checkbox" value="<?php echo $tableName ?>" name="Controllers[<?php echo $connection_name ?>][]" />
+				</td>
+			</tr>
 	<?php endforeach ?>
 
-				<tr><td>&nbsp;</td></tr>
+			<tr><td>&nbsp;</td></tr>
 				
 <?php endforeach ?>
 
-			</tbody>
-		</table>
-		<input type="submit" value="Generate Files!" />
-	</form>
-</body>
-</html>
+		</tbody>
+	</table>
+	<input type="submit" value="Generate Files!" />
+</form>

@@ -3,9 +3,15 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title><?= $title ?></title>
-		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/styles.css') ?>" />
+		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/style.css') ?>" />
 	</head>
 	<body>
+
+<ul>
+	<?php foreach($actions as $url => $label): ?>
+	<li><a href="<?php echo $url ?>/"><?php echo $label ?></a></li>
+	<?php endforeach ?>
+</ul>
 
 <?= $content ?>
 

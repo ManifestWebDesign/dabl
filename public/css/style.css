@@ -1,0 +1,47 @@
+/* Global */
+* {
+	font-family: verdana;
+}
+
+body, table, input, select, textarea {
+	font-size: 12px;
+}
+
+/* Headings */
+h1, h2, h3, h4{
+	margin:0;
+	padding:4px 0;
+}
+
+h3{
+	background:#eee;
+}
+
+/* Tables */
+th, td{
+	text-align:left;
+}
+
+/* Object Grids */
+table.object-grid{
+	border-spacing: 1px;
+	font-size: 14px;
+}
+
+table.object-grid thead{
+
+}
+
+table.object-grid thead th{
+	background: #eee;
+	padding:2px;
+}
+
+table.object-grid tr.odd{
+
+}
+
+table.object-grid tbody td{
+	padding:2px;
+}
+

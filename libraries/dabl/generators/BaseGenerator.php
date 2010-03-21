@@ -846,6 +846,10 @@ class ".$className." extends base$className{
 		return $string;
 	}
 
+	static function spaceTitleCase($string){
+		return str_replace('_', ' ', preg_replace('/([a-z])([A-Z])/', '$1_$2', self::titleCase($string)));
+	}
+
 	/**
 	 * Returns the plural version of the given word.  If the plural version is
 	 * the same, then this method will simply add an 's' to the end of
@@ -883,33 +887,22 @@ class ".$className." extends base$className{
 			array( 'person', 'people'   )
 		);
 
-		$uncountable = array(
-			'sheep',
-			'fish',
-			'series',
-			'species',
-			'money',
-			'rice',
-			'information',
-			'equipment'
-		);
-
 		// save some time in the case that singular and plural are the same
 		//if ( in_array( strtolower( $string ), $uncountable ) )return $string;
 
 		// check for irregular singular forms
 		foreach ( $irregular as $noun ){
 			if ( strtolower( $string ) == $noun[0] )
-			return $noun[1];
+				return $noun[1];
 		}
 
 		// check for matches using regular expressions
 		foreach ( $plural as $pattern ){
 			if ( preg_match( $pattern[0], $string ) )
-			return preg_replace( $pattern[0], $pattern[1], $string );
+				return preg_replace( $pattern[0], $pattern[1], $string );
 		}
 
-		return $string;
+		return $string.'s';
 	}
 
 }

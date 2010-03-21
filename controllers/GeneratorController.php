@@ -8,7 +8,6 @@ class GeneratorController extends ApplicationController {
 
 	function  __construct() {
 		parent::__construct();
-		$this->render_partial = true;
 
 		//see DABLGenerator::construct() for default options
 		$options = array(
