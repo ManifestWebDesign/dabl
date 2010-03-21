@@ -171,6 +171,12 @@ class Condition{
 	 * @return Condition
 	 */
 	function addAnd($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+		if(is_array($left)){
+			foreach($left as $key => $value)
+				$this->addAnd($key, $value);
+			return $this;
+		}
+
 		$condition = $this->processCondition($left, $right, $operator, $quote);
 		if($condition)
 			$this->ands[] = $condition;
@@ -186,6 +192,12 @@ class Condition{
 	 * @return Condition
 	 */
 	function addOr($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+		if(is_array($left)){
+			foreach($left as $key => $value)
+				$this->addOr($key, $value);
+			return $this;
+		}
+
 		$condition = $this->processCondition($left, $right, $operator, $quote);
 		if($condition)
 			$this->ors[] = $condition;
