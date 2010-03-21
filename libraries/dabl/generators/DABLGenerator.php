@@ -83,6 +83,8 @@ class DABLGenerator extends BaseGenerator {
 		$pk = $instance->getPrimaryKey();
 		$plural = $this->getViewDirName($tableName);
 		$single = strtolower($tableName);
+		$actions = $this->getActions($tableName);
+
 		ob_start();
 ?>
 <table class="object-grid <?php echo $single ?>-grid">
@@ -94,10 +96,8 @@ class DABLGenerator extends BaseGenerator {
 			<th><?php echo $columnName ?></th>
 <?php
 		}
-		if($pk){
+		foreach($actions as $action){
 ?>
-			<th>&nbsp;</th>
-			<th>&nbsp;</th>
 			<th>&nbsp;</th>
 <?php
 		}
@@ -115,15 +115,10 @@ class DABLGenerator extends BaseGenerator {
 			<td><?php echo $output ?></td>
 <?php
 		}
-		if($pk){
-			$pkMethod = "get$pk";
-			$showURL = "<?php echo site_url('".$plural."/show/'.$".$single."->".$pkMethod."()) ?>";
-			$editURL = "<?php echo site_url('".$plural."/edit/'.$".$single."->".$pkMethod."()) ?>";
-			$deleteURL = "<?php echo site_url('".$plural."/delete/'.$".$single."->".$pkMethod."()) ?>";
+		foreach($actions as $action_label => $action_url){
+			if($action_label == 'Index') continue;
 ?>
-			<td><a href="<?php echo $showURL ?>">Show</a></td>
-			<td><a href="<?php echo $editURL ?>">Edit</a></td>
-			<td><a href="<?php echo $deleteURL ?>">Delete</a></td>
+			<td><a href="<?php echo $action_url ?>"><?php echo $action_label ?></a></td>
 <?php
 		}
 ?>
@@ -209,6 +204,14 @@ class DABLGenerator extends BaseGenerator {
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
 		ob_start();
+		$actions = $this->getActions($tableName);
+		foreach($actions as $action_label => $action_url){
+			if($action_label == 'Show') continue;
+?>
+	<a href="<?php echo $action_url ?>"><?php echo $action_label ?></a>
+
+<?php
+		}
 ?>
 	<table>
 		<tbody>
@@ -230,6 +233,39 @@ class DABLGenerator extends BaseGenerator {
 		return ob_get_clean();
 	}
 
+	function getActions($tableName){
+		$controllerName = $this->getControllerName($tableName);
+		$className = $this->getModelName($tableName);
+		$plural = $this->getViewDirName($tableName);
+		$single = strtolower($tableName);
+		$instance = new $className;
+		$pk = $instance->getPrimaryKey();
+		$pkMethod = "get$pk";
+		$actions = array();
+		if(!$pk)return $actions;
+
+		$actions['Index'] = "<?php echo site_url('".$plural."') ?>";
+		$actions['Show'] = "<?php echo site_url('".$plural."/show/'.$".$single."->".$pkMethod."()) ?>";
+		$actions['Edit'] = "<?php echo site_url('".$plural."/edit/'.$".$single."->".$pkMethod."()) ?>";
+		$actions['Delete'] = "<?php echo site_url('".$plural."/delete/'.$".$single."->".$pkMethod."()) ?>";
+
+		$fkeys_to = $this->getForeignKeysToTable($tableName);
+		foreach($fkeys_to as $k => $r){
+			$from_table = $r['from_table'];
+			$from_className = $this->getModelName($from_table);
+			$from_column = $r['from_column'];
+			$to_column = $r['to_column'];
+			if(@$used_to[$from_table]){
+				unset($fkeys_to[$k]);
+				continue;
+			}
+			$used_to[$from_table]=$from_column;
+			$actions[ucwords($this->getViewDirName($from_table))] = "<?php echo site_url('".$plural.'/'.$this->getViewDirName($from_table)."/'.$".$single."->".$pkMethod."()) ?>";
+		}
+
+		return $actions;
+	}
+
 	/**
 	 * Generates a String with Controller class for MVC
 	 * @param String $tableName
@@ -241,6 +277,10 @@ class DABLGenerator extends BaseGenerator {
 		$plural = $this->getViewDirName($tableName);
 		$className = $this->getModelName($tableName);
 		$single = strtolower($tableName);
+		$instance = new $className;
+		$pk = $instance->getPrimaryKey();
+		$pkMethod = "get$pk";
+
 		ob_start();
 		echo "<?php\n";
 ?>
@@ -256,7 +296,7 @@ class <?php echo $controllerName ?> extends ApplicationController {
 		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
 		$<?php echo $single ?>->fromArray($_POST);
 		$<?php echo $single ?>->save();
-		redirect('<?php echo $plural ?>');
+		redirect('<?php echo $plural ?>/show/'.$<?php echo $single ?>-><?php echo $pkMethod ?>());
 	}
 
 	function delete($id = null){
@@ -277,6 +317,31 @@ class <?php echo $controllerName ?> extends ApplicationController {
 		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
 		$this-><?php echo $single ?> = $<?php echo $single ?>;
 	}
+
+<?php
+		foreach($this->getForeignKeysToTable($tableName) as $r){
+			$from_table = $r['from_table'];
+			$from_className = $this->getModelName($from_table);
+			$from_column = $r['from_column'];
+			$to_column = $r['to_column'];
+			$fk_plural = $this->getViewDirName($from_table);
+			if(@$used_to[$from_table])
+				continue;
+			$used_to[$from_table]=$from_column;
+
+			$this_classname = $this->getModelName($tableName);
+			$this_single = strtolower($tableName);
+?>
+	function <?php echo $fk_plural ?>($id){
+		$<?php echo $this_single ?> = <?php echo $this_classname ?>::retrieveByPK($id);
+		$this-><?php echo $fk_plural ?> = $<?php echo $this_single ?>->get<?php echo $from_className ?>s();
+		$this->renderView('<?php echo $fk_plural ?>/index');
+		$this->render_view = false;
+	}
+	
+<?php
+		}
+?>
 
 }
 <?php
