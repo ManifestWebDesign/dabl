@@ -151,7 +151,7 @@ class GeneratorConfig {
    * @param      PDO $con
    * @return     Platform
    */
-  public function getConfiguredPlatform(PDO $con = null, $platformClass = null)
+  public function getConfiguredPlatform(PDO $con = null)
   {
     $clazz = $this->getClassname("platformClass");
     $platform = new $clazz();
