@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified February 8th 2010
+ *    			Last Modified March 22nd 2010
  */
 
 abstract class BaseGenerator{
@@ -262,7 +262,7 @@ $class .= '
 	);
 ';
 		foreach($fields as $key=>$field){
-			$default = $field->getDefaultValue();
+			$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 			$class .= '	protected $'.$field->getName();
 			if(is_numeric($default))
 				$class .= ' = '.$default;
@@ -279,7 +279,7 @@ $class .= '
 ';
 
 		foreach($fields as $key=>$field){
-			$default = $field->getDefaultValue();
+			$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 			$class .= '
 	function get'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'('.($field->isTemporalType() ? '$format = null' : '').'){';
 			if($field->isTemporalType()){
