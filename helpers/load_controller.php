@@ -71,7 +71,7 @@ function load_controller($route){
 		file_not_found($route);
 
 	$action = $params ? array_shift($params) : DEFAULT_CONTROLLER;
-	
+
 	if(!$instance->view_prefix)
 		$instance->view_prefix = $view_prefix;
 
@@ -80,12 +80,8 @@ function load_controller($route){
 
 	if($render_partial)
 		$instance->render_partial = $render_partial;
-	
-	$instance->output_format = $extension;
 
-	//Start session of it's not there
-	if(!isset($_SESSION) && !headers_sent())
-		session_start();
+	$instance->output_format = $extension;
 
 	//Restore Flash params
 	if(isset($_SESSION)){

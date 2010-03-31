@@ -288,7 +288,7 @@ class DABLGenerator extends BaseGenerator {
 class <?php echo $controllerName ?> extends ApplicationController {
 
 	function index(){
-		$this-><?php echo $plural ?> = <?php echo $className ?>::getAll();
+		$this['<?php echo $plural ?>'] = <?php echo $className ?>::getAll();
 	}
 
 	function save($id = null){
@@ -309,13 +309,13 @@ class <?php echo $controllerName ?> extends ApplicationController {
 	function show($id = null){
 		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
 		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
-		$this-><?php echo $single ?> = $<?php echo $single ?>;
+		$this['<?php echo $single ?>'] = $<?php echo $single ?>;
 	}
 
 	function edit($id = null){
 		$id = $id ? $id : @$_POST[<?php echo $className ?>::getPrimaryKey()];
 		$<?php echo $single ?> = $id ? <?php echo $className ?>::retrieveByPK($id) : new <?php echo $className ?>;
-		$this-><?php echo $single ?> = $<?php echo $single ?>;
+		$this['<?php echo $single ?>'] = $<?php echo $single ?>;
 	}
 
 <?php
@@ -334,7 +334,7 @@ class <?php echo $controllerName ?> extends ApplicationController {
 ?>
 	function <?php echo $fk_plural ?>($id){
 		$<?php echo $this_single ?> = <?php echo $this_classname ?>::retrieveByPK($id);
-		$this-><?php echo $fk_plural ?> = $<?php echo $this_single ?>->get<?php echo $from_className ?>s();
+		$this['<?php echo $fk_plural ?>'] = $<?php echo $this_single ?>->get<?php echo $from_className ?>s();
 		$this->renderView('<?php echo $fk_plural ?>/index');
 		$this->render_view = false;
 	}

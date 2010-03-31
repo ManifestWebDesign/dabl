@@ -34,8 +34,8 @@ class GeneratorController extends ApplicationController {
 			$generator->setOptions($options);
 			$generators[$connection_name] = $generator;
 		}
-		$this->options = $options;
-		$this->generators = $generators;
+		$this['options'] = $options;
+		$this['generators'] = $generators;
 	}
 
 	function index(){
@@ -43,7 +43,7 @@ class GeneratorController extends ApplicationController {
 	}
 
 	function generate(){
-		if(!$this->generators)
+		if(!$this['generators'])
 			die('Nothing to generate');
 	}
 }
