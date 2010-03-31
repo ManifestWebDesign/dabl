@@ -8,7 +8,7 @@
 	<body>
 
 <ul>
-	<?php foreach($actions as $url => $label): ?>
+	<?php foreach($actions as $label => $url): ?>
 	<li><a href="<?php echo $url ?>/"><?php echo $label ?></a></li>
 	<?php endforeach ?>
 </ul>

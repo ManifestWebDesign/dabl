@@ -9,7 +9,7 @@ abstract class ApplicationController extends BaseController {
 			$action = str_replace(array('Controller','.php'), '', basename($controller_file));
 			if($action == 'Application' || $action == 'Index' || $action == 'Generator') continue;
 			$action = preg_replace('/([a-z])([A-Z])/', '$1_$2', $action);
-			$this['actions'][site_url(strtolower($action))] = str_replace('_', ' ', ucwords($action));
+			$this['actions'][str_replace('_', ' ', ucwords($action))] = site_url(strtolower($action));
 		}
 	}
 }
