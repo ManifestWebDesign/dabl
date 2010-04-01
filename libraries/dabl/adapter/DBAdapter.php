@@ -41,6 +41,9 @@ abstract class DBAdapter extends PDO {
 					if(@$connection_params['port']) $parts[] = 'port='.$connection_params['port'];
 					if(@$connection_params['unix_socket']) $parts[] = 'unix_socket='.$connection_params['unix_socket'];
 					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
+					foreach($parts as &$v) {
+						$v = str_replace(';', '\;', $v);
+					}
 					$dsn = 'mysql:'.implode(';', $parts);
 					$conn = new DBMySQL($dsn, @$connection_params['user'], @$connection_params['password']);
 					break;
@@ -50,6 +53,9 @@ abstract class DBAdapter extends PDO {
 					$parts = array();
 					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
 					if(@$connection_params['charset']) $parts[] = 'charset='.$connection_params['charset'];
+					foreach($parts as &$v) {
+						$v = str_replace(';', '\;', $v);
+					}
 					$dsn = 'oci:'.implode(';', $parts);
 					$conn = new DBOracle($dsn, @$connection_params['user'], @$connection_params['password']);
 					break;
@@ -61,6 +67,9 @@ abstract class DBAdapter extends PDO {
 					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
 					if(@$connection_params['user']) $parts[] = 'user='.$connection_params['user'];
 					if(@$connection_params['password']) $parts[] = 'password='.$connection_params['password'];
+					foreach($parts as &$v) {
+						$v = str_replace(' ', '\ ', $v);
+					}
 					$dsn = 'pgsql:'.implode(' ', $parts);
 					$conn = new DBPostgres($dsn);
 					break;
@@ -72,6 +81,9 @@ abstract class DBAdapter extends PDO {
 					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
 					if(@$connection_params['charset']) $parts[] = 'charset='.$connection_params['charset'];
 					if(@$connection_params['appname']) $parts[] = 'appname='.$connection_params['appname'];
+					foreach($parts as &$v) {
+						$v = str_replace(';', '\;', $v);
+					}
 					$dsn = $connection_params['driver'].':'.implode(';', $parts);
 					$conn = new DBMSSQL($dsn, @$connection_params['user'], @$connection_params['password']);
 					break;
