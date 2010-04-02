@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Modified version of DBAdapter from Propel Runtime
- * Last Modified February 8th 2010 by Dan Blaisdell
- */
 abstract class DBAdapter extends PDO {
 
 	const ID_METHOD_NONE = 0;

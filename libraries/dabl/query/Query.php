@@ -1,7 +1,4 @@
 <?php
-/**
- * Last Modified April 2nd 2010
- */
 
 /**
  * Used to build query strings using OOP

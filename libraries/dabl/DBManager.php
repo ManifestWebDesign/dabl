@@ -1,7 +1,4 @@
 <?php
-/**
- * Last Modified March 2010
- */
 
 class DBManager{
 	private static $connections = array();

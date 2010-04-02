@@ -1,10 +1,6 @@
 <?php
 
 /**
- * Last modified May 30th 2009
- */
-
-/**
  * Handles all of your paginating needs.
  * 
  * Example without className:

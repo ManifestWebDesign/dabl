@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Last Modified April 1st 2010
- */
-
 abstract class BaseModel {
 
 	/**

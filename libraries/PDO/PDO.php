@@ -50,8 +50,6 @@ if(class_exists('PDO'))
  * @Author		Andrea Giammarchi
  * @Site		http://www.devpro.it/
  * @Mail		andrea [ at ] 3site [ dot ] it
- * @Date		2005/10/13
- * @LastModified	2005/12/01 21:40
  * @Version		0.1b - tested, supports only PostgreSQL, MySQL or SQLITE databases
  */ 
 class PDO {

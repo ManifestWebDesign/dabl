@@ -1,12 +1,5 @@
 <?php
 
-/**
- *    DABL (Database ABstraction Layer)
- *    	By DAn BLaisdell
- *    		Inspired by Propel
- *    			Last Modified April 1st 2010
- */
-
 abstract class BaseGenerator{
 
 	/**

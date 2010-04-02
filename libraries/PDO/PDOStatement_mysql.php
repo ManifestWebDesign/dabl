@@ -14,7 +14,6 @@
  * @Site		http://www.devpro.it/
  * @Mail		andrea [ at ] 3site [ dot ] it
  * @Date		2005/10/13
- * @LastModified	2006/01/29 09:30 [fixed execute bug]
  * @Version		0.1b - tested
  */
 
