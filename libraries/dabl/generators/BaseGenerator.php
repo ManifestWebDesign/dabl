@@ -59,7 +59,7 @@ abstract class BaseGenerator{
 			'empty_string_zero' => false,
 
 			//add some logic to the setter methods to not allow column values to be null if the column cannot be null
-			'protect_not_null' => false,
+			'protect_not_null' => true,
 
 			//prepend this to class name
 			'model_prefix' => '',
