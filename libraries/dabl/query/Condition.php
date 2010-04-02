@@ -1,6 +1,6 @@
 <?php
 /**
- * Last Modified September 11th 2009
+ * Last Modified April 2nd 2010
  */
 
 /**
@@ -38,7 +38,7 @@ class Condition{
 	/**
 	 * @return string
 	 */
-	private function processCondition($left = null, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+	private function processCondition($left = null, $right=null, $operator=Query::EQUAL, $quote = null){
 		$statement = new QueryStatement;
 
 		if($left===null)
@@ -53,10 +53,15 @@ class Condition{
 			return $clause_statement;
 		}
 
-		//You can skip $operator and specify $quote with parameter 3
-		if(is_int($operator) && !$quote){
-			$quote = $operator;
-			$operator = Query::EQUAL;
+		if($quote === null){
+			//You can skip $operator and specify $quote with parameter 3
+			if(is_int($operator)){
+				$quote = $operator;
+				$operator = Query::EQUAL;
+			}
+			else{
+				$quote = self::QUOTE_RIGHT;
+			}
 		}
 
 		//Get rid of white-space on sides of $operator
@@ -158,7 +163,7 @@ class Condition{
 	 * Alias of addAnd
 	 * @return Condition
 	 */
-	function add($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+	function add($left, $right=null, $operator=Query::EQUAL, $quote = null){
 		return $this->addAnd($left, $right, $operator, $quote);
 	}
 
@@ -170,7 +175,7 @@ class Condition{
 	 * @param $quote int[optional]
 	 * @return Condition
 	 */
-	function addAnd($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+	function addAnd($left, $right=null, $operator=Query::EQUAL, $quote = null){
 		if(is_array($left)){
 			foreach($left as $key => $value)
 				$this->addAnd($key, $value);
@@ -191,7 +196,7 @@ class Condition{
 	 * @param $quote int[optional]
 	 * @return Condition
 	 */
-	function addOr($left, $right=null, $operator=Query::EQUAL, $quote = self::QUOTE_RIGHT){
+	function addOr($left, $right=null, $operator=Query::EQUAL, $quote = null){
 		if(is_array($left)){
 			foreach($left as $key => $value)
 				$this->addOr($key, $value);

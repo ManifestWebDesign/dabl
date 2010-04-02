@@ -1,6 +1,6 @@
 <?php
 /**
- * Last Modified March 8th 2010
+ * Last Modified April 2nd 2010
  */
 
 /**
@@ -225,13 +225,17 @@ class Query{
 			if($onClause instanceof Condition)
 				$onClause = $onClause->getClause();
 
+			$conn = DBManager::getConnection();
+
 			$table_parts = explode(' ', str_replace("`","",trim($table)));
-			if(count($table_parts)==1)
-				$table = "`$table`";
+			if(count($table_parts)==1){
+				if($conn) $table = $conn->quoteIdentifier($table);
+			}
 			else{
 				$table_name = $table_parts[0];
+				if($conn) $table_name = $conn->quoteIdentifier($table_name);
 				$alias = array_pop($table_parts);
-				$table = "`$table_name` $alias";
+				$table = "$table_name $alias";
 			}
 			$this->_joins[] = "$joinType $table ON ($onClause)";
 		}
@@ -242,7 +246,7 @@ class Query{
 	 * Short version of addAnd();
 	 * @return Query
 	 */
-	function add($column, $value=null, $operator=self::EQUAL, $quote = Condition::QUOTE_RIGHT){
+	function add($column, $value=null, $operator=self::EQUAL, $quote = null){
 		return $this->addAnd($column, $value, $operator, $quote);
 	}
 
@@ -254,7 +258,7 @@ class Query{
 	 * @param $operator String[optional]
 	 * @param $quote Int[optional]
 	 */
-	function addAnd($column, $value=null, $operator=self::EQUAL, $quote = Condition::QUOTE_RIGHT){
+	function addAnd($column, $value=null, $operator=self::EQUAL, $quote = null){
 		$this->_where->addAnd($column, $value, $operator, $quote);
 		return $this;
 	}
@@ -267,7 +271,7 @@ class Query{
 	 * @param $operator String[optional]
 	 * @param $quote Int[optional]
 	 */
-	function addOr($column, $value=null, $operator=self::EQUAL, $quote = Condition::QUOTE_RIGHT){
+	function addOr($column, $value=null, $operator=self::EQUAL, $quote = null){
 		$this->_where->addOr($column, $value, $operator, $quote);
 		return $this;
 	}
