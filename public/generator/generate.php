@@ -3,8 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<title><?= $title ?></title>
-		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/style.css') ?>" />
+		<title>DABL Generator</title>
+		<link type="text/css" rel="stylesheet" href="../css/style.css" />
 	</head>
 	<body>
 <?php

@@ -1,10 +1,8 @@
 <?php
 require_once('../../config.php');
 
-//see DABLGenerator::construct() for default options
+//see DABLGenerator::construct() for all default options
 $options = array(
-	'title_case' => true,
-
 	//target directory for generated base table classes
 	'base_model_path' => ROOT."models/base/",
 
