@@ -31,10 +31,10 @@ require_once ROOT.'libraries/Module.php';
 Module::addRepository('ROOT', ROOT);
 Module::import('ROOT:models');
 Module::import('ROOT:models:base');
+Module::import('ROOT:libraries:dabl');
 Module::import('ROOT:libraries:dabl:query');
 Module::import('ROOT:controllers');
 Module::import('ROOT:libraries');
-Module::import('ROOT:libraries:dabl');
 Module::import('ROOT:libraries:dabl:adapter');
 if(!class_exists('PDO')) Module::import('ROOT:libraries:PDO');
 
