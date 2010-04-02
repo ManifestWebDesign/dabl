@@ -105,15 +105,8 @@ abstract class DBAdapter extends PDO {
 	}
 
 	function printQueryLog() {
-		?>
-<pre>
-<?
 		$queries = $this->getLoggedQueries();
-		echo count($queries)." queries executed\n";
-		echo implode("\n\n", $queries);
-?>
-</pre>
-		<?
+		echo  '<pre>'.count($queries)." queries executed\n".implode("\n\n", $queries).'</pre>';
 	}
 
 	/**

@@ -185,7 +185,7 @@ class DABLGenerator extends BaseGenerator {
 ?>
 <a href="<?php echo "<?php echo site_url('".$plural."/edit') ?>" ?>">new <?php echo str_replace('_', ' ', $single) ?></a>
 <?php echo '<?php load_view("'.$plural.'/grid", $params) ?>' ?>
-<?
+<?php
 		return ob_get_clean();
 	}
 
