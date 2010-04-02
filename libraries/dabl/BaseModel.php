@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Last Modified October 30th 2009
+ * Last Modified April 1st 2010
  */
 
 abstract class BaseModel {
@@ -297,22 +297,18 @@ abstract class BaseModel {
 		$values = array();
 		foreach($this->getColumnNames() as $column){
 			$fields[] = $conn->quoteIdentifier($column);
-			$values[] = $conn->checkInput($this->$column);
-	//		$values[] = $this->$column;
-	//		$placeholders[] = '?';
+			$values[] = $this->$column;
+			$placeholders[] = '?';
 		}
-		$queryString = "REPLACE INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $values).") ";
-	//	$queryString = "REPLACE INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $placeholders).") ";
+		$queryString = "REPLACE INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $placeholders).") ";
 
-		$count = $conn->exec($queryString);
-//		$stmnt = $conn->prepare($queryString);
-//		$count = $stmnt->execute($values);
+		$statement = new QueryStatement($conn);
+		$statement->setString($queryString);
+		$statement->setParams($values);
 
-		if($this->getPrimaryKey()){
-			$pk = $this->getPrimaryKey();
-			$id = $conn->lastInsertId();
-			if($id)$this->$pk = $id;
-		}
+		$result = $statement->bindAndExecute();
+		$count = $result->rowCount();
+
 		$this->resetModified();
 		$this->setNew(false);
 		return $count;
@@ -354,7 +350,6 @@ abstract class BaseModel {
 		$statement = new QueryStatement($conn);
 		$statement->setString($queryString);
 		$statement->setParams($values);
-//		die($statement);
 		$result = $statement->bindAndExecute();
 
 		$this->resetModified();

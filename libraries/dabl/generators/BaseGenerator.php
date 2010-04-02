@@ -4,7 +4,7 @@
  *    DABL (Database ABstraction Layer)
  *    	By DAn BLaisdell
  *    		Inspired by Propel
- *    			Last Modified March 22nd 2010
+ *    			Last Modified April 1st 2010
  */
 
 abstract class BaseGenerator{
