@@ -15,12 +15,10 @@ class Module {
 
 			// turn the namespace into a path
 			$ns_path = implode($ds, $namespace_a);
-			$class_path = MODULE::$root_modules[$root] . $ds . $ns_path . $ds . $class_name . '.class.php';
-			$new_class_path = MODULE::$root_modules[$root] . $ds . $ns_path . $ds . $class_name . '.php';
+			$class_path = MODULE::$root_modules[$root] . $ds . $ns_path . $ds . $class_name . '.php';
 
-			// include path
+			// require file if it exists
 			if ( is_file ( $class_path )) require_once $class_path;
-			if ( is_file ( $new_class_path )) require_once $new_class_path;
 		}
 	}
 

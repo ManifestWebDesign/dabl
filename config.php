@@ -29,13 +29,13 @@ require_once ROOT.'libraries/Module.php';
 
 //specify directories that contain classes
 Module::addRepository('ROOT', ROOT);
-Module::import('ROOT:libraries');
 Module::import('ROOT:models');
-Module::import('ROOT:controllers');
 Module::import('ROOT:models:base');
+Module::import('ROOT:libraries:dabl:query');
+Module::import('ROOT:controllers');
+Module::import('ROOT:libraries');
 Module::import('ROOT:libraries:dabl');
 Module::import('ROOT:libraries:dabl:adapter');
-Module::import('ROOT:libraries:dabl:query');
 if(!class_exists('PDO')) Module::import('ROOT:libraries:PDO');
 
 $db_connections['my_connection_name'] = array(
