@@ -41,29 +41,21 @@ class DABLGenerator extends BaseGenerator {
 	<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo htmlentities($'.$single.'->'."get$pk".'()) ?>' ?>" />
 <?php
 		}
-?>
-	<table>
-		<tbody>
-<?php
 		foreach($instance->getColumnNames() as $columnName){
 			if($columnName==$pk)continue;
 			$method = "get$columnName";
 			$output = '<?php echo htmlentities($'.$single.'->'.$method.'()) ?>';
 ?>
-			<tr>
-				<th><?php echo $columnName ?></th>
-				<td><input type="text" name="<?php echo $columnName ?>" value="<?php echo $output ?>" /></td>
-			</tr>
+	<p>
+		<label for="<?php echo strtolower($single.'_'.$columnName) ?>"><?php echo $columnName ?></label>
+		<input id="<?php echo strtolower($single.'_'.$columnName) ?>" type="text" name="<?php echo $columnName ?>" value="<?php echo $output ?>" />
+	</p>
 <?php
 		}
 ?>
-			<tr>
-				<td>
-					<input type="submit" value="Save" />
-				</td>
-			</tr>
-		</tbody>
-	</table>
+	<p>
+		<input type="submit" value="Save" />
+	</p>
 </form>
 <?php
 		return ob_get_clean();
@@ -205,31 +197,23 @@ class DABLGenerator extends BaseGenerator {
 		$pk = $instance->getPrimaryKey();
 		ob_start();
 		$actions = $this->getActions($tableName);
+		unset($actions['Show']);
 		foreach($actions as $action_label => $action_url){
-			if($action_label == 'Show') continue;
 ?>
-	<a href="<?php echo $action_url ?>"><?php echo $action_label ?></a>
-
+<a href="<?php echo $action_url ?>"><?php echo $action_label ?></a> 
 <?php
 		}
-?>
-	<table>
-		<tbody>
-<?php
 		foreach($instance->getColumnNames() as $columnName){
 			if($columnName==$pk)continue;
 			$method = "get$columnName";
 ?>
-			<tr>
-				<th><?php echo $columnName ?></th>
-				<td><?php echo '<?php echo htmlentities($'.$single.'->'.$method.'()) ?>' ?>&nbsp;</td>
-			</tr>
+
+<p>
+	<strong><?php echo $columnName ?>:</strong>
+	<?php echo '<?php echo htmlentities($'.$single.'->'.$method.'()) ?>' ?> 
+</p>
 <?php
 		}
-?>
-		</tbody>
-	</table>
-<?php
 		return ob_get_clean();
 	}
 
@@ -244,7 +228,6 @@ class DABLGenerator extends BaseGenerator {
 		$actions = array();
 		if(!$pk)return $actions;
 
-		$actions['Index'] = "<?php echo site_url('".$plural."') ?>";
 		$actions['Show'] = "<?php echo site_url('".$plural."/show/'.$".$single."->".$pkMethod."()) ?>";
 		$actions['Edit'] = "<?php echo site_url('".$plural."/edit/'.$".$single."->".$pkMethod."()) ?>";
 		$actions['Delete'] = "<?php echo site_url('".$plural."/delete/'.$".$single."->".$pkMethod."()) ?>";
