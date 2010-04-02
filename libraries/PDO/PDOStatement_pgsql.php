@@ -312,8 +312,8 @@ class PDOStatement_pgsql extends PDOStatement{
 			$query = null;
 		}
 		$this->__position = 0;
-		$this->__num_rows = pg_num_rows($result);
-		return $query;
+		$this->__num_rows = (int)@pg_num_rows($result);
+		return $result;
 	}
 	
 }

@@ -14,11 +14,12 @@
  * @Site		http://www.devpro.it/
  * @Mail		andrea [ at ] 3site [ dot ] it
  * @Date		2005/10/13
+ * @LastModified	2006/01/29 09:30 [fixed execute bug]
  * @Version		0.1b - tested
  */
 
 class PDOStatement_mysql extends PDOStatement{
-	
+
 	/**
 	 * 'protected' variables:
 	 *      __persistent:Boolean		Connection mode, is true on persistent, false on normal (deafult) connection
@@ -26,7 +27,7 @@ class PDOStatement_mysql extends PDOStatement{
 	 *      __errorCode:String		Last error string code
 	 *      __errorInfo:Array		Last error informations, code, number, details
 	 *      __boundParams:Array		Stored bindParam
-	 */	
+	 */
 	protected $__persistent = false;
 	protected $__fetchmode = PDO::FETCH_BOTH;
 	protected $__errorCode = '';
@@ -41,9 +42,9 @@ class PDOStatement_mysql extends PDOStatement{
 		$result = 0;
 		if(!is_null($this->__result))
 			$result = mysql_num_fields($this->__result);
-		return $result; 
+		return $result;
 	}
-	
+
 	/**
 	 * Public method:
 	 * Returns a code rappresentation of an error
@@ -53,7 +54,7 @@ class PDOStatement_mysql extends PDOStatement{
 	function errorCode() {
 		return $this->__errorCode;
 	}
-	
+
 	/**
 	 * Public method:
 	 * Returns an array with error informations
@@ -66,14 +67,14 @@ class PDOStatement_mysql extends PDOStatement{
 	function errorInfo() {
 		return $this->__errorInfo;
 	}
-	
+
 	function query(){
 		if(is_null($this->__result = &$this->__uquery($this->__query)))
 			return false;
 		else
 			return true;
 	}
-	
+
 	/**
 	 * Public method:
 	 * Excecutes a query and returns true on success or false.
@@ -91,12 +92,12 @@ class PDOStatement_mysql extends PDOStatement{
 					if(!isset($tempf))
 						$tempf = $tempr = array();
 					array_push($tempf, $k);
-					array_push($tempr, '"'.mysql_escape_string($v).'"');
+					array_push($tempr, "'".mysql_escape_string($v)."'");
 				}
 				else {
-					$parse = create_function('$v', 'return \'"\'.mysql_escape_string($v).\'"\';');
-					$__query = preg_replace("/(\?)/e", '$parse($array[$k++]);', $__query);
-					break;
+				   $pos = strpos($__query, '?');
+				   if ($pos === false) break;
+					$__query = substr_replace($__query, "'".mysql_escape_string($v)."'", $pos, 1);
 				}
 			}
 			if(isset($tempf))
@@ -109,7 +110,7 @@ class PDOStatement_mysql extends PDOStatement{
 		$this->__boundParams = array();
 		return $keyvars;
 	}
-	
+
 	/**
 	 * Public method:
 	 * Returns, if present, next row of executed query or false.
@@ -133,7 +134,7 @@ class PDOStatement_mysql extends PDOStatement{
 					$result = mysql_fetch_assoc($this->__result);
 					break;
 				case PDO::FETCH_OBJ:
-					$result = mysql_fetch_object($this->__result);	
+					$result = mysql_fetch_object($this->__result);
 					break;
 				case PDO::FETCH_BOTH:
 				default:
@@ -145,7 +146,25 @@ class PDOStatement_mysql extends PDOStatement{
 			$this->__result = null;
 		return $result;
 	}
-	
+
+	/**
+	 * Public method:
+	 * Returns, if present, first column of next row of executed query
+	 * this->fetchSingle( void ):Mixed
+	 * @Return	Mixed		Null or next row's first column
+	 */
+	function fetchSingle() {
+		$result = null;
+		if(!is_null($this->__result)) {
+			$result = @mysql_fetch_row($this->__result);
+			if($result)
+				$result = $result[0];
+			else
+				$this->__result = null;
+		}
+		return $result;
+	}
+
 	/**
 	 * Public method:
 	 *	Returns an array with all rows of executed query.
@@ -165,7 +184,7 @@ class PDOStatement_mysql extends PDOStatement{
 					break;
 				case PDO::FETCH_ASSOC:
 					while($r = mysql_fetch_assoc($this->__result))
-						array_push($result, $r);
+
 					break;
 				case PDO::FETCH_COLUMN:
 					for($x = 0; $x < mysql_num_rows($this->__result); $x++)
@@ -187,21 +206,6 @@ class PDOStatement_mysql extends PDOStatement{
 	}
 
 	/**
-	 * @Return	Mixed
-	 */
-	function fetchColumn($column_number = 0) {
-		$result = null;
-		if(!is_null($this->__result)) {
-			$result = @mysql_fetch_row($this->__result);
-			if($result)
-				$result = $result[$column_number];
-			else
-				$this->__result = null;
-		}
-		return $result;
-	}
-
-	/**
 	 * Public method:
 	 * Returns number of last affected database rows
 	 * this->rowCount( void ):Integer
@@ -211,8 +215,8 @@ class PDOStatement_mysql extends PDOStatement{
 	function rowCount() {
 		return mysql_affected_rows($this->__connection);
 	}
-	
-	
+
+
 	// NOT TOTALLY SUPPORTED PUBLIC METHODS
 	/**
 	 * Public method:
@@ -242,7 +246,7 @@ class PDOStatement_mysql extends PDOStatement{
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * Public method:
 	 * Sets database attributes, in this version only connection mode.
@@ -266,7 +270,7 @@ class PDOStatement_mysql extends PDOStatement{
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * Public method:
 	 * Sets default fetch mode to use with this->fetch() method.
@@ -288,13 +292,13 @@ class PDOStatement_mysql extends PDOStatement{
 		}
 		return $result;
 	}
-	
-	
+
+
 	// UNSUPPORTED PUBLIC METHODS
 	function bindColumn($mixewd, &$param, $type = null, $max_length = null, $driver_option = null) {
 		return false;
 	}
-	
+
 	function __setErrors($er) {
 		if(!is_resource($this->__connection)) {
 			$errno = mysql_errno();
@@ -309,15 +313,15 @@ class PDOStatement_mysql extends PDOStatement{
 		$this->__errorInfo = array($this->__errorCode, $errno, $errst);
 		$this->__result = null;
 	}
-	
+
 	function __uquery(&$query) {
 		if(!$result = mysql_query($query, $this->__connection)) {
 			$this->__setErrors('SQLER');
 			$result = null;
 		}
 		$this->__position = 0;
-		$this->__num_rows = mysql_num_rows($result);
+		$this->__num_rows = (int)@mysql_num_rows($result);
 		return $result;
 	}
-	
+
 }

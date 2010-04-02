@@ -304,8 +304,8 @@ class PDOStatement_sqlite extends PDOStatement {
 			$query = null;
 		}
 		$this->__position = 0;
-		$this->__num_rows = sqlite_num_rows($result);
-		return $query;
+		$this->__num_rows = (int)@sqlite_num_rows($result);
+		return $result;
 	}
 	
 }
