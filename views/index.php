@@ -5,7 +5,7 @@
 </p>
 
 <p>
-	Once you are ready to generate your models, views, or controllers point your browser to the <a href="<?php echo site_url('generator') ?>/">generator</a>.
+	Once you are ready to generate your models, views or controllers, point your browser to the <a href="<?php echo site_url('generator') ?>/">generator</a>.
 </p>
 
 <p>
