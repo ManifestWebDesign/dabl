@@ -112,7 +112,7 @@ class DABLGenerator extends BaseGenerator {
 		foreach($instance->getColumnNames() as $columnName){
 			$output = '<?php echo htmlentities($'.$single.'->'."get$columnName".'()) ?>';
 ?>
-			<td><?php echo $output ?></td>
+			<td><?php echo $output ?>&nbsp;</td>
 <?php
 		}
 		foreach($actions as $action_label => $action_url){
@@ -222,7 +222,7 @@ class DABLGenerator extends BaseGenerator {
 ?>
 			<tr>
 				<th><?php echo $columnName ?></th>
-				<td><?php echo '<?php echo htmlentities($'.$single.'->'.$method.'()) ?>' ?></td>
+				<td><?php echo '<?php echo htmlentities($'.$single.'->'.$method.'()) ?>' ?>&nbsp;</td>
 			</tr>
 <?php
 		}
