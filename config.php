@@ -39,18 +39,11 @@ Module::import('ROOT:libraries:dabl:query');
 if(!class_exists('PDO')) Module::import('ROOT:libraries:PDO');
 
 $db_connections['my_connection_name'] = array(
-//	'driver' => 'mysql',
-//	'host' => 'localhost',
-//	'dbname' => 'test',
-//	'user' => 'root',
-//	'password' => ''
-
-	'driver' => 'pgsql',
+	'driver' => 'mysql',
 	'host' => 'localhost',
-	'port' => '5432',
-	'dbname' => 'blog',
-	'user' => 'postgres',
-	'password' => '4myfuture'
+	'dbname' => 'test',
+	'user' => 'root',
+	'password' => ''
 );
 
 //connect to database(s)
