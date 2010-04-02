@@ -27,7 +27,7 @@ ini_set('error_log', ROOT.'logs/error_log');
 //load Module class for magic class loading
 require_once ROOT.'libraries/Module.php';
 
-//specify directories with classes
+//specify directories that contain classes
 Module::addRepository('ROOT', ROOT);
 Module::import('ROOT:libraries');
 Module::import('ROOT:models');
