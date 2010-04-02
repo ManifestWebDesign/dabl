@@ -39,11 +39,18 @@ Module::import('ROOT:libraries:dabl:query');
 if(!class_exists('PDO')) Module::import('ROOT:libraries:PDO');
 
 $db_connections['my_connection_name'] = array(
-	'driver' => 'mysql',
+//	'driver' => 'mysql',
+//	'host' => 'localhost',
+//	'dbname' => 'test',
+//	'user' => 'root',
+//	'password' => ''
+
+	'driver' => 'pgsql',
 	'host' => 'localhost',
-	'dbname' => 'test',
-	'user' => 'root',
-	'password' => ''
+	'port' => '5432',
+	'dbname' => 'blog',
+	'user' => 'postgres',
+	'password' => '4myfuture'
 );
 
 //connect to database(s)
@@ -57,3 +64,6 @@ foreach (glob(ROOT."helpers/*.php") as $filename) require_once($filename);
 
 //Strip added slashes if needed
 if (get_magic_quotes_gpc()) strip_request_slashes();
+
+//start the session
+session_start();

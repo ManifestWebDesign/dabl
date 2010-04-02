@@ -1,3 +1,4 @@
+<?php require_once './init.php' ?>
 <?php
 foreach($generators as $connection_name => $generator){
 ?>
