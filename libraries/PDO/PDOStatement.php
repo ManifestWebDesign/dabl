@@ -7,26 +7,43 @@ abstract class PDOStatement implements Iterator {
 	protected $__query = '';
 	protected $__position = 0;
 	protected $__result = null;
-	protected $__boundParams = Array();
+	protected $__boundParams = array();
+	protected $__errorCode = '';
+	protected $__errorInfo = array('');
+	protected $__fetchmode = PDO::FETCH_BOTH;
+
+	/**
+	 * @var PDO
+	 */
+	protected $__pdo;
 	
 	/**
 	 * Public constructor:
 	 * Called from PDO to create a PDOStatement for this database
-	 * new PDOStatement_sqlite( &$__query:String, &$__connection:Resource, $__dbinfo:Array )
+	 * new PDOStatement_sqlite( &$__query:String, &$__connection:Resource, $__dbinfo:array )
 	 * @Param	String		query to prepare
 	 * @Param	Resource	database connection
-	 * @Param	Array		4 elements array to manage connection
+	 * @Param	array		4 elements array to manage connection
 	 */
-	function __construct(&$__query, &$__connection, &$__dbinfo) {
+	function __construct(&$__query, &$__connection, &$__dbinfo, &$__pdo_instance) {
 		$this->__query = &$__query;
 		$this->__connection = &$__connection;
 		$this->__dbinfo = &$__dbinfo;
+		$this->__pdo = &$__pdo_instance;
 		$this->__position = 0;
 	}
 
 	abstract function __uquery(&$query);
 	
 	abstract function fetch();
+
+	abstract function fetchAll();
+
+	abstract function fetchColumn();
+
+	abstract function columnCount();
+
+	abstract function rowCount();
 
 	function query(){
 		if(is_null($this->__result = &$this->__uquery($this->__query)))
@@ -85,6 +102,109 @@ abstract class PDOStatement implements Iterator {
 			$this->__boundParams[$mixed] = $variable;
 		else
 			array_push($this->__boundParams, $variable);
+	}
+
+	/**
+	 * Not supported
+	 */
+	function bindColumn($mixewd, &$param, $type = null, $max_length = null, $driver_option = null) {
+		return false;
+	}
+
+	/**
+	 * Public method:
+	 * Excecutes a query and returns true on success or false.
+	 * this->exec( $array:array ):Boolean
+	 * @Param	array		If present, it should contain all replacements for prepared query
+	 * @Return	Boolean		true if query has been done without errors, false otherwise
+	 */
+	function execute($array = array()) {
+		if(count($this->__boundParams) > 0)
+			$array = &$this->__boundParams;
+		$__query = $this->__query;
+
+		if(count($array) > 0) {
+			foreach($array as $k => $v) {
+				if(!is_int($k) || substr($k, 0, 1) === ':') {
+					if(!isset($tempf))
+						$tempf = $tempr = array();
+					array_push($tempf, $k);
+					array_push($tempr, $this->__pdo->quote($v));
+				}
+				else {
+					$__query = preg_replace("/(\?)/e", '$this->__pdo->quote($array[$k++]);', $__query);
+					break;
+				}
+			}
+			if(isset($tempf))
+				$__query = str_replace($tempf, $tempr, $__query);
+		}
+		if(is_null($this->__result = &$this->__uquery($__query)))
+			$keyvars = false;
+		else
+			$keyvars = true;
+		$this->__boundParams = array();
+		return $keyvars;
+	}
+
+	/**
+	 * Public method:
+	 * Sets default fetch mode to use with this->fetch() method.
+	 * this->setFetchMode( $mode:Integer ):Boolean
+	 * @Param	Integer		PDO_FETCH_* constant to use while reading an execute query with fetch() method.
+	 * NOTE: PDO_FETCH_LAZY and PDO_FETCH_BOUND are not supported
+	 * @Return	Boolean		true on change, false otherwise
+	 */
+	function setFetchMode($mode) {
+		$result = false;
+		switch($mode) {
+			case PDO::FETCH_NUM:
+			case PDO::FETCH_ASSOC:
+			case PDO::FETCH_OBJ:
+			case PDO::FETCH_BOTH:
+				$result = true;
+				$this->__fetchmode = &$mode;
+				break;
+		}
+		return $result;
+	}
+
+	/**
+	 * @Return	Mixed		correct information or false
+	 */
+	function getAttribute($attribute) {
+		return $this->__pdo->getAttribute($attribute);
+	}
+
+	/**
+	 * Sets database attributes, in this version only connection mode.
+	 * @Return	Boolean		true on change, false otherwise
+	 */
+	function setAttribute($attribute, $mixed) {
+		return $this->__pdo->setAttribute($attribute, $mixed);
+	}
+
+	/**
+	 * Public method:
+	 * Returns a code rappresentation of an error
+	 * this->errorCode( void ):String
+	 * @Return	String		String rappresentation of the error
+	 */
+	function errorCode() {
+		return $this->__errorCode;
+	}
+
+	/**
+	 * Public method:
+	 * Returns an array with error informations
+	 * this->errorInfo( void ):array
+	 * @Return	array		array with 3 keys:
+	 * 				0 => error code
+	 *              1 => error number
+	 *              2 => error string
+	 */
+	function errorInfo() {
+		return $this->__errorInfo;
 	}
 
 }
