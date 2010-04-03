@@ -301,6 +301,16 @@ $class .= '
 					$class .= '
 		if($theValue==="")
 			$theValue = null;';
+					if($field->getType()==PropelTypes::TIMESTAMP){
+						$class .= '
+		elseif($theValue!==null)
+			$theValue = date("Y-m-d H:i:s", strtotime($theValue));';
+					}
+					elseif($field->getType()==PropelTypes::DATE){
+						$class .= '
+		elseif($theValue!==null)
+			$theValue = date("Y-m-d", strtotime($theValue));';
+					}
 				}
 			}
 

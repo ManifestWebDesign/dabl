@@ -66,7 +66,7 @@ abstract class BaseModel {
 	 * @return Bool
 	 */
 	function isColumnModified($columnName){
-		return in_array($columnName, $this->_modifiedColumns);
+		return in_array(strtolower($columnName), array_map('strtolower', $this->_modifiedColumns));
 	}
 
 	/**
@@ -214,9 +214,10 @@ abstract class BaseModel {
 
 		if($this->hasColumn('Created') && $this->hasColumn('Updated')){
 			$now = date('Y-m-d H:i:s');
-			if($this->isNew())
+			if($this->isNew() && !$this->isColumnModified('Created'))
 				$this->setCreated($now);
-			$this->setUpdated($now);
+			if(!$this->isColumnModified('Updated'))
+				$this->setUpdated($now);
 		}
 
 		if($this->getPrimaryKeys()){
@@ -332,9 +333,7 @@ abstract class BaseModel {
 
 		$fields = array();
 		$values = array();
-		foreach($this->getColumnNames() as $column){
-			if(!$this->isColumnModified($column))
-				continue;
+		foreach($this->getModifiedColumns() as $column){
 			$fields[] = $conn->quoteIdentifier($column).'=?';
 			$values[] = $this->$column;
 		}
