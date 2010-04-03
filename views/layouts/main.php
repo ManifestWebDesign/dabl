@@ -7,7 +7,7 @@
 	</head>
 	<body>
 
-<ul>
+<ul class="navigation clearfix">
 	<?php foreach($actions as $label => $url): ?>
 	<li><a href="<?php echo $url ?>/"><?php echo $label ?></a></li>
 	<?php endforeach ?>

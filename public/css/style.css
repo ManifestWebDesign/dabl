@@ -45,3 +45,41 @@ table.object-grid tbody td{
 	padding:2px;
 }
 
+/* Navigation Menu */
+.navigation{
+	list-style: none;
+	margin:0;
+	padding:0;
+}
+
+.navigation li{
+	float:left;
+}
+
+.navigation a{
+	display:block;
+	padding:6px;
+	margin: 0 4px 4px 0;
+	background-color: #eee;
+}
+
+/* Form */
+form p label{
+	display:block;
+}
+
+/* Hacks */
+.clearfix {display: inline-table;}
+
+/* Hides from IE-mac \*/
+* html .clearfix {height: 1%;}
+.clearfix {display: block;}
+/* End hide from IE-mac */
+
+.clearfix:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}

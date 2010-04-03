@@ -34,6 +34,7 @@ class DABLGenerator extends BaseGenerator {
 		$pk = $instance->getPrimaryKey();
 		ob_start();
 ?>
+<h1>Edit <?php echo ucfirst($table_name) ?></h1>
 <form method="POST" action="<?php echo "<?php echo site_url('".$plural."/save') ?>" ?>">
 <?php
 		if($pk){
@@ -231,6 +232,7 @@ switch($column->getType()){
 		$single = strtolower($table_name);
 		ob_start();
 ?>
+<h1><?php echo ucfirst($plural) ?></h1>
 <a href="<?php echo "<?php echo site_url('".$plural."/edit') ?>" ?>">new <?php echo str_replace('_', ' ', $single) ?></a>
 <?php echo '<?php load_view("'.$plural.'/grid", $params) ?>' ?>
 <?php
@@ -254,6 +256,9 @@ switch($column->getType()){
 		ob_start();
 		$actions = $this->getActions($table_name);
 		unset($actions['Show']);
+?>
+<h1>View <?php echo ucfirst($table_name) ?></h1>
+<?php
 		foreach($actions as $action_label => $action_url){
 ?>
 <a href="<?php echo $action_url ?>"><?php echo $action_label ?></a> 
