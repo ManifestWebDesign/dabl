@@ -9,6 +9,12 @@ define('ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 //default controller, action, and view
 define('DEFAULT_CONTROLLER', 'index');
 
+//default timestamp format for views
+define('VIEW_TIMESTAMP_FORMAT', 'n/j/Y g:i a');
+
+//default date format for views
+define('VIEW_DATE_FORMAT', 'n/j/Y');
+
 //the path to your application that follows the domain name with leading and trailing slashes
 define('BASE_URL', '/');
 
