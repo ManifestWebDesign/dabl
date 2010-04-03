@@ -370,6 +370,13 @@ $class .= '
 	}
 
 	/**
+	 * @return bool
+	 */
+	static function hasColumn($columnName){
+		return in_array(strtolower($columnName), array_map(\'strtolower\', '.$className.'::getColumnNames()));
+	}
+
+	/**
 	 * Access to array of primary keys
 	 * @return array
 	 */

@@ -28,6 +28,10 @@ abstract class BaseModel {
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
 
+	static function hasColumn(){
+		throw new Exception("This should be replaced by an extension of this class.");
+	}
+
 	static function getTableName(){
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
@@ -54,7 +58,6 @@ abstract class BaseModel {
 			$set_pk_method = "set$pk";
 			$new_object->$set_pk_method(null);
 		}
-
 		return $new_object;
 	}
 
@@ -63,9 +66,7 @@ abstract class BaseModel {
 	 * @return Bool
 	 */
 	function isColumnModified($columnName){
-		if(in_array($columnName, $this->_modifiedColumns))
-			return true;
-		return false;
+		return in_array($columnName, $this->_modifiedColumns);
 	}
 
 	/**
@@ -210,6 +211,13 @@ abstract class BaseModel {
 	function save(){
 		if(!$this->validate())
 			return 0;
+
+		if($this->hasColumn('Created') && $this->hasColumn('Updated')){
+			$now = date('Y-m-d H:i:s');
+			if($this->isNew())
+				$this->setCreated($now);
+			$this->setUpdated($now);
+		}
 
 		if($this->getPrimaryKeys()){
 			if($this->isNew())
