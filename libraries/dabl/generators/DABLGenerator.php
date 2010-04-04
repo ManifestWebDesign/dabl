@@ -80,7 +80,7 @@ switch($column->getType()){
 			<?php echo $foreign_option ?>
 
 		<?php echo $foreign_close_foreach ?>
-		
+
 		</select>
 <?php
 		}
@@ -144,7 +144,7 @@ switch($column->getType()){
 	<tbody>
 <?php echo '<?php foreach($'.$plural.' as $key => $'.$single.'): ?>' ?>
 
-		<tr class="<?php echo '<?php echo' ?> ($key & 1) ? 'odd' : 'even' <?php echo '?>' ?>">
+		<tr class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?>">
 <?php
 		foreach($columns as $column){
 			$column_name = $column->getName();
@@ -198,8 +198,8 @@ switch($column->getType()){
 ?>
 <ul class="object-list <?php echo $single ?>-list">
 	<?php echo '<?php foreach($'.$plural.' as $key => $'.$single.'): ?>' ?>
-	
-	<li class="<?php echo '<?php echo' ?> ($key & 1) ? 'odd' : 'even' <?php echo '?>' ?>">
+
+	<li class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?>">
 		<dl>
 			<?php foreach($instance->getColumnNames() as $columnName): ?>
 
@@ -210,7 +210,7 @@ switch($column->getType()){
 		</dl>
 	</li>
 	<?php echo '<?php endforeach ?>' ?>
-	
+
 </ul>
 <?php
 		return ob_get_clean();
@@ -261,7 +261,7 @@ switch($column->getType()){
 <?php
 		foreach($actions as $action_label => $action_url){
 ?>
-<a href="<?php echo $action_url ?>"><?php echo $action_label ?></a> 
+<a href="<?php echo $action_url ?>"><?php echo $action_label ?></a>
 <?php
 		}
 		foreach($this->getColumns($table_name) as $column){
@@ -391,7 +391,7 @@ class <?php echo $controllerName ?> extends ApplicationController {
 		$this->renderView('<?php echo $plural ?>/grid');
 		$this->render_view = false;
 	}
-	
+
 <?php
 		}
 ?>
