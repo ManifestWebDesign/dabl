@@ -182,11 +182,9 @@ abstract class DBAdapter extends PDO {
 	 * @param mixed $value
 	 * @return mixed
 	 */
-	function checkInput($value) {
-		if (is_array($value)){
-			foreach ($value as $k => $v) $value[$k] = $this->checkInput($v);
-			return $value;
-		}
+	function prepareInput($value) {
+		if(is_array($value))
+			return array_map(array($this, 'prepareInput'), $value);
 
 		if(is_int($value))
 			return $value;
@@ -194,8 +192,19 @@ abstract class DBAdapter extends PDO {
 		if(is_bool($value))
 			return $value ? 1 : 0;
 
-		if($value===null) return "NULL";
+		if($value===null)
+			return 'NULL';
+		
 		return $this->quote($value);
+	}
+
+	/**
+	 * Deprecated method name.  Use prepareInput()
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	function checkInput($value){
+		return $this->prepareInput($value);
 	}
 
 	/**

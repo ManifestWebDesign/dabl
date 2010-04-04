@@ -81,14 +81,27 @@ class QueryStatement {
 	 */
 	function __toString(){
 		$string = $this->string;
-		$params = $this->params;
+		$params = array_values($this->params);
 		$conn = $this->connection ? $this->connection : DBManager::getConnection();
-		foreach($params as $value){
-		   $pos = strpos($string, '?');
-		   if ($pos === false) break;
-		   $string = substr_replace($string, $conn->checkInput($value), $pos, 1);
-		}
+		
+		$params = $conn->prepareInput($params);
+
+		//escape % by making it %%
+		$string = str_replace('%', '%%', $string);
+
+		//replace ? with %s
+		$string = str_replace('?', '%s', $string);
+
+		//add $query to the beginning of the array
+		array_unshift($params, $string);
+
+		if(!($string = @call_user_func_array('sprintf', $params)))
+			throw new Exception('Could not insert parameters into query string. The number of ?s might not match the number of parameters.');
+
 		return $string;
+		
+//		$key = 0;
+//		return preg_replace("/(\?)/e", '$params[$key++];', $string);
 	}
 
 	/**

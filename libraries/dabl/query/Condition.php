@@ -32,6 +32,22 @@ class Condition{
 	private $ands = array();
 	private $ors = array();
 
+	function  __construct($left = null, $right=null, $operator=Query::EQUAL, $quote = null){
+		if($left!==null) $this->add($left, $right, $operator, $quote);
+	}
+
+	/**
+	 * Returns new instance of self by passing arguments directly to constructor.
+	 * @param $left mixed
+	 * @param $right mixed[optional]
+	 * @param $operator string[optional]
+	 * @param $quote int[optional]
+	 * @return Condition
+	 */
+	static function create($left = null, $right=null, $operator=Query::EQUAL, $quote = null){
+		return new self($left, $right, $operator, $quote);
+	}
+
 	/**
 	 * @return string
 	 */

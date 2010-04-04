@@ -67,13 +67,13 @@ class Query{
 	/**
 	 * Creates new instance of Query, parameters will be passed to the
 	 * setTable() method.
-	 * @return
-	 * @param $tableName Mixed[optional]
+	 * @return self
+	 * @param $table_name Mixed[optional]
 	 * @param $alias String[optional]
 	 */
-	function __construct($tableName=null, $alias=null){
+	function __construct($table_name = null, $alias = null){
 		$this->setWhere(new Condition);
-		$this->setTable($tableName, $alias);
+		$this->setTable($table_name, $alias);
 		return $this;
 	}
 
@@ -85,10 +85,13 @@ class Query{
 	}
 
 	/**
+	 * Returns new instance of self by passing arguments directly to constructor.
+	 * @param mixed $table_name
+	 * @param string $alias
 	 * @return Query
 	 */
-	function getInstance(){
-		return new self;
+	static function create($table_name = null, $alias = null){
+		return new self($table_name, $alias);
 	}
 
 	/**
@@ -119,11 +122,11 @@ class Query{
 
 	/**
 	 * Add a column to the list of columns to select.  If unused, defaults to *.
-	 * @param String $columnName
+	 * @param String $column_name
 	 * @return Query
 	 */
-	function addColumn($columnName){
-		$this->_columns[$columnName] = $columnName;
+	function addColumn($column_name){
+		$this->_columns[$column_name] = $column_name;
 		return $this;
 	}
 
@@ -202,40 +205,53 @@ class Query{
 	 * Short version of addJoin();
 	 * @return Query
 	 */
-	function join($table, $onClause=null, $joinType=self::JOIN){
-		return $this->addJoin($table, $onClause, $joinType);
+	function join($table, $on_clause=null, $join_type=self::JOIN){
+		return $this->addJoin($table, $on_clause, $join_type);
 	}
 
 	/**
-	 * Add a join to the query.  $table should be a String representation of
-	 * the table to join, including an alias, if needed.  $onClause can be a
-	 * String or Condition object.
+	 * @param mixed $table string or Query representing table to join
+	 * @param mixed $on_clause string or Condition
+	 * @param string $join_type
 	 * @return Query
-	 * @param $table String
-	 * @param $onClause Mixed[optional]
-	 * @param $joinType String[optional]
 	 */
-	function addJoin($table, $onClause=null, $joinType=self::JOIN){
-		if(!$onClause)
-			$this->_joins[] = $table;
-		else{
-			if($onClause instanceof Condition)
-				$onClause = $onClause->getClause();
+	function addJoin($table, $on_clause=null, $join_type=self::JOIN){
+		$statement = new QueryStatement;
 
-			$conn = DBManager::getConnection();
-
-			$table_parts = explode(' ', str_replace("`","",trim($table)));
-			if(count($table_parts)==1){
-				if($conn) $table = $conn->quoteIdentifier($table);
-			}
-			else{
-				$table_name = $table_parts[0];
-				if($conn) $table_name = $conn->quoteIdentifier($table_name);
-				$alias = array_pop($table_parts);
-				$table = "$table_name $alias";
-			}
-			$this->_joins[] = "$joinType $table ON ($onClause)";
+		if($table instanceof Query){
+			$table_statement = $table->getQuery();
+			$table = '('.$table_statement->getString().')';
+			$statement->addParams($table_statement->getParams());
 		}
+		else{
+			$conn = DBManager::getConnection();
+			if($conn){
+				$table_parts = explode(' ', str_replace("`", "", trim($table)));
+				if(count($table_parts)==1)
+					$table = $conn->quoteIdentifier($table);
+				elseif(count($table_parts)==2){
+					$table_name = $table_parts[0];
+					$table_name = $conn->quoteIdentifier($table_name);
+					$alias = array_pop($table_parts);
+					$table = "$table_name $alias";
+				}
+			}
+		}
+
+		if($on_clause instanceof Condition){
+			$on_clause_statement = $on_clause->getClause();
+			$on_clause = $on_clause_statement->getString();
+			$statement->addParams($on_clause_statement->getParams());
+		}
+
+		// TODO: this is not supported correctly. Query class needs an array of secondary tables for the query and when
+		// no on_clause is given this should just add to that array and produce something like
+		// SELECT * FROM primary_table, secondary_table1, secondary_table2
+		if($on_clause == null)
+			$on_clause = 1;
+
+		$statement->setString("$join_type $table ON ($on_clause)");
+		$this->_joins[] = $statement;
 		return $this;
 	}
 
@@ -396,8 +412,12 @@ class Query{
 				break;
 		}
 
-		if($this->_joins)
-			$query_s .= "\n ".implode("\n ", $this->_joins).' ';
+		if($this->_joins){
+			foreach($this->_joins as $join_statement){
+				$query_s .= "\n ".$join_statement->getString().' ';
+				$statement->addParams($join_statement->getParams());
+			}
+		}
 
 		$where_statement = $this->getWhere()->getClause();
 

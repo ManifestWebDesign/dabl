@@ -10,7 +10,7 @@
 * @Mail        andrea [ at ] 3site [ dot ] it
 */
 class PDOMySQL {
-    
+
     /**
      *    __connection:Resource        Database connection
 	 *    __dbinfo:array            array with 4 elements used to manage connection
@@ -24,7 +24,7 @@ class PDOMySQL {
     protected $__errorCode = '';
     protected $__errorInfo = array('');
 	protected $__throwExceptions = false;
-    
+
 	/**
 	 *    Checks connection and database selection
 	 *           new PDO_mysql( &$host:String, &$db:String, &$user:String, &$pass:String )
@@ -43,7 +43,7 @@ class PDOMySQL {
                 $this->__dbinfo = array($host, $user, $pass, $db);
         }
     }
-    
+
 	/** NOT NATIVE BUT MAYBE USEFULL FOR PHP < 5.1 PDO DRIVER
 	 * Calls mysql_close function.
 	 *    this->close( Void ):Boolean
@@ -56,7 +56,7 @@ class PDOMySQL {
         }
         return $result;
     }
-    
+
 	/**
 	 *    Returns a code rappresentation of an error
 	 *           this->errorCode( void ):String
@@ -65,7 +65,7 @@ class PDOMySQL {
     function errorCode() {
         return $this->__errorCode;
     }
-    
+
 	/**
 	 *    Returns an array with error informations
 	 *           this->errorInfo( void ):array
@@ -77,7 +77,7 @@ class PDOMySQL {
     function errorInfo() {
         return $this->__errorInfo;
     }
-    
+
 	/**
 	 *    Excecutes a query and returns affected rows
 	 *           this->exec( $query:String ):Mixed
@@ -92,7 +92,7 @@ class PDOMySQL {
             $result = false;
         return $result;
     }
-    
+
 	/**
 	 *    Returns last inserted id
 	 *           this->lastInsertId( void ):Number
@@ -101,7 +101,7 @@ class PDOMySQL {
     function lastInsertId() {
         return mysql_insert_id($this->__connection);
     }
-    
+
 	/**
 	 *    Returns a new PDOStatementMySQL
 	 *           this->prepare( $query:String, $array:array ):PDOStatement
@@ -112,7 +112,7 @@ class PDOMySQL {
     function prepare($query, $array = array()) {
         return new PDOStatementMySQL($query, $this->__connection, $this->__dbinfo, $this);
     }
-    
+
 	/**
 	 *    Executes directly a query and returns an array with result or false on bad query
 	 *           this->query( $query:String ):Mixed
@@ -124,7 +124,7 @@ class PDOMySQL {
 		$statement->query();
 		return $statement;
     }
-    
+
 	/**
 	 *    Quotes correctly a string for this database
 	 *           this->quote( $string:String ):String
@@ -132,9 +132,9 @@ class PDOMySQL {
 	 * @Return    String        a correctly quoted string
 	 */
     function quote($string) {
-        return ('"'.mysql_real_escape_string($string, $this->__connection).'"');
+        return ("'".mysql_real_escape_string($string, $this->__connection)."'");
     }
-    
+
 	/**
 	 *    Quotes correctly a string for this database
 	 *           this->getAttribute( $attribute:Integer ):Mixed
@@ -162,7 +162,7 @@ class PDOMySQL {
         }
         return $result;
     }
-    
+
 	/**
 	 *    Sets database attributes, in this version only connection mode.
 	 *           this->setAttribute( $attribute:Integer, $mixed:Mixed ):Boolean
@@ -188,19 +188,19 @@ class PDOMySQL {
         }
         return $result;
     }
-    
+
     function beginTransaction() {
         return $this->exec("BEGIN");
     }
-    
+
     function commit() {
         return $this->exec("COMMIT");
     }
-    
+
     function rollBack() {
         return $this->exec("ROLLBACK");
     }
-	
+
     function __setErrors($er) {
         if(!is_resource($this->__connection)) {
             $errno = mysql_errno();
@@ -214,7 +214,7 @@ class PDOMySQL {
         $this->__errorCode = &$er;
         $this->__errorInfo = array($this->__errorCode, $errno, $errst);
     }
-    
+
     function __uquery(&$query) {
         if(!@$query = mysql_query($query, $this->__connection)) {
             $this->__setErrors('SQLER');

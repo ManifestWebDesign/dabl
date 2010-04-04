@@ -1,7 +1,7 @@
 <?php
 
 abstract class PDOStatement implements Iterator {
-	
+
 	protected $__connection;
 	protected $__dbinfo;
 	protected $__query = '';
@@ -16,7 +16,7 @@ abstract class PDOStatement implements Iterator {
 	 * @var PDO
 	 */
 	protected $__pdo;
-	
+
 	/**
 	 * Public constructor:
 	 * Called from PDO to create a PDOStatement for this database
@@ -34,7 +34,7 @@ abstract class PDOStatement implements Iterator {
 	}
 
 	abstract function __uquery(&$query);
-	
+
 	abstract function fetch();
 
 	abstract function fetchAll();
@@ -53,7 +53,7 @@ abstract class PDOStatement implements Iterator {
 	}
 
 	function rewind() {}
-	
+
 	function next() {
 		++$this->__position;
 	}
@@ -132,7 +132,21 @@ abstract class PDOStatement implements Iterator {
 					array_push($tempr, $this->__pdo->quote($v));
 				}
 				else {
-					$__query = preg_replace("/(\?)/e", '$this->__pdo->quote($array[$k++]);', $__query);
+					$params = $this->prepareInput($array);
+
+					//escape % by making it %%
+					$__query = str_replace('%', '%%', $__query);
+
+					//replace ? with %s
+					$__query = str_replace('?', '%s', $__query);
+
+					//add $query to the beginning of the array
+					array_unshift($params, $__query);
+
+					if(!($__query = @call_user_func_array('sprintf', $params)))
+						throw new Exception('Could not insert parameters into query string. The number of ?s might not match the number of parameters.');
+
+//					$__query = preg_replace("/(\?)/e", '$array[$k++];', $__query);
 					break;
 				}
 			}
@@ -145,6 +159,26 @@ abstract class PDOStatement implements Iterator {
 			$keyvars = true;
 		$this->__boundParams = array();
 		return $keyvars;
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	function prepareInput($value) {
+		if(is_array($value))
+			return array_map(array($this, 'prepareInput'), $value);
+
+		if(is_int($value))
+			return $value;
+
+		if(is_bool($value))
+			return $value ? 1 : 0;
+
+		if($value===null)
+			return 'NULL';
+
+		return $this->__pdo->quote($value);
 	}
 
 	/**

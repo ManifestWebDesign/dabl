@@ -284,6 +284,7 @@ switch($column->getType()){
 <p>
 	<strong><?php echo $column_name ?>:</strong>
 	<?php echo '<?php echo htmlentities($'.$single.'->'.$method.'('.$format.')) ?>' ?>
+
 </p>
 <?php
 		}

@@ -304,12 +304,17 @@ $class .= '
 					if($field->getType()==PropelTypes::TIMESTAMP){
 						$class .= '
 		elseif($theValue!==null)
-			$theValue = date("Y-m-d H:i:s", strtotime($theValue));';
+			$theValue = date('.$className.'::getConnection()->getTimestampFormatter(), strtotime($theValue));';
 					}
 					elseif($field->getType()==PropelTypes::DATE){
 						$class .= '
 		elseif($theValue!==null)
-			$theValue = date("Y-m-d", strtotime($theValue));';
+			$theValue = date('.$className.'::getConnection()->getDateFormatter(), strtotime($theValue));';
+					}
+					elseif($field->getType()==PropelTypes::TIME){
+						$class .= '
+		elseif($theValue!==null)
+			$theValue = date('.$className.'::getConnection()->getTimeFormatter(), strtotime($theValue));';
 					}
 				}
 			}
