@@ -7,7 +7,7 @@ abstract class DBAdapter extends PDO {
 	const ID_METHOD_SEQUENCE = 2;
 
 	protected $_query_log = array();
-	protected $_log_queries = true;
+	protected $_log_queries = false;
 	protected $_db_name = null;
 
 	function setDBName($db_name){
