@@ -6,8 +6,8 @@ abstract class DBAdapter extends PDO {
 	const ID_METHOD_AUTOINCREMENT = 1;
 	const ID_METHOD_SEQUENCE = 2;
 
-	protected $_logged_queries = array();
-	protected $_log_queries = false;
+	protected $_query_log = array();
+	protected $_log_queries = true;
 	protected $_db_name = null;
 
 	function setDBName($db_name){
@@ -16,6 +16,13 @@ abstract class DBAdapter extends PDO {
 
 	function getDBName(){
 		return $this->_db_name;
+	}
+
+	function logQuery($query_string, $time){
+		$this->_query_log[] = array(
+			'query' => $query_string,
+			'time' => $time
+		);
 	}
 
 	/**
@@ -83,7 +90,7 @@ abstract class DBAdapter extends PDO {
 					$dsn = $connection_params['driver'].':'.implode(';', $parts);
 					$conn = new DBMSSQL($dsn, @$connection_params['user'], @$connection_params['password']);
 					break;
-				
+
 				default:
 					throw new Exception("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
 					break;
@@ -96,30 +103,77 @@ abstract class DBAdapter extends PDO {
 		return $conn;
 	}
 
-	function getLoggedQueries() {
-		return $this->_logged_queries;
+	function  __construct() {
+		$args = func_get_args();
+		$result = call_user_func_array(array('parent', '__construct'), $args);
+		if($this->_log_queries)
+			$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, 'LoggedPDOStatement');
+		return $result;
 	}
 
-	function printQueryLog() {
-		$queries = $this->getLoggedQueries();
-		echo  '<pre>'.count($queries)." queries executed\n".implode("\n\n", $queries).'</pre>';
+	/**
+	 *
+	 * @return PDOStatement
+	 */
+	function prepare() {
+		$args = func_get_args();
+		$statement = call_user_func_array(array('parent', 'prepare'), $args);
+		if($statement instanceof LoggedPDOStatement)
+			$statement->setConnection($this);
+		return $statement;
 	}
 
 	/**
 	 * Override of PDO::query() to provide query logging functionality
-	 * @param string $arg1
-	 * @param int $arg2
-	 * @param mixed $arg3
-	 * @param mixed $arg4
 	 * @return PDOStatement
 	 */
 	function query() {
 		$args = func_get_args();
 
-		if($this->_log_queries)
-			$this->_logged_queries[] = (string)$args[0];
+		if($this->_log_queries){
+			$start = microtime(true);
+			$result = call_user_func_array(array('parent', 'query'), $args);
+			$time = microtime(true) - $start;
+			$this->logQuery((string)$args[0], $time);
+			return $result;
+		}
 
 		return call_user_func_array(array('parent', 'query'), $args);
+	}
+
+	/**
+	 * @return PDOStatement
+	 */
+	function exec() {
+		$args = func_get_args();
+
+		if($this->_log_queries){
+			$start = microtime(true);
+			$result = call_user_func_array(array('parent', 'exec'), $args);
+			$time = microtime(true) - $start;
+			$this->logQuery((string)$args[0], $time);
+			return $result;
+		}
+
+		return call_user_func_array(array('parent', 'exec'), $args);
+	}
+
+	function getLoggedQueries() {
+		return $this->_query_log;
+	}
+
+	function printQueryLog() {
+		$queries = $this->getLoggedQueries();
+		$total_time = 0.00;
+		$string = '<table border="1"><tbody>';
+			$string .= '<tr><th>Query</th><th>Execution Time (Seconds)</th>'.'</tr>';
+		foreach($this->_query_log as $query_array){
+			$string .= '<tr><td><pre>'.$query_array['query'].'</pre></td><td>'.$query_array['time'].'</td></tr>';
+			$total_time += $query_array['time'];
+		}
+		$string .= '<tr><td><pre>Total Time: </pre></td><td>'.$total_time.'</td></tr>';
+		$string .= '</tbody></table>';
+		echo $string;
 	}
 
 	/**
@@ -194,7 +248,7 @@ abstract class DBAdapter extends PDO {
 
 		if($value===null)
 			return 'NULL';
-		
+
 		return $this->quote($value);
 	}
 
@@ -356,5 +410,5 @@ abstract class DBAdapter extends PDO {
 	abstract function random($seed = null);
 
 	abstract function getDatabaseSchema();
-	
+
 }

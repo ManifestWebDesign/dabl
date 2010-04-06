@@ -24,6 +24,8 @@ class PDOMySQL {
     protected $__errorCode = '';
     protected $__errorInfo = array('');
 	protected $__throwExceptions = false;
+	protected $__container_pdo;
+	public $logging = false;
 
 	/**
 	 *    Checks connection and database selection
@@ -43,6 +45,10 @@ class PDOMySQL {
                 $this->__dbinfo = array($host, $user, $pass, $db);
         }
     }
+
+	function setContainerPDO(PDO $pdo){
+		$this->__container_pdo = $pdo;
+	}
 
 	/** NOT NATIVE BUT MAYBE USEFULL FOR PHP < 5.1 PDO DRIVER
 	 * Calls mysql_close function.
@@ -110,7 +116,7 @@ class PDOMySQL {
 	 * @Return    PDOStatementMySQL
 	 */
     function prepare($query, $array = array()) {
-        return new PDOStatementMySQL($query, $this->__connection, $this->__dbinfo, $this);
+        return new PDOStatementMySQL($query, $this->__connection, $this->__dbinfo, $this->__container_pdo);
     }
 
 	/**
@@ -120,7 +126,7 @@ class PDOMySQL {
 	 * @Return    PDOStatementMySQL
 	 */
     function query($query) {
-    	$statement = new PDOStatementMySQL($query, $this->__connection, $this->__dbinfo, $this);
+    	$statement = new PDOStatementMySQL($query, $this->__connection, $this->__dbinfo, $this->__container_pdo);
 		$statement->query();
 		return $statement;
     }
@@ -176,7 +182,10 @@ class PDOMySQL {
 		if($attribute == PDO::ATTR_ERRMODE && $mixed ==PDO::ERRMODE_EXCEPTION){
 			$this->__throwExceptions = true;
 		}
-        if($attribute === PDO::ATTR_PERSISTENT && $mixed != $this->__persistent) {
+		elseif($attribute == PDO::ATTR_STATEMENT_CLASS && $mixed == 'LoggedPDOStatement'){
+			$this->logging = true;
+		}
+        elseif($attribute === PDO::ATTR_PERSISTENT && $mixed != $this->__persistent) {
             $result = true;
             $this->__persistent = (boolean) $mixed;
             mysql_close($this->__connection);

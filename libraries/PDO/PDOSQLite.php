@@ -24,6 +24,8 @@ class PDOSQLite {
 	protected $__errorCode = '';
 	protected $__errorInfo = array('');
 	protected $__throwExceptions = false;
+	protected $__container_pdo;
+	public $logging = false;
 	
 	/**
 	 * @Param	String		host with or without port info
@@ -37,7 +39,11 @@ class PDOSQLite {
 		else
 			$this->__dbinfo = &$string_dsn;
 	}
-	
+
+	function setContainerPDO(PDO $pdo){
+		$this->__container_pdo = $pdo;
+	}
+
 	/**
 	 * Calls sqlite_close function.
 	 *	this->close( Void ):Boolean
@@ -104,7 +110,7 @@ class PDOSQLite {
 	 * @Return	PDOStatementSQLite
 	 */
 	function prepare($query, $array = array()) {
-		return new PDOStatementSQLite($query, $this->__connection, $this->__dbinfo, $this);
+		return new PDOStatementSQLite($query, $this->__connection, $this->__dbinfo, $this->__container_pdo);
 	}
 	
 	/**
@@ -114,7 +120,7 @@ class PDOSQLite {
 	 * @Return	PDOStatementSQLite
 	 */
 	function query($query) {
-    	$statement = new PDOStatementSQLite($query, $this->__connection, $this->__dbinfo, $this);
+    	$statement = new PDOStatementSQLite($query, $this->__connection, $this->__dbinfo, $this->__container_pdo);
 		$statement->query();
 		return $statement;
 	}
@@ -167,6 +173,9 @@ class PDOSQLite {
 		$result = false;
 		if($attribute === PDO::ATTR_ERRMODE && $mixed ===PDO::ERRMODE_EXCEPTION){
 			$this->__throwExceptions = true;
+		}
+		elseif($attribute == PDO::ATTR_STATEMENT_CLASS && $mixed == 'LoggedPDOStatement'){
+			$this->logging = true;
 		}
 		if($attribute === PDO::ATTR_PERSISTENT && $mixed != $this->__persistent) {
 			$result = true;

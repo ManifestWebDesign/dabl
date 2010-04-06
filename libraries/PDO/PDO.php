@@ -55,11 +55,14 @@ class PDO {
 	const FETCH_COLUMN = 7;
 	const FETCH_LAZY = 1;
 	const FETCH_BOUND = 6;
+	
+	const ATTR_ERRMODE = 3;
 	const ATTR_SERVER_VERSION = 4;
 	const ATTR_CLIENT_VERSION = 5;
 	const ATTR_SERVER_INFO = 6;
 	const ATTR_PERSISTENT = 12;
-	const ATTR_ERRMODE = 3;
+	const ATTR_STATEMENT_CLASS = 13;
+	
 	const ERRMODE_EXCEPTION = 2;
 
 	const PARAM_BOOL = 5;
@@ -102,6 +105,19 @@ class PDO {
 				$this->__driver = new PDOPostgres($string_dsn);
 				break;
 		}
+		$this->__driver->setContainerPDO($this);
+	}
+
+	function  __call($name,  $arguments) {
+		return call_user_func_array(array($this->__driver, $name), $arguments);
+	}
+
+	function  __set($name,  $value) {
+		$this->__driver->$name = $value;
+	}
+
+	function  __get($name) {
+		return $this->__driver->$name;
 	}
 
 	/**
@@ -149,13 +165,6 @@ class PDO {
 	}
 
 	/**
-	 *	http://us2.php.net/manual/en/function.pdo-getattribute.php
-	 */
-	function getAttribute($attribute) {
-		return $this->__driver->getAttribute($attribute);
-	}
-
-	/**
 	 *	http://us2.php.net/manual/en/function.pdo-lastinsertid.php
 	 */
 	function lastInsertId() {
@@ -195,6 +204,13 @@ class PDO {
 	 */
 	function setAttribute($attribute, $mixed) {
 		return $this->__driver->setAttribute($attribute, $mixed);
+	}
+
+	/**
+	 *	http://us2.php.net/manual/en/function.pdo-getattribute.php
+	 */
+	function getAttribute($attribute) {
+		return $this->__driver->getAttribute($attribute);
 	}
 
 	private function __getDSN(&$string) {

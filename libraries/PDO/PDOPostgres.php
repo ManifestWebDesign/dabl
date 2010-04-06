@@ -26,6 +26,8 @@ class PDOPostgres {
 	protected $__errorInfo = array('');
 	protected $__result = null;
 	protected $__throwExceptions = false;
+	protected $__container_pdo;
+	public $logging = false;
 	
 	/**
 	 *	Checks connection and database selection
@@ -37,6 +39,10 @@ class PDOPostgres {
 			$this->__setErrors('DBCON', true);
 		else
 			$this->__dbinfo = &$string_dsn;
+	}
+
+	function setContainerPDO(PDO $pdo){
+		$this->__container_pdo = $pdo;
 	}
 	
 	/**
@@ -109,7 +115,7 @@ class PDOPostgres {
 	 * @Return	PDOStatementPostgres
 	 */
 	function prepare($query, $array = array()) {
-		return new PDOStatementPostgres($query, $this->__connection, $this->__dbinfo, $this);
+		return new PDOStatementPostgres($query, $this->__connection, $this->__dbinfo, $this->__container_pdo);
 	}
 	
 	/**
@@ -119,7 +125,7 @@ class PDOPostgres {
 	 * @Return	PDOStatementPostgres
 	 */
 	function query($query) {
-    	$statement = new PDOStatementPostgres($query, $this->__connection, $this->__dbinfo, $this);
+    	$statement = new PDOStatementPostgres($query, $this->__connection, $this->__dbinfo, $this->__container_pdo);
 		$statement->query();
 		return $statement;
 	}
@@ -175,6 +181,9 @@ class PDOPostgres {
 		$result = false;
 		if($attribute === PDO::ATTR_ERRMODE && $mixed ===PDO::ERRMODE_EXCEPTION){
 			$this->__throwExceptions = true;
+		}
+		elseif($attribute == PDO::ATTR_STATEMENT_CLASS && $mixed == 'LoggedPDOStatement'){
+			$this->logging = true;
 		}
 		if($attribute === PDO::ATTR_PERSISTENT && $mixed != $this->__persistent) {
 			$result = true;

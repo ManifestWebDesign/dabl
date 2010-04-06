@@ -153,7 +153,20 @@ abstract class PDOStatement implements Iterator {
 			if(isset($tempf))
 				$__query = str_replace($tempf, $tempr, $__query);
 		}
-		if(is_null($this->__result = &$this->__uquery($__query)))
+
+		$log = ($this->__pdo->logging);
+		if($log){
+			$start = microtime(true);
+		}
+
+		$this->__result = &$this->__uquery($__query);
+
+		if($log){
+			$time = microtime(true) - $start;
+			$this->__pdo->logQuery($__query, $time);
+		}
+		
+		if(is_null($this->__result))
 			$keyvars = false;
 		else
 			$keyvars = true;
