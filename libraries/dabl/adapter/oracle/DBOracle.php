@@ -12,7 +12,7 @@
  * @version	$Revision: 718 $
  * @package	propel.adapter
  */
-class DBOracle extends DBAdapter {
+class DBOracle extends DABLPDO {
 
 	/**
 	 * This method is used to ignore case.
@@ -68,7 +68,7 @@ class DBOracle extends DBAdapter {
 	}
 
 	/**
-	 * @see		DBAdapter::applyLimit()
+	 * @see		DABLPDO::applyLimit()
 	 */
 	function applyLimit(&$sql, $offset, $limit){
 		 $sql =
@@ -92,7 +92,7 @@ class DBOracle extends DBAdapter {
 	}
 
 	protected function getIdMethod(){
-		return DBAdapter::ID_METHOD_SEQUENCE;
+		return DABLPDO::ID_METHOD_SEQUENCE;
 	}
 
 	function getId($name = null){

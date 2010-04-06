@@ -7,7 +7,7 @@
  * @version	$Revision: 989 $
  * @package	propel.adapter
  */
-class DBSQLite extends DBAdapter {
+class DBSQLite extends DABLPDO {
 
 	/**
 	 * For SQLite this method has no effect, since SQLite doesn't support specifying a character
@@ -73,14 +73,14 @@ class DBSQLite extends DBAdapter {
 	}
 
 	/**
-	 * @see		DBAdapter::quoteIdentifier()
+	 * @see		DABLPDO::quoteIdentifier()
 	 */
 	function quoteIdentifier($text) {
 		return '[' . $text . ']';
 	}
 
 	/**
-	 * @see		DBAdapter::applyLimit()
+	 * @see		DABLPDO::applyLimit()
 	 */
 	function applyLimit(&$sql, $offset, $limit) {
 		if ( $limit > 0 ) {

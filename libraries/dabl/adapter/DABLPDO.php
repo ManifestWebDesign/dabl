@@ -1,6 +1,6 @@
 <?php
 
-abstract class DBAdapter extends PDO {
+abstract class DABLPDO extends PDO {
 
 	const ID_METHOD_NONE = 0;
 	const ID_METHOD_AUTOINCREMENT = 1;
@@ -329,10 +329,10 @@ abstract class DBAdapter extends PDO {
 
 	/**
 	 * Returns the native ID method for this RDBMS.
-	 * @return	 int one of DBAdapter:ID_METHOD_SEQUENCE, DBAdapter::ID_METHOD_AUTOINCREMENT.
+	 * @return	 int one of DABLPDO:ID_METHOD_SEQUENCE, DABLPDO::ID_METHOD_AUTOINCREMENT.
 	 */
 	protected function getIdMethod() {
-		return DBAdapter::ID_METHOD_AUTOINCREMENT;
+		return DABLPDO::ID_METHOD_AUTOINCREMENT;
 	}
 
 	/**
@@ -340,7 +340,7 @@ abstract class DBAdapter extends PDO {
 	 * @return	 boolean
 	 */
 	function isGetIdBeforeInsert() {
-		return ($this->getIdMethod() === DBAdapter::ID_METHOD_SEQUENCE);
+		return ($this->getIdMethod() === DABLPDO::ID_METHOD_SEQUENCE);
 	}
 
 	/**
@@ -348,7 +348,7 @@ abstract class DBAdapter extends PDO {
 	 * @return	 boolean
 	 */
 	function isGetIdAfterInsert() {
-		return ($this->getIdMethod() === DBAdapter::ID_METHOD_AUTOINCREMENT);
+		return ($this->getIdMethod() === DABLPDO::ID_METHOD_AUTOINCREMENT);
 	}
 
 	/**

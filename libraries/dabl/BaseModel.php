@@ -18,7 +18,7 @@ abstract class BaseModel {
 	}
 
 	/**
-	 * @return DBAdapter
+	 * @return DABLPDO
 	 */
 	static function getConnection(){
 		throw new Exception("This should be replaced by an extension of this class.");

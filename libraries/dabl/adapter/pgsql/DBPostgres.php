@@ -10,7 +10,7 @@
  * @version	$Revision: 1011 $
  * @package	propel.adapter
  */
-class DBPostgres extends DBAdapter {
+class DBPostgres extends DABLPDO {
 
 	/**
 	 * This method is used to ignore case.
@@ -66,10 +66,10 @@ class DBPostgres extends DBAdapter {
 	}
 
 	/**
-	 * @see		DBAdapter::getIdMethod()
+	 * @see		DABLPDO::getIdMethod()
 	 */
 	protected function getIdMethod() {
-		return DBAdapter::ID_METHOD_SEQUENCE;
+		return DABLPDO::ID_METHOD_SEQUENCE;
 	}
 
 	/**
@@ -96,7 +96,7 @@ class DBPostgres extends DBAdapter {
 	}
 
 	/**
-	 * @see		DBAdapter::applyLimit()
+	 * @see		DABLPDO::applyLimit()
 	 */
 	function applyLimit(&$sql, $offset, $limit) {
 		if ( $limit > 0 ) {
@@ -108,7 +108,7 @@ class DBPostgres extends DBAdapter {
 	}
 
 	/**
-	 * @see		DBAdapter::random()
+	 * @see		DABLPDO::random()
 	 */
 	function random($seed=NULL) {
 		return 'random()';

@@ -25,7 +25,7 @@ class DBManager{
 
 	/**
 	 * @param String $db_name
-	 * @return DBAdapter
+	 * @return DABLPDO
 	 */
 	static function getConnection($db_name=null) {
 		if($db_name===null)
@@ -34,7 +34,7 @@ class DBManager{
 	}
 
 	static function addConnection($connection_name, $connection_params){
-		$conn = DBAdapter::factory($connection_params);
+		$conn = DABLPDO::factory($connection_params);
 		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		self::$connections[$connection_name] = $conn;
 	}

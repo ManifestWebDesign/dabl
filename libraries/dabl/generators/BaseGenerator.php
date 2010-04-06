@@ -362,7 +362,7 @@ $class .= '
 		$class .= '
 
 	/**
-	 * @return DBAdapter
+	 * @return DABLPDO
 	 */
 	static function getConnection(){
 		return DBManager::getConnection("'.$this->getConnectionName().'");

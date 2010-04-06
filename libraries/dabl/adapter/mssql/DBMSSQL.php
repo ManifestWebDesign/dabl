@@ -7,7 +7,7 @@
  * @version	$Revision: 989 $
  * @package	propel.adapter
  */
-class DBMSSQL extends DBAdapter {
+class DBMSSQL extends DABLPDO {
 
 	/**
 	 * This method is used to ignore case.
@@ -63,14 +63,14 @@ class DBMSSQL extends DBAdapter {
 	}
 
 	/**
-	 * @see		DBAdapter::quoteIdentifier()
+	 * @see		DABLPDO::quoteIdentifier()
 	 */
 	function quoteIdentifier($text) {
 		return '[' . $text . ']';
 	}
 
 	/**
-	 * @see		DBAdapter::random()
+	 * @see		DABLPDO::random()
 	 */
 	function random($seed = null) {
 		return 'rand('.((int) $seed).')';
@@ -79,7 +79,7 @@ class DBMSSQL extends DBAdapter {
 	/**
 	 * Simulated Limit/Offset
 	 * This rewrites the $sql query to apply the offset and limit.
-	 * @see		DBAdapter::applyLimit()
+	 * @see		DABLPDO::applyLimit()
 	 * @author	 Justin Carlson <justin.carlson@gmail.com>
 	 */
 	function applyLimit(&$sql, $offset, $limit) {

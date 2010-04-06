@@ -10,7 +10,7 @@
  * @version	$Revision: 989 $
  * @package	propel.adapter
  */
-class DBMySQL extends DBAdapter {
+class DBMySQL extends DABLPDO {
 
 	/**
 	 * This method is used to ignore case.
@@ -89,21 +89,21 @@ class DBMySQL extends DBAdapter {
 	}
 
 	/**
-	 * @see		DBAdapter::quoteIdentifier()
+	 * @see		DABLPDO::quoteIdentifier()
 	 */
 	function quoteIdentifier($text){
 		return '`' . $text . '`';
 	}
 
 	/**
-	 * @see		DBAdapter::useQuoteIdentifier()
+	 * @see		DABLPDO::useQuoteIdentifier()
 	 */
 	function useQuoteIdentifier(){
 		return true;
 	}
 
 	/**
-	 * @see		DBAdapter::applyLimit()
+	 * @see		DABLPDO::applyLimit()
 	 */
 	function applyLimit(&$sql, $offset, $limit){
 		if ( $limit > 0 ) {
@@ -114,7 +114,7 @@ class DBMySQL extends DBAdapter {
 	}
 
 	/**
-	 * @see		DBAdapter::random()
+	 * @see		DABLPDO::random()
 	 */
 	function random($seed = null){
 		return 'rand('.((int) $seed).')';
