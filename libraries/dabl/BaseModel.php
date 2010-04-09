@@ -246,7 +246,7 @@ abstract class BaseModel {
 
 	/**
 	 * Creates and executes INSERT query string for this object
-	 * @return
+	 * @return int
 	 */
 	protected function insert(){
 		$conn = $this->getConnection();

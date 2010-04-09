@@ -712,7 +712,7 @@ class ".$className." extends base$className{
 
 	/**
 	 * Generates Table classes
-	 * @return
+	 * @return void
 	 */
 	function generateModels($tableNames = false){
 		if($tableNames===false)
