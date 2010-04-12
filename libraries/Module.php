@@ -18,7 +18,10 @@ class Module {
 			$class_path = MODULE::$root_modules[$root] . $ds . $ns_path . $ds . $class_name . '.php';
 
 			// require file if it exists
-			if ( is_file ( $class_path )) require_once $class_path;
+			if ( is_file ( $class_path )){
+				require_once $class_path;
+				return;
+			}
 		}
 	}
 
