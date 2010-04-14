@@ -259,7 +259,7 @@ $class .= '
 			$class .= '	protected $'.$field->getName();
 			if(is_numeric($default))
 				$class .= ' = '.$default;
-			elseif($default!==NULL)
+			elseif($default!==NULL && $default!=='NULL')
 				$class .= ' = "'.$default.'"';
 			$class .= ';
 ';
