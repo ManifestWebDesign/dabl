@@ -255,11 +255,12 @@ $class .= '
 	);
 ';
 		foreach($fields as $key=>$field){
+			$field = new Column();
 			$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 			$class .= '	protected $'.$field->getName();
-			if(is_numeric($default))
+			if($field->isNumericType())
 				$class .= ' = '.$default;
-			elseif($default!==NULL && $default!=='NULL')
+			elseif($default!==NULL && strtolower($default)!=='null')
 				$class .= ' = "'.$default.'"';
 			$class .= ';
 ';
