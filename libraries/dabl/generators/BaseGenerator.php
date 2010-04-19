@@ -255,10 +255,9 @@ $class .= '
 	);
 ';
 		foreach($fields as $key=>$field){
-			$field = new Column();
 			$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 			$class .= '	protected $'.$field->getName();
-			if($field->isNumericType())
+			if($field->isNumericType() && $default !== NULL)
 				$class .= ' = '.$default;
 			elseif($default!==NULL && strtolower($default)!=='null')
 				$class .= ' = "'.$default.'"';
