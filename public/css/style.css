@@ -50,3 +50,12 @@ h1 .ui-button-link{
 	line-height:inherit;
 	font:inherit;
 }
+
+.ui-message-icon{
+	float: left;
+	margin-right: 0.3em;
+}
+
+.ui-state-highlight, ui-state-error{
+	margin-top:5px;
+}

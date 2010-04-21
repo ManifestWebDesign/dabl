@@ -9,23 +9,13 @@ abstract class BaseController extends ArrayObject {
 	public $view_prefix = '';
 	public $view_dir = '';
 	public $output_format = 'html';
-	public $render_view = true;
+	public $load_view = true;
 	public $render_partial = false;
 
-	/**
-	 * @param string $var
-	 * @return mixed
-	 */
-	function __get($var){
-		return $this[$var];
-	}
+	public $persistant = array();
 
-	/**
-	 * @param string $var
-	 * @param mixed $value
-	 */
-	function __set($var, $value){
-		$this[$var] = $value;
+	function  __destruct() {
+		set_persistant_values(array_merge_recursive(get_persistant_values(), $this->persistant));
 	}
 
 	/**
@@ -58,6 +48,10 @@ abstract class BaseController extends ArrayObject {
 	}
 
 	function renderView($view){
+		return $this->loadView();
+	}
+
+	function loadView($view){
 		$output_format = $this->output_format;
 		$params = $this->getParams();
 
@@ -66,6 +60,8 @@ abstract class BaseController extends ArrayObject {
 
 		if($use_layout)
 			load_view($this->layout, $params, false, $output_format);
+
+		$this->load_view = false;
 	}
 
 	/**
@@ -79,8 +75,8 @@ abstract class BaseController extends ArrayObject {
 
 		call_user_func_array(array($this, $action_name), $params);
 
-		if(!$this->render_view)return;
-		$this->renderView($view);
+		if(!$this->load_view)return;
+		$this->loadView($view);
 	}
 
 }

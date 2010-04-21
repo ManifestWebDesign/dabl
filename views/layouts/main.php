@@ -8,20 +8,6 @@
 	</head>
 	<body>
 
-<?php if(isset($errors)): ?>
-
-		<div class="ui-state-error ui-corner-all" style="padding: 0pt 0.7em;">
-
-	<?php foreach($errors as $error): ?>
-			<p>
-				<span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-alert"></span>
-				<strong>Error:</strong> <?= $error ?>
-			</p>
-	<?php endforeach ?>
-
-		</div>
-<?php endif ?>
-
 		<div class="ui-tabs ui-widget ui-widget-content ui-corner-all">
 			<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
 			<?php foreach($actions as $label => $url): ?>
@@ -30,6 +16,28 @@
 				</li>
 			<?php endforeach ?>
 			</ul>
+
+			<?php if(@$errors): ?>
+				<div class="ui-state-error ui-corner-all" style="padding: 0pt 0.7em;">
+				<?php foreach($errors as $error): ?>
+					<p>
+						<span class="ui-message-icon ui-icon ui-icon-alert"></span>
+						<?= $error ?>
+					</p>
+				<?php endforeach ?>
+				</div>
+			<?php endif ?>
+
+			<?php if(@$messages): ?>
+				<div class="ui-state-highlight ui-corner-all" style="padding: 0pt 0.7em;">
+				<?php foreach($messages as $message): ?>
+					<p>
+						<span class="ui-message-icon ui-icon ui-icon-info"></span>
+						<?= $message ?>
+					</p>
+				<?php endforeach ?>
+				</div>
+			<?php endif ?>
 
 			<?php echo $content ?>
 		</div>

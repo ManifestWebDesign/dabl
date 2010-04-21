@@ -84,12 +84,7 @@ function load_controller($route){
 	$instance->output_format = $extension;
 
 	//Restore Flash params
-	if(isset($_SESSION)){
-		if(!isset($_SESSION['Flash']))
-			$_SESSION['Flash'] = array();
-		$instance->setParams(array_merge($_SESSION['Flash'], $instance->getParams()));
-		$_SESSION['Flash'] = array();
-	}
+	$instance->setParams(array_merge_recursive(get_clean_persistant_values(), $instance->getParams()));
 
 	$instance->doAction($action, $params);
 }

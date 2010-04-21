@@ -61,6 +61,10 @@ abstract class BaseModel {
 		return $new_object;
 	}
 
+	function isModified(){
+		return (bool)$this->getModifiedColumns();
+	}
+
 	/**
 	 * Checks whether the given column is in the modified array
 	 * @return Bool
