@@ -7,13 +7,32 @@
 	</head>
 	<body>
 
-<ul class="navigation clearfix">
-	<?php foreach($actions as $label => $url): ?>
-	<li><a href="<?php echo $url ?>/"><?php echo $label ?></a></li>
-	<?php endforeach ?>
-</ul>
+<?php
+if(isset($errors)) {
+?>
+		<div class="ui-state-error ui-corner-all" style="padding: 0pt 0.7em;">
+<?php
+	foreach($errors as $error) {
+?>	
+			<p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-alert"></span>
+				<strong>Error:</strong> <?= $error ?></p>
+<?php
+	}
+?>
+		</div>
+<?php
+}
+?>
+		<div class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+			<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-corner-top">
+			<?php foreach($actions as $label => $url): ?>
+				<li class="ui-state-default ui-corner-top <? if (@$page == $label) echo "ui-tabs-selected ui-state-active ui-state-hover"?>">
+					<a href="<?php echo $url ?>/"><?php echo $label ?></a>
+				</li>
+			<?php endforeach ?>
+			</ul>
 
-<?php echo $content ?>
-
+		<?php echo $content ?>
+		</div>
 	</body>
 </html>
