@@ -1,48 +1,17 @@
 /* Global */
-* {
-	font-family: verdana;
-}
 
 body, table, input, select, textarea {
 	font-size: 12px;
 }
 
-h1, h2, h3, h4, h5 {
-	padding: 10px 0 2px 0;
-	margin: 0;
-}
-
-/* Tables */
-th, td{
-	text-align:left;
-}
-
 /* Object Grids */
 table.object-grid{
 	width:100%;
-	border-spacing: 1px;
-	font-size: 14px;
+	border-spacing: 2px;
 }
 
 table.object-grid th.grid-action-column{
 	width:0px;
-}
-
-table.object-grid thead{
-
-}
-
-table.object-grid thead th{
-	background: #eee;
-	padding:2px;
-}
-
-table.object-grid tr.odd{
-
-}
-
-table.object-grid tbody td{
-	padding:2px;
 }
 
 /* Form */
@@ -51,9 +20,16 @@ form p label{
 }
 
 .ui-button-link {
-	padding:0.4em 1em 0.4em 20px;
+	padding:0.3em .8em 0.3em 18px;
+	font-size: 14px;
 	position:relative;
 	text-decoration:none;
+	cursor: pointer;
+	display:inline-block;
+}
+
+h1 .ui-button-link{
+	float:right;
 }
 
 .ui-button-link .ui-icon {
@@ -61,4 +37,16 @@ form p label{
 	margin:-8px 5px 0 0;
 	position:absolute;
 	top:50%;
+	_top:13px;
+}
+
+.ui-button-link input{
+	border:none;
+	padding:0;
+	margin:0;
+	background: transparent;
+	color:inherit;
+	cursor: inherit;
+	line-height:inherit;
+	font:inherit;
 }

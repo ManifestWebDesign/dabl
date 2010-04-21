@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title><?php echo $title ?></title>
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/style.css') ?>" />
-		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/themes/start/jquery-ui-1.8.custom.css') ?>" />
+		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/themes/redmond/jquery-ui-1.8.custom.css') ?>" />
 	</head>
 	<body>
 

@@ -29,7 +29,7 @@ class DABLGenerator extends BaseGenerator {
 	 * @return String
 	 */
 	function getEditView($table_name){
-		$controllerName = $this->getControllerName($table_name);
+		$controller_name = $this->getControllerName($table_name);
 		$className = $this->getModelName($table_name);
 		$plural = $this->getViewDirName($table_name);
 		$single = strtolower($table_name);
@@ -37,8 +37,8 @@ class DABLGenerator extends BaseGenerator {
 		$pk = $instance->getPrimaryKey();
 		ob_start();
 ?>
-<h1>Edit <?php echo ucfirst($table_name) ?></h1>
-<div class="ui-widget-content ui-corner-bottom">
+<h1><?php echo '<?php echo $'.$single.'->isNew() ? "New" : "Edit" ?>' ?> <?php echo ucfirst($table_name) ?></h1>
+<div class="ui-widget-content ui-corner-all">
 <form method="POST" action="<?php echo "<?php echo site_url('".$plural."/save') ?>" ?>">
 <?php
 		if($pk){
@@ -101,7 +101,10 @@ switch($column->getType()){
 		}
 ?>
 	<p>
-		<input type="submit" value="Save" />
+		<span class="ui-state-default ui-corner-all ui-button-link">
+			<span class="ui-icon ui-icon-disk"></span>
+			<input type="submit" value="<?php echo '<?php echo $'.$single.'->isNew() ? "Save" : "Save Changes" ?>' ?>" />
+		</span>
 	</p>
 </form>
 </div>
@@ -117,7 +120,7 @@ switch($column->getType()){
 	 * @return String
 	 */
 	function getListView($table_name){
-		$controllerName = $this->getControllerName($table_name);
+		$controller_name = $this->getControllerName($table_name);
 		$className = $this->getModelName($table_name);
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
@@ -130,10 +133,10 @@ switch($column->getType()){
 
 	<li class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?>">
 		<dl>
-			<?php foreach($instance->getColumnNames() as $columnName): ?>
+			<?php foreach($instance->getColumnNames() as $column_name): ?>
 
-			<dt><?php echo $columnName ?></dt>
-			<dd><?php echo '<?php echo htmlentities($'.$single.'->'."get$columnName".'()) ?>' ?></dd>
+			<dt><?php echo $column_name ?></dt>
+			<dd><?php echo '<?php echo htmlentities($'.$single.'->'."get$column_name".'()) ?>' ?></dd>
 			<?php endforeach ?>
 
 		</dl>
@@ -153,7 +156,7 @@ switch($column->getType()){
 	 * @return String
 	 */
 	function getGridView($table_name){
-		$controllerName = $this->getControllerName($table_name);
+		$controller_name = $this->getControllerName($table_name);
 		$className = $this->getModelName($table_name);
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
@@ -168,16 +171,18 @@ switch($column->getType()){
 	<thead>
 		<tr>
 <?php
-		foreach($columns as $column){
+		foreach($columns as $key => $column){
 			$column_name = $column->getName();
 ?>
-			<th class="ui-state-default ui-th-column ui-th-ltr"><?php echo $column_name ?></th>
+			<th class="ui-state-default ui-th-column ui-th-ltr <?php if($key==0)echo 'ui-corner-tl' ?>"><?php echo $column_name ?></th>
 <?php
 		}
+		$key = 1;
 		foreach($actions as $action){
 ?>
-			<th class="ui-state-default ui-th-column ui-th-ltr grid-action-column">&nbsp;</th>
+			<th class="ui-state-default ui-th-column ui-th-ltr grid-action-column <?php if($key == count($actions))echo 'ui-corner-tr' ?>">&nbsp;</th>
 <?php
+			++$key;
 		}
 ?>
 		</tr>
@@ -208,15 +213,12 @@ switch($column->getType()){
 		foreach($actions as $action_label => $action_url){
 			if($action_label == 'Index') continue;
 ?>
-			<td><a <?php if(in_array($action_label, self::$standard_actions)) { ?>
-					name="<?php echo $action_label ?>Button"
-					class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
-				    title="<?php echo $action_label . " " . ucfirst($single) ?>"
-				   <?php } ?>
-				   href="<?php echo $action_url ?>"
-				   <?php if(strtolower($action_label) == 'delete') echo 'onclick="return confirm(\'Are you sure?\');"'
-					?>> <?php if(array_key_exists($action_label, self::$action_icons)) { ?>
-				   <span class="ui-icon ui-icon-<?php echo self::$action_icons[$action_label] ?>"><?php } ?><?php echo $action_label ?><?php if(array_key_exists($action_label, self::$action_icons)) { ?></span><?php } ?></a></td>
+			<td>
+				<a<?php if(in_array($action_label, self::$standard_actions)) : ?> class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" title="<?php echo $action_label . " " . ucfirst($single) ?>"<?php endif ?> href="<?php echo $action_url ?>"<?php if(strtolower($action_label) == 'delete') echo ' onclick="return confirm(\'Are you sure?\');"' ?>>
+					<?php if(array_key_exists($action_label, self::$action_icons)): ?><span class="ui-icon ui-icon-<?php echo self::$action_icons[$action_label] ?>"><?php endif ?><?php echo $action_label ?><?php if(array_key_exists($action_label, self::$action_icons)): ?></span><?php endif ?>
+					
+				</a>
+			</td>
 <?php
 		}
 ?>
@@ -237,7 +239,7 @@ switch($column->getType()){
 	 * @return String
 	 */
 	function getIndexView($table_name){
-		$controllerName = $this->getControllerName($table_name);
+		$controller_name = $this->getControllerName($table_name);
 		$className = $this->getModelName($table_name);
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
@@ -245,15 +247,15 @@ switch($column->getType()){
 		$single = strtolower($table_name);
 		ob_start();
 ?>
-<h1><?php echo ucfirst($plural) ?></h1>
-
-<p>
+<h1>
+	<?php echo ucfirst($plural) ?>
 	<a href="<?php echo "<?php echo site_url('".$plural."/edit') ?>" ?>" class="ui-state-default ui-corner-all ui-button-link" title="New <?php echo str_replace('_', ' ', ucfirst($single)) ?>">
 		<span class="ui-icon ui-icon-plusthick"></span>New <?php echo str_replace('_', ' ', ucfirst($single)) ?>
-	</a>
-</p>
 
-<div class="ui-widget-content">
+	</a>
+</h1>
+
+<div class="ui-widget-content ui-corner-all">
 <?php echo '<?php load_view("'.$plural.'/grid", $params) ?>' ?>
 </div>
 <?php
@@ -268,25 +270,26 @@ switch($column->getType()){
 	 * @return String
 	 */
 	function getShowView($table_name){
-		$controllerName = $this->getControllerName($table_name);
+		$controller_name = $this->getControllerName($table_name);
 		$className = $this->getModelName($table_name);
 		$plural = $this->getViewDirName($table_name);
 		$single = strtolower($table_name);
 		$instance = new $className;
 		$pk = $instance->getPrimaryKey();
-		ob_start();
 		$actions = $this->getActions($table_name);
 		unset($actions['Show']);
+		ob_start();
 ?>
 <h1>View <?php echo ucfirst($table_name) ?></h1>
 <p>
 <?php foreach($actions as $action_label => $action_url): ?>
-<a href="<?php echo $action_url ?>" class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>" <?php if($action_label=='delete') echo "onclick=\"return confirm('Are you sure?');\"";?>>
-	<span class="ui-icon ui-icon-<?php echo self::$action_icons[$action_label] ?>"></span><?php echo $action_label ?>
-</a>
+	<a href="<?php echo $action_url ?>" class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php if($action_label=='delete') echo " onclick=\"return confirm('Are you sure?');\"";?>>
+		<span class="ui-icon ui-icon-<?php echo self::$action_icons[$action_label] ?>"></span><?php echo $action_label ?>
+
+	</a>
 <?php endforeach ?>
 </p>
-<div class="ui-widget-content ui-corner-bottom">
+<div class="ui-widget-content ui-corner-all">
 <?php
 		foreach($this->getColumns($table_name) as $column){
 			$column_name = $column->getName();
@@ -320,7 +323,7 @@ switch($column->getType()){
 	}
 
 	function getActions($table_name){
-		$controllerName = $this->getControllerName($table_name);
+		$controller_name = $this->getControllerName($table_name);
 		$className = $this->getModelName($table_name);
 		$plural = $this->getViewDirName($table_name);
 		$single = strtolower($table_name);
@@ -357,7 +360,7 @@ switch($column->getType()){
 	 * @return String
 	 */
 	function getController($table_name){
-		$controllerName = $this->getControllerName($table_name);
+		$controller_name = $this->getControllerName($table_name);
 		$plural = $this->getViewDirName($table_name);
 		$className = $this->getModelName($table_name);
 		$single = strtolower($table_name);
@@ -369,7 +372,7 @@ switch($column->getType()){
 		echo "<?php\n";
 ?>
 
-class <?php echo $controllerName ?> extends ApplicationController {
+class <?php echo $controller_name ?> extends ApplicationController {
 
 	function index(){
 		$this['<?php echo $plural ?>'] = <?php echo $className ?>::getAll();
@@ -435,10 +438,10 @@ class <?php echo $controllerName ?> extends ApplicationController {
 	 * @return string
 	 */
 	function getControllerName($table_name){
-		$controllerName = str_replace(' ', '', ucwords(str_replace('_', ' ', $table_name)));
-		$controllerName = self::pluralize($controllerName);
-		$controllerName = $controllerName.'Controller';
-		return $controllerName;
+		$controller_name = str_replace(' ', '', ucwords(str_replace('_', ' ', $table_name)));
+		$controller_name = self::pluralize($controller_name);
+		$controller_name = $controller_name.'Controller';
+		return $controller_name;
 	}
 
 	function getControllerFileName($table_name){
