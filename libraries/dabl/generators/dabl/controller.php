@@ -30,7 +30,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		if($<?php echo $single ?>->delete())
 			$this->persistant['messages'][] = '<?php echo ucfirst($single) ?> deleted';
 		else
-			$this->persistant['errors'][] = '<?php echo ucfirst($single) ?> could not be delete';
+			$this->persistant['errors'][] = '<?php echo ucfirst($single) ?> could not be deleted';
 
 		redirect('<?php echo $plural ?>');
 	}
