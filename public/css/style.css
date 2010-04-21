@@ -8,7 +8,7 @@ body, table, input, select, textarea {
 }
 
 h1, h2, h3, h4, h5 {
-	padding: 0;
+	padding: 10px 0 2px 0;
 	margin: 0;
 }
 
@@ -19,8 +19,13 @@ th, td{
 
 /* Object Grids */
 table.object-grid{
+	width:100%;
 	border-spacing: 1px;
 	font-size: 14px;
+}
+
+table.object-grid th.grid-action-column{
+	width:0px;
 }
 
 table.object-grid thead{
@@ -43,4 +48,17 @@ table.object-grid tbody td{
 /* Form */
 form p label{
 	display:block;
+}
+
+.ui-button-link {
+	padding:0.4em 1em 0.4em 20px;
+	position:relative;
+	text-decoration:none;
+}
+
+.ui-button-link .ui-icon {
+	left:0.2em;
+	margin:-8px 5px 0 0;
+	position:absolute;
+	top:50%;
 }

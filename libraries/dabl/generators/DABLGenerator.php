@@ -37,9 +37,7 @@ class DABLGenerator extends BaseGenerator {
 		$pk = $instance->getPrimaryKey();
 		ob_start();
 ?>
-<div class="ui-widget-header ui-corner-top ui-helper-clearfix">
 <h1>Edit <?php echo ucfirst($table_name) ?></h1>
-</div>
 <div class="ui-widget-content ui-corner-bottom">
 <form method="POST" action="<?php echo "<?php echo site_url('".$plural."/save') ?>" ?>">
 <?php
@@ -113,6 +111,42 @@ switch($column->getType()){
 
 	/**
 	 * Generates a String with an html/php view showing all of the
+	 * objects from the given table in a list
+	 * @param String $table_name
+	 * @param String $className
+	 * @return String
+	 */
+	function getListView($table_name){
+		$controllerName = $this->getControllerName($table_name);
+		$className = $this->getModelName($table_name);
+		$instance = new $className;
+		$pk = $instance->getPrimaryKey();
+		$plural = $this->getViewDirName($table_name);
+		$single = strtolower($table_name);
+		ob_start();
+?>
+<ul class="object-list <?php echo $single ?>-list">
+	<?php echo '<?php foreach($'.$plural.' as $key => $'.$single.'): ?>' ?>
+
+	<li class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?>">
+		<dl>
+			<?php foreach($instance->getColumnNames() as $columnName): ?>
+
+			<dt><?php echo $columnName ?></dt>
+			<dd><?php echo '<?php echo htmlentities($'.$single.'->'."get$columnName".'()) ?>' ?></dd>
+			<?php endforeach ?>
+
+		</dl>
+	</li>
+	<?php echo '<?php endforeach ?>' ?>
+
+</ul>
+<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Generates a String with an html/php view showing all of the
 	 * objects from the given table in a grid
 	 * @param String $table_name
 	 * @param String $className
@@ -130,7 +164,7 @@ switch($column->getType()){
 
 		ob_start();
 ?>
-<table class="object-grid <?php echo $single ?>-grid ui-corner-all">
+<table class="object-grid <?php echo $single ?>-grid">
 	<thead>
 		<tr>
 <?php
@@ -142,7 +176,7 @@ switch($column->getType()){
 		}
 		foreach($actions as $action){
 ?>
-			<th class="ui-state-default ui-th-column ui-th-ltr">&nbsp;</th>
+			<th class="ui-state-default ui-th-column ui-th-ltr grid-action-column">&nbsp;</th>
 <?php
 		}
 ?>
@@ -197,42 +231,6 @@ switch($column->getType()){
 
 	/**
 	 * Generates a String with an html/php view showing all of the
-	 * objects from the given table in a list
-	 * @param String $table_name
-	 * @param String $className
-	 * @return String
-	 */
-	function getListView($table_name){
-		$controllerName = $this->getControllerName($table_name);
-		$className = $this->getModelName($table_name);
-		$instance = new $className;
-		$pk = $instance->getPrimaryKey();
-		$plural = $this->getViewDirName($table_name);
-		$single = strtolower($table_name);
-		ob_start();
-?>
-<ul class="object-list <?php echo $single ?>-list">
-	<?php echo '<?php foreach($'.$plural.' as $key => $'.$single.'): ?>' ?>
-
-	<li class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?>">
-		<dl>
-			<?php foreach($instance->getColumnNames() as $columnName): ?>
-
-			<dt><?php echo $columnName ?></dt>
-			<dd><?php echo '<?php echo htmlentities($'.$single.'->'."get$columnName".'()) ?>' ?></dd>
-			<?php endforeach ?>
-
-		</dl>
-	</li>
-	<?php echo '<?php endforeach ?>' ?>
-
-</ul>
-<?php
-		return ob_get_clean();
-	}
-
-	/**
-	 * Generates a String with an html/php view showing all of the
 	 * objects from the given table in a grid
 	 * @param String $table_name
 	 * @param String $className
@@ -247,13 +245,15 @@ switch($column->getType()){
 		$single = strtolower($table_name);
 		ob_start();
 ?>
-<h1 class="ui-widget-header ui-corner-top ui-helper-clearfix" style="position: relative;"><?php echo ucfirst($plural) ?>
-<a href="<?php echo "<?php echo site_url('".$plural."/edit') ?>" ?>"
-   style="float:right; margin: 10px;"
-   class="ui-dialog-titlebar-close ui-corner-all ui-state-default"
-   title="New <?php echo str_replace('_', ' ', ucfirst($single)) ?>"><span class="ui-icon ui-icon-plusthick">New <?php echo str_replace('_', ' ', ucfirst($single)) ?></span></a>
-</h1>
-<div class="ui-widget-content ui-corner-bottom">
+<h1><?php echo ucfirst($plural) ?></h1>
+
+<p>
+	<a href="<?php echo "<?php echo site_url('".$plural."/edit') ?>" ?>" class="ui-state-default ui-corner-all ui-button-link" title="New <?php echo str_replace('_', ' ', ucfirst($single)) ?>">
+		<span class="ui-icon ui-icon-plusthick"></span>New <?php echo str_replace('_', ' ', ucfirst($single)) ?>
+	</a>
+</p>
+
+<div class="ui-widget-content">
 <?php echo '<?php load_view("'.$plural.'/grid", $params) ?>' ?>
 </div>
 <?php
@@ -278,21 +278,14 @@ switch($column->getType()){
 		$actions = $this->getActions($table_name);
 		unset($actions['Show']);
 ?>
-<div class="ui-widget-header ui-corner-top ui-helper-clearfix">
-<h1 style="float:left;">View <?php echo ucfirst($table_name) ?></h1>
-<div style="float:right; margin: 10px;">
-<?php
-		foreach($actions as $action_label => $action_url){
-?>
-<a href="<?php echo $action_url ?>"
-   class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
-   title="<?php echo $action_label . ' ' . ucfirst($single) ?>"
-   <?php if($action_label=='delete') echo "onclick=\"return confirm('Are you sure?');\"";?>><span class="ui-icon ui-icon-<?php echo self::$action_icons[$action_label] ?>"><?php echo $action_label ?></span></a>
-<?php
-		}
-?>
-</div>
-</div>
+<h1>View <?php echo ucfirst($table_name) ?></h1>
+<p>
+<?php foreach($actions as $action_label => $action_url): ?>
+<a href="<?php echo $action_url ?>" class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>" <?php if($action_label=='delete') echo "onclick=\"return confirm('Are you sure?');\"";?>>
+	<span class="ui-icon ui-icon-<?php echo self::$action_icons[$action_label] ?>"></span><?php echo $action_label ?>
+</a>
+<?php endforeach ?>
+</p>
 <div class="ui-widget-content ui-corner-bottom">
 <?php
 		foreach($this->getColumns($table_name) as $column){
