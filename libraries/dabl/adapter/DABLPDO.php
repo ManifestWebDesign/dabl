@@ -6,20 +6,20 @@ abstract class DABLPDO extends PDO {
 	const ID_METHOD_AUTOINCREMENT = 1;
 	const ID_METHOD_SEQUENCE = 2;
 
-	protected $_query_log = array();
-	protected $_log_queries = false;
-	protected $_db_name = null;
+	protected $queryLog = array();
+	protected $logQueries = false;
+	protected $dbName = null;
 
 	function setDBName($db_name){
-		$this->_db_name = $db_name;
+		$this->dbName = $db_name;
 	}
 
 	function getDBName(){
-		return $this->_db_name;
+		return $this->dbName;
 	}
 
 	function logQuery($query_string, $time){
-		$this->_query_log[] = array(
+		$this->queryLog[] = array(
 			'query' => $query_string,
 			'time' => $time
 		);
@@ -106,7 +106,7 @@ abstract class DABLPDO extends PDO {
 	function  __construct() {
 		$args = func_get_args();
 		$result = call_user_func_array(array('parent', '__construct'), $args);
-		if($this->_log_queries)
+		if($this->logQueries)
 			$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, 'LoggedPDOStatement');
 		return $result;
 	}
@@ -130,7 +130,7 @@ abstract class DABLPDO extends PDO {
 	function query() {
 		$args = func_get_args();
 
-		if($this->_log_queries){
+		if($this->logQueries){
 			$start = microtime(true);
 			$result = call_user_func_array(array('parent', 'query'), $args);
 			$time = microtime(true) - $start;
@@ -147,7 +147,7 @@ abstract class DABLPDO extends PDO {
 	function exec() {
 		$args = func_get_args();
 
-		if($this->_log_queries){
+		if($this->logQueries){
 			$start = microtime(true);
 			$result = call_user_func_array(array('parent', 'exec'), $args);
 			$time = microtime(true) - $start;
@@ -159,7 +159,7 @@ abstract class DABLPDO extends PDO {
 	}
 
 	function getLoggedQueries() {
-		return $this->_query_log;
+		return $this->queryLog;
 	}
 
 	function printQueryLog() {
@@ -167,7 +167,7 @@ abstract class DABLPDO extends PDO {
 		$total_time = 0.00;
 		$string = '<table border="1"><tbody>';
 			$string .= '<tr><th>Query</th><th>Execution Time (Seconds)</th>'.'</tr>';
-		foreach($this->_query_log as $query_array){
+		foreach($this->queryLog as $query_array){
 			$string .= '<tr><td><pre>'.$query_array['query'].'</pre></td><td>'.$query_array['time'].'</td></tr>';
 			$total_time += $query_array['time'];
 		}

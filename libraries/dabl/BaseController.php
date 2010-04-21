@@ -6,12 +6,11 @@ abstract class BaseController extends ArrayObject {
 	 * @var string
 	 */
 	public $layout = 'layouts/main';
-	public $view_prefix = '';
-	public $view_dir = '';
-	public $output_format = 'html';
-	public $load_view = true;
-	public $render_partial = false;
-
+	public $viewPrefix = '';
+	public $viewDir = '';
+	public $outputFormat = 'html';
+	public $loadView = true;
+	public $renderPartial = false;
 	public $persistant = array();
 
 	function  __destruct() {
@@ -38,8 +37,8 @@ abstract class BaseController extends ArrayObject {
 	 * @return string
 	 */
 	function getViewPath(){
-		$controller_view_dir = $this->view_dir ? $this->view_dir : str_replace('controller', '', strtolower(get_class($this)));
-		$view = str_replace('\\', '/', $this->view_prefix);
+		$controller_view_dir = $this->viewDir ? $this->viewDir : str_replace('controller', '', strtolower(get_class($this)));
+		$view = str_replace('\\', '/', $this->viewPrefix);
 		$view = trim($view, '/').'/';
 		if($controller_view_dir != DEFAULT_CONTROLLER)
 			$view .= $controller_view_dir.'/';
@@ -52,16 +51,16 @@ abstract class BaseController extends ArrayObject {
 	}
 
 	function loadView($view){
-		$output_format = $this->output_format;
+		$output_format = $this->outputFormat;
 		$params = $this->getParams();
 
-		$use_layout = ($this->layout && $this->render_partial===false && $output_format == 'html');
+		$use_layout = ($this->layout && $this->renderPartial===false && $output_format == 'html');
 		$params['content'] = load_view($view, $params, $use_layout, $output_format);
 
 		if($use_layout)
 			load_view($this->layout, $params, false, $output_format);
 
-		$this->load_view = false;
+		$this->loadView = false;
 	}
 
 	/**
@@ -75,7 +74,7 @@ abstract class BaseController extends ArrayObject {
 
 		call_user_func_array(array($this, $action_name), $params);
 
-		if(!$this->load_view)return;
+		if(!$this->loadView)return;
 		$this->loadView($view);
 	}
 

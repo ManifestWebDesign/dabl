@@ -10,12 +10,12 @@ abstract class BaseGenerator{
 	/**
 	 * @var String
 	 */
-	private $connection_name;
+	private $connectionName;
 
 	/**
 	 * @var DOMDocument
 	 */
-	private $db_schema;
+	private $dbSchema;
 
 	/**
 	 *
@@ -78,14 +78,14 @@ abstract class BaseGenerator{
 	 * @param DOMDocument $schema
 	 */
 	function setSchema(DOMDocument $schema){
-		$this->db_schema = $schema;
+		$this->dbSchema = $schema;
 	}
 
 	/**
 	 * @return DOMDocument
 	 */
 	function getSchema(){
-		return $this->db_schema;
+		return $this->dbSchema;
 	}
 
 	function setOptions($options){
@@ -173,14 +173,14 @@ abstract class BaseGenerator{
 	 * @param String $conn_name
 	 */
 	function setConnectionName($conn_name){
-		$this->connection_name = $conn_name;
+		$this->connectionName = $conn_name;
 	}
 
 	/**
 	 * @return String
 	 */
 	function getConnectionName(){
-		return $this->connection_name;
+		return $this->connectionName;
 	}
 
 	/**

@@ -72,16 +72,16 @@ function load_controller($route){
 
 	$action = $params ? array_shift($params) : DEFAULT_CONTROLLER;
 
-	if(!$instance->view_prefix)
-		$instance->view_prefix = $view_prefix;
+	if(!$instance->viewPrefix)
+		$instance->viewPrefix = $view_prefix;
 
-	if(!$instance->view_dir)
-		$instance->view_dir = $view_dir;
+	if(!$instance->viewDir)
+		$instance->viewDir = $view_dir;
 
 	if($render_partial)
-		$instance->render_partial = $render_partial;
+		$instance->renderPartial = $render_partial;
 
-	$instance->output_format = $extension;
+	$instance->outputFormat = $extension;
 
 	//Restore Flash params
 	$instance->setParams(array_merge_recursive(get_clean_persistant_values(), $instance->getParams()));
