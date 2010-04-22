@@ -60,7 +60,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		$id = $id ? $id : @$_POST[<?php echo $to_class_name ?>::getPrimaryKey()];
 		$<?php echo $fk_single ?> = $id ? <?php echo $to_class_name ?>::retrieveByPK($id) : new <?php echo $to_class_name ?>;
 
-		$this['<?php echo $plural ?>'] = $<?php echo $fk_single ?>->get<?php echo $table_name ?>s();
+		$this['<?php echo $plural ?>'] = $<?php echo $fk_single ?>->get<?php echo $className ?>s();
 		$this->loadView('<?php echo $plural ?>/grid');
 	}
 
