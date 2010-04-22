@@ -142,9 +142,9 @@ class PDOStatementSQLite extends PDOStatement {
 	}
 	
 	function __uquery(&$query) {
-		if(!@$query = sqlite_query($query, $this->__connection)) {
+		if(!@$result = sqlite_query($query, $this->__connection)) {
 			$this->__setErrors('SQLER');
-			$query = null;
+			$result = null;
 		}
 		$this->__position = 0;
 		$this->__num_rows = (int)@sqlite_num_rows($result);
