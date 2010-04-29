@@ -46,7 +46,7 @@
 ?>
 			<td>
 				<a<?php if(in_array($action_label, self::$standard_actions)) : ?> class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" title="<?php echo $action_label . " " . ucfirst($single) ?>"<?php endif ?> href="<?php echo $action_url ?>"<?php if(strtolower($action_label) == 'delete') echo ' onclick="return confirm(\'Are you sure?\');"' ?>>
-					<?php if(array_key_exists($action_label, self::$action_icons)): ?><span class="ui-icon ui-icon-<?php echo self::$action_icons[$action_label] ?>"><?php endif ?><?php echo $action_label ?><?php if(array_key_exists($action_label, self::$action_icons)): ?></span><?php endif ?>
+					<?php if(array_key_exists($action_label, self::$action_icons)): ?><span class="ui-icon <?php if(array_key_exists($action_label, self::$action_icons)) echo 'ui-icon-'.self::$action_icons[$action_label]; ?>"><?php endif ?><?php echo $action_label ?><?php if(array_key_exists($action_label, self::$action_icons)): ?></span><?php endif ?>
 
 				</a>
 			</td>
