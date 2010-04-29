@@ -131,7 +131,7 @@ class DABLGenerator extends BaseGenerator {
 				continue;
 			}
 			$used_to[$from_table]=$from_column;
-			$actions[ucwords($this->getViewDirName($from_table))] = "<?php echo site_url('".$this->getViewDirName($from_table).'/'.$single."/'.$".$single."->".$pkMethod."()) ?>";
+			$actions[ucwords(self::spaceTitleCase(self::pluralize($from_table)))] = "<?php echo site_url('".$this->getViewDirName($from_table).'/'.$single."/'.$".$single."->".$pkMethod."()) ?>";
 		}
 
 		return $actions;

@@ -1,5 +1,5 @@
 <h1>
-	<?php echo ucfirst($plural) ?>
+	<?php echo BaseGenerator::spaceTitleCase($plural) ?>
 	<a href="<?php echo "<?php echo site_url('".$plural."/edit') ?>" ?>" class="ui-state-default ui-corner-all ui-button-link" title="New <?php echo str_replace('_', ' ', ucfirst($single)) ?>">
 		<span class="ui-icon ui-icon-plusthick"></span>New <?php echo str_replace('_', ' ', ucfirst($single)) ?>
 

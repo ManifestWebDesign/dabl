@@ -833,7 +833,7 @@ class ".$className." extends base$className{
 	 * @return string
 	 */
 	function getViewDirName($tableName){
-		return strtolower(self::pluralize($tableName));
+		return strtolower(join('_',self::getWords(self::pluralize($tableName))));
 	}
 
 	/**
@@ -849,7 +849,11 @@ class ".$className." extends base$className{
 	}
 
 	static function spaceTitleCase($string){
-		return str_replace('_', ' ', preg_replace('/([a-z])([A-Z])/', '$1_$2', self::titleCase($string)));
+		return join(' ', self::getWords($string));
+	}
+
+	static function getWords($string) {
+		return explode('_', preg_replace('/([a-z])([A-Z])/', '$1_$2', self::titleCase($string)));
 	}
 
 	/**

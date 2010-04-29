@@ -1,4 +1,4 @@
-<h1>View <?php echo ucfirst($table_name) ?></h1>
+<h1>View <?php echo BaseGenerator::spaceTitleCase($table_name) ?></h1>
 <p>
 <?php foreach($actions as $action_label => $action_url): ?>
 	<a href="<?php echo $action_url ?>" class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php if(strtolower($action_label)=='delete') echo " onclick=\"return confirm('Are you sure?');\"";?>>
