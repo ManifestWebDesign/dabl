@@ -25,6 +25,7 @@ function load_controller($route){
 		$params[] = implode('.', $file_parts);
 	}
 
+	// directory where controllers are found
 	$c_dir = ROOT.'controllers'.DIRECTORY_SEPARATOR;
 	$view_prefix = '';
 	$view_dir = '';
@@ -56,16 +57,22 @@ function load_controller($route){
 			}
 		}
 
+	}
+
+	if (!$instance) {
 		//fallback check if default index exists in directory
 		$alternate_c_class = ucwords(DEFAULT_CONTROLLER).'Controller';
 		$alternate_c_class_file = $c_dir.$alternate_c_class.'.php';
 		if(is_file($alternate_c_class_file)){
-			array_unshift($params, $segment);
+			if ($params) {
+				array_unshift($params, $segment);
+				$view_dir = '';
+			}
 			require_once $alternate_c_class_file;
 			$instance = new $alternate_c_class;
-			break;
 		}
 	}
+
 	//if no instance of a Controller, 404
 	if(!$instance)
 		file_not_found($route);
