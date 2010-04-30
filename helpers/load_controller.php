@@ -14,10 +14,9 @@ function load_controller($route){
 		$render_partial=true;
 		array_shift($params);
 	}
-	if(!$params)$params[] = DEFAULT_CONTROLLER;
 
 	$last = array_pop($params);
-	$extension = "html";
+	$extension = 'html';
 	if($last!==null){
 		$file_parts = explode('.', $last);
 		if(count($file_parts) > 1)
@@ -72,10 +71,7 @@ function load_controller($route){
 	if(!$instance)
 		file_not_found($route);
 
-	$action = $params ? array_shift($params) : DEFAULT_CONTROLLER;
-
-	if(!$instance->viewPrefix)
-		$instance->viewPrefix = $view_prefix;
+	$view_dir = $view_dir ? $view_prefix.$view_dir.DIRECTORY_SEPARATOR : $view_prefix;
 
 	if(!$instance->viewDir)
 		$instance->viewDir = $view_dir;
@@ -89,9 +85,8 @@ function load_controller($route){
 	$instance->setParams(
 		array_merge_recursive(
 			get_clean_persistant_values(),
-			$instance->getParams(),
-			Application::getParams()
+			$instance->getParams()
 	));
 
-	$instance->doAction($action, $params);
+	$instance->doAction(array_shift($params), $params);
 }

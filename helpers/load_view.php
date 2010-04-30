@@ -13,9 +13,15 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 
 	switch($output_format){
 		case 'json':
+			if (!headers_sent()) {
+				header('Content-type: application/json');
+			}
 			echo json_encode_all($params);
 			break;
 		case 'xml':
+			if (!headers_sent()) {
+				header('Content-type: application/xml');
+			}
 			echo xml_encode_all($params);
 			break;
 		case 'html':

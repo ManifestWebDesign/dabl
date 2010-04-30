@@ -833,7 +833,15 @@ class ".$className." extends base$className{
 	 * @return string
 	 */
 	function getViewDirName($tableName){
+		return self::getPluralName($tableName);
+	}
+
+	static function getPluralName($tableName) {
 		return strtolower(join('_',self::getWords(self::pluralize($tableName))));
+	}
+
+	static function getSingularName($tableName) {
+		return strtolower(join('_',self::getWords($tableName)));
 	}
 
 	/**

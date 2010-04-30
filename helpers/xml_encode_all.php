@@ -6,15 +6,19 @@ function xml_encode_all($array) {
 	$array = object_to_array($array);
 
 	$dom = new DOMDocument('1.0', 'utf-8');
+	$doc = create_xml_node('data', null, $dom);
 
 	foreach($array as $key => $value){
-		$dom->appendChild(create_xml_node($key, $value, $dom));
+		$doc->appendChild(create_xml_node($key, $value, $dom));
 	}
+
+	$dom->appendChild($doc);
 	$dom->formatOutput = true;
 	return $dom->saveXML();
 }
 
 function create_xml_node($name, $value, DomDocument $dom = null){
+	$name = str_replace(' ', '_', $name);
 	if(!is_string($name))
 		$name = 'element';
 	$element = $dom->createElement($name);

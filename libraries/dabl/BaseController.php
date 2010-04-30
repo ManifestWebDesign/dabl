@@ -13,7 +13,7 @@ abstract class BaseController extends ArrayObject {
 	public $renderPartial = false;
 	public $persistant = array();
 
-	function  __destruct() {
+	function __destruct() {
 		set_persistant_values(array_merge_recursive(get_persistant_values(), $this->persistant));
 	}
 
@@ -36,14 +36,19 @@ abstract class BaseController extends ArrayObject {
 	/**
 	 * @return string
 	 */
-	function getViewPath(){
-		$controller_view_dir = $this->viewDir ? $this->viewDir : str_replace('controller', '', strtolower(get_class($this)));
-		$view = str_replace('\\', '/', $this->viewPrefix);
-		$view = trim($view, '/').'/';
-		if($controller_view_dir != DEFAULT_CONTROLLER)
-			$view .= $controller_view_dir.'/';
+	protected function getViewDir(){
+		$view = str_replace('\\', '/', $this->viewDir);
+		$view = trim($view, '/');
 
-		return $view;
+		if ($view===DEFAULT_CONTROLLER) $view = '';
+		$index_view = '/'.DEFAULT_CONTROLLER;
+		$pos = strrpos($view, $index_view);
+		if ($pos!==false && strlen($view)===($pos+strlen($index_view))) {
+			$view = substr($view, 0, $pos);
+		}
+		$view .= '/';
+
+		return str_replace('/', DIRECTORY_SEPARATOR, $view);
 	}
 
 	function renderView($view){
@@ -67,8 +72,9 @@ abstract class BaseController extends ArrayObject {
 	 * @param string $action_name
 	 * @param array $params
 	 */
-	function doAction($action_name, $params = array()){
-		$view = $this->getViewPath($action_name).$action_name;
+	function doAction($action_name=null, $params = array()){
+		$action_name = $action_name ? $action_name : DEFAULT_CONTROLLER;
+		$view = $this->getViewDir($action_name).$action_name;
 
 		method_exists($this, $action_name) || file_not_found($view);
 
