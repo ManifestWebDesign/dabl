@@ -30,7 +30,7 @@ function load_controller($route){
 	$view_dir = '';
 	$instance = null;
 
-	foreach($params as $key => $segment){
+	while ($segment = array_shift($params)) {
 		$view_dir = strtolower($segment);
 		$c_class = str_replace(array('_', '-'), ' ', $segment);
 		$c_class = ucwords($c_class);
@@ -40,15 +40,14 @@ function load_controller($route){
 		//check if file exists
 		if(is_file($c_class_file)){
 			require_once $c_class_file;
-			unset($params[$key]);
 			$instance = new $c_class;
 			break;
 		}
 
 		//check if the segment matches directory name
-		$c_dir .= $segment.DIRECTORY_SEPARATOR;
-		if(is_dir($c_dir)){
-			unset($params[$key]);
+		$t_dir = $c_dir.$segment.DIRECTORY_SEPARATOR;
+		if(is_dir($t_dir)){
+			$c_dir = $t_dir;
 			//if there are no segments left, and we continue, then we'll never load anything
 			//so only continue the loop if there is more to loop through
 			if($params){
@@ -61,6 +60,7 @@ function load_controller($route){
 		$alternate_c_class = ucwords(DEFAULT_CONTROLLER).'Controller';
 		$alternate_c_class_file = $c_dir.$alternate_c_class.'.php';
 		if(is_file($alternate_c_class_file)){
+			array_unshift($params, $segment);
 			require_once $alternate_c_class_file;
 			$instance = new $alternate_c_class;
 			break;
@@ -84,7 +84,12 @@ function load_controller($route){
 	$instance->outputFormat = $extension;
 
 	//Restore Flash params
-	$instance->setParams(array_merge_recursive(get_clean_persistant_values(), $instance->getParams()));
+	$instance->setParams(
+		array_merge_recursive(
+			get_clean_persistant_values(),
+			$instance->getParams(),
+			Application::getParams()
+	));
 
 	$instance->doAction($action, $params);
 }
