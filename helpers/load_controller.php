@@ -32,7 +32,6 @@ function load_controller($route){
 	$instance = null;
 
 	while ($segment = array_shift($params)) {
-		$view_dir = strtolower($segment);
 		$c_class = str_replace(array('_', '-'), ' ', $segment);
 		$c_class = ucwords($c_class);
 		$c_class = str_replace(' ', '', $c_class).'Controller';
@@ -42,6 +41,7 @@ function load_controller($route){
 		if(is_file($c_class_file)){
 			require_once $c_class_file;
 			$instance = new $c_class;
+			$view_dir = strtolower($segment);
 			break;
 		}
 
@@ -49,14 +49,13 @@ function load_controller($route){
 		$t_dir = $c_dir.$segment.DIRECTORY_SEPARATOR;
 		if(is_dir($t_dir)){
 			$c_dir = $t_dir;
-			//if there are no segments left, and we continue, then we'll never load anything
-			//so only continue the loop if there is more to loop through
-			if($params){
-				$view_prefix .= $segment.DIRECTORY_SEPARATOR;
-				continue;
-			}
+			$view_prefix .= $segment.DIRECTORY_SEPARATOR;
+			continue;
 		}
 
+		// file and directory not found; use default controller
+		array_unshift($params, $segment);
+		break;
 	}
 
 	if (!$instance) {
@@ -64,10 +63,6 @@ function load_controller($route){
 		$alternate_c_class = ucwords(DEFAULT_CONTROLLER).'Controller';
 		$alternate_c_class_file = $c_dir.$alternate_c_class.'.php';
 		if(is_file($alternate_c_class_file)){
-			if ($params) {
-				array_unshift($params, $segment);
-				$view_dir = '';
-			}
 			require_once $alternate_c_class_file;
 			$instance = new $alternate_c_class;
 		}
