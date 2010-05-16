@@ -37,7 +37,7 @@ function checkAll(name, connection, checked){
 			<tr><th colspan="100"><h3>Database: <?php echo $generator->getDBName() ?> (<?php echo $connection_name ?>)</h3></th></tr>
 			<tr>
 				<th>&nbsp;</th>
-				<th><input type="checkbox" checked="CHECKED" onclick="checkAll('Models', '<?php echo $connection_name ?>', this.checked)" /> Models</th>
+				<th><input type="checkbox" checked="checked" onclick="checkAll('Models', '<?php echo $connection_name ?>', this.checked)" /> Models</th>
 				<th><input type="checkbox" onclick="checkAll('Views', '<?php echo $connection_name ?>', this.checked)" /> Views</th>
 				<th><input type="checkbox" onclick="checkAll('Controllers', '<?php echo $connection_name ?>', this.checked)" /> Controllers</th>
 			</tr>
@@ -47,7 +47,7 @@ function checkAll(name, connection, checked){
 			<tr>
 				<td><?php echo $tableName ?></td>
 				<td>
-					<input type="checkbox" value="<?php echo $tableName ?>" name="Models[<?php echo $connection_name ?>][]" checked="CHECKED" />
+					<input type="checkbox" value="<?php echo $tableName ?>" name="Models[<?php echo $connection_name ?>][]" checked="checked" />
 				</td>
 				<td>
 					<input type="checkbox" value="<?php echo $tableName ?>" name="Views[<?php echo $connection_name ?>][]" />
