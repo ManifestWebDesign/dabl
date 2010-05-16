@@ -44,6 +44,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	function edit($id = null){
 		$id = $id ? $id : @$_POST[<?php echo $model_name ?>::getPrimaryKey()];
 		$<?php echo $single ?> = $id ? <?php echo $model_name ?>::retrieveByPK($id) : new <?php echo $model_name ?>;
+		$<?php echo $single ?>->fromArray(@$_REQUEST);
 		$this['<?php echo $single ?>'] = $<?php echo $single ?>;
 	}
 

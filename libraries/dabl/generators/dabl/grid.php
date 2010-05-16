@@ -21,7 +21,7 @@
 	<tbody>
 <?php echo '<?php foreach($'.$plural.' as $key => $'.$single.'): ?>' ?>
 
-		<tr class="<?php echo '<?php echo' ?> ($key & 1) ? 'even ui-priority-secondary' : 'odd' <?php echo '?>' ?> ui-widget-content ui-row-ltr">
+		<tr class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?> ui-widget-content ui-row-ltr">
 <?php
 		foreach($columns as $column){
 			$column_name = $column->getName();
