@@ -476,10 +476,7 @@ class Query{
 			throw new Exception("No table specified.");
 
 		$q->setAction(self::ACTION_COUNT);
-
-		$qs = $q->getQuery($conn);
-		$result = $qs->bindAndExecute();
-		return $result->fetchColumn();
+		return $q->getQuery($conn)->bindAndExecute()->fetchColumn();
 	}
 
 	/**
@@ -495,10 +492,7 @@ class Query{
 			throw new Exception("No table specified.");
 
 		$q->setAction(self::ACTION_DELETE);
-
-		$qs = $q->getQuery($conn);
-		$result = $qs->bindAndExecute();
-		return $result->rowCount();
+		return $q->getQuery($conn)->bindAndExecute()->rowCount();
 	}
 
 	/**
@@ -512,10 +506,7 @@ class Query{
 			throw new Exception("No table specified.");
 
 		$q->setAction(self::ACTION_SELECT);
-
-		$qs = $q->getQuery($conn);
-		$result = $qs->bindAndExecute();
-		return $result;
+		return $q->getQuery($conn)->bindAndExecute();
 	}
 
 }
