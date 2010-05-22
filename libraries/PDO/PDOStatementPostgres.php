@@ -40,6 +40,9 @@ class PDOStatementPostgres extends PDOStatement{
 				case PDO::FETCH_OBJ:
 					$result = pg_fetch_object($this->__result);
 					break;
+				case PDO::FETCH_CLASS:
+					$result = pg_fetch_object($this->__result, $this->__fetchClass);
+					break;
 				case PDO::FETCH_BOTH:
 				default:
 					$result = pg_fetch_array($this->__result);
@@ -79,6 +82,10 @@ class PDOStatementPostgres extends PDOStatement{
 					while($r = pg_fetch_object($this->__result))
 						array_push($result, $r);
 					break;
+				case PDO::FETCH_CLASS:
+					while($r = pg_fetch_object($this->__result, $this->__fetchClass))
+						array_push($result, $r);
+					break;
 				case PDO::FETCH_BOTH:
 				default:
 					while($r = pg_fetch_array($this->__result))
@@ -90,6 +97,10 @@ class PDOStatementPostgres extends PDOStatement{
 		return $result;
 	}
 	
+	function fetchObject($class_name){
+		return  pg_fetch_object($this->__result, $class_name);
+	}
+
 	/**
 	 * @Return	Mixed
 	 */

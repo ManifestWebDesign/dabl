@@ -40,6 +40,9 @@ class PDOStatementSQLite extends PDOStatement {
 				case PDO::FETCH_OBJ:
 					$result = sqlite_fetch_object($this->__result);
 					break;
+				case PDO::FETCH_CLASS:
+					$result = sqlite_fetch_object($this->__result, $this->__fetchClass);
+					break;
 				case PDO::FETCH_BOTH:
 				default:
 					$result = sqlite_fetch_array($this->__result, SQLITE_BOTH);
@@ -79,6 +82,10 @@ class PDOStatementSQLite extends PDOStatement {
 					while($r = sqlite_fetch_object($this->__result))
 						array_push($result, $r);
 					break;
+				case PDO::FETCH_CLASS:
+					while($r = sqlite_fetch_object($this->__result, $this->__fetchClass))
+						array_push($result, $r);
+					break;
 				case PDO::FETCH_BOTH:
 				default:
 					while($r = sqlite_fetch_array($this->__result, SQLITE_BOTH))
@@ -89,7 +96,11 @@ class PDOStatementSQLite extends PDOStatement {
 		$this->__result = null;
 		return $result;
 	}
-	
+
+	function fetchObject($class_name){
+		return  sqlite_fetch_object($this->__result, $class_name);
+	}
+
 	/**
 	 * @Return	Mixed
 	 */

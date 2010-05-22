@@ -43,6 +43,9 @@ class PDOStatementMySQL extends PDOStatement{
 				case PDO::FETCH_OBJ:
 					$result = mysql_fetch_object($this->__result);
 					break;
+				case PDO::FETCH_CLASS:
+					$result = mysql_fetch_object($this->__result, $this->__fetchClass);
+					break;
 				case PDO::FETCH_BOTH:
 				default:
 					$result = mysql_fetch_array($this->__result);
@@ -83,6 +86,10 @@ class PDOStatementMySQL extends PDOStatement{
 					while($r = mysql_fetch_object($this->__result))
 						array_push($result, $r);
 					break;
+				case PDO::FETCH_CLASS:
+					while($r = mysql_fetch_object($this->__result, $this->__fetchClass))
+						array_push($result, $r);
+					break;
 				case PDO::FETCH_BOTH:
 				default:
 					while($r = mysql_fetch_array($this->__result))
@@ -92,6 +99,10 @@ class PDOStatementMySQL extends PDOStatement{
 		}
 		$this->__result = null;
 		return $result;
+	}
+
+	function fetchObject($class_name){
+		return  mysql_fetch_object($this->__result, $class_name);
 	}
 
 	/**

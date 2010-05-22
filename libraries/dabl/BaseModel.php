@@ -9,6 +9,8 @@ abstract class BaseModel {
 
 	protected $_cacheResults = true;
 
+	protected $_formatDates = true;
+
 	protected $_isNew = true;
 
 	protected $_validationErrors = array();
@@ -109,11 +111,11 @@ abstract class BaseModel {
 	 * Array keys must match column names to be used.
 	 */
 	function fromArray($array){
-		foreach($this->getColumnNames() as $column){
-			if(!array_key_exists($column, $array))
-				continue;
+		$columns = $this->getColumnNames();
+       	foreach($array as $column => $value){
+			if(in_array($column, $columns) === false) continue;
 			$method = "set$column";
-			$this->$method($array[$column]);
+			$this->$method($value);
 		}
 	}
 

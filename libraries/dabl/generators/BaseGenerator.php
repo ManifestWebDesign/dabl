@@ -290,52 +290,52 @@ $class .= '
 			}
 			$class .='
 	}
-	function set'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'($theValue){';
+	
+	function set'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'($value){';
 			if($field->isNumericType() || $field->isTemporalType()){
 				if($field->isNumericType() && $options['empty_string_zero'] && $field->getName()!=$PK){
 					$class .= '
-		if($theValue==="")
-			$theValue = 0;';
+		if($value==="")
+			$value = 0;';
 				}
 				else{
 					$class .= '
-		if($theValue==="")
-			$theValue = null;';
+		if($value==="")
+			$value = null;';
 					if($field->getType()==PropelTypes::TIMESTAMP){
 						$class .= '
-		elseif($theValue!==null)
-			$theValue = date('.$className.'::getConnection()->getTimestampFormatter(), strtotime($theValue));';
+		elseif($value!==null && $this->_formatDates)
+			$value = date($this->getConnection()->getTimestampFormatter(), strtotime($value));';
 					}
 					elseif($field->getType()==PropelTypes::DATE){
 						$class .= '
-		elseif($theValue!==null)
-			$theValue = date('.$className.'::getConnection()->getDateFormatter(), strtotime($theValue));';
+		elseif($value!==null && $this->_formatDates)
+			$value = date($this->getConnection()->getDateFormatter(), strtotime($value));';
 					}
 					elseif($field->getType()==PropelTypes::TIME){
 						$class .= '
-		elseif($theValue!==null)
-			$theValue = date('.$className.'::getConnection()->getTimeFormatter(), strtotime($theValue));';
+		elseif($value!==null && $this->_formatDates)
+			$value = date($this->getConnection()->getTimeFormatter(), strtotime($value));';
 					}
 				}
 			}
 
 			if($options['protect_not_null'] && $field->getName()!=$PK && $field->isNotNull()){
 				$class .= '
-		if($theValue===null){';
+		if($value===null){';
 				if($default){
 					$class .='
-			$pk = $this->getPrimaryKey();
-			if($pk && $this->$pk===null)
-				$theValue='.(is_numeric($default) ? $default : '"'.$default.'"').';
+			if($this->isNew())
+				$value = '.(is_numeric($default) ? $default : '"'.$default.'"').';
 			else{';
 				}
 
 				if($field->isNumericType())
 					$class .= '
-			$theValue = 0;';
+				$value = 0;';
 				else
 					$class .= '
-			$theValue = "";';
+				$value = "";';
 
 				if($default){
 					$class .= '
@@ -346,14 +346,14 @@ $class .= '
 			}
 			if($field->getPdoType()==PDO::PARAM_INT){
 				$class .= '
-		if($theValue!==null)
-			$theValue = (int)$theValue;';
+		if($value!==null)
+			$value = (int)$value;';
 			}
 
 			$class .= '
-		if($this->'.$field->getName().' !== $theValue){
+		if($this->'.$field->getName().' !== $value){
 			$this->_modifiedColumns[] = "'.$field->getName().'";
-			$this->'.$field->getName().' = $theValue;
+			$this->'.$field->getName().' = $value;
 		}
 	}
 ';
@@ -484,11 +484,13 @@ $class .= '
 	 * Returns an array of '.$className.' Objects from the rows of a PDOStatement(query result)
 	 * @return array
 	 */
-	 static function fromResult(PDOStatement $result){
+	 static function fromResult(PDOStatement $result, $class = "'.$className.'"){
 		$objects = array();
 		while($row = $result->fetch(PDO::FETCH_ASSOC)){
-			$object = new '.$className.';
+			$object = new $class;
+			$object->_formatDates = false;
 			$object->fromArray($row);
+			$object->_formatDates = true;
 			$object->resetModified();
 			$object->setNew(false);
 			$objects[] = $object;

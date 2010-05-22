@@ -55,6 +55,7 @@ class PDO {
 	const FETCH_COLUMN = 7;
 	const FETCH_LAZY = 1;
 	const FETCH_BOUND = 6;
+	const FETCH_CLASS = 8;
 	
 	const ATTR_ERRMODE = 3;
 	const ATTR_SERVER_VERSION = 4;

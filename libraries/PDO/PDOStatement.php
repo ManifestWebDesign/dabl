@@ -11,6 +11,7 @@ abstract class PDOStatement implements Iterator {
 	protected $__errorCode = '';
 	protected $__errorInfo = array('');
 	protected $__fetchmode = PDO::FETCH_BOTH;
+	protected $__fetchClass;
 
 	/**
 	 * @var PDO
@@ -202,9 +203,11 @@ abstract class PDOStatement implements Iterator {
 	 * NOTE: PDO_FETCH_LAZY and PDO_FETCH_BOUND are not supported
 	 * @Return	Boolean		true on change, false otherwise
 	 */
-	function setFetchMode($mode) {
+	function setFetchMode($mode, $class=null) {
 		$result = false;
 		switch($mode) {
+			case PDO::FETCH_CLASS:
+				$this->__fetchClass = $class;
 			case PDO::FETCH_NUM:
 			case PDO::FETCH_ASSOC:
 			case PDO::FETCH_OBJ:
