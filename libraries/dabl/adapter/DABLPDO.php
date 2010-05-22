@@ -19,13 +19,25 @@ abstract class DABLPDO extends PDO {
 	}
 
 	function logQuery($query_string, $time){
+		$trace = '';
+		$backtrace = debug_backtrace();
+		array_shift($backtrace);
+		foreach($backtrace as $block)
+			$trace .= @$block['file'].' (line '.@$block['line'].') '.@$block['class'].@$block['type'].@$block['function'].'()<br />';
 		$this->queryLog[] = array(
 			'query' => $query_string,
-			'time' => $time
+			'time' => $time,
+			'trace' => $trace
 		);
 	}
 
-	/**
+	function __destruct() {
+        if($this->logQueries)
+			$this->printQueryLog();
+    }
+
+
+  	/**
 	 * Creates a new instance of the database adapter associated
 	 * with the specified Creole driver.
 	 *
@@ -165,13 +177,13 @@ abstract class DABLPDO extends PDO {
 	function printQueryLog() {
 		$queries = $this->getLoggedQueries();
 		$total_time = 0.00;
-		$string = '<table border="1"><tbody>';
-			$string .= '<tr><th>Query</th><th>Execution Time (Seconds)</th>'.'</tr>';
-		foreach($this->queryLog as $query_array){
-			$string .= '<tr><td><pre>'.$query_array['query'].'</pre></td><td>'.$query_array['time'].'</td></tr>';
+		$string = '<table border="1" style="margin:auto;font-size:11px;font-family:monospace" cellpadding="1" cellspacing="0"><tbody>';
+			$string .= '<tr><th>#</th><th>Query</th><th>Execution Time (Seconds)</th><th>Trace</th></tr>';
+		foreach($this->queryLog as $num => $query_array){
+			$string .= '<tr><td>'.($num + 1).'</td><td><pre>'.$query_array['query'].'</pre></td><td>'.round($query_array['time'], 6).'</td><td><pre>'.$query_array['trace'].'</pre></td></tr>';
 			$total_time += $query_array['time'];
 		}
-		$string .= '<tr><td><pre>Total Time: </pre></td><td>'.$total_time.'</td></tr>';
+		$string .= '<tr><td></td><td nowrap="nowrap">Total Time: </td><td>'.round($total_time, 6).'</td><td>&nbsp;</td></tr>';
 		$string .= '</tbody></table>';
 		echo $string;
 	}
