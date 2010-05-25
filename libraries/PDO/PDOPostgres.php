@@ -182,7 +182,7 @@ class PDOPostgres {
 		if($attribute === PDO::ATTR_ERRMODE && $mixed ===PDO::ERRMODE_EXCEPTION){
 			$this->__throwExceptions = true;
 		}
-		elseif($attribute == PDO::ATTR_STATEMENT_CLASS && $mixed == 'LoggedPDOStatement'){
+		elseif($attribute == PDO::ATTR_STATEMENT_CLASS && @$mixed[0] == 'LoggedPDOStatement'){
 			$this->logging = true;
 		}
 		if($attribute === PDO::ATTR_PERSISTENT && $mixed != $this->__persistent) {

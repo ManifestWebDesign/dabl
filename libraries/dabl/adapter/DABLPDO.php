@@ -119,7 +119,7 @@ abstract class DABLPDO extends PDO {
 		$args = func_get_args();
 		$result = call_user_func_array(array('parent', '__construct'), $args);
 		if($this->logQueries)
-			$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, 'LoggedPDOStatement');
+			$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('LoggedPDOStatement', array()));
 		return $result;
 	}
 
