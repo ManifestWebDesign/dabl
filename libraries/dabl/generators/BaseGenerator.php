@@ -48,9 +48,6 @@ abstract class BaseGenerator{
 			//enforce an upper case first letter of get and set methods
 			'cap_method_names' => true,
 
-			//if attempting to set value of numeric column to empty string, convert it to a zero
-			'empty_string_zero' => false,
-
 			//add some logic to the setter methods to not allow column values to be null if the column cannot be null
 			'protect_not_null' => true,
 
@@ -185,20 +182,21 @@ abstract class BaseGenerator{
 
 	/**
 	 * Generates a String with the contents of the Base class
-	 * @param String $tableName
-	 * @param String $className
+	 * @param String $table_name
+	 * @param String $class_name
 	 * @param array $options
 	 * @return String
 	 */
-	function getBaseModel($tableName){
-		$className = $this->getModelName($tableName);
+	function getBaseModel($table_name){
+		$class_name = $this->getModelName($table_name);
 		$options = $this->options;
 		//Gather all the information about the table's columns from the database
 		$PK = null;
 		$numeric = array();
 		$null = array();
 		$PKs = array();
-		$fields = $this->getColumns($tableName);
+		$fields = $this->getColumns($table_name);
+		$conn = DBManager::getConnection($this->getConnectionName());
 		foreach($fields as $field)
 			if($field->isPrimaryKey()) $PKs[] = $field->getName();
 
@@ -216,14 +214,14 @@ abstract class BaseGenerator{
  *
  */
 
-abstract class base$className extends BaseModel{
+abstract class base$class_name extends BaseModel{
 ";
 
 		$class .= '
 	/**
 	 * Name of the table
 	 */
-	protected static $_tableName = "'.$tableName.'";
+	protected static $_tableName = "'.$table_name.'";
 
 	/**
 	 * Array of all primary keys
@@ -281,8 +279,7 @@ $class .= '
 			return $this->'.$field->getName().';
 		if(strpos($this->'.$field->getName().', "0000-00-00")===0)
 			return null;
-		$dateTime = new DateTime($this->'.$field->getName().');
-		return $dateTime->format($format);';
+		return date($format, strtotime($this->'.$field->getName().'));';
 			}
 			else{
 			$class .='
@@ -293,60 +290,42 @@ $class .= '
 	
 	function set'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'($value){';
 			if($field->isNumericType() || $field->isTemporalType()){
-				if($field->isNumericType() && $options['empty_string_zero'] && $field->getName()!=$PK){
-					$class .= '
-		if($value==="")
-			$value = 0;';
-				}
-				else{
-					$class .= '
+				// all numbers and dates should be null instead of empty strings
+				$class .= '
 		if($value==="")
 			$value = null;';
-					if($field->getType()==PropelTypes::TIMESTAMP){
-						$class .= '
-		elseif($value!==null && $this->_formatDates)
-			$value = date($this->getConnection()->getTimestampFormatter(), strtotime($value));';
+				// format dates as needed
+				if($field->isTemporalType()){
+					switch($field->getType()){
+						case PropelTypes::TIMESTAMP:
+							$formatter = $conn->getTimestampFormatter();
+							break;
+						case PropelTypes::DATE:
+							$formatter = $conn->getDateFormatter();
+							break;
+						case PropelTypes::TIME:
+							$formatter = $conn->getTimeFormatter();
+							break;
 					}
-					elseif($field->getType()==PropelTypes::DATE){
-						$class .= '
+					$class .= '
 		elseif($value!==null && $this->_formatDates)
-			$value = date($this->getConnection()->getDateFormatter(), strtotime($value));';
-					}
-					elseif($field->getType()==PropelTypes::TIME){
-						$class .= '
-		elseif($value!==null && $this->_formatDates)
-			$value = date($this->getConnection()->getTimeFormatter(), strtotime($value));';
-					}
+			$value = date("'.$formatter.'", strtotime($value));';
 				}
 			}
 
 			if($options['protect_not_null'] && $field->getName()!=$PK && $field->isNotNull()){
 				$class .= '
-		if($value===null){';
-				if($default){
-					$class .='
-			if($this->isNew())
-				$value = '.(is_numeric($default) ? $default : '"'.$default.'"').';
-			else{';
-				}
-
+		if($value===null)';
 				if($field->isNumericType())
 					$class .= '
-				$value = 0;';
+			$value = 0;';
 				else
 					$class .= '
-				$value = "";';
-
-				if($default){
-					$class .= '
-			}';
-				}
-				$class .= '
-		}';
+			$value = "";';
 			}
 			if($field->getPdoType()==PDO::PARAM_INT){
 				$class .= '
-		if($value!==null)
+		elseif($value!==null)
 			$value = (int)$value;';
 			}
 
@@ -373,7 +352,7 @@ $class .= '
 	 * @return String
 	 */
 	static function getTableName(){
-		return '.$className.'::$_tableName;
+		return '.$class_name.'::$_tableName;
 	}
 
 	/**
@@ -381,14 +360,14 @@ $class .= '
 	 * @return array
 	 */
 	static function getColumnNames(){
-		return '.$className.'::$_columnNames;
+		return '.$class_name.'::$_columnNames;
 	}
 
 	/**
 	 * @return bool
 	 */
 	static function hasColumn($columnName){
-		return in_array(strtolower($columnName), array_map(\'strtolower\', '.$className.'::getColumnNames()));
+		return in_array(strtolower($columnName), array_map(\'strtolower\', '.$class_name.'::getColumnNames()));
 	}
 
 	/**
@@ -396,7 +375,7 @@ $class .= '
 	 * @return array
 	 */
 	static function getPrimaryKeys(){
-		return '.$className.'::$_primaryKeys;
+		return '.$class_name.'::$_primaryKeys;
 	}
 
 	/**
@@ -404,33 +383,33 @@ $class .= '
 	 * @return array
 	 */
 	static function getPrimaryKey(){
-		return '.$className.'::$_primaryKey;
+		return '.$class_name.'::$_primaryKey;
 	}
 
 	/**
 	 * Searches the database for a row with the ID(primary key) that matches
 	 * the one input.
-	 * @return '.$className.'
+	 * @return '.$class_name.'
 	 */
 	static function retrieveByPK( $thePK ){
 		if($thePK===null)return null;
-		$PKs = '.$className.'::getPrimaryKeys();
+		$PKs = '.$class_name.'::getPrimaryKeys();
 		if(count($PKs)>1)
 			throw new Exception("This table has more than one primary key.  Use retrieveByPKs() instead.");
 		elseif(count($PKs)==0)
 			throw new Exception("This table does not have a primary key.");
 		$q = new Query;
-		$conn = '.$className.'::getConnection();
+		$conn = '.$class_name.'::getConnection();
 		$pkColumn = $conn->quoteIdentifier($PKs[0]);
 		$q->add($pkColumn, $thePK);
 		$q->setLimit(1);
-		return array_shift('.$className.'::doSelect($q));
+		return array_shift('.$class_name.'::doSelect($q));
 	}
 
 	/**
 	 * Searches the database for a row with the primary keys that match
 	 * the ones input.
-	 * @return '.$className.'
+	 * @return '.$class_name.'
 	 */
 	static function retrieveByPKs( ';
 		foreach($PKs as $key=>$value){
@@ -439,8 +418,8 @@ $class .= '
 		}
 
 		$class .= ' ){
-		$conn = '.$className.'::getConnection();
-		$tableWrapped = $conn->quoteIdentifier('.$className.'::getTableName());';
+		$conn = '.$class_name.'::getConnection();
+		$tableWrapped = $conn->quoteIdentifier('.$class_name.'::getTableName());';
 		foreach($PKs as $key=>$value){
 			$class .= '
 		if($PK'.$key.'===null)return null;';
@@ -455,70 +434,75 @@ $class .= '
 
 		$class .= '";
 		$conn->applyLimit($queryString, 0, 1);
-		return '.$className.'::fetchSingle($queryString);
+		return '.$class_name.'::fetchSingle($queryString);
 	}
 
 	/**
-	 * Populates and returns an instance of '.$className.' with the
+	 * Populates and returns an instance of '.$class_name.' with the
 	 * first result of a query.  If the query returns no results,
 	 * returns null.
-	 * @return '.$className.'
+	 * @return '.$class_name.'
 	 */
 	static function fetchSingle($queryString){
-		return array_shift('.$className.'::fetch($queryString));
+		return array_shift('.$class_name.'::fetch($queryString));
 	}
 
 	/**
-	 * Populates and returns an Array of '.$className.' Objects with the
+	 * Populates and returns an Array of '.$class_name.' Objects with the
 	 * results of a query.  If the query returns no results,
 	 * returns an empty Array.
 	 * @return array
 	 */
 	static function fetch($queryString){
-		$conn = '.$className.'::getConnection();
+		$conn = '.$class_name.'::getConnection();
 		$result = $conn->query($queryString);
-		return '.$className.'::fromResult($result);
+		return '.$class_name.'::fromResult($result);
 	}
 
 	/**
-	 * Returns an array of '.$className.' Objects from the rows of a PDOStatement(query result)
+	 * Returns an array of '.$class_name.' Objects from the rows of a PDOStatement(query result)
 	 * @return array
 	 */
-	 static function fromResult(PDOStatement $result, $class = "'.$className.'"){
+	static function fromResult(PDOStatement $result, $class = "'.$class_name.'"){
 		$objects = array();
-		while($row = $result->fetch(PDO::FETCH_ASSOC)){
-			$object = new $class;
-			$object->_formatDates = false;
-			$object->fromArray($row);
-			$object->_formatDates = true;
-			$object->resetModified();
+		while($object = $result->fetchObject($class)){
+			$object->castInts();
 			$object->setNew(false);
 			$objects[] = $object;
 		}
 		return $objects;
-	 }
+	}
+
+	function castInts(){';
+	foreach($fields as $key => $field){
+		if($field->getPdoType()==PDO::PARAM_INT)
+			$class .= '
+		$this->'.$field->getName().' = ($this->'.$field->getName().' === null) ? null : (int)$this->'.$field->getName().';';
+	}
+		$class .='
+	}
 
 	/**
-	 * Returns an Array of all '.$className.' Objects in the database.
+	 * Returns an Array of all '.$class_name.' Objects in the database.
 	 * $extra SQL can be appended to the query to limit,sort,group results.
 	 * If there are no results, returns an empty Array.
 	 * @param $extra String
 	 * @return array
 	 */
 	static function getAll($extra = null){
-		$conn = '.$className.'::getConnection();
-		$tableWrapped = $conn->quoteIdentifier('.$className.'::getTableName());
-		return '.$className.'::fetch("SELECT * FROM $tableWrapped $extra ");
+		$conn = '.$class_name.'::getConnection();
+		$tableWrapped = $conn->quoteIdentifier('.$class_name.'::getTableName());
+		return '.$class_name.'::fetch("SELECT * FROM $tableWrapped $extra ");
 	}
 
 	/**
 	 * @return Int
 	 */
 	static function doCount(Query $q){
-		$conn = '.$className.'::getConnection();
+		$conn = '.$class_name.'::getConnection();
 		$q = clone $q;
-		if(!$q->getTable() || strrpos($q->getTable(), '.$className.'::getTableName())===false )
-			$q->setTable('.$className.'::getTableName());
+		if(!$q->getTable() || strrpos($q->getTable(), '.$class_name.'::getTableName())===false )
+			$q->setTable('.$class_name.'::getTableName());
 		return $q->doCount($conn);
 	}
 
@@ -526,10 +510,10 @@ $class .= '
 	 * @return Int
 	 */
 	static function doDelete(Query $q){
-		$conn = '.$className.'::getConnection();
+		$conn = '.$class_name.'::getConnection();
 		$q = clone $q;
-		if(!$q->getTable() || strrpos($q->getTable(), '.$className.'::getTableName())===false )
-			$q->setTable('.$className.'::getTableName());
+		if(!$q->getTable() || strrpos($q->getTable(), '.$class_name.'::getTableName())===false )
+			$q->setTable('.$class_name.'::getTableName());
 		return $q->doDelete($conn);
 	}
 
@@ -537,16 +521,16 @@ $class .= '
 	 * @return array
 	 */
 	static function doSelect(Query $q){
-		$conn = '.$className.'::getConnection();
+		$conn = '.$class_name.'::getConnection();
 		$q = clone $q;
-		if(!$q->getTable() || strrpos($q->getTable(), '.$className.'::getTableName())===false )
-			$q->setTable('.$className.'::getTableName());
-		return '.$className.'::fromResult($q->doSelect($conn));
+		if(!$q->getTable() || strrpos($q->getTable(), '.$class_name.'::getTableName())===false )
+			$q->setTable('.$class_name.'::getTableName());
+		return '.$class_name.'::fromResult($q->doSelect($conn));
 	}
 ';
 
 		$used_from = array();
-		foreach($this->getForeignKeysFromTable($tableName) as $r){
+		foreach($this->getForeignKeysFromTable($table_name) as $r){
 			$to_table = $r['to_table'];
 			$to_className = $this->getModelName($to_table);
 			$to_column = $r['to_column'];
@@ -587,13 +571,13 @@ $class .= '
 		}
 
 		$used_to = array();
-		foreach($this->getForeignKeysToTable($tableName) as $r){
+		foreach($this->getForeignKeysToTable($table_name) as $r){
 			$from_table = $r['from_table'];
 			$from_className = $this->getModelName($from_table);
 			$from_column = $r['from_column'];
 			$to_column = $r['to_column'];
 			if(@$used_to[$from_table]){
-				echo "WARNING: <b>$tableName.$to_column</b> USED BY MORE THAN ONE FOREIGN KEY IN TABLE: <b>$from_table</b>.
+				echo "WARNING: <b>$table_name.$to_column</b> USED BY MORE THAN ONE FOREIGN KEY IN TABLE: <b>$from_table</b>.
 						METHODS CREATED FOR <b>$from_table.".$used_to[$from_table]."</b> ONLY.<br />";
 				continue;
 			}
