@@ -98,8 +98,7 @@ abstract class BaseModel {
 		$columns = $this->getColumnNames();
        	foreach($array as $column => $value){
 			if(in_array($column, $columns) === false) continue;
-			$method = "set$column";
-			$this->$method($value);
+			$this->{'set'.$column}($value);
 		}
 	}
 
@@ -110,10 +109,9 @@ abstract class BaseModel {
 	 */
 	function toArray(){
 		$array = array();
-		foreach($this->getColumnNames() as $column){
-			$method = "get$column";
-			$array[$column] = $this->$method();
-		}
+		$column_names = $this->getColumnNames();
+		while($column = array_shift($column_names))
+			$array[$column] = $this->{'get'.$column}();
 		return $array;
 	}
 
