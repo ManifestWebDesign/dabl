@@ -1,7 +1,6 @@
 <?php
 
 abstract class DABLPDO extends PDO {
-
 	const ID_METHOD_NONE = 0;
 	const ID_METHOD_AUTOINCREMENT = 1;
 	const ID_METHOD_SEQUENCE = 2;
@@ -10,20 +9,20 @@ abstract class DABLPDO extends PDO {
 	protected $logQueries = false;
 	protected $dbName = null;
 
-	function setDBName($db_name){
+	function setDBName($db_name) {
 		$this->dbName = $db_name;
 	}
 
-	function getDBName(){
+	function getDBName() {
 		return $this->dbName;
 	}
 
-	function logQuery($query_string, $time){
+	function logQuery($query_string, $time) {
 		$trace = '';
 		$backtrace = debug_backtrace();
 		array_shift($backtrace);
-		foreach($backtrace as $block)
-			$trace .= @$block['file'].' (line '.@$block['line'].') '.@$block['class'].@$block['type'].@$block['function'].'()<br />';
+		foreach ($backtrace as $block)
+			$trace .= @ $block['file'] . ' (line ' . @$block['line'] . ') ' . @$block['class'] . @$block['type'] . @$block['function'] . '()<br />';
 		$this->queryLog[] = array(
 			'query' => $query_string,
 			'time' => $time,
@@ -32,74 +31,88 @@ abstract class DABLPDO extends PDO {
 	}
 
 	function __destruct() {
-        if($this->logQueries)
+		if ($this->logQueries)
 			$this->printQueryLog();
-    }
+	}
 
-
-  	/**
+	/**
 	 * Creates a new instance of the database adapter associated
 	 * with the specified Creole driver.
 	 *
 	 */
 	static function factory($connection_params) {
-		try{
-			switch($connection_params['driver']){
+		try {
+			switch ($connection_params['driver']) {
 				case 'sqlite':
-					$dsn = 'sqlite:'.$connection_params['dbname'];
+					$dsn = 'sqlite:' . $connection_params['dbname'];
 					$conn = new DBSQLite($dsn);
 					break;
 
 				case 'mysql':
 					$parts = array();
-					if(@$connection_params['host']) $parts[] = 'host='.$connection_params['host'];
-					if(@$connection_params['port']) $parts[] = 'port='.$connection_params['port'];
-					if(@$connection_params['unix_socket']) $parts[] = 'unix_socket='.$connection_params['unix_socket'];
-					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
-					foreach($parts as &$v) {
+					if (@$connection_params['host'])
+						$parts[] = 'host=' . $connection_params['host'];
+					if (@$connection_params['port'])
+						$parts[] = 'port=' . $connection_params['port'];
+					if (@$connection_params['unix_socket'])
+						$parts[] = 'unix_socket=' . $connection_params['unix_socket'];
+					if (@$connection_params['dbname'])
+						$parts[] = 'dbname=' . $connection_params['dbname'];
+					foreach ($parts as &$v) {
 						$v = str_replace(';', '\;', $v);
 					}
-					$dsn = 'mysql:'.implode(';', $parts);
+					$dsn = 'mysql:' . implode(';', $parts);
 					$conn = new DBMySQL($dsn, @$connection_params['user'], @$connection_params['password']);
 					break;
 
 				case 'oracle':
 				case 'oci':
 					$parts = array();
-					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
-					if(@$connection_params['charset']) $parts[] = 'charset='.$connection_params['charset'];
-					foreach($parts as &$v) {
+					if (@$connection_params['dbname'])
+						$parts[] = 'dbname=' . $connection_params['dbname'];
+					if (@$connection_params['charset'])
+						$parts[] = 'charset=' . $connection_params['charset'];
+					foreach ($parts as &$v) {
 						$v = str_replace(';', '\;', $v);
 					}
-					$dsn = 'oci:'.implode(';', $parts);
+					$dsn = 'oci:' . implode(';', $parts);
 					$conn = new DBOracle($dsn, @$connection_params['user'], @$connection_params['password']);
 					break;
 
 				case 'pgsql':
 					$parts = array();
-					if(@$connection_params['host']) $parts[] = 'host='.$connection_params['host'];
-					if(@$connection_params['port']) $parts[] = 'port='.$connection_params['port'];
-					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
-					if(@$connection_params['user']) $parts[] = 'user='.$connection_params['user'];
-					if(@$connection_params['password']) $parts[] = 'password='.$connection_params['password'];
-					foreach($parts as &$v) {
+					if (@$connection_params['host'])
+						$parts[] = 'host=' . $connection_params['host'];
+					if (@$connection_params['port'])
+						$parts[] = 'port=' . $connection_params['port'];
+					if (@$connection_params['dbname'])
+						$parts[] = 'dbname=' . $connection_params['dbname'];
+					if (@$connection_params['user'])
+						$parts[] = 'user=' . $connection_params['user'];
+					if (@$connection_params['password'])
+						$parts[] = 'password=' . $connection_params['password'];
+					foreach ($parts as &$v) {
 						$v = str_replace(' ', '\ ', $v);
 					}
-					$dsn = 'pgsql:'.implode(' ', $parts);
+					$dsn = 'pgsql:' . implode(' ', $parts);
 					$conn = new DBPostgres($dsn);
 					break;
 
 				case 'mssql':
 				case 'sybase':
 				case 'dblib':
-					if(@$connection_params['host']) $parts[] = 'host='.$connection_params['host'];
-					if(@$connection_params['dbname']) $parts[] = 'dbname='.$connection_params['dbname'];
-					if(@$connection_params['charset']) $parts[] = 'charset='.$connection_params['charset'];
-					if(@$connection_params['appname']) $parts[] = 'appname='.$connection_params['appname'];
-					foreach($parts as &$v) {
+					if (@$connection_params['host'])
+						$parts[] = 'host=' . $connection_params['host'];
+					if (@$connection_params['dbname'])
+						$parts[] = 'dbname=' . $connection_params['dbname'];
+					if (@$connection_params['charset'])
+						$parts[] = 'charset=' . $connection_params['charset'];
+					if (@$connection_params['appname'])
+						$parts[] = 'appname=' . $connection_params['appname'];
+					foreach ($parts as &$v) {
 						$v = str_replace(';', '\;', $v);
 					}
-					$dsn = $connection_params['driver'].':'.implode(';', $parts);
+					$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
 					$conn = new DBMSSQL($dsn, @$connection_params['user'], @$connection_params['password']);
 					break;
 
@@ -107,19 +120,18 @@ abstract class DABLPDO extends PDO {
 					throw new Exception("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
 					break;
 			}
-		}
-		catch(Exception $e){
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
 		}
 		$conn->setDBName(@$connection_params['dbname']);
 		return $conn;
 	}
 
-	function  __construct() {
+	function __construct() {
 		$args = func_get_args();
 		$result = call_user_func_array(array('parent', '__construct'), $args);
-		if($this->logQueries)
-			$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('LoggedPDOStatement', array()));
+		if ($this->logQueries)
+           	$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('LoggedPDOStatement', array($this)));
 		return $result;
 	}
 
@@ -130,8 +142,6 @@ abstract class DABLPDO extends PDO {
 	function prepare() {
 		$args = func_get_args();
 		$statement = call_user_func_array(array('parent', 'prepare'), $args);
-		if($statement instanceof LoggedPDOStatement)
-			$statement->setConnection($this);
 		return $statement;
 	}
 
@@ -142,11 +152,11 @@ abstract class DABLPDO extends PDO {
 	function query() {
 		$args = func_get_args();
 
-		if($this->logQueries){
+		if ($this->logQueries) {
 			$start = microtime(true);
 			$result = call_user_func_array(array('parent', 'query'), $args);
 			$time = microtime(true) - $start;
-			$this->logQuery((string)$args[0], $time);
+			$this->logQuery((string) $args[0], $time);
 			return $result;
 		}
 
@@ -159,11 +169,11 @@ abstract class DABLPDO extends PDO {
 	function exec() {
 		$args = func_get_args();
 
-		if($this->logQueries){
+		if ($this->logQueries) {
 			$start = microtime(true);
 			$result = call_user_func_array(array('parent', 'exec'), $args);
 			$time = microtime(true) - $start;
-			$this->logQuery((string)$args[0], $time);
+			$this->logQuery((string) $args[0], $time);
 			return $result;
 		}
 
@@ -178,12 +188,12 @@ abstract class DABLPDO extends PDO {
 		$queries = $this->getLoggedQueries();
 		$total_time = 0.00;
 		$string = '<table border="1" style="margin:auto;font-size:11px;font-family:monospace" cellpadding="1" cellspacing="0"><tbody>';
-			$string .= '<tr><th>#</th><th>Query</th><th>Execution Time (Seconds)</th><th>Trace</th></tr>';
-		foreach($this->queryLog as $num => $query_array){
-			$string .= '<tr><td>'.($num + 1).'</td><td><pre>'.$query_array['query'].'</pre></td><td>'.round($query_array['time'], 6).'</td><td><pre>'.$query_array['trace'].'</pre></td></tr>';
+		$string .= '<tr><th>#</th><th>Query</th><th>Execution Time (Seconds)</th><th>Trace</th></tr>';
+		foreach ($this->queryLog as $num => $query_array) {
+			$string .= '<tr><td>' . ($num + 1) . '</td><td><pre>' . $query_array['query'] . '</pre></td><td>' . round($query_array['time'], 6) . '</td><td><pre>' . $query_array['trace'] . '</pre></td></tr>';
 			$total_time += $query_array['time'];
 		}
-		$string .= '<tr><td></td><td nowrap="nowrap">Total Time: </td><td>'.round($total_time, 6).'</td><td>&nbsp;</td></tr>';
+		$string .= '<tr><td></td><td nowrap="nowrap">Total Time: </td><td>' . round($total_time, 6) . '</td><td>&nbsp;</td></tr>';
 		$string .= '</tbody></table>';
 		echo $string;
 	}
@@ -205,7 +215,7 @@ abstract class DABLPDO extends PDO {
 			$this->setCharset($settings['charset']['value']);
 		if (isset($settings['queries']) && is_array($settings['queries'])) {
 			foreach ($settings['queries'] as $queries) {
-				foreach ((array)$queries as $query) {
+				foreach ((array) $queries as $query) {
 					$this->exec($query);
 				}
 			}
@@ -249,16 +259,16 @@ abstract class DABLPDO extends PDO {
 	 * @return mixed
 	 */
 	function prepareInput($value) {
-		if(is_array($value))
+		if (is_array($value))
 			return array_map(array($this, 'prepareInput'), $value);
 
-		if(is_int($value))
+		if (is_int($value))
 			return $value;
 
-		if(is_bool($value))
+		if (is_bool($value))
 			return $value ? 1 : 0;
 
-		if($value===null)
+		if ($value===null)
 			return 'NULL';
 
 		return $this->quote($value);
@@ -269,7 +279,7 @@ abstract class DABLPDO extends PDO {
 	 * @param mixed $value
 	 * @return mixed
 	 */
-	function checkInput($value){
+	function checkInput($value) {
 		return $this->prepareInput($value);
 	}
 
@@ -334,9 +344,9 @@ abstract class DABLPDO extends PDO {
 	 * Quotes a database table which could have space seperating it from an alias, both should be identified seperately
 	 * @param	  string $table The table name to quo
 	 * @return	 string The quoted table name
-	 **/
+	 * */
 	function quoteIdentifierTable($table) {
-		return implode(" ", array_map(array($this, "quoteIdentifier"), explode(" ", $table) ) );
+		return implode(" ", array_map(array($this, "quoteIdentifier"), explode(" ", $table)));
 	}
 
 	/**
@@ -422,5 +432,5 @@ abstract class DABLPDO extends PDO {
 	abstract function random($seed = null);
 
 	abstract function getDatabaseSchema();
-
 }
+

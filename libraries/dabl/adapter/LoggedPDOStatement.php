@@ -4,7 +4,12 @@ class LoggedPDOStatement extends PDOStatement{
 
 	private $_connection;
 
-	function setConnection(PDO $conn){
+	protected function __construct(PDO $conn) {
+		$this->setConnection($conn);
+    }
+
+
+  	function setConnection(PDO $conn){
 		$this->_connection = $conn;
 	}
 
