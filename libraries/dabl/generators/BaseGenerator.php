@@ -160,7 +160,7 @@ abstract class BaseGenerator{
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getDBName(){
 		return DBManager::getConnection($this->getConnectionName())->getDBName();
@@ -174,7 +174,7 @@ abstract class BaseGenerator{
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getConnectionName(){
 		return $this->connectionName;
@@ -185,507 +185,42 @@ abstract class BaseGenerator{
 	 * @param String $table_name
 	 * @param String $class_name
 	 * @param array $options
-	 * @return String
+	 * @return string
 	 */
 	function getBaseModel($table_name){
 		$class_name = $this->getModelName($table_name);
 		$options = $this->options;
 		//Gather all the information about the table's columns from the database
 		$PK = null;
-		$numeric = array();
-		$null = array();
 		$PKs = array();
 		$fields = $this->getColumns($table_name);
 		$conn = DBManager::getConnection($this->getConnectionName());
-		foreach($fields as $field)
+		
+		foreach($fields as $field){
 			if($field->isPrimaryKey()) $PKs[] = $field->getName();
-
+		}
+		
 		if(count($PKs)==1)
 			$PK = $PKs[0];
 
-		$class = "<?php
-/**
- *	Created by Dan Blaisdell's Database->Object Mapper
- *		             Based on Propel
- *
- *		Do not alter base files, as they will be overwritten.
- *		To alter the objects, alter the extended clases in
- *		the 'tables' folder.
- *
- */
-
-abstract class base$class_name extends BaseModel{
-";
-
-		$class .= '
-	/**
-	 * Name of the table
-	 */
-	protected static $_tableName = "'.$table_name.'";
-
-	/**
-	 * Array of all primary keys
-	 */
-	protected static $_primaryKeys = array(';
-		if($PKs)
-			foreach($PKs as $thePK){
-	 		$class .= '
-			"'.$thePK.'",';
-		}
-		$class .= '
-	);
-
-	/**
-	 * Primary Key
-	 */
-	 protected static $_primaryKey = "'.$PK.'";
-
-	/**
-	 * Array of all column names
-	 */
-	protected static $_columnNames = array(';
-		foreach($fields as $key=>$field){
-			$class .= "
-		'{$field->getName()}'";
-			if($key!=(count($fields)-1)) $class .= ",";
-		}
-$class .= '
-	);
-';
-		foreach($fields as $key=>$field){
-			$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
-			$class .= '	protected $'.$field->getName();
-			if($field->isNumericType() && $default !== NULL)
-				$class .= ' = '.$default;
-			elseif($default!==NULL && strtolower($default)!=='null')
-				$class .= ' = "'.$default.'"';
-			$class .= ';
-';
-		}
-
-		$class .='
-	/**
-	 * Column Accessors and Mutators
-	 */
-';
-
-		foreach($fields as $key=>$field){
-			$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
-			$class .= '
-	function get'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'('.($field->isTemporalType() ? '$format = null' : '').'){';
-			if($field->isTemporalType()){
-				$class .= '
-		if($this->'.$field->getName().'===null || !$format)
-			return $this->'.$field->getName().';
-		if(strpos($this->'.$field->getName().', "0000-00-00")===0)
-			return null;
-		return date($format, strtotime($this->'.$field->getName().'));';
-			}
-			else{
-			$class .='
-		return $this->'.$field->getName().';';
-			}
-			$class .='
-	}
-	
-	function set'.($options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName()).'($value){';
-			if($field->isNumericType() || $field->isTemporalType()){
-				// all numbers and dates should be null instead of empty strings
-				$class .= '
-		if($value==="")
-			$value = null;';
-				// format dates as needed
-				if($field->isTemporalType()){
-					switch($field->getType()){
-						case PropelTypes::TIMESTAMP:
-							$formatter = $conn->getTimestampFormatter();
-							break;
-						case PropelTypes::DATE:
-							$formatter = $conn->getDateFormatter();
-							break;
-						case PropelTypes::TIME:
-							$formatter = $conn->getTimeFormatter();
-							break;
-					}
-					$class .= '
-		elseif($value!==null && $this->_formatDates)
-			$value = date("'.$formatter.'", strtotime($value));';
-				}
-			}
-
-			if($options['protect_not_null'] && $field->getName()!=$PK && $field->isNotNull()){
-				$class .= '
-		if($value===null)';
-				if($field->isNumericType())
-					$class .= '
-			$value = 0;';
-				else
-					$class .= '
-			$value = "";';
-			}
-			if($field->getPdoType()==PDO::PARAM_INT){
-				$class .= '
-		elseif($value!==null)
-			$value = (int)$value;';
-			}
-
-			$class .= '
-		if($this->'.$field->getName().' !== $value){
-			$this->_modifiedColumns[] = "'.$field->getName().'";
-			$this->'.$field->getName().' = $value;
-		}
-	}
-';
-		}
-
-		$class .= '
-
-	/**
-	 * @return DABLPDO
-	 */
-	static function getConnection(){
-		return DBManager::getConnection("'.$this->getConnectionName().'");
-	}
-
-	/**
-	 * Returns String representation of table name
-	 * @return String
-	 */
-	static function getTableName(){
-		return '.$class_name.'::$_tableName;
-	}
-
-	/**
-	 * Access to array of column names
-	 * @return array
-	 */
-	static function getColumnNames(){
-		return '.$class_name.'::$_columnNames;
-	}
-
-	/**
-	 * @return bool
-	 */
-	static function hasColumn($columnName){
-		return in_array(strtolower($columnName), array_map(\'strtolower\', '.$class_name.'::getColumnNames()));
-	}
-
-	/**
-	 * Access to array of primary keys
-	 * @return array
-	 */
-	static function getPrimaryKeys(){
-		return '.$class_name.'::$_primaryKeys;
-	}
-
-	/**
-	 * Access to name of primary key
-	 * @return array
-	 */
-	static function getPrimaryKey(){
-		return '.$class_name.'::$_primaryKey;
-	}
-
-	/**
-	 * Searches the database for a row with the ID(primary key) that matches
-	 * the one input.
-	 * @return '.$class_name.'
-	 */
-	static function retrieveByPK( $thePK ){
-		if($thePK===null)return null;
-		$PKs = '.$class_name.'::getPrimaryKeys();
-		if(count($PKs)>1)
-			throw new Exception("This table has more than one primary key.  Use retrieveByPKs() instead.");
-		elseif(count($PKs)==0)
-			throw new Exception("This table does not have a primary key.");
-		$q = new Query;
-		$conn = '.$class_name.'::getConnection();
-		$pkColumn = $conn->quoteIdentifier($PKs[0]);
-		$q->add($pkColumn, $thePK);
-		$q->setLimit(1);
-		return array_shift('.$class_name.'::doSelect($q));
-	}
-
-	/**
-	 * Searches the database for a row with the primary keys that match
-	 * the ones input.
-	 * @return '.$class_name.'
-	 */
-	static function retrieveByPKs( ';
-		foreach($PKs as $key=>$value){
-			if($key == 0) $class .= '$PK'.$key;
-			if($key > 0) $class .= ', $PK'.$key;
-		}
-
-		$class .= ' ){
-		$conn = '.$class_name.'::getConnection();
-		$tableWrapped = $conn->quoteIdentifier('.$class_name.'::getTableName());';
-		foreach($PKs as $key=>$value){
-			$class .= '
-		if($PK'.$key.'===null)return null;';
-		}
-		$class .= '
-		$queryString = "SELECT * FROM $tableWrapped WHERE ';
-
-		foreach($PKs as $key=>$value){
-			if($key == 0) $class .= '".$conn->quoteIdentifier(\''.$value.'\')."=".$conn->checkInput($PK'.$key.')."';
-			if($key > 0) $class .= ' AND '.$value.'=".$conn->checkInput($PK'.$key.')."';
-		}
-
-		$class .= '";
-		$conn->applyLimit($queryString, 0, 1);
-		return '.$class_name.'::fetchSingle($queryString);
-	}
-
-	/**
-	 * Populates and returns an instance of '.$class_name.' with the
-	 * first result of a query.  If the query returns no results,
-	 * returns null.
-	 * @return '.$class_name.'
-	 */
-	static function fetchSingle($queryString){
-		return array_shift('.$class_name.'::fetch($queryString));
-	}
-
-	/**
-	 * Populates and returns an Array of '.$class_name.' Objects with the
-	 * results of a query.  If the query returns no results,
-	 * returns an empty Array.
-	 * @return array
-	 */
-	static function fetch($queryString){
-		$conn = '.$class_name.'::getConnection();
-		$result = $conn->query($queryString);
-		return '.$class_name.'::fromResult($result);
-	}
-
-	/**
-	 * Returns an array of '.$class_name.' Objects from the rows of a PDOStatement(query result)
-	 * @return array
-	 */
-	static function fromResult(PDOStatement $result, $class = "'.$class_name.'"){
-		$objects = array();
-		while($object = $result->fetchObject($class)){
-			$object->castInts();
-			$object->setNew(false);
-			$objects[] = $object;
-		}
-		return $objects;
-	}
-
-	function castInts(){';
-	foreach($fields as $key => $field){
-		if($field->getPdoType()==PDO::PARAM_INT)
-			$class .= '
-		$this->'.$field->getName().' = ($this->'.$field->getName().' === null) ? null : (int)$this->'.$field->getName().';';
-	}
-		$class .='
-	}
-
-	/**
-	 * Returns an Array of all '.$class_name.' Objects in the database.
-	 * $extra SQL can be appended to the query to limit,sort,group results.
-	 * If there are no results, returns an empty Array.
-	 * @param $extra String
-	 * @return array
-	 */
-	static function getAll($extra = null){
-		$conn = '.$class_name.'::getConnection();
-		$tableWrapped = $conn->quoteIdentifier('.$class_name.'::getTableName());
-		return '.$class_name.'::fetch("SELECT * FROM $tableWrapped $extra ");
-	}
-
-	/**
-	 * @return Int
-	 */
-	static function doCount(Query $q){
-		$conn = '.$class_name.'::getConnection();
-		$q = clone $q;
-		if(!$q->getTable() || strrpos($q->getTable(), '.$class_name.'::getTableName())===false )
-			$q->setTable('.$class_name.'::getTableName());
-		return $q->doCount($conn);
-	}
-
-	/**
-	 * @return Int
-	 */
-	static function doDelete(Query $q){
-		$conn = '.$class_name.'::getConnection();
-		$q = clone $q;
-		if(!$q->getTable() || strrpos($q->getTable(), '.$class_name.'::getTableName())===false )
-			$q->setTable('.$class_name.'::getTableName());
-		return $q->doDelete($conn);
-	}
-
-	/**
-	 * @return array
-	 */
-	static function doSelect(Query $q){
-		$conn = '.$class_name.'::getConnection();
-		$q = clone $q;
-		if(!$q->getTable() || strrpos($q->getTable(), '.$class_name.'::getTableName())===false )
-			$q->setTable('.$class_name.'::getTableName());
-		return '.$class_name.'::fromResult($q->doSelect($conn));
-	}
-';
-
-		$used_from = array();
-		foreach($this->getForeignKeysFromTable($table_name) as $r){
-			$to_table = $r['to_table'];
-			$to_className = $this->getModelName($to_table);
-			$to_column = $r['to_column'];
-			$from_column = $r['from_column'];
-
-			if(@$used_from[$to_table]) continue;
-
-			$used_from[$to_table] = $from_column;
-
-			$class .= '
-	/**
-	 * @var '.$to_className.'
-	 */
-	private $'.$to_className.'_c;
-
-	/**
-	 * Returns a '.$to_table.' Object(row) from the '.$to_table.' table
-	 * with a '.$to_column.' that matches $this->'.$from_column.'.
-	 * When first called, this method will cache the result.
-	 * After that, if $this->'.$from_column.' is not modified, the
-	 * method will return the cached result instead of querying the database
-	 * a second time(for performance purposes).
-	 * @return '.$to_className.'
-	 */
-	function get'.$to_className.'(){
-		if($this->get'.$from_column.'()===null)
-			return null;
-		$conn = $this->getConnection();
-		$columnQuoted = $conn->quoteIdentifier("'.$to_column.'");
-		$tableQuoted = $conn->quoteIdentifier('.$to_className.'::getTableName());
-		if($this->getCacheResults() && @$this->'.$to_className.'_c && !$this->isColumnModified("'.$from_column.'"))return $this->'.$to_className.'_c;
-		$queryString = "SELECT * FROM $tableQuoted WHERE $columnQuoted=".$conn->checkInput($this->get'.$from_column.'());
-		$'.$to_table.' = '.$to_className.'::fetchSingle($queryString);
-		$this->'.$to_className.'_c = $'.$to_table.';
-		return $'.$to_table.';
-	}
-';
-		}
-
-		$used_to = array();
-		foreach($this->getForeignKeysToTable($table_name) as $r){
-			$from_table = $r['from_table'];
-			$from_className = $this->getModelName($from_table);
-			$from_column = $r['from_column'];
-			$to_column = $r['to_column'];
-			if(@$used_to[$from_table]){
-				echo "WARNING: <b>$table_name.$to_column</b> USED BY MORE THAN ONE FOREIGN KEY IN TABLE: <b>$from_table</b>.
-						METHODS CREATED FOR <b>$from_table.".$used_to[$from_table]."</b> ONLY.<br />";
-				continue;
-			}
-			$used_to[$from_table]=$from_column;
-			$class .= '
-
-	/**
-	 * Returns a Query for selecting '.$from_table.' Objects(rows) from the '.$from_table.' table
-	 * with a '.$from_column.' that matches $this->'.$to_column.'.
-	 * @return Query
-	 */
-	function get'.$from_className.'sQuery(Query $q = null){
-		if($this->get'.$to_column.'()===null)
-			throw new Exception("NULL cannot be used to match keys.");
-		$conn = $this->getConnection();
-		$column = $conn->quoteIdentifier("'.$from_column.'");
-		if($q){
-			$q = clone $q;
-			$alias = $q->getAlias();
-			if($alias && $q->getTableName()=="'.$from_table.'")
-				$column = "$alias.$column";
-		}
-		else
-			$q = new Query;
-		$q->add($column, $this->get'.$to_column.'());
-		return $q;
-	}
-
-	/**
-	 * Returns the count of '.$from_className.' Objects(rows) from the '.$from_table.' table
-	 * with a '.$from_column.' that matches $this->'.$to_column.'.
-	 * @return Int
-	 */
-	function count'.$from_className.'s(Query $q = null){
-		if($this->get'.$to_column.'()===null)
-			return 0;
-		return '.$from_className.'::doCount($this->get'.$from_className.'sQuery($q));
-	}
-
-	/**
-	 * Deletes the '.$from_table.' Objects(rows) from the '.$from_table.' table
-	 * with a '.$from_column.' that matches $this->'.$to_column.'.
-	 * @return Int
-	 */
-	function delete'.$from_className.'s(Query $q = null){
-		if($this->get'.$to_column.'()===null)
-			return 0;
-		return '.$from_className.'::doDelete($this->get'.$from_className.'sQuery($q));
-	}
-
-	private $'.$from_className.'s_c = array();
-
-	/**
-	 * Returns an Array of '.$from_className.' Objects(rows) from the '.$from_table.' table
-	 * with a '.$from_column.' that matches $this->'.$to_column.'.
-	 * When first called, this method will cache the result.
-	 * After that, if $this->'.$to_column.' is not modified, the
-	 * method will return the cached result instead of querying the database
-	 * a second time(for performance purposes).
-	 * @return array
-	 */
-	function get'.$from_className.'s($extra=NULL){
-		if($this->get'.$to_column.'()===null)
-			return array();
-
-		if(!$extra || $extra instanceof Query)
-			return '.$from_className.'::doSelect($this->get'.$from_className.'sQuery($extra));
-
-		if(!$extra && $this->getCacheResults() && @$this->'.$from_className.'s_c && !$this->isColumnModified("'.$to_column.'"))
-			return $this->'.$from_className.'s_c;
-
-		$conn = $this->getConnection();
-		$tableQuoted = $conn->quoteIdentifier('.$from_className.'::getTableName());
-		$columnQuoted = $conn->quoteIdentifier("'.$from_column.'");
-		$queryString = "SELECT * FROM $tableQuoted WHERE $columnQuoted=".$conn->checkInput($this->get'.$to_column.'())." $extra";
-		$'.$from_table.'s = '.$from_className.'::fetch($queryString);
-		if(!$extra)$this->'.$from_className.'s_c = $'.$from_table.'s;
-		return $'.$from_table.'s;
-	}
-';
-		}
-
-		$class .= '
-}';
-
-//<?php
-
-		return $class;
+        ob_start();
+        require dirname(__FILE__) . '/dabl/base_model.php';
+        return ob_get_clean();
 	}
 
 	/**
 	 * Generates a String with the contents of the stub class
 	 * for the table, which is used for extending the Base class.
-	 * @param String $tableName
-	 * @param String $className
-	 * @return String
+	 * @param String $table_name
+	 * @param String $class_name
+	 * @return string
 	 */
-	function getModel($tableName){
-		$className = $this->getModelName($tableName);
+	function getModel($table_name){
+		$class_name = $this->getModelName($table_name);
 		$options = $this->options;
-		$class = "<?php
-
-class ".$className." extends base$className{
-
-}";
-//<?php
-
-		return $class;
+        ob_start();
+        require dirname(__FILE__) . '/dabl/model.php';
+        return ob_get_clean();
 	}
 
 	abstract function getViews($tableName);
@@ -798,7 +333,7 @@ class ".$className." extends base$className{
 	 * to add class prefixes and/or suffixes, or to convert a class_name to a title case
 	 * ClassName
 	 * @param String $tableName
-	 * @return String
+	 * @return string
 	 */
 	function getModelName($tableName){
 		$options = $this->options;
@@ -833,7 +368,7 @@ class ".$className." extends base$className{
 	/**
 	 * Converts a given string to title case
 	 * @param String $string
-	 * @return String
+	 * @return string
 	 */
 	static function titleCase($string){
 		$string = str_replace('_', ' ', $string);
@@ -855,7 +390,7 @@ class ".$className." extends base$className{
 	 * the same, then this method will simply add an 's' to the end of
 	 * the word.
 	 * @param String $string
-	 * @return String
+	 * @return string
 	 */
 	static function pluralize( $string ){
 		$plural = array(
