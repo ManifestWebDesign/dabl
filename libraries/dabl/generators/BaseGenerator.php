@@ -199,9 +199,13 @@ abstract class BaseGenerator{
 		foreach($fields as $field){
 			if($field->isPrimaryKey()) $PKs[] = $field->getName();
 		}
-		
-		if(count($PKs)==1)
+
+		$auto_increment = false;
+		if(count($PKs)==1){
 			$PK = $PKs[0];
+			if($fields[0]->isAutoIncrement())
+				$auto_increment = true;
+		}
 
         ob_start();
         require dirname(__FILE__) . '/dabl/base_model.php';

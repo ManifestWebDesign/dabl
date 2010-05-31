@@ -27,12 +27,20 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 	);
 
 	/**
-	 * Primary Key
+	 * string name of the primary key column
+	 * @var string
 	 */
 	protected static $_primaryKey = '<?php echo $PK ?>';
 
 	/**
-	 * Array of all column names
+	 * true if primary key is an auto-increment column
+	 * @var bool
+	 */
+	protected static $_isAutoIncrement = <?php echo $auto_increment ? 'true' : 'false' ?>;
+	
+	/**
+	 * array of all column names
+	 * @var array
 	 */
 	protected static $_columnNames = array(
 <?php foreach($fields as $key=>$field): ?>
@@ -300,7 +308,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
 	 * that matches $this-><?php echo $from_column ?>.
 	 * When first called, this method will cache the result.
-	 * After that, if $this-><?php $from_column ?> is not modified, the
+	 * After that, if $this-><?php echo $from_column ?> is not modified, the
 	 * method will return the cached result instead of querying the database
 	 * a second time.
 	 * @return <?php echo $to_className ?>
