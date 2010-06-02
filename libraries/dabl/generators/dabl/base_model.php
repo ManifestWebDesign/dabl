@@ -95,7 +95,7 @@ foreach($fields as $key=>$field):
 			$value = null;
 <?php if($field->isTemporalType()): ?>
 		elseif($value!==null && $this->_formatDates)
-			$value = date('<?php echo $formatter ?>', strtotime($value));
+			$value = date('<?php echo $formatter ?>', is_int($value) ? $value : strtotime($value));
 <?php endif ?>
 <?php endif ?>
 <?php if($options['protect_not_null'] && $field->getName()!=$PK && $field->isNotNull()): ?>

@@ -201,11 +201,10 @@ abstract class BaseModel {
 			return 0;
 
 		if($this->hasColumn('Created') && $this->hasColumn('Updated')){
-			$now = date('Y-m-d H:i:s');
 			if($this->isNew() && !$this->isColumnModified('Created'))
-				$this->setCreated($now);
+				$this->setCreated(CURRENT_TIME);
 			if(!$this->isColumnModified('Updated'))
-				$this->setUpdated($now);
+				$this->setUpdated(CURRENT_TIME);
 		}
 
 		if($this->getPrimaryKeys()){
