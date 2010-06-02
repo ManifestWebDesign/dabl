@@ -161,6 +161,14 @@ foreach($fields as $key=>$field):
 	}
 
 	/**
+	 * Returns true if the primary key column for this table is auto-increment
+	 * @return bool
+	 */
+	static function isAutoIncrement() {
+		return <?php echo $class_name ?>::$_isAutoIncrement;
+	}
+
+	/**
 	 * Searches the database for a row with the ID(primary key) that matches
 	 * the one input.
 	 * @return <?php echo $class_name ?>

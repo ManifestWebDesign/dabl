@@ -262,7 +262,7 @@ abstract class BaseModel {
 		$result = $statement->bindAndExecute();
 		$count = $result->rowCount();
 
-		if($pk && $this->_isAutoIncrement){
+		if($pk && $this->isAutoIncrement()){
 			$setPK = "set$pk";
 
 			if($conn instanceof DBPostgres)
