@@ -73,7 +73,7 @@ abstract class BaseController extends ArrayObject {
 	 * @param array $params
 	 */
 	function doAction($action_name=null, $params = array()){
-		$action_name = $action_name ? $action_name : DEFAULT_CONTROLLER;
+		$action_name = str_replace(array('-', ' ', '', $action_name ? $action_name : DEFAULT_CONTROLLER);
 		$view = $this->getViewDir($action_name).$action_name;
 
 		method_exists($this, $action_name) || file_not_found($view);
