@@ -358,7 +358,7 @@ abstract class BaseGenerator{
 	 * @return string
 	 */
 	function getViewDirName($table_name){
-		return self::getPluralName($table_name);
+		return self::getPluralURL($table_name);
 	}
 
 	static function getPluralName($table_name) {
