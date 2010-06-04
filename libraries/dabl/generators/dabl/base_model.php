@@ -51,8 +51,14 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 <?php
 foreach($fields as $key=>$field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
+	if ($field->isNumericType() && 0!==$default && !$default) $default = null;
 ?>
-	protected $<?php echo $field->getName() ?><?php if($field->isNumericType() && $default !== NULL) echo ' = '.$default; elseif($default!==NULL && strtolower($default)!=='null') echo " = '$default'" ?>;
+	protected $<?php echo $field->getName() ?><?php
+if($field->isNumericType() && $default !== null)
+	echo ' = '.$default;
+elseif($default!==null && strtolower($default)!=='null')
+	echo " = '$default'"
+?>;
 <?php endforeach ?>
 
 	/**
