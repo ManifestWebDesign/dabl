@@ -14,7 +14,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 
 		if($<?php echo $single ?>->save() || (!$<?php echo $single ?>->isModified() && !$<?php echo $single ?>->isNew())){
 			$this->persistant['messages'][] = '<?php echo self::spaceTitleCase($single) ?> saved';
-			redirect('<?php echo $plural ?>/show/'.$<?php echo $single ?>-><?php echo $pkMethod ?>());
+			redirect('<?php echo $plural_url ?>/show/'.$<?php echo $single ?>-><?php echo $pkMethod ?>());
 		}
 		else{
 			$this['errors'] = $<?php echo $single ?>->getValidationErrors();
@@ -32,7 +32,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		else
 			$this->persistant['errors'][] = '<?php echo self::spaceTitleCase($single) ?> could not be deleted';
 
-		redirect('<?php echo $plural ?>');
+		redirect('<?php echo $plural_url ?>');
 	}
 
 	function show($id = null){

@@ -227,22 +227,22 @@ abstract class BaseGenerator{
         return ob_get_clean();
 	}
 
-	abstract function getViews($tableName);
+	abstract function getViews($table_name);
 
-	abstract function getController($tableName);
+	abstract function getController($table_name);
 
-	abstract function getControllerName($tableName);
+	abstract function getControllerName($table_name);
 
-	abstract function getControllerFileName($tableName);
+	abstract function getControllerFileName($table_name);
 
 	/**
 	 * Generates Table classes
 	 * @return void
 	 */
-	function generateModels($tableNames = false){
-		if($tableNames===false)
-			$tableNames = $this->getTableNames();
-		elseif(empty($tableNames))
+	function generateModels($table_names = false){
+		if($table_names===false)
+			$table_names = $this->getTableNames();
+		elseif(empty($table_names))
 			return;
 
 		$options = $this->options;
@@ -254,21 +254,21 @@ abstract class BaseGenerator{
 			die('The directory '.$options['base_model_path'].' does not exist.');
 
 		//Write php files for classes
-		foreach($tableNames as $tableName){
-			$className = $this->getModelName($tableName);
-			$lower_case_table = strtolower($tableName);
+		foreach($table_names as $table_name){
+			$class_name = $this->getModelName($table_name);
+			$lower_case_table = strtolower($table_name);
 
-			$baseClass = $this->getBaseModel($tableName);
-			$baseFile = "base$className.php";
-			$baseFile = $options['base_model_path'].$baseFile;
+			$base_class = $this->getBaseModel($table_name);
+			$base_file = "base$class_name.php";
+			$base_file = $options['base_model_path'].$base_file;
 
-			if(!file_exists($baseFile) || file_get_contents($baseFile)!=$baseClass)
-				file_put_contents($baseFile, $baseClass);
+			if(!file_exists($base_file) || file_get_contents($base_file)!=$base_class)
+				file_put_contents($base_file, $base_class);
 
-			$file = $options['model_path'].$className.".php";
+			$file = $options['model_path'].$class_name.".php";
 
 			if (!file_exists($file)){
-				$class = $this->getModel($tableName);
+				$class = $this->getModel($table_name);
 				file_put_contents($file, $class);
 			}
 		}
@@ -279,24 +279,24 @@ abstract class BaseGenerator{
 	/**
 	 * Generate views
 	 */
-	function generateViews($tableNames = false){
-		if($tableNames===false)
-			$tableNames = $this->getTableNames();
+	function generateViews($table_names = false){
+		if($table_names===false)
+			$table_names = $this->getTableNames();
 
 		$options = $this->getOptions();
 
-		foreach((array)$tableNames as $tableName){
-			$lower_case_table = strtolower($tableName);
+		foreach((array)$table_names as $table_name){
+			$lower_case_table = strtolower($table_name);
 
 			if(!is_dir($options['view_path']))
 				throw new Exception($options['view_path']." is not a directory.");
 
-			$target_dir = $options['view_path'].$this->getViewDirName($tableName).DIRECTORY_SEPARATOR;
+			$target_dir = $options['view_path'].$this->getViewDirName($table_name).DIRECTORY_SEPARATOR;
 
 			if(!is_dir($target_dir))
 				mkdir($target_dir, 0755);
 
-			foreach($this->getViews($tableName) as $file_name => $contents){
+			foreach($this->getViews($table_name) as $file_name => $contents){
 				$file_name = $target_dir.$file_name;
 
 				if(!file_exists($file_name))
@@ -308,25 +308,25 @@ abstract class BaseGenerator{
 	/**
 	 * Generate controllers
 	 */
-	function generateControllers($tableNames = false){
-		if($tableNames===false)
-			$tableNames = $this->getTableNames();
-		elseif(empty($tableNames))
+	function generateControllers($table_names = false){
+		if($table_names===false)
+			$table_names = $this->getTableNames();
+		elseif(empty($table_names))
 			return;
 
 		$options = $this->options;
 
-		foreach($tableNames as $tableName){
+		foreach($table_names as $table_name){
 			$target_dir = $options['controller_path'];
-			$lower_case_table = strtolower($tableName);
+			$lower_case_table = strtolower($table_name);
 
 			if(!is_dir($target_dir))
 				throw new Exception("$target_dir is not a directory.");
 
-			$file = $this->getControllerFileName($tableName);
+			$file = $this->getControllerFileName($table_name);
 			$file = $target_dir.$file;
 			if(!file_exists($file)){
-				$controller = $this->getController($tableName);
+				$controller = $this->getController($table_name);
 				file_put_contents($file, $controller);
 			}
 		}
@@ -336,37 +336,45 @@ abstract class BaseGenerator{
 	 * Converts a table name to a class name using the given options.  Often used
 	 * to add class prefixes and/or suffixes, or to convert a class_name to a title case
 	 * ClassName
-	 * @param String $tableName
+	 * @param String $table_name
 	 * @return string
 	 */
-	function getModelName($tableName){
+	function getModelName($table_name){
 		$options = $this->options;
-		$className = $tableName;
+		$class_name = $table_name;
 		if(@$options['title_case'])
-			$className = self::titleCase($className);
+			$class_name = self::titleCase($class_name);
 		if($options['cap_model_names'])
-			$className = ucfirst($className);
+			$class_name = ucfirst($class_name);
 		if(@$options['model_prefix'])
-			$className = $options['model_prefix'].$className;
+			$class_name = $options['model_prefix'].$class_name;
 		if(@$options['model_suffix'])
-			$className = $className.$options['model_suffix'];
-		return $className;
+			$class_name = $class_name.$options['model_suffix'];
+		return $class_name;
 	}
 
 	/**
-	 * @param string $tableName
+	 * @param string $table_name
 	 * @return string
 	 */
-	function getViewDirName($tableName){
-		return self::getPluralName($tableName);
+	function getViewDirName($table_name){
+		return self::getPluralName($table_name);
 	}
 
-	static function getPluralName($tableName) {
-		return strtolower(join('_',self::getWords(self::pluralize($tableName))));
+	static function getPluralName($table_name) {
+		return strtolower(join('_', self::getWords(self::pluralize($table_name))));
 	}
 
-	static function getSingularName($tableName) {
-		return strtolower(join('_',self::getWords($tableName)));
+	static function getPluralURL($table_name){
+		return str_replace('_', '-', self::getPluralName($table_name));
+	}
+
+	static function getSingularName($table_name) {
+		return strtolower(join('_', self::getWords($table_name)));
+	}
+
+	static function getSingularURL($table_name) {
+		return str_replace('_', '-', self::getPluralName($table_name));
 	}
 
 	/**
@@ -375,7 +383,7 @@ abstract class BaseGenerator{
 	 * @return string
 	 */
 	static function titleCase($string){
-		$string = str_replace('_', ' ', $string);
+		$string = str_replace(array('_','-'), ' ', $string);
 		$string = ucwords($string);
 		$string = str_replace(' ', '', $string);
 		return $string;

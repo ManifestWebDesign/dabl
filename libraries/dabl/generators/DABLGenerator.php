@@ -6,15 +6,17 @@ class DABLGenerator extends BaseGenerator {
     static $standard_actions = array('Show', 'Edit', 'Delete');
 
     function getParams($table_name) {
-        $className = $this->getModelName($table_name);
+        $class_name = $this->getModelName($table_name);
         $instance = new $className;
         return array(
             'table_name' => $table_name,
             'controller_name' => $this->getControllerName($table_name),
-            'model_name' => $className,
+            'model_name' => $class_name,
             'instance' => $instance,
             'plural' => self::getPluralName($table_name),
+			'plural_url' => self::getPluralURL($table_name),
             'single' => self::getSingularName($table_name),
+			'single' => self::getSingularURL($table_name),
             'pk' => $instance->getPrimaryKey(),
             'pkMethod' => "get{$instance->getPrimaryKey()}",
             'actions' => $this->getActions($table_name),
@@ -112,7 +114,7 @@ class DABLGenerator extends BaseGenerator {
 
     function getActions($table_name) {
         $controller_name = $this->getControllerName($table_name);
-        $className = $this->getModelName($table_name);
+        $class_name = $this->getModelName($table_name);
         $plural = self::getPluralName($table_name);
         $single = self::getSingularName($table_name);
         $instance = new $className;
