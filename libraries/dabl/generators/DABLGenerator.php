@@ -7,7 +7,7 @@ class DABLGenerator extends BaseGenerator {
 
     function getParams($table_name) {
         $class_name = $this->getModelName($table_name);
-        $instance = new $className;
+        $instance = new $class_name;
         return array(
             'table_name' => $table_name,
             'controller_name' => $this->getControllerName($table_name),
@@ -45,7 +45,6 @@ class DABLGenerator extends BaseGenerator {
      * Generates a String with an html/php view for editing view MVC
      * objects in the given table.
      * @param String $table_name
-     * @param String $className
      * @return String
      */
     function getEditView($params) {
@@ -59,7 +58,6 @@ class DABLGenerator extends BaseGenerator {
      * Generates a String with an html/php view showing all of the
      * objects from the given table in a list
      * @param String $table_name
-     * @param String $className
      * @return String
      */
     function getListView($params) {
@@ -73,7 +71,6 @@ class DABLGenerator extends BaseGenerator {
      * Generates a String with an html/php view showing all of the
      * objects from the given table in a grid
      * @param String $table_name
-     * @param String $className
      * @return String
      */
     function getGridView($params) {
@@ -87,7 +84,6 @@ class DABLGenerator extends BaseGenerator {
      * Generates a String with an html/php view showing all of the
      * objects from the given table in a grid
      * @param String $table_name
-     * @param String $className
      * @return String
      */
     function getIndexView($params) {
@@ -101,7 +97,6 @@ class DABLGenerator extends BaseGenerator {
      * Generates a String with an html/php view for show view MVC
      * objects in the given table.
      * @param String $table_name
-     * @param String $className
      * @return String
      */
     function getShowView($params) {
@@ -117,7 +112,7 @@ class DABLGenerator extends BaseGenerator {
         $class_name = $this->getModelName($table_name);
         $plural = self::getPluralName($table_name);
         $single = self::getSingularName($table_name);
-        $instance = new $className;
+        $instance = new $class_name;
         $pk = $instance->getPrimaryKey();
         $pkMethod = "get$pk";
         $actions = array();
@@ -146,7 +141,6 @@ class DABLGenerator extends BaseGenerator {
     /**
      * Generates a String with Controller class for MVC
      * @param String $table_name
-     * @param String $className
      * @return String
      */
     function getController($table_name) {
