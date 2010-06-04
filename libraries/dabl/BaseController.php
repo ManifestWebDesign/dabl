@@ -52,7 +52,7 @@ abstract class BaseController extends ArrayObject {
 	}
 
 	function renderView($view){
-		return $this->loadView();
+		return $this->loadView($view);
 	}
 
 	function loadView($view){
