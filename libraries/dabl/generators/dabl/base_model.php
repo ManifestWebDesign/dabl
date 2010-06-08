@@ -20,8 +20,8 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 	 */
 	protected static $_primaryKeys = array(
 <?php if($PKs): ?>
-<?php foreach($PKs as $thePK): ?>
-		'<?php echo $thePK ?>',
+<?php foreach($PKs as $the_pk): ?>
+		'<?php echo $the_pk ?>',
 <?php endforeach ?>
 <?php endif ?>
 	);
@@ -88,7 +88,7 @@ foreach($fields as $key=>$field):
 <?php if($field->isTemporalType()): ?>
 		if($this-><?php echo $field_name ?>===null || !$format)
 			return $this-><?php echo $field_name ?>;
-		if(strpos($this-><?php echo $field_name ?>, "0000-00-00")===0)
+		if(strpos($this-><?php echo $field_name ?>, '0000-00-00')===0)
 			return null;
 		return date($format, strtotime($this-><?php echo $field_name ?>));
 <?php else: ?>
@@ -97,7 +97,7 @@ foreach($fields as $key=>$field):
 	}
 	function set<?php echo $method_name ?>($value) {
 <?php if($field->isNumericType() || $field->isTemporalType()): ?>
-		if($value==="")
+		if($value==='')
 			$value = null;
 <?php if($field->isTemporalType()): ?>
 		elseif($value!==null && $this->_formatDates)
@@ -180,19 +180,23 @@ foreach($fields as $key=>$field):
 	 * @return <?php echo $class_name ?>
 	 
 	 */
-	static function retrieveByPK($thePK) {
-		if($thePK===null)return null;
+	static function retrieveByPK($the_pk, $use_cache = true) {
+		if($the_pk===null)
+			return null;
 		$PKs = <?php echo $class_name ?>::getPrimaryKeys();
 		if(count($PKs)>1)
 			throw new Exception('This table has more than one primary key.  Use retrieveByPKs() instead.');
 		elseif(count($PKs)==0)
 			throw new Exception('This table does not have a primary key.');
+		if($use_cache && array_key_exists($the_pk, <?php echo $class_name ?>::$_instancePool))
+			return <?php echo $class_name ?>::$_instancePool[$the_pk];
 		$q = new Query;
 		$conn = <?php echo $class_name ?>::getConnection();
 		$pkColumn = $conn->quoteIdentifier($PKs[0]);
-		$q->add($pkColumn, $thePK);
+		$q->add($pkColumn, $the_pk);
 		$q->setLimit(1);
-		return array_shift(<?php echo $class_name ?>::doSelect($q));
+		$instance = array_shift(<?php echo $class_name ?>::doSelect($q));
+		return $instance;
 	}
 
 	/**
@@ -241,10 +245,13 @@ foreach($fields as $key=>$field):
 	 */
 	static function fromResult(PDOStatement $result, $class = '<?php echo $class_name ?>') {
 		$objects = array();
+		$pk = <?php echo $class_name ?>::getPrimaryKey();
 		while($object = $result->fetchObject($class)){
 			$object->castInts();
 			$object->setNew(false);
 			$objects[] = $object;
+			if($pk)
+				<?php echo $class_name ?>::$_instancePool[$object->{"get$pk"}()] = $object;
 		}
 		return $objects;
 	}
@@ -360,13 +367,13 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	 */
 	function get<?php echo $from_class_name ?>sQuery(Query $q = null) {
 		if($this->get<?php echo $to_column ?>()===null)
-			throw new Exception("NULL cannot be used to match keys.");
+			throw new Exception('NULL cannot be used to match keys.');
 		$conn = $this->getConnection();
-		$column = $conn->quoteIdentifier("<?php echo $from_column ?>");
+		$column = $conn->quoteIdentifier('<?php echo $from_column ?>');
 		if($q){
 			$q = clone $q;
 			$alias = $q->getAlias();
-			if($alias && $q->getTableName()=="<?php echo $from_table ?>")
+			if($alias && $q->getTableName()=='<?php echo $from_table ?>')
 				$column = "$alias.$column";
 		}
 		else

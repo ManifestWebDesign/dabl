@@ -15,6 +15,8 @@ abstract class BaseModel {
 
 	protected $_validationErrors = array();
 
+	protected static $_instancePool = array();
+
 	static function getPrimaryKey(){
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
@@ -183,7 +185,11 @@ abstract class BaseModel {
 		}
 		$q->setLimit(1);
 		$q->setTable($this->getTableName());
-		return $this->doDelete($q);
+		$result = $this->doDelete($q);
+		$pk = $this->getPrimaryKey();
+		if($result && $pk)
+			unset(self::$_instancePool[$this->{"get$pk"}()]);
+		return $result;
 	}
 
 	/**
@@ -262,17 +268,16 @@ abstract class BaseModel {
 		$count = $result->rowCount();
 
 		if($pk && $this->isAutoIncrement()){
-			$setPK = "set$pk";
-
 			if($conn instanceof DBPostgres)
 				$id = $conn->getId($this->getTableName(), $pk);
 			elseif($conn->isGetIdAfterInsert())
 				$id = $conn->lastInsertId();
-
-			$this->$setPK($id);
+			$this->{"set$pk"}($id);
 		}
 		$this->resetModified();
 		$this->setNew(false);
+		if($pk)
+			self::$_instancePool[$this->{"get$pk"}()] = $this;
 		return $count;
 	}
 
