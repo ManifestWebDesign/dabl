@@ -9,7 +9,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	const CONNECTION_NAME = 'my_connection_name';
 
 	/**
-	 * @covers DBMySQL::beginTransaction()
+	 * @group NestedTransaction
+	 * @group bug1355
+	 * @covers DBMySQL::beginTransaction
 	 */
 	function testBeginTransaction() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
@@ -20,7 +22,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers DBMySQL::rollback()
+	 * @group NestedTransaction
+	 * @group bug1355
+	 * @covers DBMySQL::rollback
 	 * @expectedException Exception
 	 */
 	function testRollbackOutsideTransaction() {
@@ -29,7 +33,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers DBMySQL::commit()
+	 * @group NestedTransaction
+	 * @group bug1355
+	 * @covers DBMySQL::commit
 	 * @expectedException Exception
 	 */
 	function testCommitOutsideTransaction() {
@@ -38,7 +44,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers DBMySQL::rollback()
+	 * @group NestedTransaction
+	 * @group bug1355
+	 * @covers DBMySQL::rollback
 	 */
 	function testNestedRollback() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
@@ -50,7 +58,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers DBMySQL::commit()
+	 * @group NestedTransaction
+	 * @group bug1355
+	 * @covers DBMySQL::commit
 	 */
 	function testNestedCommit() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
@@ -62,7 +72,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers DBMySQL::rollback()
+	 * @group NestedTransaction
+	 * @group bug1355
+	 * @covers DBMySQL::rollback
 	 */
 	function testCommitBeforeRollback() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
@@ -74,7 +86,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers DBMySQL::commit()
+	 * @group NestedTransaction
+	 * @group bug1355
+	 * @covers DBMySQL::commit
 	 * @expectedException Exception
 	 */
 	function testRollbackBeforeCommit() {
