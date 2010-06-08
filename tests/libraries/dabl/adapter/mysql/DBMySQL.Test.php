@@ -1,8 +1,7 @@
 <?php
 
-require_once 'config.php';
-
 require_once 'PHPUnit/Framework.php';
+require_once '../config.php';
 
 class TestDBMySQL extends PHPUnit_Framework_TestCase {
 
