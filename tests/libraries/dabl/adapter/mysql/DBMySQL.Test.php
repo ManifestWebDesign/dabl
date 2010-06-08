@@ -8,6 +8,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 
 	const CONNECTION_NAME = 'my_connection_name';
 
+	/**
+	 * @covers DBMySQL::beginTransaction()
+	 */
 	function testBeginTransaction() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
 		$pdo->beginTransaction();
@@ -17,6 +20,7 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @covers DBMySQL::rollback()
 	 * @expectedException Exception
 	 */
 	function testRollbackOutsideTransaction() {
@@ -25,6 +29,7 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @covers DBMySQL::commit()
 	 * @expectedException Exception
 	 */
 	function testCommitOutsideTransaction() {
@@ -32,6 +37,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 		$pdo->commit();
 	}
 
+	/**
+	 * @covers DBMySQL::rollback()
+	 */
 	function testNestedRollback() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
 		$pdo->beginTransaction();
@@ -41,6 +49,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 		$pdo->rollback();
 	}
 
+	/**
+	 * @covers DBMySQL::commit()
+	 */
 	function testNestedCommit() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
 		$pdo->beginTransaction();
@@ -50,6 +61,9 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 		$pdo->commit();
 	}
 
+	/**
+	 * @covers DBMySQL::rollback()
+	 */
 	function testCommitBeforeRollback() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
 		$pdo->beginTransaction();
@@ -60,6 +74,7 @@ class TestDBMySQL extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @covers DBMySQL::commit()
 	 * @expectedException Exception
 	 */
 	function testRollbackBeforeCommit() {

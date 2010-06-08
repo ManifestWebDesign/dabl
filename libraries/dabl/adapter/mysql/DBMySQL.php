@@ -147,12 +147,18 @@ class DBMySQL extends DABLPDO {
 	 * @throws Exception
 	 */
 	function commit() {
-		--$this->_transaction_count;
-		if ($this->_rollback_connection) throw new Exception('DABL: Attempting to commit a rolled back connection');
-		if ($this->_transaction_count==0) {
-			return parent::commit();
-		} elseif ($this->_transaction_count < 0) {
+		if ($this->_transaction_count<=0)
 			throw new Exception('DABL: Attempting to commit outside of a transaction');
+
+		--$this->_transaction_count;
+
+		if ($this->_transaction_count==0) {
+			if ($this->_rollback_connection) {
+				parent::rollback();
+				throw new Exception('DABL: attempting to commit a rolled back transaction');
+			} else {
+				return parent::commit();
+			}
 		}
 	}
 
@@ -165,12 +171,14 @@ class DBMySQL extends DABLPDO {
 	 * @throws Exception
 	 */
 	function rollback() {
+		if ($this->_transaction_count<=0)
+			throw new Exception('DABL: Attempting to rollback outside of a transaction');
+
 		--$this->_transaction_count;
+
 		$this->_rollback_connection = true;
 		if ($this->_transaction_count==0) {
 			return parent::rollback();
-		} elseif ($this->_transaction_count < 0) {
-			throw new Exception('DABL: Attempting to rollback outside of a transaction');
 		}
 	}
 
