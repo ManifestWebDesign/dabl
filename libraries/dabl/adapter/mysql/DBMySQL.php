@@ -121,6 +121,56 @@ class DBMySQL extends DABLPDO {
 	}
 
 	/**
+	 * Begin a (possibly nested) transaction.
+	 *
+	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
+	 * @see PDO::beginTransaction()
+	 */
+	function beginTransaction() {
+		if ($this->_connection_count==0) {
+			$this->_rollback_connection = false;
+			parent::beginTransaction();
+		}
+		++$this->_connection_count;
+	}
+
+	/**
+	 * Commit a (possibly nested) transaction.
+	 * FIXME: Make this throw an Exception of a DABL class
+	 *
+	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
+	 * @see PDO::commit()
+	 * @throws Exception
+	 */
+	function commit() {
+		--$this->_connection_count;
+		if ($this->_rollback_connection) throw new Exception('DABL: Attempting to commit a rolled back connection');
+		if ($this->_connection_count==0) {
+			return parent::commit();
+		} elseif ($this->_connection_count < 0) {
+			throw new Exception('DABL: Attempting to commit outside of a transaction');
+		}
+	}
+
+	/**
+	 * Rollback, and prevent all further commits in this transaction.
+	 * FIXME: Make this throw an Exception of a DABL class
+	 *
+	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
+	 * @see PDO::rollback()
+	 * @throws Exception
+	 */
+	function rollback() {
+		--$this->_connection_count;
+		$this->_rollback_connection = true;
+		if ($this->_connection_count==0) {
+			return parent::rollback();
+		} elseif ($this->_connection_count < 0) {
+			throw new Exception('DABL: Attempting to rollback outside of a transaction');
+		}
+	}
+
+	/**
 	 * @return Database
 	 */
 	function getDatabaseSchema(){
