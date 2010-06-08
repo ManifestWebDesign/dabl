@@ -6,7 +6,7 @@ abstract class DABLPDO extends PDO {
 	const ID_METHOD_SEQUENCE = 2;
 
 	protected $queryLog = array();
-	protected $logQueries = true;
+	protected $logQueries = false;
 	protected $dbName = null;
 
 	function setDBName($db_name) {
