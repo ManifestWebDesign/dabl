@@ -12,6 +12,9 @@
  */
 class DBMySQL extends DABLPDO {
 
+	private $_transaction_count = 0;
+	private $_rollback_connection = false;
+
 	/**
 	 * This method is used to ignore case.
 	 *
@@ -127,11 +130,12 @@ class DBMySQL extends DABLPDO {
 	 * @see PDO::beginTransaction()
 	 */
 	function beginTransaction() {
-		if ($this->_connection_count==0) {
+		if ($this->_transaction_count<=0) {
 			$this->_rollback_connection = false;
+			$this->_transaction_count = 0;
 			parent::beginTransaction();
 		}
-		++$this->_connection_count;
+		++$this->_transaction_count;
 	}
 
 	/**
@@ -143,11 +147,11 @@ class DBMySQL extends DABLPDO {
 	 * @throws Exception
 	 */
 	function commit() {
-		--$this->_connection_count;
+		--$this->_transaction_count;
 		if ($this->_rollback_connection) throw new Exception('DABL: Attempting to commit a rolled back connection');
-		if ($this->_connection_count==0) {
+		if ($this->_transaction_count==0) {
 			return parent::commit();
-		} elseif ($this->_connection_count < 0) {
+		} elseif ($this->_transaction_count < 0) {
 			throw new Exception('DABL: Attempting to commit outside of a transaction');
 		}
 	}
@@ -161,13 +165,33 @@ class DBMySQL extends DABLPDO {
 	 * @throws Exception
 	 */
 	function rollback() {
-		--$this->_connection_count;
+		--$this->_transaction_count;
 		$this->_rollback_connection = true;
-		if ($this->_connection_count==0) {
+		if ($this->_transaction_count==0) {
 			return parent::rollback();
-		} elseif ($this->_connection_count < 0) {
+		} elseif ($this->_transaction_count < 0) {
 			throw new Exception('DABL: Attempting to rollback outside of a transaction');
 		}
+	}
+
+	/**
+	 * Utility function for writing test cases.
+	 *
+	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
+	 * @return int
+	 */
+	function getTransactionCount() {
+		return $this->_transaction_count;
+	}
+
+	/**
+	 * Utility function for writing test cases.
+	 *
+	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
+	 * @return bool
+	 */
+	function getRollbackImminent() {
+		return $this->_rollback_connection;
 	}
 
 	/**
