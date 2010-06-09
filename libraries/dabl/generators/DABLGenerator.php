@@ -16,7 +16,7 @@ class DABLGenerator extends BaseGenerator {
             'plural' => self::getPluralName($table_name),
 			'plural_url' => self::getPluralURL($table_name),
             'single' => self::getSingularName($table_name),
-			'single' => self::getSingularURL($table_name),
+			'single_url' => self::getSingularURL($table_name),
             'pk' => $instance->getPrimaryKey(),
             'pkMethod' => "get{$instance->getPrimaryKey()}",
             'actions' => $this->getActions($table_name),

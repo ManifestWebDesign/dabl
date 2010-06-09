@@ -374,16 +374,16 @@ foreach($fields as $key=>$field):
 $used_from = array();
 foreach($this->getForeignKeysFromTable($table_name) as $r):
 	$to_table = $r['to_table'];
-	$to_className = $this->getModelName($to_table);
+	$to_class_name = $this->getModelName($to_table);
 	$to_column = $r['to_column'];
 	$from_column = $r['from_column'];
 	if(@$used_from[$to_table]) continue;
 	$used_from[$to_table] = $from_column;
 ?>
 	/**
-	 * @var <?php echo $to_className ?>
+	 * @var <?php echo $to_class_name ?>
 	 */
-	private $<?php echo $to_className ?>_c;
+	private $<?php echo $to_class_name ?>_c;
 
 	/**
 	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
@@ -392,18 +392,23 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	 * After that, if $this-><?php echo $from_column ?> is not modified, the
 	 * method will return the cached result instead of querying the database
 	 * a second time.
-	 * @return <?php echo $to_className ?>
+	 * @return <?php echo $to_class_name ?>
 	 */
-	function get<?php echo $to_className ?>() {
+	function get<?php echo $to_class_name ?>() {
+		$pk = <?php echo $to_class_name ?>::getPrimaryKey();
+		$column = '<?php echo $to_column ?>';
+		if($pk == $column)
+			return <?php echo $to_class_name ?>::retrieveByPK($this->get<?echo $from_column ?>());
 		if($this->get<?echo $from_column ?>()===null)
 			return null;
 		$conn = $this->getConnection();
-		$columnQuoted = $conn->quoteIdentifier('<?php echo $to_column ?>');
-		$tableQuoted = $conn->quoteIdentifier(<?php echo $to_className ?>::getTableName());
-		if($this->getCacheResults() && @$this-><?php echo $to_className ?>_c && !$this->isColumnModified('<?php echo $from_column ?>'))return $this-><?php echo $to_className ?>_c;
-		$query_string = "SELECT * FROM $tableQuoted WHERE $columnQuoted=".$conn->checkInput($this->get<?php echo $from_column ?>());
+		$column_quoted = $conn->quoteIdentifier($column);
+		$table_quoted = $conn->quoteIdentifier(<?php echo $to_class_name ?>::getTableName());
+		if($this->getCacheResults() && @$this-><?php echo $to_class_name ?>_c && !$this->isColumnModified('<?php echo $from_column ?>'))
+			return $this-><?php echo $to_class_name ?>_c;
+		$query_string = "SELECT * FROM $table_quoted WHERE $column_quoted=".$conn->checkInput($this->get<?php echo $from_column ?>());
 		$conn->applyLimit($query_string, 0, 1);
-		return $this-><?php echo $to_className ?>_c = <?php echo $to_className ?>::fetchSingle($query_string);
+		return $this-><?php echo $to_class_name ?>_c = <?php echo $to_class_name ?>::fetchSingle($query_string);
 	}
 <?php endforeach ?>
 
@@ -486,9 +491,9 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 			return $this-><?php echo $from_class_name ?>s_c;
 
 		$conn = $this->getConnection();
-		$tableQuoted = $conn->quoteIdentifier(<?php echo $from_class_name ?>::getTableName());
-		$columnQuoted = $conn->quoteIdentifier("<?php echo $from_column ?>");
-		$query_string = "SELECT * FROM $tableQuoted WHERE $columnQuoted=".$conn->checkInput($this->get<?php echo $to_column ?>())." $extra";
+		$table_quoted = $conn->quoteIdentifier(<?php echo $from_class_name ?>::getTableName());
+		$column_quoted = $conn->quoteIdentifier("<?php echo $from_column ?>");
+		$query_string = "SELECT * FROM $table_quoted WHERE $column_quoted=".$conn->checkInput($this->get<?php echo $to_column ?>())." $extra";
 		$<?php echo $from_table ?>s = <?php echo $from_class_name ?>::fetch($query_string);
 		if(!$extra)$this-><?php echo $from_class_name ?>s_c = $<?php echo $from_table ?>s;
 		return $<?php echo $from_table ?>s;
