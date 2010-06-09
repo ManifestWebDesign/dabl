@@ -299,11 +299,11 @@ foreach($fields as $key=>$field):
 	 */
 	static function removeFromPool($object) {
 		$pk = is_object($object) ?
-			implode('-', $object->getPrimaryKeyValues() :
+			implode('-', $object->getPrimaryKeyValues()) :
 			$object;
 
 		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool))
-			unset(<?php echo $class_name ?>::$_instancePool[$pk]));
+			unset(<?php echo $class_name ?>::$_instancePool[$pk]);
 	}
 
 	/**
