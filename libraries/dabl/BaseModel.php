@@ -1,50 +1,45 @@
 <?php
 
 abstract class BaseModel {
-
 	const MAX_INSTANCE_POOL_SIZE = 10000;
 
 	/**
 	 * Array to contain names of modified columns
 	 */
 	protected $_modifiedColumns = array();
-
 	protected $_cacheResults = true;
-
 	protected $_formatDates = true;
-
 	protected $_isNew = true;
-
 	protected $_validationErrors = array();
 
-	static function getPrimaryKey(){
+	static function getPrimaryKey() {
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
 
 	/**
 	 * @return DABLPDO
 	 */
-	static function getConnection(){
+	static function getConnection() {
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
 
-	static function getColumnNames(){
+	static function getColumnNames() {
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
 
-	static function hasColumn(){
+	static function hasColumn() {
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
 
-	static function getTableName(){
+	static function getTableName() {
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
 
-	static function getPrimaryKeys(){
+	static function getPrimaryKeys() {
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
 
-	static function doDelete(Query $q){
+	static function doDelete(Query $q) {
 		throw new Exception("This should be replaced by an extension of this class.");
 	}
 
@@ -57,7 +52,8 @@ abstract class BaseModel {
 	 * @return BaseModel[]
 	 */
 	static function fromResult(PDOStatement $result, $class) {
-		if (!$class) throw new Exception('No class name given');
+		if (!$class)
+			throw new Exception('No class name given');
 
 		$objects = array();
 		while ($object = $result->fetchObject($class)) {
@@ -73,12 +69,12 @@ abstract class BaseModel {
 	 * Creates new instance of $this and
 	 * @return BaseModel
 	 */
-	function copy(){
+	function copy() {
 		$class = get_class($this);
 		$new_object = new $class;
 		$new_object->fromArray($this->toArray());
 
-		if($this->getPrimaryKey()){
+		if ($this->getPrimaryKey()) {
 			$pk = $this->getPrimaryKey();
 			$set_pk_method = "set$pk";
 			$new_object->$set_pk_method(null);
@@ -86,15 +82,15 @@ abstract class BaseModel {
 		return $new_object;
 	}
 
-	function isModified(){
-		return (bool)$this->getModifiedColumns();
+	function isModified() {
+		return (bool) $this->getModifiedColumns();
 	}
 
 	/**
 	 * Checks whether the given column is in the modified array
 	 * @return Bool
 	 */
-	function isColumnModified($columnName){
+	function isColumnModified($columnName) {
 		return in_array(strtolower($columnName), array_map('strtolower', $this->_modifiedColumns));
 	}
 
@@ -102,14 +98,14 @@ abstract class BaseModel {
 	 * Returns an array of the names of modified columns
 	 * @return array
 	 */
-	function getModifiedColumns(){
+	function getModifiedColumns() {
 		return $this->_modifiedColumns ? $this->_modifiedColumns : array();
 	}
 
 	/**
 	 * Clears the array of modified column names
 	 */
-	function resetModified(){
+	function resetModified() {
 		$this->_modifiedColumns = array();
 	}
 
@@ -117,11 +113,12 @@ abstract class BaseModel {
 	 * Populates $this with the values of an associative Array.
 	 * Array keys must match column names to be used.
 	 */
-	function fromArray($array){
+	function fromArray($array) {
 		$columns = $this->getColumnNames();
-       	foreach($array as $column => $value){
-			if(in_array($column, $columns) === false) continue;
-			$this->{'set'.$column}($value);
+		foreach ($array as $column => $value) {
+			if (in_array($column, $columns) === false)
+				continue;
+			$this->{'set' . $column}($value);
 		}
 	}
 
@@ -130,11 +127,11 @@ abstract class BaseModel {
 	 * Array keys match column names.
 	 * @return Array of BaseTable Objects
 	 */
-	function toArray(){
+	function toArray() {
 		$array = array();
 		$column_names = $this->getColumnNames();
-		while($column = array_shift($column_names))
-			$array[$column] = $this->{'get'.$column}();
+		while ($column = array_shift($column_names))
+			$array[$column] = $this->{'get' . $column} ();
 		return $array;
 	}
 
@@ -143,28 +140,29 @@ abstract class BaseModel {
 	 * the query each time, even if it hasn't changed.
 	 * @param $value Bool[optional]
 	 */
-	function setCacheResults($value=true){
-		$this->_cacheResults = (bool)$value;
+	function setCacheResults($value=true) {
+		$this->_cacheResults = (bool) $value;
 	}
 
 	/**
 	 * Returns true if this object is set to cache results
 	 * @return Bool
 	 */
-	function getCacheResults(){
-		return (bool)$this->_cacheResults;
+	function getCacheResults() {
+		return (bool) $this->_cacheResults;
 	}
 
 	/**
 	 * Returns true if this table has primary keys and if all of the primary values are not null
 	 * @return Bool
 	 */
-	function hasPrimaryKeyValues(){
+	function hasPrimaryKeyValues() {
 		$pks = $this->getPrimaryKeys();
-		if(!$pks) return false;
+		if (!$pks)
+			return false;
 
-		foreach($pks as $pk)
-			if($this->$pk===null)
+		foreach ($pks as $pk)
+			if ($this->$pk === null)
 				return false;
 		return true;
 	}
@@ -178,7 +176,7 @@ abstract class BaseModel {
 		$arr = array();
 		$pks = $this->getPrimaryKeys();
 
-		foreach($pks as $pk) {
+		foreach ($pks as $pk) {
 			$arr[] = $this->{"get$pk"}();
 		}
 
@@ -189,7 +187,7 @@ abstract class BaseModel {
 	 * Returns true if the column values validate.
 	 * @return bool
 	 */
-	function validate(){
+	function validate() {
 		$this->_validationErrors = array();
 		return true;
 	}
@@ -198,7 +196,7 @@ abstract class BaseModel {
 	 * See $this->validate()
 	 * @return array Array of errors that occured when validating object
 	 */
-	function getValidationErrors(){
+	function getValidationErrors() {
 		return $this->_validationErrors;
 	}
 
@@ -210,13 +208,14 @@ abstract class BaseModel {
 	 * leaving the original row unchanged(if it exists).  Also, since NULL isn't an accurate way
 	 * to look up a row, I return if one of the primary keys is null.
 	 */
-	function delete(){
+	function delete() {
 		$conn = $this->getConnection();
 		$pks = $this->getPrimaryKeys();
-		if(!$pks)throw new Exception("This table has no primary keys");
+		if (!$pks
+			)throw new Exception("This table has no primary keys");
 		$q = new Query();
-		foreach($pks as $pk){
-			if($this->$pk===null)
+		foreach ($pks as $pk) {
+			if ($this->$pk === null)
 				throw new Exception("Cannot delete using NULL primary key.");
 			$q->addAnd($conn->quoteIdentifier($pk), $this->$pk);
 		}
@@ -237,19 +236,19 @@ abstract class BaseModel {
 	 * leaving the original row unchanged(if it exists).
 	 * @todo find a way to solve the above issue
 	 */
-	function save(){
-		if(!$this->validate())
+	function save() {
+		if (!$this->validate())
 			return 0;
 
-		if($this->hasColumn('Created') && $this->hasColumn('Updated')){
-			if($this->isNew() && !$this->isColumnModified('Created'))
+		if ($this->hasColumn('Created') && $this->hasColumn('Updated')) {
+			if ($this->isNew() && !$this->isColumnModified('Created'))
 				$this->setCreated(CURRENT_TIME);
-			if(!$this->isColumnModified('Updated'))
+			if (!$this->isColumnModified('Updated'))
 				$this->setUpdated(CURRENT_TIME);
 		}
 
-		if($this->getPrimaryKeys()){
-			if($this->isNew())
+		if ($this->getPrimaryKeys()) {
+			if ($this->isNew())
 				return $this->insert();
 			return $this->update();
 		}
@@ -260,32 +259,32 @@ abstract class BaseModel {
 	 * Returns true if this has not yet been saved to the database
 	 * @return Bool
 	 */
-	function isNew(){
-		return (bool)$this->_isNew;
+	function isNew() {
+		return (bool) $this->_isNew;
 	}
 
 	/**
 	 * Indicate whether this object has been saved to the database
 	 * @param Bool $bool
 	 */
-	function setNew($bool){
-		$this->_isNew = (bool)$bool;
+	function setNew($bool) {
+		$this->_isNew = (bool) $bool;
 	}
 
 	/**
 	 * Creates and executes INSERT query string for this object
 	 * @return int
 	 */
-	protected function insert(){
+	protected function insert() {
 		$conn = $this->getConnection();
 		$pk = $this->getPrimaryKey();
-		
+
 		$fields = array();
 		$values = array();
 		$placeholders = array();
-		foreach($this->getColumnNames() as $column){
+		foreach ($this->getColumnNames() as $column) {
 			$value = $this->$column;
-			if($value===null && !$this->isColumnModified($column))
+			if ($value === null && !$this->isColumnModified($column))
 				continue;
 			$fields[] = $conn->quoteIdentifier($column);
 			$values[] = $value;
@@ -293,8 +292,8 @@ abstract class BaseModel {
 		}
 
 		$quotedTable = $conn->quoteIdentifier($this->getTableName());
-		$queryString = "INSERT INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $placeholders).") ";
-		
+		$queryString = "INSERT INTO $quotedTable (" . implode(", ", $fields) . ") VALUES (" . implode(', ', $placeholders) . ") ";
+
 		$statement = new QueryStatement($conn);
 		$statement->setString($queryString);
 		$statement->setParams($values);
@@ -302,10 +301,10 @@ abstract class BaseModel {
 		$result = $statement->bindAndExecute();
 		$count = $result->rowCount();
 
-		if($pk && $this->isAutoIncrement()){
-			if($conn instanceof DBPostgres)
+		if ($pk && $this->isAutoIncrement()) {
+			if ($conn instanceof DBPostgres)
 				$id = $conn->getId($this->getTableName(), $pk);
-			elseif($conn->isGetIdAfterInsert())
+			elseif ($conn->isGetIdAfterInsert())
 				$id = $conn->lastInsertId();
 			$this->{"set$pk"}($id);
 		}
@@ -322,18 +321,18 @@ abstract class BaseModel {
 	 * the number of affected rows.
 	 * @return Int
 	 */
-	protected function replace(){
+	protected function replace() {
 		$conn = $this->getConnection();
 		$quotedTable = $conn->quoteIdentifier($this->getTableName());
 
 		$fields = array();
 		$values = array();
-		foreach($this->getColumnNames() as $column){
+		foreach ($this->getColumnNames() as $column) {
 			$fields[] = $conn->quoteIdentifier($column);
 			$values[] = $this->$column;
 			$placeholders[] = '?';
 		}
-		$queryString = "REPLACE INTO $quotedTable (".implode(", ", $fields).") VALUES (".implode(', ', $placeholders).") ";
+		$queryString = "REPLACE INTO $quotedTable (" . implode(", ", $fields) . ") VALUES (" . implode(', ', $placeholders) . ") ";
 
 		$statement = new QueryStatement($conn);
 		$statement->setString($queryString);
@@ -353,32 +352,33 @@ abstract class BaseModel {
 	 * the number of affected rows.
 	 * @return Int
 	 */
-	protected function update(){
+	protected function update() {
 		$conn = $this->getConnection();
 		$quotedTable = $conn->quoteIdentifier($this->getTableName());
 
-		if(!$this->getPrimaryKeys())
+		if (!$this->getPrimaryKeys())
 			throw new Exception('This table has no primary keys');
 
 		$fields = array();
 		$values = array();
-		foreach($this->getModifiedColumns() as $column){
-			$fields[] = $conn->quoteIdentifier($column).'=?';
+		foreach ($this->getModifiedColumns() as $column) {
+			$fields[] = $conn->quoteIdentifier($column) . '=?';
 			$values[] = $this->$column;
 		}
 
 		//If array is empty there is nothing to update
-		if(!$fields) return 0;
+		if (!$fields)
+			return 0;
 
 		$pkWhere = array();
-		foreach($this->getPrimaryKeys() as $pk){
-			if($this->$pk===null)
+		foreach ($this->getPrimaryKeys() as $pk) {
+			if ($this->$pk === null)
 				throw new Exception('Cannot update with NULL primary key.');
-			$pkWhere[] = $conn->quoteIdentifier($pk).'=?';
+			$pkWhere[] = $conn->quoteIdentifier($pk) . '=?';
 			$values[] = $this->$pk;
 		}
 
-		$queryString = "UPDATE $quotedTable SET ".implode(", ", $fields)." WHERE ".implode(" AND ", $pkWhere);
+		$queryString = "UPDATE $quotedTable SET " . implode(", ", $fields) . " WHERE " . implode(" AND ", $pkWhere);
 		$statement = new QueryStatement($conn);
 		$statement->setString($queryString);
 		$statement->setParams($values);
