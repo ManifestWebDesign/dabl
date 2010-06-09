@@ -303,7 +303,7 @@ foreach($fields as $key=>$field):
 			$object;
 
 		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool))
-			unset(<?php echo $class_name ?>::$_instancePool[$pk]);
+			unset(<?php echo $class_name ?>::$_instancePool[$pk]));
 	}
 
 	/**
