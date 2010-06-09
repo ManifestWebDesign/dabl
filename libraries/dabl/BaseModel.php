@@ -2,6 +2,8 @@
 
 abstract class BaseModel {
 
+	const MAX_INSTANCE_POOL_SIZE = 10000;
+
 	/**
 	 * Array to contain names of modified columns
 	 */
@@ -14,8 +16,6 @@ abstract class BaseModel {
 	protected $_isNew = true;
 
 	protected $_validationErrors = array();
-
-	protected static $_instancePool = array();
 
 	static function getPrimaryKey(){
 		throw new Exception("This should be replaced by an extension of this class.");
@@ -46,6 +46,27 @@ abstract class BaseModel {
 
 	static function doDelete(Query $q){
 		throw new Exception("This should be replaced by an extension of this class.");
+	}
+
+	/**
+	 * Returns an array of objects of class $class from
+	 * the rows of a PDOStatement(query result)
+	 *
+	 * @param PDOStatement $result
+	 * @param string $class name of class to create
+	 * @return BaseModel[]
+	 */
+	static function fromResult(PDOStatement $result, $class) {
+		if (!$class) throw new Exception('No class name given');
+
+		$objects = array();
+		while ($object = $result->fetchObject($class)) {
+			$object->castInts();
+			$object->setNew(false);
+			$objects[] = $object;
+			$object->insertIntoPool($object);
+		}
+		return $objects;
 	}
 
 	/**
@@ -185,10 +206,8 @@ abstract class BaseModel {
 		}
 		$q->setLimit(1);
 		$q->setTable($this->getTableName());
-		$result = $this->doDelete($q);
-		$pk = $this->getPrimaryKey();
-		if($result && $pk)
-			unset(self::$_instancePool[$this->{"get$pk"}()]);
+		$result = $this->doDelete($q, false);
+		$this->removeFromPool($this);
 		return $result;
 	}
 
@@ -276,8 +295,9 @@ abstract class BaseModel {
 		}
 		$this->resetModified();
 		$this->setNew(false);
-		if($pk)
-			self::$_instancePool[$this->{"get$pk"}()] = $this;
+
+		$this->insertIntoPool($this);
+
 		return $count;
 	}
 
@@ -308,6 +328,7 @@ abstract class BaseModel {
 
 		$this->resetModified();
 		$this->setNew(false);
+
 		return $count;
 	}
 
@@ -348,7 +369,11 @@ abstract class BaseModel {
 		$result = $statement->bindAndExecute();
 
 		$this->resetModified();
+
+		$this->removeFromPool($this);
+
 		return $result->rowCount();
 	}
 
+	abstract function castInts();
 }

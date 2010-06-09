@@ -12,11 +12,19 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 
 	/**
 	 * Name of the table
+	 * @var string
 	 */
 	protected static $_tableName = '<?php echo $table_name ?>';
 
 	/**
+	 * Cache of objects retrieved from the database
+	 * @var <?php echo $class_name ?>[]
+	 */
+	protected static $_instancePool = array();
+
+	/**
 	 * Array of all primary keys
+	 * @var string[]
 	 */
 	protected static $_primaryKeys = array(
 <?php if($PKs): ?>
@@ -40,7 +48,7 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 	
 	/**
 	 * array of all column names
-	 * @var array
+	 * @var string[]
 	 */
 	protected static $_columnNames = array(
 <?php foreach($fields as $key=>$field): ?>
@@ -178,7 +186,7 @@ foreach($fields as $key=>$field):
 	 * Searches the database for a row with the ID(primary key) that matches
 	 * the one input.
 	 * @return <?php echo $class_name ?>
-	 
+ 
 	 */
 	static function retrieveByPK($the_pk, $use_cache = true) {
 		if($the_pk===null)
@@ -240,20 +248,13 @@ foreach($fields as $key=>$field):
 	}
 
 	/**
-	 * Returns an array of <?php echo $class_name ?> objects from the rows of a PDOStatement(query result)
-	 * @return <?php echo $class_name ?>[]
+	 * Returns an array of <?php echo $class_name ?> objects from
+	 * a PDOStatement(query result).
+	 *
+	 * @see BaseModel::fromResult
 	 */
-	static function fromResult(PDOStatement $result, $class = '<?php echo $class_name ?>') {
-		$objects = array();
-		$pk = <?php echo $class_name ?>::getPrimaryKey();
-		while($object = $result->fetchObject($class)){
-			$object->castInts();
-			$object->setNew(false);
-			$objects[] = $object;
-			if($pk)
-				<?php echo $class_name ?>::$_instancePool[$object->{"get$pk"}()] = $object;
-		}
-		return $objects;
+	static function fromResult(PDOStatement $result, $class='<?php echo $class_name ?>') {
+		return baseModel::fromResult($result, $class);
 	}
 
 	function castInts() {
@@ -262,6 +263,56 @@ foreach($fields as $key=>$field):
 		$this-><?php echo $field->getName() ?> = ($this-><?php echo $field->getName() ?> === null) ? null : (int)$this-><?php echo $field->getName() ?>;
 <?php endif ?>
 <?php endforeach ?>
+	}
+
+	/**
+	 * Add (or replace) to the instance pool.
+	 *
+	 * @param <?php echo $class_name ?> $object
+	 * @return void
+	 */
+	static function insertIntoPool(<?php echo $class_name ?> $object) {
+		if (!<?php echo $class_name ?>::getPrimaryKeys()) return;
+		if (count(<?php echo $class_name ?>::$_instancePool) > self::MAX_INSTANCE_POOL_SIZE) return;
+
+		<?php echo $class_name ?>::$_instancePool[implode('-',$object->getPrimaryKeyValues())] = clone $object;
+	}
+
+	/**
+	 * Return the cached instance from the pool.
+	 *
+	 * @param mixed $pk Primary Key
+	 * @return <?php echo $class_name ?>
+	 */
+	static function retrieveFromPool($pk) {
+		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool))
+			return clone <?php echo $class_name ?>::$_instancePool[$pk];
+
+		return null;
+	}
+
+	/**
+	 * Remove the object from the instance pool.
+	 *
+	 * @param mixed $object Object or PK to remove
+	 * @return void
+	 */
+	static function removeFromPool($object) {
+		$pk = is_object($object) ?
+			implode('-', $object->getPrimaryKeyValues() :
+			$object;
+
+		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool))
+			unset(<?php echo $class_name ?>::$_instancePool[$pk]);
+	}
+
+	/**
+	 * Empty the instance pool.
+	 *
+	 * @return void
+	 */
+	static function flushPool() {
+		<?php echo $class_name ?>::$_instancePool = array();
 	}
 
 	/**
@@ -289,14 +340,21 @@ foreach($fields as $key=>$field):
 	}
 
 	/**
+	 * @param Query $q
+	 * @param bool $dump_cache
 	 * @return int
 	 */
-	static function doDelete(Query $q) {
+	static function doDelete(Query $q, $dump_cache=true) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
 		if(!$q->getTable() || strrpos($q->getTable(), <?php echo $class_name ?>::getTableName())===false )
 			$q->setTable(<?php echo $class_name ?>::getTableName());
-		return $q->doDelete($conn);
+		$result = $q->doDelete($conn);
+
+		if ($dump_cache)
+			<?php echo $class_name ?>::$_instancePool = array();
+
+		return $result;
 	}
 
 	/**
