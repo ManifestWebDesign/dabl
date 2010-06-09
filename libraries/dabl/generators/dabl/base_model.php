@@ -59,6 +59,17 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 <?php
 foreach($fields as $key=>$field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
+?>
+
+	/**
+	 * <?php echo $conn->quoteIdentifier($field->getName()) ?> <?php echo $field->getType() ?>
+<?php if ($field->isNotNull()): ?> NOT NULL<?php endif ?>
+<?php if (null!==$default): ?> DEFAULT <?php echo is_numeric($default) ? $default : $conn->quote($default) ?><?php endif ?>
+
+	 * @var <?php echo $field->getPhpType() ?>
+
+	 */
+<?
 	if ($field->isNumericType() && 0!==$default && !$default) $default = null;
 ?>
 	protected $<?php echo $field->getName() ?><?php
