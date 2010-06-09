@@ -170,6 +170,22 @@ abstract class BaseModel {
 	}
 
 	/**
+	 * Returns an array of all primary key values.
+	 *
+	 * @return mixed[]
+	 */
+	function getPrimaryKeyValues() {
+		$arr = array();
+		$pks = $this->getPrimaryKeys();
+
+		foreach($pks as $pk) {
+			$arr[] = $this->{"get$pk"}();
+		}
+
+		return $arr;
+	}
+
+	/**
 	 * Returns true if the column values validate.
 	 * @return bool
 	 */

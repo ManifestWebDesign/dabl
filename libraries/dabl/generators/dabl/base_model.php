@@ -92,6 +92,8 @@ foreach($fields as $key=>$field):
 		}
 	}
 ?>
+
+<?php // GETTERS AND SETTERS ?>
 	function get<?php echo $method_name ?>(<?php echo $params ?>) {
 <?php if($field->isTemporalType()): ?>
 		if($this-><?php echo $field_name ?>===null || !$format)
