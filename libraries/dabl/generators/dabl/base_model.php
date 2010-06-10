@@ -203,23 +203,14 @@ foreach($fields as $key=>$field):
 	 * @return <?php echo $class_name ?>
  
 	 */
-	static function retrieveByPK($the_pk, $use_cache = true) {
-		if($the_pk===null)
-			return null;
-		$PKs = <?php echo $class_name ?>::getPrimaryKeys();
-		if(count($PKs)>1)
-			throw new Exception('This table has more than one primary key.  Use retrieveByPKs() instead.');
-		elseif(count($PKs)==0)
-			throw new Exception('This table does not have a primary key.');
-		if($use_cache && array_key_exists($the_pk, <?php echo $class_name ?>::$_instancePool))
-			return <?php echo $class_name ?>::$_instancePool[$the_pk];
-		$q = new Query;
-		$conn = <?php echo $class_name ?>::getConnection();
-		$pkColumn = $conn->quoteIdentifier($PKs[0]);
-		$q->add($pkColumn, $the_pk);
-		$q->setLimit(1);
-		$instance = array_shift(<?php echo $class_name ?>::doSelect($q));
-		return $instance;
+	static function retrieveByPK($the_pk) {
+<?php if(count($PKs) > 1): ?>
+		throw new Exception('This table has more than one primary key.  Use retrieveByPKs() instead.');
+<?php elseif(count($PKs)==0): ?>
+		throw new Exception('This table does not have a primary key.');
+<?php else: ?>
+		return self::retrieveByPKs($the_pk);
+<?php endif ?>
 	}
 
 	/**
@@ -228,15 +219,21 @@ foreach($fields as $key=>$field):
 	 * @return <?php echo $class_name ?>
 	 
 	 */
-	static function retrieveByPKs(<?php foreach($PKs as $k=>$v): ?><?php if($k > 0): ?>, <?php endif ?>$PK<?php echo $k ?><? endforeach ?>) {
-		$conn = <?php echo $class_name ?>::getConnection();
-		$tableWrapped = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
+	static function retrieveByPKs(<?php foreach($PKs as $k=>$v): ?><?php if($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><? endforeach ?>) {
 <?php foreach($PKs as $k=>$v): ?>
-		if($PK<?php echo $k ?>===null)return null;
-<? endforeach ?>
-		$query_string = "SELECT * FROM $tableWrapped WHERE <?php foreach($PKs as $k=>$v): ?><?php if($k > 0): ?> AND <?php endif ?>".$conn->quoteIdentifier('<?php echo $v ?>')." = ".$conn->checkInput($PK<?php echo $k ?>)."<?php endforeach ?>";
-		$conn->applyLimit($query_string, 0, 1);
-		return <?php echo $class_name ?>::fetchSingle($query_string);
+		if($<?php echo strtolower(str_replace('-', '_', $v)) ?>===null)
+			return null;
+<?php endforeach ?>
+		$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if(count($PKs==1)): ?>$<?php echo strtolower(str_replace('-', '_', $PK)) ?><?php else: ?>implode('-', func_get_args())<?php endif ?>);
+		if($pool_instance)
+			return $pool_instance;
+		$conn = <?php echo $class_name ?>::getConnection();
+		$q = new Query;
+<?php foreach($PKs as $k=>$v): ?>
+		$q->add($conn->quoteIdentifier('<?php echo $v ?>'), $<?php echo strtolower(str_replace('-', '_', $v)) ?>);
+<?php endforeach ?>
+		$q->setLimit(1);
+		return array_shift(<?php echo $class_name ?>::doSelect($q, true));
 	}
 
 	/**
@@ -246,8 +243,8 @@ foreach($fields as $key=>$field):
 	 * @return <?php echo $class_name ?>
 	 
 	 */
-	static function fetchSingle($query_string) {
-		return array_shift(<?php echo $class_name ?>::fetch($query_string));
+	static function fetchSingle($query_string, $write_cache = true) {
+		return array_shift(<?php echo $class_name ?>::fetch($query_string, $write_cache));
 	}
 
 	/**
@@ -256,10 +253,10 @@ foreach($fields as $key=>$field):
 	 * returns an empty Array.
 	 * @return <?php echo $class_name ?>[]
 	 */
-	static function fetch($query_string) {
+	static function fetch($query_string, $write_cache = false) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$result = $conn->query($query_string);
-		return <?php echo $class_name ?>::fromResult($result);
+		return <?php echo $class_name ?>::fromResult($result, $class='<?php echo $class_name ?>', $write_cache);
 	}
 
 	/**
@@ -268,8 +265,8 @@ foreach($fields as $key=>$field):
 	 *
 	 * @see BaseModel::fromResult
 	 */
-	static function fromResult(PDOStatement $result, $class='<?php echo $class_name ?>') {
-		return baseModel::fromResult($result, $class);
+	static function fromResult(PDOStatement $result, $class='<?php echo $class_name ?>', $write_cache = false) {
+		return baseModel::fromResult($result, $class, $write_cache);
 	}
 
 	function castInts() {
@@ -305,6 +302,8 @@ foreach($fields as $key=>$field):
 
 	 */
 	static function retrieveFromPool($pk) {
+		if($pk === null)
+			return null;
 		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool))
 			return clone <?php echo $class_name ?>::$_instancePool[$pk];
 
@@ -342,10 +341,10 @@ foreach($fields as $key=>$field):
 	 * @param $extra string
 	 * @return <?php echo $class_name ?>[]
 	 */
-	static function getAll($extra = null) {
+	static function getAll($extra = null, $write_cache = false) {
 		$conn = <?php echo $class_name ?>::getConnection();
-		$tableWrapped = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
-		return <?php echo $class_name ?>::fetch("SELECT * FROM $tableWrapped $extra ");
+		$table_quoted = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
+		return <?php echo $class_name ?>::fetch("SELECT * FROM $table_quoted $extra ", $write_cache);
 	}
 
 	/**
@@ -380,12 +379,12 @@ foreach($fields as $key=>$field):
 	/**
 	 * @return <?php echo $class_name ?>[]
 	 */
-	static function doSelect(Query $q){
+	static function doSelect(Query $q, $write_cache = false){
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
 		if(!$q->getTable() || strrpos($q->getTable(), <?php echo $class_name ?>::getTableName())===false )
 			$q->setTable(<?php echo $class_name ?>::getTableName());
-		return <?php echo $class_name ?>::fromResult($q->doSelect($conn));
+		return <?php echo $class_name ?>::fromResult($q->doSelect($conn), $class='<?php echo $class_name ?>', $write_cache);
 	}
 
 <?php

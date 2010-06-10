@@ -51,7 +51,7 @@ abstract class BaseModel {
 	 * @param string $class name of class to create
 	 * @return BaseModel[]
 	 */
-	static function fromResult(PDOStatement $result, $class) {
+	static function fromResult(PDOStatement $result, $class, $write_cache = false) {
 		if (!$class)
 			throw new Exception('No class name given');
 
@@ -60,7 +60,7 @@ abstract class BaseModel {
 			$object->castInts();
 			$object->setNew(false);
 			$objects[] = $object;
-			$object->insertIntoPool($object);
+			if($write_cache)$object->insertIntoPool($object);
 		}
 		return $objects;
 	}
