@@ -22,6 +22,8 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 	 */
 	protected static $_instancePool = array();
 
+	protected static $_instancePoolCount = 0;
+
 	/**
 	 * Array of all primary keys
 	 * @var string[]
@@ -285,10 +287,14 @@ foreach($fields as $key=>$field):
 	 * @return void
 	 */
 	static function insertIntoPool(<?php echo $class_name ?> $object) {
-		if (!<?php echo $class_name ?>::getPrimaryKeys()) return;
-		if (count(<?php echo $class_name ?>::$_instancePool) > self::MAX_INSTANCE_POOL_SIZE) return;
+<?php if(!$PKs): ?>
+		// This table doesn't have primary keys, so there's no way to key the instance pool array
+		return;
+<?php endif ?>
+		if (<?php echo $class_name ?>::$_instancePoolCount > <?php echo $class_name ?>::MAX_INSTANCE_POOL_SIZE) return;
 
 		<?php echo $class_name ?>::$_instancePool[implode('-',$object->getPrimaryKeyValues())] = clone $object;
+		++<?php echo $class_name ?>::$_instancePoolCount;
 	}
 
 	/**
@@ -312,12 +318,12 @@ foreach($fields as $key=>$field):
 	 * @return void
 	 */
 	static function removeFromPool($object) {
-		$pk = is_object($object) ?
-			implode('-', $object->getPrimaryKeyValues()) :
-			$object;
+		$pk = is_object($object) ? implode('-', $object->getPrimaryKeyValues()) : $object;
 
-		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool))
+		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool)){
 			unset(<?php echo $class_name ?>::$_instancePool[$pk]);
+			--<?php echo $class_name ?>::$_instancePoolCount;
+		}
 	}
 
 	/**

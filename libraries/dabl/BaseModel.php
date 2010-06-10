@@ -1,7 +1,7 @@
 <?php
 
 abstract class BaseModel {
-	const MAX_INSTANCE_POOL_SIZE = 10000;
+	const MAX_INSTANCE_POOL_SIZE = 100;
 
 	/**
 	 * Array to contain names of modified columns
