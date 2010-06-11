@@ -206,8 +206,6 @@ foreach($fields as $key=>$field):
 	static function retrieveByPK($the_pk) {
 <?php if(count($PKs) > 1): ?>
 		throw new Exception('This table has more than one primary key.  Use retrieveByPKs() instead.');
-<?php elseif(count($PKs)==0): ?>
-		throw new Exception('This table does not have a primary key.');
 <?php else: ?>
 		return self::retrieveByPKs($the_pk);
 <?php endif ?>
@@ -220,6 +218,9 @@ foreach($fields as $key=>$field):
 	 
 	 */
 	static function retrieveByPKs(<?php foreach($PKs as $k=>$v): ?><?php if($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><? endforeach ?>) {
+<?php if(count($PKs)==0): ?>
+		throw new Exception('This table does not have any primary keys.');
+<?php else: ?>
 <?php foreach($PKs as $k=>$v): ?>
 		if($<?php echo strtolower(str_replace('-', '_', $v)) ?>===null)
 			return null;
@@ -234,6 +235,7 @@ foreach($fields as $key=>$field):
 <?php endforeach ?>
 		$q->setLimit(1);
 		return array_shift(<?php echo $class_name ?>::doSelect($q, true));
+<?php endif ?>
 	}
 
 	/**
