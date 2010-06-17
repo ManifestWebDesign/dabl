@@ -48,7 +48,7 @@ class DABLGenerator extends BaseGenerator {
      * @return String
      */
     function getEditView($params) {
-        foreach ($params as $key => $value)$$key = $value;
+        foreach ($params as $key => &$value)$$key = $value;
         ob_start();
         require dirname(__FILE__) . '/dabl/edit.php';
         return ob_get_clean();
@@ -61,7 +61,7 @@ class DABLGenerator extends BaseGenerator {
      * @return String
      */
     function getListView($params) {
-        foreach ($params as $key => $value)$$key = $value;
+        foreach ($params as $key => &$value)$$key = $value;
         ob_start();
         require dirname(__FILE__) . '/dabl/list.php';
         return ob_get_clean();
@@ -74,7 +74,7 @@ class DABLGenerator extends BaseGenerator {
      * @return String
      */
     function getGridView($params) {
-        foreach ($params as $key => $value)$$key = $value;
+        foreach ($params as $key => &$value)$$key = $value;
         ob_start();
         require dirname(__FILE__) . '/dabl/grid.php';
         return ob_get_clean();
@@ -87,7 +87,7 @@ class DABLGenerator extends BaseGenerator {
      * @return String
      */
     function getIndexView($params) {
-        foreach ($params as $key => $value)$$key = $value;
+        foreach ($params as $key => &$value)$$key = $value;
         ob_start();
         require dirname(__FILE__) . '/dabl/index.php';
         return ob_get_clean();
@@ -100,7 +100,7 @@ class DABLGenerator extends BaseGenerator {
      * @return String
      */
     function getShowView($params) {
-        foreach ($params as $key => $value)$$key = $value;
+        foreach ($params as $key => &$value)$$key = $value;
         unset($actions['Show']);
         ob_start();
         require dirname(__FILE__) . '/dabl/show.php';
@@ -118,11 +118,11 @@ class DABLGenerator extends BaseGenerator {
         $actions = array();
         if (!$pk)return $actions;
 
-        foreach (self::$standard_actions as $staction)
+        foreach (self::$standard_actions as &$staction)
             $actions[$staction] = "<?php echo site_url('" . $plural . "/" . strtolower($staction) . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
 
         $fkeys_to = $this->getForeignKeysToTable($table_name);
-        foreach ($fkeys_to as $k => $r) {
+        foreach ($fkeys_to as $k => &$r) {
             $from_table = $r['from_table'];
             $from_className = $this->getModelName($from_table);
             $from_column = $r['from_column'];

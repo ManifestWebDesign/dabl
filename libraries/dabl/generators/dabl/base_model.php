@@ -30,7 +30,7 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 	 */
 	protected static $_primaryKeys = array(
 <?php if($PKs): ?>
-<?php foreach($PKs as $the_pk): ?>
+<?php foreach($PKs as &$the_pk): ?>
 		'<?php echo $the_pk ?>',
 <?php endforeach ?>
 <?php endif ?>
@@ -53,13 +53,13 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 	 * @var string[]
 	 */
 	protected static $_columnNames = array(
-<?php foreach($fields as $key=>$field): ?>
+<?php foreach($fields as $key => &$field): ?>
 		'<?php echo $field->getName() ?>',
 <?php endforeach ?>
 	);
 
 <?php
-foreach($fields as $key=>$field):
+foreach($fields as $key => &$field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 ?>
 
@@ -86,7 +86,7 @@ elseif($default!==null && strtolower($default)!=='null')
 	 * Column Accessors and Mutators
 	 */
 <?php
-foreach($fields as $key=>$field):
+foreach($fields as $key => &$field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 	$method_name = $options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName();
 	$params = $field->isTemporalType() ? '$format = null' : '';
@@ -217,11 +217,11 @@ foreach($fields as $key=>$field):
 	 * @return <?php echo $class_name ?>
 	 
 	 */
-	static function retrieveByPKs(<?php foreach($PKs as $k=>$v): ?><?php if($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><? endforeach ?>) {
+	static function retrieveByPKs(<?php foreach($PKs as $k => &$v): ?><?php if($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><? endforeach ?>) {
 <?php if(count($PKs)==0): ?>
 		throw new Exception('This table does not have any primary keys.');
 <?php else: ?>
-<?php foreach($PKs as $k=>$v): ?>
+<?php foreach($PKs as $k => &$v): ?>
 		if($<?php echo strtolower(str_replace('-', '_', $v)) ?>===null)
 			return null;
 <?php endforeach ?>
@@ -230,7 +230,7 @@ foreach($fields as $key=>$field):
 			return $pool_instance;
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = new Query;
-<?php foreach($PKs as $k=>$v): ?>
+<?php foreach($PKs as $k => &$v): ?>
 		$q->add($conn->quoteIdentifier('<?php echo $v ?>'), $<?php echo strtolower(str_replace('-', '_', $v)) ?>);
 <?php endforeach ?>
 		$q->setLimit(1);
@@ -272,7 +272,7 @@ foreach($fields as $key=>$field):
 	}
 
 	function castInts() {
-<?php foreach($fields as $key => $field): ?>
+<?php foreach($fields as $key => &$field): ?>
 <?php if($field->getPdoType()==PDO::PARAM_INT): ?>
 		$this-><?php echo $field->getName() ?> = ($this-><?php echo $field->getName() ?> === null) ? null : (int)$this-><?php echo $field->getName() ?>;
 <?php endif ?>

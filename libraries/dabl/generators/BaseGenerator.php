@@ -196,9 +196,9 @@ abstract class BaseGenerator{
 		$fields = $this->getColumns($table_name);
 		$conn = DBManager::getConnection($this->getConnectionName());
 		
-		foreach($fields as $field){
-			if($field->isPrimaryKey()) $PKs[] = $field->getName();
-		}
+		foreach($fields as $field)
+			if($field->isPrimaryKey())
+				$PKs[] = $field->getName();
 
 		$auto_increment = false;
 		if(count($PKs)==1){
@@ -254,7 +254,7 @@ abstract class BaseGenerator{
 			die('The directory '.$options['base_model_path'].' does not exist.');
 
 		//Write php files for classes
-		foreach($table_names as $table_name){
+		foreach($table_names as &$table_name){
 			$class_name = $this->getModelName($table_name);
 			$lower_case_table = strtolower($table_name);
 
@@ -316,7 +316,7 @@ abstract class BaseGenerator{
 
 		$options = $this->options;
 
-		foreach($table_names as $table_name){
+		foreach($table_names as &$table_name){
 			$target_dir = $options['controller_path'];
 			$lower_case_table = strtolower($table_name);
 
@@ -433,7 +433,7 @@ abstract class BaseGenerator{
 		//if ( in_array( strtolower( $string ), $uncountable ) )return $string;
 
 		// check for matches using regular expressions
-		foreach ( $plural as $pattern ){
+		foreach ( $plural as &$pattern ){
 			if ( preg_match( $pattern[0], $string ) )
 				return preg_replace( $pattern[0], $pattern[1], $string );
 		}

@@ -146,7 +146,7 @@ class Condition{
 			if($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH){
 				$statement->addParams($right);
 				$placeholders = array();
-				foreach($right as $r)
+				foreach($right as &$r)
 					$placeholders[] = '?';
 				$right = '('.implode(',', $placeholders).')';
 			}
@@ -190,7 +190,7 @@ class Condition{
 	 */
 	function addAnd($left, $right=null, $operator=Query::EQUAL, $quote = null){
 		if(is_array($left)){
-			foreach($left as $key => $value)
+			foreach($left as $key => &$value)
 				$this->addAnd($key, $value);
 			return $this;
 		}
@@ -211,7 +211,7 @@ class Condition{
 	 */
 	function addOr($left, $right=null, $operator=Query::EQUAL, $quote = null){
 		if(is_array($left)){
-			foreach($left as $key => $value)
+			foreach($left as $key => &$value)
 				$this->addOr($key, $value);
 			return $this;
 		}
@@ -235,14 +235,16 @@ class Condition{
 			$and_strings[] = $and_statement->getString();
 			$statement->addParams($and_statement->getParams());
 		}
-		if($and_strings) $AND = implode(" AND ", $and_strings);
+		if($and_strings)
+			$AND = implode(' AND ', $and_strings);
 
 		$or_strings = array();
 		foreach($this->ors as $or_statement){
 			$or_strings[] = $or_statement->getString();
 			$statement->addParams($or_statement->getParams());
 		}
-		if($or_strings) $OR = implode(" OR ", $or_strings);
+		if($or_strings)
+			$OR = implode(' OR ', $or_strings);
 
 		if($and_strings || $or_strings){
 			if($and_strings && $or_strings)

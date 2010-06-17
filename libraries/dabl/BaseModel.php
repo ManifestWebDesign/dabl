@@ -115,10 +115,10 @@ abstract class BaseModel {
 	 */
 	function fromArray($array) {
 		$columns = $this->getColumnNames();
-		foreach ($array as $column => $value) {
+		foreach ($array as $column => &$v) {
 			if (in_array($column, $columns) === false)
 				continue;
-			$this->{'set' . $column}($value);
+			$this->{'set' . $column}($v);
 		}
 	}
 
@@ -129,8 +129,7 @@ abstract class BaseModel {
 	 */
 	function toArray() {
 		$array = array();
-		$column_names = $this->getColumnNames();
-		while ($column = array_shift($column_names))
+		foreach($this->getColumnNames() as $column)
 			$array[$column] = $this->{'get' . $column} ();
 		return $array;
 	}
@@ -161,7 +160,7 @@ abstract class BaseModel {
 		if (!$pks)
 			return false;
 
-		foreach ($pks as $pk)
+		foreach ($pks as &$pk)
 			if ($this->$pk === null)
 				return false;
 		return true;
@@ -176,7 +175,7 @@ abstract class BaseModel {
 		$arr = array();
 		$pks = $this->getPrimaryKeys();
 
-		foreach ($pks as $pk) {
+		foreach ($pks as &$pk) {
 			$arr[] = $this->{"get$pk"}();
 		}
 
@@ -214,7 +213,7 @@ abstract class BaseModel {
 		if (!$pks
 			)throw new Exception("This table has no primary keys");
 		$q = new Query();
-		foreach ($pks as $pk) {
+		foreach ($pks as &$pk) {
 			if ($this->$pk === null)
 				throw new Exception("Cannot delete using NULL primary key.");
 			$q->addAnd($conn->quoteIdentifier($pk), $this->$pk);
