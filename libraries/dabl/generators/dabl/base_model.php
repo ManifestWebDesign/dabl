@@ -225,7 +225,10 @@ foreach($fields as $key => &$field):
 		if($<?php echo strtolower(str_replace('-', '_', $v)) ?>===null)
 			return null;
 <?php endforeach ?>
-		$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if(count($PKs)==1): ?>$<?php echo strtolower(str_replace('-', '_', $PK)) ?><?php else: ?>implode('-', func_get_args())<?php endif ?>);
+<?php if (count($PKs)!=1): ?>
+		$args = func_get_args();
+<?php endif; ?>
+		$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if(count($PKs)==1): ?>$<?php echo strtolower(str_replace('-', '_', $PK)) ?><?php else: ?>implode('-', $args)<?php endif ?>);
 		if($pool_instance)
 			return $pool_instance;
 		$conn = <?php echo $class_name ?>::getConnection();
