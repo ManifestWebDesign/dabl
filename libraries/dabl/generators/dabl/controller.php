@@ -8,9 +8,9 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	}
 
 	function save($id = null){
-		$id = $id ? $id : @$_POST[<?php echo $model_name ?>::getPrimaryKey()];
+		$id = $id ? $id : @$_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
 		$<?php echo $single ?> = $id ? <?php echo $model_name ?>::retrieveByPK($id) : new <?php echo $model_name ?>;
-		$<?php echo $single ?>->fromArray($_POST);
+		$<?php echo $single ?>->fromArray($_REQUEST);
 
 		if($<?php echo $single ?>->save() || (!$<?php echo $single ?>->isModified() && !$<?php echo $single ?>->isNew())){
 			$this->persistant['messages'][] = '<?php echo self::spaceTitleCase($single) ?> saved';
@@ -24,7 +24,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	}
 
 	function delete($id = null){
-		$id = $id ? $id : @$_POST[<?php echo $model_name ?>::getPrimaryKey()];
+		$id = $id ? $id : @$_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
 		$<?php echo $single ?> = <?php echo $model_name ?>::retrieveByPK($id);
 
 		if($<?php echo $single ?>->delete())
@@ -36,13 +36,13 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	}
 
 	function show($id = null){
-		$id = $id ? $id : @$_POST[<?php echo $model_name ?>::getPrimaryKey()];
+		$id = $id ? $id : @$_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
 		$<?php echo $single ?> = $id ? <?php echo $model_name ?>::retrieveByPK($id) : new <?php echo $model_name ?>;
 		$this['<?php echo $single ?>'] = $<?php echo $single ?>;
 	}
 
 	function edit($id = null){
-		$id = $id ? $id : @$_POST[<?php echo $model_name ?>::getPrimaryKey()];
+		$id = $id ? $id : @$_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
 		$<?php echo $single ?> = $id ? <?php echo $model_name ?>::retrieveByPK($id) : new <?php echo $model_name ?>;
 		$<?php echo $single ?>->fromArray(@$_REQUEST);
 		$this['<?php echo $single ?>'] = $<?php echo $single ?>;
@@ -58,7 +58,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 			$used_from[$to_table] = $from_column;
 ?>
 	function <?php echo $fk_single ?>($id = null){
-		$id = $id ? $id : @$_POST[<?php echo $to_class_name ?>::getPrimaryKey()];
+		$id = $id ? $id : @$_REQUEST[<?php echo $to_class_name ?>::getPrimaryKey()];
 		$<?php echo $fk_single ?> = $id ? <?php echo $to_class_name ?>::retrieveByPK($id) : new <?php echo $to_class_name ?>;
 
 		$this['<?php echo $plural ?>'] = $<?php echo $fk_single ?>->get<?php echo $model_name ?>s();
