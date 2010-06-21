@@ -207,9 +207,9 @@ abstract class BaseGenerator{
 				$auto_increment = true;
 		}
 
-        ob_start();
-        require dirname(__FILE__) . '/dabl/base_model.php';
-        return ob_get_clean();
+		ob_start();
+		require dirname(__FILE__) . '/dabl/base_model.php';
+		return ob_get_clean();
 	}
 
 	/**
@@ -222,9 +222,9 @@ abstract class BaseGenerator{
 	function getModel($table_name){
 		$class_name = $this->getModelName($table_name);
 		$options = $this->options;
-        ob_start();
-        require dirname(__FILE__) . '/dabl/model.php';
-        return ob_get_clean();
+		ob_start();
+		require dirname(__FILE__) . '/dabl/model.php';
+		return ob_get_clean();
 	}
 
 	abstract function getViews($table_name);
