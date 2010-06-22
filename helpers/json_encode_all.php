@@ -9,7 +9,7 @@
  * properties directly but only through an Iterator interface are also encoded
  * correctly.
  */
-function json_encode_all($param) {
+function json_encode_all(&$param) {
 	if (is_object($param) || is_array($param))
 		$param = object_to_array($param);
 	return json_encode($param);

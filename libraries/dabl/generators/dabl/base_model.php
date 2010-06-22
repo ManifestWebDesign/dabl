@@ -170,7 +170,7 @@ foreach($fields as $key => &$field):
 	 * @return bool
 	 */
 	static function hasColumn($columnName) {
-		return in_array(strtolower($columnName), array_map('strtolower', <?php echo $class_name ?>::getColumnNames()));
+		return in_array(strtolower($columnName), array_map('strtolower', <?php echo $class_name ?>::$_columnNames));
 	}
 
 	/**
@@ -485,22 +485,21 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	 * a second time(for performance purposes).
 	 * @return <?php echo $from_class_name ?>[]
 	 */
-	function get<?php echo $from_class_name ?>s($extra=NULL) {
+	function get<?php echo $from_class_name ?>s($extra = null) {
 		if($this->get<?php echo $to_column ?>()===null)
 			return array();
 
 		if(!$extra || $extra instanceof Query)
 			return <?php echo $from_class_name ?>::doSelect($this->get<?php echo $from_class_name ?>sQuery($extra));
 
-		if(!$extra && $this->getCacheResults() && @$this-><?php echo $from_class_name ?>s_c && !$this->isColumnModified("<?php echo $to_column ?>"))
+		if(!$extra && $this->getCacheResults() && @$this-><?php echo $from_class_name ?>s_c && !$this->isColumnModified('<?php echo $to_column ?>'))
 			return $this-><?php echo $from_class_name ?>s_c;
 
 		$conn = $this->getConnection();
 		$table_quoted = $conn->quoteIdentifier(<?php echo $from_class_name ?>::getTableName());
-		$column_quoted = $conn->quoteIdentifier("<?php echo $from_column ?>");
-		$query_string = "SELECT * FROM $table_quoted WHERE $column_quoted=".$conn->checkInput($this->get<?php echo $to_column ?>())." $extra";
-		$<?php echo $from_table ?>s = <?php echo $from_class_name ?>::fetch($query_string);
-		if(!$extra)$this-><?php echo $from_class_name ?>s_c = $<?php echo $from_table ?>s;
+		$column_quoted = $conn->quoteIdentifier('<?php echo $from_column ?>');
+		$<?php echo $from_table ?>s = <?php echo $from_class_name ?>::fetch("SELECT * FROM $table_quoted WHERE $column_quoted=".$conn->checkInput($this->get<?php echo $to_column ?>())." $extra");
+		if($extra === null) $this-><?php echo $from_class_name ?>s_c = $<?php echo $from_table ?>s;
 		return $<?php echo $from_table ?>s;
 	}
 <?php endforeach ?>

@@ -10,7 +10,6 @@
  * @return array
  */
 function object_to_array($var) {
-	$result = array();
 	$references = array();
 
 	//use toArray() if it exists so object can control array conversion if it wants to
@@ -22,19 +21,15 @@ function object_to_array($var) {
 	}
 
 	// loop over elements/properties
-	foreach ($var as $key => $value) {
+	foreach ($var as $key => &$value) {
 		// recursively convert objects
 		if (is_object($value) || is_array($value)) {
 			// but prevent cycles
 			if (!in_array($value, $references)) {
-				$result[$key] = object_to_array($value);
-				$references[] = $value;
+				$value = object_to_array($value);
+				$references[] = &$value;
 			}
 		}
-		else {
-			// simple values are untouched
-			$result[$key] = $value;
-		}
 	}
-	return $result;
+	return $var;
 }
