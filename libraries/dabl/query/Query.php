@@ -390,7 +390,7 @@ class Query{
 		if($this->_columns)
 			$columns = implode(', ',$this->_columns);
 		elseif($alias)$columns = "$alias.*";
-		else $columns = "*";
+		else $columns = "$table_name.*"; //always use the table name of the object trying to retrieve
 
 		if($this->_distinct)
 			$columns = "DISTINCT $columns";
