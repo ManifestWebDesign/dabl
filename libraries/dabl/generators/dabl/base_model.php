@@ -47,7 +47,7 @@ abstract class base<?php echo $class_name ?> extends BaseModel{
 	 * @var bool
 	 */
 	protected static $_isAutoIncrement = <?php echo $auto_increment ? 'true' : 'false' ?>;
-	
+
 	/**
 	 * array of all column names
 	 * @var string[]
@@ -140,7 +140,7 @@ foreach($fields as $key => &$field):
 			$this-><?php echo $field_name ?> = $value;
 		}
 	}
-	
+
 <?php endforeach ?>
 
 	/**
@@ -201,13 +201,13 @@ foreach($fields as $key => &$field):
 	 * Searches the database for a row with the ID(primary key) that matches
 	 * the one input.
 	 * @return <?php echo $class_name ?>
- 
+
 	 */
 	static function retrieveByPK($the_pk) {
 <?php if(count($PKs) > 1): ?>
 		throw new Exception('This table has more than one primary key.  Use retrieveByPKs() instead.');
 <?php else: ?>
-		return self::retrieveByPKs($the_pk);
+		return <?php echo $class_name ?>::retrieveByPKs($the_pk);
 <?php endif ?>
 	}
 
@@ -215,7 +215,7 @@ foreach($fields as $key => &$field):
 	 * Searches the database for a row with the primary keys that match
 	 * the ones input.
 	 * @return <?php echo $class_name ?>
-	 
+
 	 */
 	static function retrieveByPKs(<?php foreach($PKs as $k => &$v): ?><?php if($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><? endforeach ?>) {
 <?php if(count($PKs)==0): ?>
@@ -246,7 +246,7 @@ foreach($fields as $key => &$field):
 	 * first result of a query.  If the query returns no results,
 	 * returns null.
 	 * @return <?php echo $class_name ?>
-	 
+
 	 */
 	static function fetchSingle($query_string, $write_cache = true) {
 		return array_shift(<?php echo $class_name ?>::fetch($query_string, $write_cache));
@@ -382,14 +382,24 @@ foreach($fields as $key => &$field):
 	}
 
 	/**
+	 * @param Query $q The Query object that creates the SELECT query string
+	 * @param bool $write_cache Whether or not to store results in instance pool
+	 * @param array $additional_classes Array of additional classes for fromResult to instantiate as properties
 	 * @return <?php echo $class_name ?>[]
 	 */
-	static function doSelect(Query $q, $write_cache = false){
+	static function doSelect(Query $q, $write_cache = false, $additional_classes = null) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
 		if(!$q->getTable() || strrpos($q->getTable(), <?php echo $class_name ?>::getTableName())===false )
 			$q->setTable(<?php echo $class_name ?>::getTableName());
-		return <?php echo $class_name ?>::fromResult($q->doSelect($conn), $class='<?php echo $class_name ?>', $write_cache);
+
+		if(is_array($additional_classes)){
+			array_unshift($additional_classes, '<?php echo $class_name ?>');
+			$class = $additional_classes;
+		} else {
+			$class='<?php echo $class_name ?>';
+		}
+		return <?php echo $class_name ?>::fromResult($q->doSelect($conn), $class, $write_cache);
 	}
 
 <?php
@@ -402,8 +412,19 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	if(@$used_from[$to_table]) continue;
 	$used_from[$to_table] = $from_column;
 ?>
+
+	protected $_<?php echo $to_class_name ?>;
+
+	function set<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
+		if(!$<?php echo $to_class_name ?>->get<?php echo $from_column ?>())
+			throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $from_column ?>');
+		if($this->getCacheResults())
+			$this->_<?php echo $to_class_name ?> = $<?php echo $to_class_name ?>;
+		$this->set<?echo $from_column ?>($<?php echo $to_class_name ?>->get<?php echo $from_column ?>());
+	}
+
 	/**
-	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?> 
+	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
 	 * that matches $this-><?php echo $from_column ?>.
 	 * @return <?php echo $to_class_name ?>
 
@@ -413,8 +434,32 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 		$column = '<?php echo $to_column ?>';
 		if($pk != $column)
 			throw new Exception('Foreign key references a column that is not a primary key.');
-		return <?php echo $to_class_name ?>::retrieveByPK($this->get<?echo $from_column ?>());
+		if($this->getCacheResults() && $this->_<?php echo $to_class_name ?> !== null)
+			return $this->_<?php echo $to_class_name ?>;
+		$result = <?php echo $to_class_name ?>::retrieveByPK($this->get<?echo $from_column ?>());
+		if($this->getCacheResults())
+			$this->_<?php echo $to_class_name ?> = $result;
+		return $result;
 	}
+
+	/**
+	 * This function expects the Query to be selecting * columns
+	 * from <?php echo $table_name ?> and from <?php echo $to_table ?> (in that order).
+	 * @return <?php echo $class_name ?>[]
+	 */
+	static function doSelectJoin<?php echo $to_class_name ?>(Query $q, $write_cache = false) {
+		$to_table = <?php echo $to_class_name ?>::getTableName();
+		$this_table = <?php echo $class_name ?>::getTableName();
+		$q->join($to_table, $to_table.'.<?php echo $to_column ?> = '.$this_table.'.<?php echo $from_column ?>');
+		$columns = $q->getColumns();
+		$alias = $q->getAlias();
+		if(!$columns)
+			$columns[] = $alias ? $alias.'.*' : $this_table.'.*';
+		$columns[] = $to_table.'.*';
+		$q->setColumns($columns);
+		return <?php echo $class_name ?>::doSelect($q, $write_cache, array('<?php echo $to_class_name ?>'));
+	}
+
 <?php endforeach ?>
 
 <?php

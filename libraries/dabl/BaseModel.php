@@ -48,21 +48,55 @@ abstract class BaseModel {
 	 * the rows of a PDOStatement(query result)
 	 *
 	 * @param PDOStatement $result
-	 * @param string $class name of class to create
+	 * @param string $class_name name of class to create
 	 * @return BaseModel[]
 	 */
-	static function fromResult(PDOStatement $result, $class, $write_cache = false) {
-		if (!$class)
+	static function fromResult(PDOStatement $result, $class_name, $write_cache = false) {
+		if (!$class_name)
 			throw new Exception('No class name given');
 
 		$objects = array();
-		while ($object = $result->fetchObject($class)) {
-			$object->castInts();
-			$object->setNew(false);
-			$objects[] = $object;
-			if($write_cache)$object->insertIntoPool($object);
+		if (is_array($class_name)) {
+			$class_names = $class_name;
+			unset($class_name);
+			$starting_column_number = 0;
+			while ($values = $result->fetch(PDO::FETCH_NUM)) {
+				unset($main_object);
+				$startcol = 0;
+				foreach ($class_names as $key => $class_name) {
+					$object = new $class_name;
+					$object->fromNumericResultArray($values, $startcol);
+
+					if ($write_cache)
+						$object->insertIntoPool($object);
+
+					if (!isset($main_object)) {
+						$main_object = $objects[] = $object;
+					} else {
+						if(method_exists($main_object, 'set'.$class_name))
+							$main_object->{'set'.$class_name}($object);
+						else
+							$main_object->{$class_name} = $object;
+					}
+				}
+			}
+		} else {
+			while ($object = $result->fetchObject($class_name)) {
+				$object->castInts();
+				$object->setNew(false);
+				$objects[] = $object;
+				if ($write_cache)
+					$object->insertIntoPool($object);
+			}
 		}
 		return $objects;
+	}
+
+	function fromNumericResultArray($values, &$startcol) {
+		foreach ($this->getColumnNames() as $column_name)
+			$this->{$column_name} = $values[$startcol++];
+		$this->castInts();
+		$this->setNew(false);
 	}
 
 	/**
@@ -129,8 +163,8 @@ abstract class BaseModel {
 	 */
 	function toArray() {
 		$array = array();
-		foreach($this->getColumnNames() as $column)
-			$array[$column] = $this->{'get' . $column} ();
+		foreach ($this->getColumnNames() as $column)
+			$array[$column] = $this->{'get' . $column}();
 		return $array;
 	}
 
@@ -211,6 +245,7 @@ abstract class BaseModel {
 		$conn = $this->getConnection();
 		$pks = $this->getPrimaryKeys();
 		if (!$pks
+
 			)throw new Exception("This table has no primary keys");
 		$q = new Query();
 		foreach ($pks as &$pk) {
