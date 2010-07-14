@@ -121,6 +121,9 @@ class Query {
 
 	/**
 	 * Add a column to the list of columns to select.  If unused, defaults to *.
+	 *
+	 * {@example libraries/dabl/query/Query_addColumn.php}
+	 *
 	 * @param String $column_name
 	 * @return Query
 	 */
