@@ -148,11 +148,13 @@ class Query {
 	}
 
 	/**
-	 * Sets the table to be queried. This can be a string table name or an
-	 * instance of Query if you would like to nest queries.
+	 * Sets the table to be queried. This can be a string table name
+	 * or an instance of Query if you would like to nest queries.
+	 * This function also supports arbitrary SQL.
+	 *
+	 * @param String|Query $tableName Name of the table to add
+	 * @param String[optional] $alias Alias for the table
 	 * @return Query
-	 * @param $tableName Mixed
-	 * @param $alias String[optional]
 	 */
 	function setTable($tableName, $alias=null) {
 		if ($tableName instanceof Query) {
@@ -167,8 +169,9 @@ class Query {
 	}
 
 	/**
-	 * Returns a String representation of the table being queried, including its
-	 * alias if present.
+	 * Returns a String representation of the table being queried,
+	 * including its alias if present.
+	 *
 	 * @return String
 	 */
 	function getTable() {
@@ -176,8 +179,9 @@ class Query {
 	}
 
 	/**
-	 * Returns a String representation of the table being queried, not including
-	 * its alias.
+	 * Returns a String representation of the table being queried,
+	 * not including its alias.
+	 *
 	 * @return String
 	 */
 	function getTableName() {
@@ -190,7 +194,9 @@ class Query {
 	}
 
 	/**
-	 * Returns a String of the alias of the talbe being queried, if present
+	 * Returns a String of the alias of the talbe being queried,
+	 * if present.
+	 *
 	 * @return String
 	 */
 	function getAlias() {
@@ -201,9 +207,11 @@ class Query {
 	}
 
 	/**
-	 * Provide the Condition object to generate the WHERE clause of the query
+	 * Provide the Condition object to generate the WHERE clause of
+	 * the query.
+	 *
+	 * @param Condition $w
 	 * @return Query
-	 * @param $w Condition
 	 */
 	function setWhere(Condition $w) {
 		$this->_where = $w;
@@ -211,7 +219,9 @@ class Query {
 	}
 
 	/**
-	 * Returns the Condition object that generates the WHERE clause of the query
+	 * Returns the Condition object that generates the WHERE clause
+	 * of the query.
+	 *
 	 * @return Condition
 	 */
 	function getWhere() {
@@ -219,17 +229,19 @@ class Query {
 	}
 
 	/**
-	 * Short version of addJoin();
-	 * @return Query
+	 * Alias of {@link addJoin()}.
 	 */
 	function join($table, $on_clause=null, $join_type=self::JOIN) {
 		return $this->addJoin($table, $on_clause, $join_type);
 	}
 
 	/**
-	 * @param mixed $table string or Query representing table to join
-	 * @param mixed $on_clause string or Condition
-	 * @param string $join_type
+	 * Add a JOIN to the query.
+	 *
+	 * @todo Support the ON clause being NULL correctly
+	 * @param string|Query $table Table to join on
+	 * @param string|Condition $on_clause ON clause to join with
+	 * @param string $join_type Type of JOIN to perform
 	 * @return Query
 	 */
 	function addJoin($table, $on_clause=null, $join_type=self::JOIN) {
@@ -272,8 +284,7 @@ class Query {
 	}
 
 	/**
-	 * Short version of addAnd();
-	 * @return Query
+	 * Alias of {@link addAnd()}
 	 */
 	function add($column, $value=null, $operator=self::EQUAL, $quote = null) {
 		return $this->addAnd($column, $value, $operator, $quote);
