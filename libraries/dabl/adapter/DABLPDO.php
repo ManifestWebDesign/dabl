@@ -196,6 +196,7 @@ abstract class DABLPDO extends PDO {
 		$string .= '<tr><td></td><td nowrap="nowrap">Total Time: </td><td>' . round($total_time, 6) . '</td><td>&nbsp;</td></tr>';
 		$string .= '</tbody></table>';
 		echo $string;
+		echo '<br />'.'Max Memory Usage: '.memory_get_peak_usage() / (1024 * 1024) .' MB';
 	}
 
 	/**
