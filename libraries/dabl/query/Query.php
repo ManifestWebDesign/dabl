@@ -152,7 +152,7 @@ class Query {
 	 * or an instance of Query if you would like to nest queries.
 	 * This function also supports arbitrary SQL.
 	 *
-	 * @param String|Query $tableName Name of the table to add
+	 * @param String|Query $tableName Name of the table to add, or sub-Query
 	 * @param String[optional] $alias Alias for the table
 	 * @return Query
 	 */
@@ -161,9 +161,10 @@ class Query {
 			if (!$alias)
 				throw new Exception("The nested query must have an alias.");
 			$tableName = "($tableName) $alias";
-		}
-		elseif ($alias)
+		} elseif ($alias) {
 			$tableName = "$tableName $alias";
+		}
+
 		$this->_table = $tableName;
 		return $this;
 	}
@@ -185,12 +186,9 @@ class Query {
 	 * @return String
 	 */
 	function getTableName() {
-		$table = $this->_table;
-		$table_parts = explode(' ', $table, 2);
-		if (count($table_parts) == 1)
-			return $table;
-		else
-			return $table_parts[0];
+		$space = strrpos($this->_table, ' ');
+
+		return false===$space ? $this->_table : substr($this->_table, 0, $space);
 	}
 
 	/**
@@ -200,10 +198,9 @@ class Query {
 	 * @return String
 	 */
 	function getAlias() {
-		$table = $this->_table;
-		$table_parts = explode(' ', $table);
-		if (count($table_parts) > 1)
-			return $table_parts[1];
+		$space = strrpos($this->_table, ' ');
+
+		return false===$space ? null : substr($this->_table, $space+1);
 	}
 
 	/**
@@ -431,7 +428,9 @@ class Query {
 			$columns = "DISTINCT $columns";
 		}
 
-		if ($conn) {
+		if (strpos($table_name, ' ')!==false) {
+			$table = $alias ? "$table_name $alias" : $table_name;
+		} elseif ($conn) {
 			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
 		} else {
 			$table = $alias ? "`$table_name` $alias" : "`$table_name`";
