@@ -78,6 +78,20 @@ abstract class BaseModel {
 	}
 
 	/**
+	 * Loads values from the array returned by PDOStatement::fetch(PDO::FETCH_ASSOC)
+	 * @param array $values
+	 */
+	function fromAssociativeResultArray($values) {
+		foreach ($this->getColumnNames() as $column_name)
+			$this->{$column_name} = $values[$column_name];
+		if($this->getPrimaryKeys() && !$this->hasPrimaryKeyValues())
+			return false;
+		$this->castInts();
+		$this->setNew(false);
+		return true;
+	}
+
+	/**
 	 * Creates new instance of $this and
 	 * @return BaseModel
 	 */
@@ -128,7 +142,7 @@ abstract class BaseModel {
 	function fromArray($array) {
 		$columns = $this->getColumnNames();
 		foreach ($array as $column => &$v) {
-			if (in_array($column, $columns) === false)
+			if (is_string($column) === false || in_array($column, $columns) === false)
 				continue;
 			$this->{'set' . $column}($v);
 		}

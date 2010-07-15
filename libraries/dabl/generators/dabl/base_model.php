@@ -168,8 +168,11 @@ foreach($fields as $key => &$field):
 	/**
 	 * @return bool
 	 */
-	static function hasColumn($columnName) {
-		return in_array(strtolower($columnName), array_map('strtolower', <?php echo $class_name ?>::$_columnNames));
+	static function hasColumn($column_name) {
+		static $lower_case_columns;
+		if(!$lower_case_columns)
+			$lower_case_columns = array_map('strtolower', <?php echo $class_name ?>::$_columnNames);
+		return in_array(strtolower($column_name), $lower_case_columns);
 	}
 
 	/**
@@ -455,7 +458,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 		$q->join($to_table, $this_table.'.<?php echo $from_column ?> = '.$to_table.'.<?php echo $to_column ?>', $join_type);
 		$columns[] = $to_table.'.*';
 		$q->setColumns($columns);
-		
+
 		return <?php echo $class_name ?>::doSelect($q, $write_cache, array('<?php echo $to_class_name ?>'));
 	}
 
@@ -478,7 +481,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 		$to_column = $r['to_column'];
 		$from_column = $r['from_column'];
 ?>
-		
+
 		$to_table = <?php echo $to_class_name ?>::getTableName();
 		$q->join($to_table, $this_table.'.<?php echo $from_column ?> = '.$to_table.'.<?php echo $to_column ?>', $join_type);
 		$columns[] = $to_table.'.*';
