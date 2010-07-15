@@ -140,7 +140,6 @@ foreach($fields as $key => &$field):
 			$this-><?php echo $field_name ?> = $value;
 		}
 	}
-
 <?php endforeach ?>
 
 	/**
@@ -410,7 +409,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	$to_column = $r['to_column'];
 	$from_column = $r['from_column'];
 	if(@$used_from[$to_table]) continue;
-	$used_from[$to_table] = $from_column;
+	$used_from[$to_table] = $r;
 ?>
 
 	protected $_<?php echo $to_class_name ?>;
@@ -443,24 +442,53 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	}
 
 	/**
-	 * This function expects the Query to be selecting * columns
-	 * from <?php echo $table_name ?> and from <?php echo $to_table ?> (in that order).
 	 * @return <?php echo $class_name ?>[]
 	 */
-	static function doSelectJoin<?php echo $to_class_name ?>(Query $q, $write_cache = false) {
-		$to_table = <?php echo $to_class_name ?>::getTableName();
-		$this_table = <?php echo $class_name ?>::getTableName();
-		$q->join($to_table, $to_table.'.<?php echo $to_column ?> = '.$this_table.'.<?php echo $from_column ?>');
+	static function doSelectJoin<?php echo $to_class_name ?>(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
 		$columns = $q->getColumns();
 		$alias = $q->getAlias();
+		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
 		if(!$columns)
-			$columns[] = $alias ? $alias.'.*' : $this_table.'.*';
+			$columns[] = $this_table.'.*';
+
+		$to_table = <?php echo $to_class_name ?>::getTableName();
+		$q->join($to_table, $this_table.'.<?php echo $from_column ?> = '.$to_table.'.<?php echo $to_column ?>', $join_type);
 		$columns[] = $to_table.'.*';
 		$q->setColumns($columns);
+		
 		return <?php echo $class_name ?>::doSelect($q, $write_cache, array('<?php echo $to_class_name ?>'));
 	}
 
 <?php endforeach ?>
+<?php if($used_from): ?>
+	/**
+	 * @return <?php echo $class_name ?>[]
+	 */
+	static function doSelectJoinAll(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
+		$columns = $q->getColumns();
+		$classes = array();
+		$alias = $q->getAlias();
+		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
+		if(!$columns)
+			$columns[] = $this_table.'.*';
+<?php
+	foreach($used_from as $r):
+		$to_table = $r['to_table'];
+		$to_class_name = $this->getModelName($to_table);
+		$to_column = $r['to_column'];
+		$from_column = $r['from_column'];
+?>
+		
+		$to_table = <?php echo $to_class_name ?>::getTableName();
+		$q->join($to_table, $this_table.'.<?php echo $from_column ?> = '.$to_table.'.<?php echo $to_column ?>', $join_type);
+		$columns[] = $to_table.'.*';
+		$classes[] = '<?php echo $to_class_name ?>';
+	<?php endforeach ?>
+
+		$q->setColumns($columns);
+		return <?php echo $class_name ?>::doSelect($q, $write_cache, $classes);
+	}
+<?php endif ?>
 
 <?php
 $used_to = array();

@@ -12,37 +12,6 @@ abstract class BaseModel {
 	protected $_isNew = true;
 	protected $_validationErrors = array();
 
-	static function getPrimaryKey() {
-		throw new Exception("This should be replaced by an extension of this class.");
-	}
-
-	/**
-	 * @return DABLPDO
-	 */
-	static function getConnection() {
-		throw new Exception("This should be replaced by an extension of this class.");
-	}
-
-	static function getColumnNames() {
-		throw new Exception("This should be replaced by an extension of this class.");
-	}
-
-	static function hasColumn() {
-		throw new Exception("This should be replaced by an extension of this class.");
-	}
-
-	static function getTableName() {
-		throw new Exception("This should be replaced by an extension of this class.");
-	}
-
-	static function getPrimaryKeys() {
-		throw new Exception("This should be replaced by an extension of this class.");
-	}
-
-	static function doDelete(Query $q) {
-		throw new Exception("This should be replaced by an extension of this class.");
-	}
-
 	/**
 	 * Returns an array of objects of class $class from
 	 * the rows of a PDOStatement(query result)
@@ -65,7 +34,8 @@ abstract class BaseModel {
 				$startcol = 0;
 				foreach ($class_names as $key => $class_name) {
 					$object = new $class_name;
-					$object->fromNumericResultArray($values, $startcol);
+					if(!$object->fromNumericResultArray($values, $startcol))
+							continue;
 
 					if ($write_cache)
 						$object->insertIntoPool($object);
@@ -92,11 +62,19 @@ abstract class BaseModel {
 		return $objects;
 	}
 
+	/**
+	 * Loads values from the array returned by PDOStatement::fetch(PDO::FETCH_NUM)
+	 * @param array $values
+	 * @param int $startcol
+	 */
 	function fromNumericResultArray($values, &$startcol) {
 		foreach ($this->getColumnNames() as $column_name)
 			$this->{$column_name} = $values[$startcol++];
+		if($this->getPrimaryKeys() && !$this->hasPrimaryKeyValues())
+			return false;
 		$this->castInts();
 		$this->setNew(false);
+		return true;
 	}
 
 	/**
