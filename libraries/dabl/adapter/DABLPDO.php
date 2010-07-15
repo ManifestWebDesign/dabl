@@ -187,7 +187,7 @@ abstract class DABLPDO extends PDO {
 	function printQueryLog() {
 		$queries = $this->getLoggedQueries();
 		$total_time = 0.00;
-		$string = '<table border="1" style="margin:auto;font-size:11px;font-family:monospace" cellpadding="1" cellspacing="0"><tbody>';
+		$string = '<table border="1" style="clear:both;margin:auto;font-size:11px;font-family:monospace" cellpadding="1" cellspacing="0"><tbody>';
 		$string .= '<tr><th>#</th><th>Query</th><th>Execution Time (Seconds)</th><th>Trace</th></tr>';
 		foreach ($this->queryLog as $num => &$query_array) {
 			$string .= '<tr><td>' . ($num + 1) . '</td><td><pre>' . $query_array['query'] . '</pre></td><td>' . round($query_array['time'], 6) . '</td><td><pre>' . $query_array['trace'] . '</pre></td></tr>';
