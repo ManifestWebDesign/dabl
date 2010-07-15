@@ -401,7 +401,9 @@ class Query {
 
 	/**
 	 * Builds and returns the query string
-	 * @return String
+	 *
+	 * @param mixed $conn Database connection to use
+	 * @return string
 	 */
 	function getQuery($conn = null) {
 		$table_name = $this->getTableName();
@@ -410,26 +412,30 @@ class Query {
 			throw new Exception("No table specified.");
 
 		$alias = $this->getAlias();
-		if (!$conn)
+		if (!$conn) {
 			$conn = DBManager::getConnection();
+		}
+
 		$query_s = "";
 		$statement = new QueryStatement($conn);
 
-		if ($this->_columns)
+		if ($this->_columns) {
 			$columns = implode(', ', $this->_columns);
-		elseif ($alias
-
-			)$columns = "$alias.*";
-		else
+		} elseif ($alias) {
+			$columns = "$alias.*";
+		} else {
 			$columns = "$table_name.*"; //always use the table name of the object trying to retrieve
+		}
 
-			if ($this->_distinct)
+		if ($this->_distinct) {
 			$columns = "DISTINCT $columns";
+		}
 
-		if ($conn)
+		if ($conn) {
 			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
-		else
+		} else {
 			$table = $alias ? "`$table_name` $alias" : "`$table_name`";
+		}
 
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
