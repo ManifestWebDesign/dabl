@@ -45,8 +45,9 @@ function get_clean_persistant_values(){
 }
 
 /**
- * 
+ *
  */
 function clean_persistant_values(){
-	unset($_SESSION['__persisted']);
+	if(isset($_SESSION['__persisted']))
+		unset($_SESSION['__persisted']);
 }
