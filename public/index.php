@@ -1,5 +1,5 @@
 <?php
 require_once '../config.php';
 
-$route = array_shift(explode('?', @$_GET['url'], 2));
+$route = @$_GET['url'];
 load_controller($route);
