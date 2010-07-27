@@ -4,42 +4,13 @@
  * Handles all of your paginating needs.
  *
  * Example without className:
- *
- * //New query with table name
- * $q = new Query('Client');
- * $q->add('Column','Value');
- *
- * //Limit results per page
- * $limit = 50;
- *
- * //Specify the current page
- * $page = 3;
- *
- * //Create instance of pager
- * $pager = new QueryPager($q, $limit, $page);
- *
- * //Retrieve PDOStatement with results for that page
- * $resultSet = $pager->fetchPage();
- *
- *
- *
+ * 
+ * {@example libraries/dabl/query/QueryPager_description_1.php}
+ * 
  * Example with className:
+ * 
+ * {@example libraries/dabl/query/QueryPager_description_2.php}
  *
- * //New query
- * $q = new Query;
- * $q->add('Column','Value');
- *
- * //Limit results per page
- * $limit = 50;
- *
- * //Specify the current page
- * $page = 2;
- *
- * //Create instance of pager, provide the name of the DABL class
- * $pager = new QueryPager($q, $limit, $page, 'Inspection');
- *
- * //Retrieve an array of Objects from the DABL class for that page
- * $inspections = $pager->fetchPage();
  */
 class QueryPager {
 
