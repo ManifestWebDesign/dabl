@@ -82,8 +82,10 @@ abstract class BaseModel {
 	 * @param array $values
 	 */
 	function fromAssociativeResultArray($values) {
-		foreach ($this->getColumnNames() as $column_name)
-			$this->{$column_name} = $values[$column_name];
+		foreach ($this->getColumnNames() as $column_name){
+			if(array_key_exists($column_name, $values))
+				$this->{$column_name} = $values[$column_name];
+		}
 		if($this->getPrimaryKeys() && !$this->hasPrimaryKeyValues())
 			return false;
 		$this->castInts();
