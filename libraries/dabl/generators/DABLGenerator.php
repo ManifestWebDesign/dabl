@@ -7,18 +7,19 @@ class DABLGenerator extends BaseGenerator {
 
     function getParams($table_name) {
         $class_name = $this->getModelName($table_name);
-        $instance = new $class_name;
+		$pk = call_user_func(array($class_name, 'getPrimaryKey'));
+		$column_names = call_user_func(array($class_name, 'getColumnNames'));
         return array(
             'table_name' => $table_name,
             'controller_name' => $this->getControllerName($table_name),
             'model_name' => $class_name,
-            'instance' => $instance,
+			'column_names' => $column_names,
             'plural' => self::getPluralName($table_name),
 			'plural_url' => self::getPluralURL($table_name),
             'single' => self::getSingularName($table_name),
 			'single_url' => self::getSingularURL($table_name),
-            'pk' => $instance->getPrimaryKey(),
-            'pkMethod' => "get{$instance->getPrimaryKey()}",
+            'pk' => $pk,
+            'pkMethod' => "get$pk",
             'actions' => $this->getActions($table_name),
             'columns' => $this->getColumns($table_name)
         );
@@ -112,8 +113,7 @@ class DABLGenerator extends BaseGenerator {
         $class_name = $this->getModelName($table_name);
         $plural = self::getPluralName($table_name);
         $single = self::getSingularName($table_name);
-        $instance = new $class_name;
-        $pk = $instance->getPrimaryKey();
+        $pk = call_user_func(array($class_name, 'getPrimaryKey'));
         $pkMethod = "get$pk";
         $actions = array();
         if (!$pk)return $actions;
