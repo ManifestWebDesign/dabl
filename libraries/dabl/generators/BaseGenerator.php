@@ -423,7 +423,7 @@ abstract class BaseGenerator {
 	 * @return array
 	 */
 	static function getWords($string) {
-		return explode(' ', str_replace(array("\n", '_', '-'), ' ', $string));
+		return explode(' ', preg_replace('/([a-z])([A-Z])/', '$1 $2', str_replace(array("\n", '_', '-'), ' ', $string)));
 	}
 
 	/**
