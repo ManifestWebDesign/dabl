@@ -5,13 +5,13 @@
 		foreach($columns as $key => $column){
 			$column_name = $column->getName();
 ?>
-			<th class="ui-state-default ui-th-column ui-th-ltr <?php if($key==0)echo 'ui-corner-tl' ?>"><?php echo $column_name ?></th>
+			<th class="ui-widget-header ui-th-column ui-th-ltr <?php if($key==0)echo 'ui-corner-tl' ?>"><?php echo $column_name ?></th>
 <?php
 		}
 		$key = 1;
 		foreach($actions as $action){
 ?>
-			<th class="ui-state-default ui-th-column ui-th-ltr grid-action-column <?php if($key == count($actions))echo 'ui-corner-tr' ?>">&nbsp;</th>
+			<th class="ui-widget-header ui-th-column ui-th-ltr grid-action-column <?php if($key == count($actions))echo 'ui-corner-tr' ?>">&nbsp;</th>
 <?php
 			++$key;
 		}
