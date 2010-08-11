@@ -10,7 +10,7 @@
  * Example with className:
  * 
  * {@example libraries/dabl/query/QueryPager_description_2.php}
- *
+ * 
  */
 class QueryPager {
 
