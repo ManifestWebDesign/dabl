@@ -119,7 +119,7 @@ class DABLGenerator extends BaseGenerator {
         if (!$pk)return $actions;
 
         foreach (self::$standard_actions as &$staction)
-            $actions[$staction] = "<?php echo site_url('" . $plural . "/" . strtolower($staction) . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
+            $actions[$staction] = "<?php echo site_url('" . $this->getPluralURL($table_name) . "/" . strtolower($staction) . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
 
         $fkeys_to = $this->getForeignKeysToTable($table_name);
         foreach ($fkeys_to as $k => &$r) {
