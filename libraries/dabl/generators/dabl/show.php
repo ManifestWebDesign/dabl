@@ -1,8 +1,11 @@
+<?php
+unset($actions['Show']);
+?>
 <h1>View <?php echo BaseGenerator::spaceTitleCase($table_name) ?></h1>
 <p>
 <?php foreach($actions as $action_label => $action_url): ?>
 	<a href="<?php echo $action_url ?>" class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php if(strtolower($action_label)=='delete') echo " onclick=\"return confirm('Are you sure?');\"";?>>
-		<span class="ui-icon <?php if(array_key_exists($action_label, self::$action_icons)) echo 'ui-icon-'.self::$action_icons[$action_label]; ?>"></span><?php echo $action_label ?>
+		<span class="ui-icon <?php if(array_key_exists($action_label, $this->actionIcons)) echo 'ui-icon-'.$this->actionIcons[$action_label]; ?>"></span><?php echo $action_label ?>
 
 	</a>
 <?php endforeach ?>
