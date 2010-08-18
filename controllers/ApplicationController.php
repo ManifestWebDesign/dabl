@@ -8,8 +8,8 @@ abstract class ApplicationController extends BaseController {
 		foreach(glob(ROOT.'controllers/*.php') as $controller_file){
 			$action = str_replace(array('Controller','.php'), '', basename($controller_file));
 			if($action == 'Application' || $action == 'Index' || $action == 'Generator') continue;
-			$action = preg_replace('/([a-z])([A-Z])/', '$1_$2', $action);
-			$this['actions'][ucwords(str_replace('_', ' ', $action))] = site_url(strtolower($action));
+			$action = preg_replace('/([a-z])([A-Z])/', '$1-$2', $action);
+			$this['actions'][ucwords(str_replace('-', ' ', $action))] = site_url(strtolower($action));
 		}
 	}
 }
