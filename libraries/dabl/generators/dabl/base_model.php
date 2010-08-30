@@ -72,13 +72,13 @@ foreach($fields as $key => &$field):
 
 	 */
 <?
-	if ($field->isNumericType() && 0!==$default && !$default) $default = null;
+	if (($field->isNumericType()) && (0!==$default) && (!$default)) $default = null;
 ?>
 	protected $<?php echo $field->getName() ?><?php
 if($field->isNumericType() && $default !== null)
 	echo ' = '.$default;
 elseif($default!==null && strtolower($default)!=='null')
-	echo " = '$default'"
+	echo " = '".addslashes($default)."'"
 ?>;
 <?php endforeach ?>
 
