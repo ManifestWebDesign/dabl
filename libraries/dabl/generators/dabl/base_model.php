@@ -66,13 +66,13 @@ foreach($fields as $key => &$field):
 	/**
 	 * <?php echo $conn->quoteIdentifier($field->getName()) ?> <?php echo $field->getType() ?>
 <?php if ($field->isNotNull()): ?> NOT NULL<?php endif ?>
-<?php if (null!==$default): ?> DEFAULT <?php echo is_numeric($default) ? $default : $conn->quote($default) ?><?php endif ?>
+<?php if (null!==$default): ?> DEFAULT <?php echo ctype_digit($default) ? $default : $conn->quote($default) ?><?php endif ?>
 
 	 * @var <?php echo $field->getPhpType() ?>
 
 	 */
 <?
-	if (($field->isNumericType()) && (0!==$default) && (!$default)) $default = null;
+	if (($field->isNumericType()) && (!ctype_digit($default)) && (!$default)) $default = null;
 ?>
 	protected $<?php echo $field->getName() ?><?php
 if($field->isNumericType() && $default !== null)
