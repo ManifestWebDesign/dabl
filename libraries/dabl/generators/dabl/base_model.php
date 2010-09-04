@@ -8,7 +8,7 @@
  *
  */
 
-abstract class base<?php echo $class_name ?> extends BaseModel{
+abstract class base<?php echo $class_name ?> extends ApplicationBaseModel {
 
 	/**
 	 * Name of the table

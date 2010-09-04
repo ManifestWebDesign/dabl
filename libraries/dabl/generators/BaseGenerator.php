@@ -34,6 +34,11 @@ abstract class BaseGenerator {
 	protected $modelTemplate = '/dabl/model.php';
 
 	/**
+	 * @var string
+	 */
+	protected $applicationBaseModelTemplate = '/dabl/application_base_model.php';
+
+	/**
 	 * Constructor function
 	 * @param $db_name string
 	 * @param $schema DOMDocument
@@ -218,6 +223,14 @@ abstract class BaseGenerator {
 	}
 
 	/**
+	 * @return string Path to application base model template file relative to dirname(__FILE__) with leading /
+	 */
+	function getApplicationBaseModelTemplate(){
+		return $this->applicationBaseModelTemplate;
+	}
+
+
+	/**
 	 * @return array Paths to view template files relative to dirname(__FILE__) with leading /
 	 */
 	function getViewTemplates(){
@@ -352,6 +365,14 @@ abstract class BaseGenerator {
 			die('The directory ' . $options['base_model_path'] . ' does not exist.');
 
 		//Write php files for classes
+		$app_base_model_path = $options['model_path'].'ApplicationBaseModel.php';
+		if (!file_exists($app_base_model_path)) {
+			ob_start();
+			require dirname(__FILE__).$this->getApplicationBaseModelTemplate();
+			file_put_contents($app_base_model_path, ob_get_clean());
+		}
+		unset($app_base_model_path);
+
 		foreach ($table_names as &$table_name) {
 			$class_name = $this->getModelName($table_name);
 			$lower_case_table = strtolower($table_name);
