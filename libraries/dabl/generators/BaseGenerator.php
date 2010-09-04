@@ -389,6 +389,7 @@ abstract class BaseGenerator {
 			if (!file_exists($file)) {
 				$class = $this->getModel($table_name);
 				file_put_contents($file, $class);
+				unset($class);
 			}
 		}
 		//save xml to file
