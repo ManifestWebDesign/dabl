@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @package dabl
+ */
 abstract class BaseModel {
 	const MAX_INSTANCE_POOL_SIZE = 100;
 
@@ -7,9 +10,25 @@ abstract class BaseModel {
 	 * Array to contain names of modified columns
 	 */
 	protected $_modifiedColumns = array();
+
+	/**
+	 * Whether or not to cache results in the internal object cache
+	 */
 	protected $_cacheResults = true;
+
+	/**
+	 * Whether or not to save dates as formatted date/time strings
+	 */
 	protected $_formatDates = true;
+
+	/**
+	 * Whether or not this is a new object
+	 */
 	protected $_isNew = true;
+
+	/**
+	 * Errors from the validate() step of saving
+	 */
 	protected $_validationErrors = array();
 
 	/**
@@ -115,13 +134,17 @@ abstract class BaseModel {
 		return $new_object;
 	}
 
+	/**
+	 * Checks whether any of the columns have been modified from the database values.
+	 * @return bool
+	 */
 	function isModified() {
 		return (bool) $this->getModifiedColumns();
 	}
 
 	/**
 	 * Checks whether the given column is in the modified array
-	 * @return Bool
+	 * @return bool
 	 */
 	function isColumnModified($columnName) {
 		return in_array(strtolower($columnName), array_map('strtolower', $this->_modifiedColumns));
@@ -145,6 +168,7 @@ abstract class BaseModel {
 	/**
 	 * Populates $this with the values of an associative Array.
 	 * Array keys must match column names to be used.
+	 * @param array $array
 	 */
 	function fromArray($array) {
 		$columns = $this->getColumnNames();
@@ -158,7 +182,7 @@ abstract class BaseModel {
 	/**
 	 * Returns an associative Array with the values of $this.
 	 * Array keys match column names.
-	 * @return Array of BaseTable Objects
+	 * @return array of BaseTable Objects
 	 */
 	function toArray() {
 		$array = array();
@@ -170,7 +194,7 @@ abstract class BaseModel {
 	/**
 	 * Sets whether to use cached results for foreign keys or to execute
 	 * the query each time, even if it hasn't changed.
-	 * @param $value Bool[optional]
+	 * @param bool $value[optional]
 	 */
 	function setCacheResults($value=true) {
 		$this->_cacheResults = (bool) $value;
@@ -178,7 +202,7 @@ abstract class BaseModel {
 
 	/**
 	 * Returns true if this object is set to cache results
-	 * @return Bool
+	 * @return bool
 	 */
 	function getCacheResults() {
 		return (bool) $this->_cacheResults;
@@ -186,7 +210,7 @@ abstract class BaseModel {
 
 	/**
 	 * Returns true if this table has primary keys and if all of the primary values are not null
-	 * @return Bool
+	 * @return bool
 	 */
 	function hasPrimaryKeyValues() {
 		$pks = $this->getPrimaryKeys();
@@ -239,6 +263,7 @@ abstract class BaseModel {
 	 * deleting based on the new primary key(s) and not the originals,
 	 * leaving the original row unchanged(if it exists).  Also, since NULL isn't an accurate way
 	 * to look up a row, I return if one of the primary keys is null.
+	 * @return int number of records deleted
 	 */
 	function delete() {
 		$conn = $this->getConnection();
@@ -268,6 +293,7 @@ abstract class BaseModel {
 	 * updating/inserting based on the new primary key(s) and not the originals,
 	 * leaving the original row unchanged(if it exists).
 	 * @todo find a way to solve the above issue
+	 * @return int number of records inserted or updated
 	 */
 	function save() {
 		if (!$this->validate())
@@ -290,7 +316,7 @@ abstract class BaseModel {
 
 	/**
 	 * Returns true if this has not yet been saved to the database
-	 * @return Bool
+	 * @return bool
 	 */
 	function isNew() {
 		return (bool) $this->_isNew;
@@ -298,7 +324,7 @@ abstract class BaseModel {
 
 	/**
 	 * Indicate whether this object has been saved to the database
-	 * @param Bool $bool
+	 * @param bool $bool
 	 */
 	function setNew($bool) {
 		$this->_isNew = (bool) $bool;
@@ -424,5 +450,8 @@ abstract class BaseModel {
 		return $result->rowCount();
 	}
 
+	/**
+	 * Cast returned values from the database into integers where appropriate.
+	 */
 	abstract function castInts();
 }

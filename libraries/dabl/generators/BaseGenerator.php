@@ -343,7 +343,7 @@ abstract class BaseGenerator {
 	 * @return String
 	 */
 	function getController($table_name) {
-			return $this->renderTemplate($table_name, $this->getControllerTemplate());
+		return $this->renderTemplate($table_name, $this->getControllerTemplate());
 	}
 
 	/**
