@@ -414,7 +414,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	$used_from[$to_table] = $r;
 ?>
 
-	protected $_<?php echo $to_class_name ?>;
+	protected $_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>;
 
 	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
 		if(!$<?php echo $to_class_name ?>->get<?php echo $from_column ?>())
