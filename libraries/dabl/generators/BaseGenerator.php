@@ -61,7 +61,7 @@ abstract class BaseGenerator {
 			//enforce an upper case first letter of get and set methods
 			'cap_method_names' => true,
 			//add some logic to the setter methods to not allow column values to be null if the column cannot be null
-			'protect_not_null' => true,
+			'protect_not_null' => false,
 			//prepend this to class name
 			'model_prefix' => '',
 			//append this to class name

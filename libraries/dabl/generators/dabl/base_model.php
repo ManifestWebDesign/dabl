@@ -411,13 +411,12 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	$to_class_name = $this->getModelName($to_table);
 	$to_column = $r['to_column'];
 	$from_column = $r['from_column'];
-	if(@$used_from[$to_table]) continue;
 	$used_from[$to_table] = $r;
 ?>
 
 	protected $_<?php echo $to_class_name ?>;
 
-	function set<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
+	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
 		if(!$<?php echo $to_class_name ?>->get<?php echo $from_column ?>())
 			throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $from_column ?>');
 		if($this->getCacheResults())
@@ -431,7 +430,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	 * @return <?php echo $to_class_name ?>
 
 	 */
-	function get<?php echo $to_class_name ?>() {
+	function get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>() {
 		$pk = <?php echo $to_class_name ?>::getPrimaryKey();
 		$column = '<?php echo $to_column ?>';
 		if($pk != $column)
