@@ -16,6 +16,10 @@ foreach($generators as $connection_name => $generator){
 	$generator->generateModels(@$_REQUEST['Models'][$connection_name]);
 	$generator->generateViews(@$_REQUEST['Views'][$connection_name]);
 	$generator->generateControllers(@$_REQUEST['Controllers'][$connection_name]);
+	if(isset($generator->warnings)) {
+		foreach($generator->warnings as $warning)
+			echo "$warning<br/>";
+	}
 }
 ?>
 <h2>Including All Model Classes...</h2>

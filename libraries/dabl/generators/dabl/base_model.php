@@ -3,11 +3,11 @@
 /**
  *		Created by Dan Blaisdell's DABL
  *		Do not alter base files, as they will be overwritten.
- *		To alter the objects, alter the extended clases in
- *		the 'tables' folder.
+ *		To alter the objects, alter the extended classes in
+ *		the 'models' folder.
  *
  */
-
+<?php $used_functions = array(); ?>
 abstract class base<?php echo $class_name ?> extends ApplicationBaseModel {
 
 	/**
@@ -106,7 +106,9 @@ foreach($fields as $key => &$field):
 	}
 ?>
 
-<?php // GETTERS AND SETTERS ?>
+<?php // GETTERS AND SETTERS
+	$used_functions[] = "get$method_name";
+?>
 	function get<?php echo $method_name ?>(<?php echo $params ?>) {
 <?php if($field->isTemporalType()): ?>
 		if($this-><?php echo $field_name ?>===null || !$format)
@@ -118,6 +120,7 @@ foreach($fields as $key => &$field):
 		return $this-><?php echo $field_name ?>;
 <?php endif ?>
 	}
+<?php $used_functions[] = "set$method_name"; ?>
 	function set<?php echo $method_name ?>($value) {
 <?php if($field->isNumericType() || $field->isTemporalType()): ?>
 		if($value==='')
@@ -145,6 +148,7 @@ foreach($fields as $key => &$field):
 	/**
 	 * @return DABLPDO
 	 */
+<?php $used_functions[] = "getConnection"; ?>
 	static function getConnection() {
 		return DBManager::getConnection('<?php echo $this->getConnectionName() ?>');
 	}
@@ -153,6 +157,7 @@ foreach($fields as $key => &$field):
 	 * Returns String representation of table name
 	 * @return string
 	 */
+<?php $used_functions[] = "getTableName"; ?>
 	static function getTableName() {
 		return <?php echo $class_name ?>::$_tableName;
 	}
@@ -161,6 +166,7 @@ foreach($fields as $key => &$field):
 	 * Access to array of column names
 	 * @return array
 	 */
+<?php $used_functions[] = "getColumnNames"; ?>
 	static function getColumnNames() {
 		return <?php echo $class_name ?>::$_columnNames;
 	}
@@ -168,6 +174,7 @@ foreach($fields as $key => &$field):
 	/**
 	 * @return bool
 	 */
+<?php $used_functions[] = "hasColumn"; ?>
 	static function hasColumn($column_name) {
 		static $lower_case_columns;
 		if(!$lower_case_columns)
@@ -179,6 +186,7 @@ foreach($fields as $key => &$field):
 	 * Access to array of primary keys
 	 * @return array
 	 */
+<?php $used_functions[] = "getPrimaryKeys"; ?>
 	static function getPrimaryKeys() {
 		return <?php echo $class_name ?>::$_primaryKeys;
 	}
@@ -187,6 +195,7 @@ foreach($fields as $key => &$field):
 	 * Access to name of primary key
 	 * @return array
 	 */
+<?php $used_functions[] = "getPrimaryKey"; ?>
 	static function getPrimaryKey() {
 		return <?php echo $class_name ?>::$_primaryKey;
 	}
@@ -195,6 +204,7 @@ foreach($fields as $key => &$field):
 	 * Returns true if the primary key column for this table is auto-increment
 	 * @return bool
 	 */
+<?php $used_functions[] = "isAutoIncrement"; ?>
 	static function isAutoIncrement() {
 		return <?php echo $class_name ?>::$_isAutoIncrement;
 	}
@@ -205,6 +215,7 @@ foreach($fields as $key => &$field):
 	 * @return <?php echo $class_name ?>
 
 	 */
+<?php $used_functions[] = "retrieveByPK"; ?>
 	static function retrieveByPK($the_pk) {
 <?php if(count($PKs) > 1): ?>
 		throw new Exception('This table has more than one primary key.  Use retrieveByPKs() instead.');
@@ -219,6 +230,7 @@ foreach($fields as $key => &$field):
 	 * @return <?php echo $class_name ?>
 
 	 */
+<?php $used_functions[] = "retrieveByPKs"; ?>
 	static function retrieveByPKs(<?php foreach($PKs as $k => &$v): ?><?php if($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><? endforeach ?>) {
 <?php if(count($PKs)==0): ?>
 		throw new Exception('This table does not have any primary keys.');
@@ -250,6 +262,7 @@ foreach($fields as $key => &$field):
 	 * @return <?php echo $class_name ?>
 
 	 */
+<?php $used_functions[] = "fetchSingle"; ?>
 	static function fetchSingle($query_string, $write_cache = true) {
 		return array_shift(<?php echo $class_name ?>::fetch($query_string, $write_cache));
 	}
@@ -260,6 +273,7 @@ foreach($fields as $key => &$field):
 	 * returns an empty Array.
 	 * @return <?php echo $class_name ?>[]
 	 */
+<?php $used_functions[] = "fetch"; ?>
 	static function fetch($query_string, $write_cache = false) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$result = $conn->query($query_string);
@@ -272,10 +286,12 @@ foreach($fields as $key => &$field):
 	 *
 	 * @see BaseModel::fromResult
 	 */
+<?php $used_functions[] = "fromResult"; ?>
 	static function fromResult(PDOStatement $result, $class='<?php echo $class_name ?>', $write_cache = false) {
 		return baseModel::fromResult($result, $class, $write_cache);
 	}
 
+<?php $used_functions[] = "castInts"; ?>
 	function castInts() {
 <?php foreach($fields as $key => &$field): ?>
 <?php if($field->getPdoType()==PDO::PARAM_INT): ?>
@@ -290,6 +306,7 @@ foreach($fields as $key => &$field):
 	 * @param <?php echo $class_name ?> $object
 	 * @return void
 	 */
+<?php $used_functions[] = "insertIntoPool"; ?>
 	static function insertIntoPool(<?php echo $class_name ?> $object) {
 <?php if(!$PKs): ?>
 		// This table doesn't have primary keys, so there's no way to key the instance pool array
@@ -308,6 +325,7 @@ foreach($fields as $key => &$field):
 	 * @return <?php echo $class_name ?>
 
 	 */
+<?php $used_functions[] = "retrieveFromPool"; ?>
 	static function retrieveFromPool($pk) {
 		if($pk === null)
 			return null;
@@ -323,6 +341,7 @@ foreach($fields as $key => &$field):
 	 * @param mixed $object Object or PK to remove
 	 * @return void
 	 */
+<?php $used_functions[] = "removeFromPool"; ?>
 	static function removeFromPool($object) {
 		$pk = is_object($object) ? implode('-', $object->getPrimaryKeyValues()) : $object;
 
@@ -337,6 +356,7 @@ foreach($fields as $key => &$field):
 	 *
 	 * @return void
 	 */
+<?php $used_functions[] = "flushPool"; ?>
 	static function flushPool() {
 		<?php echo $class_name ?>::$_instancePool = array();
 	}
@@ -348,6 +368,7 @@ foreach($fields as $key => &$field):
 	 * @param $extra string
 	 * @return <?php echo $class_name ?>[]
 	 */
+<?php $used_functions[] = "getAll"; ?>
 	static function getAll($extra = null, $write_cache = false) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$table_quoted = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
@@ -357,6 +378,7 @@ foreach($fields as $key => &$field):
 	/**
 	 * @return int
 	 */
+<?php $used_functions[] = "doCount"; ?>
 	static function doCount(Query $q) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
@@ -370,6 +392,7 @@ foreach($fields as $key => &$field):
 	 * @param bool $dump_cache
 	 * @return int
 	 */
+<?php $used_functions[] = "doDelete"; ?>
 	static function doDelete(Query $q, $dump_cache=true) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
@@ -389,6 +412,7 @@ foreach($fields as $key => &$field):
 	 * @param array $additional_classes Array of additional classes for fromResult to instantiate as properties
 	 * @return <?php echo $class_name ?>[]
 	 */
+<?php $used_functions[] = "doSelect"; ?>
 	static function doSelect(Query $q, $write_cache = false, $additional_classes = null) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
@@ -405,17 +429,38 @@ foreach($fields as $key => &$field):
 	}
 
 <?php
-$used_from = array();
+$to_table_list = array();
 foreach($this->getForeignKeysFromTable($table_name) as $r):
 	$to_table = $r['to_table'];
+	if(isset($to_table_list[$to_table]))
+		$to_table_list[$to_table] += 1;
+	else
+		$to_table_list[$to_table] = 1;
 	$to_class_name = $this->getModelName($to_table);
 	$to_column = $r['to_column'];
 	$from_column = $r['from_column'];
-	$used_from[$to_table] = $r;
+	$namedID = false;
+	if(strpos($from_column, 'ID') === strlen($from_column) - 2) {
+		$from_column_clean = rtrim($from_column, "ID");
+		if(!in_array($from_column_clean, $fields)) {
+			$namedID = true;
+		} else {
+			$this->warnings[] = "Can't create convenience functions for column $from_column: get$from_column_clean() and set$from_column_clean(), consider renaming column $from_column_clean";
+		}
+	}
 ?>
-
 	protected $_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>;
-
+<?php
+	if($namedID) {
+?>
+<?php $used_functions[] = "set$from_column_clean"; ?>
+	function set<?php echo $from_column_clean ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
+		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
+	}
+<?php
+	}
+?>
+<?php $used_functions[] = "set$to_class_name" . "RelatedBy$from_column"; ?>
 	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
 		if(!$<?php echo $to_class_name ?>->get<?php echo $from_column ?>())
 			throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $from_column ?>');
@@ -423,13 +468,29 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 			$this->_<?php echo $to_class_name ?> = $<?php echo $to_class_name ?>;
 		$this->set<?echo $from_column ?>($<?php echo $to_class_name ?>->get<?php echo $from_column ?>());
 	}
+<?php
+	if($namedID) {
+?>
 
 	/**
 	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
 	 * that matches $this-><?php echo $from_column ?>.
 	 * @return <?php echo $to_class_name ?>
-
 	 */
+<?php $used_functions[] = "get$from_column_clean"; ?>
+	function get<?php echo $from_column_clean ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
+		$this->get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
+	}
+<?php
+	}
+?>
+	
+	/**
+	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
+	 * that matches $this-><?php echo $from_column ?>.
+	 * @return <?php echo $to_class_name ?>
+	 */
+<?php $used_functions[] = "get$to_class_name" . "RelatedBy$from_column"; ?>
 	function get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>() {
 		$pk = <?php echo $to_class_name ?>::getPrimaryKey();
 		$column = '<?php echo $to_column ?>';
@@ -443,10 +504,22 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 		return $result;
 	}
 
+<?php
+	if($namedID) {
+?>
+<?php $used_functions[] = "doSelectJoin$from_column_clean"; ?>
+	static function doSelectJoin<?php echo $from_column_clean ?>(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
+		return <?php echo $class_name ?>::doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($q, $write_cache, $join_type);
+	}
+
+<?php
+	}
+?>
 	/**
 	 * @return <?php echo $class_name ?>[]
 	 */
-	static function doSelectJoin<?php echo $to_class_name ?>(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
+<?php $used_functions[] = "doSelectJoin$to_class_name" . "RelatedBy$from_column"; ?>
+	static function doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
 		$columns = $q->getColumns();
 		$alias = $q->getAlias();
 		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
@@ -462,10 +535,51 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	}
 
 <?php endforeach ?>
-<?php if($used_from): ?>
+
+<?php
+	foreach($this->getForeignKeysFromTable($table_name) as $r){
+		$to_table = $r['to_table'];
+		$to_class_name = $this->getModelName($to_table);
+		$to_column = $r['to_column'];
+		$from_column = $r['from_column'];
+		if($to_table_list[$to_table] < 2) {
+			if(!in_array("get$to_class_name", $used_functions)) {
+?>
+	/**
+	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
+	 * that matches $this-><?php echo $from_column ?>.
+	 * @return <?php echo $to_class_name ?>
+	 */
+<?php $used_functions[] = "get$to_class_name"; ?>
+	function get<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
+		$this->get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
+	}
+
+<?
+			}
+			if(!in_array("set$to_class_name", $used_functions)) {
+			
+?>
+	/**
+	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
+	 * that matches $this-><?php echo $from_column ?>.
+	 * @return <?php echo $to_class_name ?>
+	 */
+<?php $used_functions[] = "set$to_class_name"; ?>
+	function set<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
+		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
+	}
+
+<?
+			}
+		}
+	}
+?>
+
 	/**
 	 * @return <?php echo $class_name ?>[]
 	 */
+<?php $used_functions[] = "doSelectJoinAll"; ?>
 	static function doSelectJoinAll(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
 		$columns = $q->getColumns();
 		$classes = array();
@@ -474,7 +588,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 		if(!$columns)
 			$columns[] = $this_table.'.*';
 <?php
-	foreach($used_from as $r):
+	foreach($this->getForeignKeysFromTable($table_name) as $r):
 		$to_table = $r['to_table'];
 		$to_class_name = $this->getModelName($to_table);
 		$to_column = $r['to_column'];
@@ -490,41 +604,53 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 		$q->setColumns($columns);
 		return <?php echo $class_name ?>::doSelect($q, $write_cache, $classes);
 	}
-<?php endif ?>
+
+<?php $used_functions[] = "getForeignObjectsQuery"; ?>
+	/**
+	 *
+	 * @param <type> $tablename
+	 * @param <type> $columnname
+	 * @param Query $q
+	 * @return Query
+	 */
+	protected function getForeignObjectsQuery($tablename, $columnname, Query $q = null){
+		$value = $this->{"get$columnname"}();
+		if($value ===null)
+			throw new Exception('NULL cannot be used to match keys.');
+		$conn = $this->getConnection();
+		$column = $conn->quoteIdentifier($columnname);
+		if($q){
+			$q = clone $q;
+			$alias = $q->getAlias();
+			if($alias && $q->getTableName()==$tablename)
+				$column = "$alias.$column";
+		}
+		else
+			$q = new Query;
+		$q->add($column, $value);
+		return $q;
+	}
 
 <?php
-$used_to = array();
+$from_table_list = array();
 foreach($this->getForeignKeysToTable($table_name) as $r):
 	$from_table = $r['from_table'];
+	if(isset($from_table_list[$from_table]))
+		$from_table_list[$from_table] += 1;
+	else
+		$from_table_list[$from_table] = 1;
 	$from_class_name = $this->getModelName($from_table);
 	$from_column = $r['from_column'];
 	$to_column = $r['to_column'];
-	if(@$used_to[$from_table]){
-		$this->warnings[] = "WARNING: <strong>$table_name.$to_column</strong> used by more than one foreign key in table: <strong>$from_table</strong>. Methods created for <strong>$from_table.".$used_to[$from_table]."</strong> only.";
-		continue;
-	}
-	$used_to[$from_table]=$from_column;
 ?>
 	/**
 	 * Returns a Query for selecting <?php echo $from_table ?> Objects(rows) from the <?php echo $from_table ?> table
 	 * with a <?php echo $from_column ?> that matches $this-><?php echo $to_column ?>.
 	 * @return Query
 	 */
-	function get<?php echo $from_class_name ?>sQuery(Query $q = null) {
-		if($this->get<?php echo $to_column ?>()===null)
-			throw new Exception('NULL cannot be used to match keys.');
-		$conn = $this->getConnection();
-		$column = $conn->quoteIdentifier('<?php echo $from_column ?>');
-		if($q){
-			$q = clone $q;
-			$alias = $q->getAlias();
-			if($alias && $q->getTableName()=='<?php echo $from_table ?>')
-				$column = "$alias.$column";
-		}
-		else
-			$q = new Query;
-		$q->add($column, $this->get<?php echo $to_column ?>());
-		return $q;
+<?php $used_functions[] = "get$from_class_name" . "sRelatedBy$from_column" . "Query"; ?>
+	function get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query(Query $q = null) {
+		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>', $q);
 	}
 
 	/**
@@ -532,10 +658,11 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	 * with a <?php echo $from_column ?> that matches $this-><?php echo $to_column ?>.
 	 * @return int
 	 */
-	function count<?php echo $from_class_name ?>s(Query $q = null) {
+<?php $used_functions[] = "count$from_class_name" . "sRelatedBy$from_column"; ?>
+	function count<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>(Query $q = null) {
 		if($this->get<?php echo $to_column ?>()===null)
 			return 0;
-		return <?php echo $from_class_name ?>::doCount($this->get<?php echo $from_class_name ?>sQuery($q));
+		return <?php echo $from_class_name ?>::doCount($this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query($q));
 	}
 
 	/**
@@ -543,13 +670,14 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	 * with a <?php echo $from_column ?> that matches $this-><?php echo $to_column ?>.
 	 * @return int
 	 */
-	function delete<?php echo $from_class_name ?>s(Query $q = null) {
+<?php $used_functions[] = "delete$from_class_name" ."sRelatedBy$from_column"; ?>
+	function delete<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>(Query $q = null) {
 		if($this->get<?php echo $to_column ?>()===null)
 			return 0;
-		return <?php echo $from_class_name ?>::doDelete($this->get<?php echo $from_class_name ?>sQuery($q));
+		return <?php echo $from_class_name ?>::doDelete($this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query($q));
 	}
 
-	private $<?php echo $from_class_name ?>s_c = array();
+	private $<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>_c = array();
 
 	/**
 	 * Returns an array of <?php echo $from_class_name ?> objects with a <?php echo $from_column ?>
@@ -560,15 +688,16 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	 * a second time(for performance purposes).
 	 * @return <?php echo $from_class_name ?>[]
 	 */
-	function get<?php echo $from_class_name ?>s($extra = null) {
+<?php $used_functions[] = "get$from_class_name" . "sRelatedBy$from_column"; ?>
+	function get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($extra = null) {
 		if($this->get<?php echo $to_column ?>()===null)
 			return array();
 
 		if(!$extra || $extra instanceof Query)
-			return <?php echo $from_class_name ?>::doSelect($this->get<?php echo $from_class_name ?>sQuery($extra));
+			return <?php echo $from_class_name ?>::doSelect($this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query($extra));
 
-		if(!$extra && $this->getCacheResults() && @$this-><?php echo $from_class_name ?>s_c && !$this->isColumnModified('<?php echo $to_column ?>'))
-			return $this-><?php echo $from_class_name ?>s_c;
+		if(!$extra && $this->getCacheResults() && @$this-><?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>_c && !$this->isColumnModified('<?php echo $to_column ?>'))
+			return $this-><?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>_c;
 
 		$conn = $this->getConnection();
 		$table_quoted = $conn->quoteIdentifier(<?php echo $from_class_name ?>::getTableName());
@@ -579,4 +708,70 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	}
 <?php endforeach ?>
 
+<?php
+	foreach($this->getForeignKeysToTable($table_name) as $r){
+		$from_table = $r['from_table'];
+		$from_class_name = $this->getModelName($from_table);
+		$from_column = $r['from_column'];
+		$to_column = $r['to_column'];
+		if($from_table_list[$from_table] < 2) {
+			if(!in_array("get$from_class_name"."s", $used_functions)) {
+?>
+	/**
+	 * Convenience function for <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>
+	 * @return <?php echo $from_class_name ?>[]
+	 * @see <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
+	 */
+<?php $used_functions[] = "get$from_class_name"."s"; ?>
+	function get<?php echo $from_class_name ?>s($extra = null){
+		$this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($extra);
+	}
+
+<?
+			}
+			if(!in_array("get$from_class_name"."sQuery", $used_functions)) {
+?>
+	/**
+	  * Convenience function for <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query
+	  * @return Query
+	  * @see <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query
+	  */
+<?php $used_functions[] = "get$from_class_name" . "sQuery"; ?>
+	function get<?php echo $from_class_name ?>sQuery(Query $q = null) {
+		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>', $q);
+	}
+
+<?
+			}
+			if(!in_array("delete$from_class_name" . "s", $used_functions)) {
+?>
+	/**
+	  * Convenience function for <?php echo $class_name ?>::delete<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
+	  * @return int
+	  * @see <?php echo $class_name ?>::delete<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
+	  */
+<?php $used_functions[] = "delete$from_class_name" . "s"; ?>
+	function delete<?php echo $from_class_name ?>s(Query $q = null) {
+		return $this->delete<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($q);
+	}
+
+<?
+			}
+			if(!in_array("count$from_class_name" . "s", $used_functions)) {
+?>
+	/**
+	  * Convenience function for <?php echo $class_name ?>::count<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
+	  * @return int
+	  * @see <?php echo $class_name ?>::count<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
+	  */
+<?php $used_functions[] = "count$from_class_name" . "s"; ?>
+	function count<?php echo $from_class_name ?>s(Query $q = null) {
+		return $this->count<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($q);
+	}
+
+<?
+			}
+		}
+	}
+?>
 }
