@@ -70,7 +70,5 @@ function load_view(
 
 	if ($_['return_output']) {
 		return ob_get_clean();
-	} else {
-		ob_end_flush();
 	}
 }
