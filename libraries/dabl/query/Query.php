@@ -417,19 +417,8 @@ class Query {
 		}
 
 		$query_s = "";
+
 		$statement = new QueryStatement($conn);
-
-		if ($this->_columns) {
-			$columns = implode(', ', $this->_columns);
-		} elseif ($alias) {
-			$columns = "$alias.*";
-		} else {
-			$columns = "$table_name.*"; //always use the table name of the object trying to retrieve
-		}
-
-		if ($this->_distinct) {
-			$columns = "DISTINCT $columns";
-		}
 
 		if (strpos($table_name, ' ')!==false) {
 			$table = $alias ? "$table_name $alias" : $table_name;
@@ -437,6 +426,18 @@ class Query {
 			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
 		} else {
 			$table = $alias ? "`$table_name` $alias" : "`$table_name`";
+		}
+
+		if ($this->_columns) {
+			$columns = implode(', ', $this->_columns);
+		} elseif ($alias) {
+			$columns = "$alias.*";
+		} else {
+			$columns = "$table.*"; //always use the table name of the object trying to retrieve
+		}
+
+		if ($this->_distinct) {
+			$columns = "DISTINCT $columns";
 		}
 
 		switch (strtoupper($this->getAction())) {

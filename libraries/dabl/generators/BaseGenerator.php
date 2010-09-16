@@ -124,23 +124,7 @@ abstract class BaseGenerator {
 	 * @return array
 	 */
 	function getForeignKeysFromTable($table_name) {
-		$references = array();
-
-		$database_node = $this->getSchema()->getElementsByTagName('database')->item(0);
-		foreach ($database_node->getElementsByTagName('table') as $table_node) {
-			if ($table_node->getAttribute("name") !== $table_name
-				)continue;
-			foreach ($table_node->getElementsByTagName('foreign-key') as $fk_node) {
-				foreach ($fk_node->getElementsByTagName('reference') as $reference_node) {
-					$references[] = array(
-						'to_table' => $fk_node->getAttribute('foreignTable'),
-						'to_column' => $reference_node->getAttribute('foreign'),
-						'from_column' => $reference_node->getAttribute('local'),
-					);
-				}
-			}
-		}
-		return $references;
+		return $this->database->getTable($table_name)->getForeignKeys();
 	}
 
 	/**
@@ -148,23 +132,7 @@ abstract class BaseGenerator {
 	 * @return array
 	 */
 	function getForeignKeysToTable($table_name) {
-		$references = array();
-
-		$database_node = $this->getSchema()->getElementsByTagName('database')->item(0);
-		foreach ($database_node->getElementsByTagName('table') as $table_node) {
-			foreach ($table_node->getElementsByTagName('foreign-key') as $fk_node) {
-				foreach ($fk_node->getElementsByTagName('reference') as $reference_node) {
-					if ($fk_node->getAttribute('foreignTable') != $table_name
-						)continue;
-					$references[] = array(
-						'from_table' => $table_node->getAttribute('name'),
-						'to_column' => $reference_node->getAttribute('foreign'),
-						'from_column' => $reference_node->getAttribute('local'),
-					);
-				}
-			}
-		}
-		return $references;
+		return $this->database->getTable($table_name)->getReferrers();
 	}
 
 	/**
@@ -199,8 +167,9 @@ abstract class BaseGenerator {
 	 * @param string $template Path to file relative to dirname(__FILE__) with leading /
 	 * @return string
 	 */
-	function renderTemplate($table_name, $template){
+	function renderTemplate($table_name, $template, $extraparams = array()){
 		$params = $this->getTemplateParams($table_name);
+		$params = array_merge($params, $extraparams);
 		foreach ($params as $key => &$value)$$key = $value;
 
 		ob_start();
@@ -334,6 +303,9 @@ abstract class BaseGenerator {
 	$rendered_views = array();
 	foreach($this->getViewTemplates() as $file_name => $view_template)
 		$rendered_views[$file_name] = $this->renderTemplate($table_name, $view_template);
+	foreach($this->database->getTable($table_name)->getForeignKeys() as $fk) {
+		$rendered_views[$fk->getForeignTableName().'.php'] = $this->renderTemplate($table_name, '/dabl/fkgrid.php', array('foreign_key' => $fk));
+	}
 	return $rendered_views;
 	}
 

@@ -220,6 +220,7 @@ class DBMySQL extends DABLPDO {
 		$database = new Database($this->getDBName());
 		$database->setPlatform(new MysqlPlatform());
 		$parser->parse($database);
+		$database->doFinalInitialization();
 		return $database;
 	}
 

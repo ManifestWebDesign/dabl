@@ -5,6 +5,7 @@
 
 	</a>
 </h1>
+<?php echo '<?php echo $pager->getLinks($pageString) ?>' ?>
 
 <div class="ui-widget-content ui-corner-all">
 <?php echo '<?php load_view("'.$plural_url.'/grid", $params) ?>' ?>

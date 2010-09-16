@@ -299,11 +299,11 @@ abstract class BaseModel {
 		if (!$this->validate())
 			return 0;
 
-		if ($this->hasColumn('Created') && $this->hasColumn('Updated')) {
-			if ($this->isNew() && !$this->isColumnModified('Created'))
-				$this->setCreated(CURRENT_TIME);
-			if (!$this->isColumnModified('Updated'))
-				$this->setUpdated(CURRENT_TIME);
+		if ($this->hasColumn('Created') && $this->isNew() && !$this->isColumnModified('Created')) {
+			$this->setCreated(CURRENT_TIME);
+		}
+		if($this->hasColumn('Updated') && !$this->isColumnModified('Updated')) {
+			$this->setUpdated(CURRENT_TIME);
 		}
 
 		if ($this->getPrimaryKeys()) {

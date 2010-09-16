@@ -5,13 +5,18 @@
 		foreach($columns as $key => $column){
 			$column_name = $column->getName();
 ?>
-			<th class="ui-widget-header ui-th-column ui-th-ltr <?php if($key==0)echo 'ui-corner-tl' ?>"><?php echo $column_name ?></th>
+			<th class="ui-widget-header <?php if($key==0)echo 'ui-corner-tl' ?>">
+				<a class="display-block" href="<?php echo "<?php echo" ?> '?SortBy=<?php echo $column_name ?>' . (!isset($_REQUEST['Dir']) && @$_REQUEST['SortBy'] == '<?php echo $column_name ?>' ? '&Dir=DESC' : '') <?php echo "?>" ?>">
+				<?php echo "<?" ?> if( @$_REQUEST['SortBy'] == '<?php echo $column_name ?>'):<?php echo "?>" ?><span class="ui-icon ui-icon-carat-1-<?php echo "<?php" ?> echo isset($_REQUEST['Dir'])?'s' :'n'<?php echo "?>" ?> float-right"></span><?php echo "<?" ?>endif;<?php echo "?>"?>
+				<?php echo $column_name ?>
+				</a>
+			</th>
 <?php
 		}
 		$key = 1;
 		foreach($actions as $action){
 ?>
-			<th class="ui-widget-header ui-th-column ui-th-ltr grid-action-column <?php if($key == count($actions))echo 'ui-corner-tr' ?>">&nbsp;</th>
+			<th class="ui-widget-header grid-action-column <?php if($key == count($actions))echo 'ui-corner-tr' ?>">&nbsp;</th>
 <?php
 			++$key;
 		}
@@ -21,7 +26,7 @@
 	<tbody>
 <?php echo '<?php foreach($'.$plural.' as $key => $'.$single.'): ?>' ?>
 
-		<tr class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?> ui-widget-content ui-row-ltr">
+		<tr class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?> ui-widget-content">
 <?php
 		foreach($columns as $column){
 			$column_name = $column->getName();

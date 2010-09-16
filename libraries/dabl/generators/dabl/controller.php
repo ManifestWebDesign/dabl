@@ -2,9 +2,23 @@
 
 class <?php echo $controller_name ?> extends ApplicationController {
 
-	function index(){
-		$this['<?php echo $plural ?>'] = <?php echo $model_name ?>::getAll();
+	function index($page=1){
+		$pageString = site_url('<?php echo $single ?>/index/$page_num');
+
+		$q = new Query('<?php echo $single ?>');
+		if(isset($_REQUEST['SortBy'])) {
+			$q->order($_REQUEST['SortBy'], isset($_REQUEST['Dir']) ? Query::DESC : Query::ASC);
+			$pageString .= '?SortBy='.$_REQUEST['SortBy'];
+		}
+		if(isset($_REQUEST['Dir']))
+			$pageString .= '&Dir='.$_REQUEST['Dir'];
+
+
+		$qp = new QueryPager($q, 25, $page, '<?php echo $model_name ?>');
+		$this['<?php echo $plural ?>'] = $qp->fetchPage();
 		$this['page'] = '<?php echo self::spaceTitleCase($plural) ?>';
+		$this['pageString'] = $pageString;
+		$this['pager'] = $qp;
 	}
 
 	function save($id = null){
@@ -50,10 +64,10 @@ class <?php echo $controller_name ?> extends ApplicationController {
 
 <?php
 		foreach($this->getForeignKeysFromTable($table_name) as $r){
-			$to_table = $r['to_table'];
+			$to_table = $r->getForeignTableName();
 			$to_class_name = $this->getModelName($to_table);
-			$from_column = $r['from_column'];
-			$fk_single =  strtolower($to_table);
+			$from_column = array_shift($r->getLocalColumns());
+			$fk_single = str_replace(array('_', '-'), '', strtolower($to_table));
 			if(@$used_from[$to_table]) continue;
 			$used_from[$to_table] = $from_column;
 ?>
@@ -62,11 +76,10 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		$<?php echo $fk_single ?> = $id ? <?php echo $to_class_name ?>::retrieveByPK($id) : new <?php echo $to_class_name ?>;
 
 		$this['<?php echo $plural ?>'] = $<?php echo $fk_single ?>->get<?php echo $model_name ?>s();
-		$this->loadView($this->getViewDir().'/grid');
+		$this['<?php echo $fk_single ?>'] = $<?php echo $fk_single ?>;
+		$this['page'] = '<?php echo self::spaceTitleCase($plural) ?> for <?php echo $fk_single ?>';
 	}
-
 <?php
 		}
 ?>
-
 }

@@ -254,6 +254,31 @@ foreach($fields as $key => &$field):
 		return array_shift(<?php echo $class_name ?>::doSelect($q, true));
 <?php endif ?>
 	}
+	
+<?php
+	foreach($this->getColumns($table_name) as $field) {
+?>
+	static function retrieveBy<?php echo $field->getName() ?>($value) {
+<?php
+		if($field->isPrimaryKey()) {
+?>
+		return <?php echo $class_name?>::retrieveByPK($value);
+<?php
+		} else {
+?>
+		return <?php echo $class_name ?>::retrieveByColumn('<?php echo $field->getName() ?>', $value);
+<?php
+		}
+?>
+	}
+
+<?php
+	}
+?>
+	static function retrieveByColumn($field, $value) {
+		$conn = <?php echo $table_name ?>::getConnection();
+		return array_shift(<?php echo $class_name ?>::doSelect(Query::create()->add($conn->quoteIdentifier($field), $value)->setLimit(1)->orderBy('<?php echo $PK ?>')));
+	}
 
 	/**
 	 * Populates and returns an instance of <?php echo $class_name ?> with the
@@ -430,15 +455,20 @@ foreach($fields as $key => &$field):
 
 <?php
 $to_table_list = array();
-foreach($this->getForeignKeysFromTable($table_name) as $r):
-	$to_table = $r['to_table'];
+
+foreach($this->getForeignKeysFromTable($table_name) as $r){
+	$to_table = $r->getForeignTableName();
 	if(isset($to_table_list[$to_table]))
 		$to_table_list[$to_table] += 1;
 	else
 		$to_table_list[$to_table] = 1;
+}
+
+foreach($this->getForeignKeysFromTable($table_name) as $r):
+	$to_table = $r->getForeignTableName();
 	$to_class_name = $this->getModelName($to_table);
-	$to_column = $r['to_column'];
-	$from_column = $r['from_column'];
+	$to_column = array_shift($r->getForeignColumns());
+	$from_column = array_shift($r->getLocalColumns());
 	$namedID = false;
 	if(strpos($from_column, 'ID') === strlen($from_column) - 2) {
 		$from_column_clean = rtrim($from_column, "ID");
@@ -450,6 +480,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	}
 ?>
 	protected $_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>;
+	
 <?php
 	if($namedID) {
 ?>
@@ -457,16 +488,17 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	function set<?php echo $from_column_clean ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
 		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
 	}
+
 <?php
 	}
 ?>
 <?php $used_functions[] = "set$to_class_name" . "RelatedBy$from_column"; ?>
 	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
-		if(!$<?php echo $to_class_name ?>->get<?php echo $from_column ?>())
-			throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $from_column ?>');
+		if(!$<?php echo $to_class_name ?>->get<?php echo $to_column ?>())
+			throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $to_column ?>');
 		if($this->getCacheResults())
-			$this->_<?php echo $to_class_name ?> = $<?php echo $to_class_name ?>;
-		$this->set<?echo $from_column ?>($<?php echo $to_class_name ?>->get<?php echo $from_column ?>());
+			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> = $<?php echo $to_class_name ?>;
+		$this->set<?echo $from_column ?>($<?php echo $to_class_name ?>->get<?php echo $to_column ?>());
 	}
 <?php
 	if($namedID) {
@@ -474,12 +506,14 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 
 	/**
 	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
+
 	 * that matches $this-><?php echo $from_column ?>.
 	 * @return <?php echo $to_class_name ?>
+
 	 */
 <?php $used_functions[] = "get$from_column_clean"; ?>
-	function get<?php echo $from_column_clean ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
-		$this->get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
+	function get<?php echo $from_column_clean ?>(){
+		return $this->get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>();
 	}
 <?php
 	}
@@ -487,20 +521,27 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	
 	/**
 	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
+
 	 * that matches $this-><?php echo $from_column ?>.
 	 * @return <?php echo $to_class_name ?>
+
 	 */
 <?php $used_functions[] = "get$to_class_name" . "RelatedBy$from_column"; ?>
 	function get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>() {
-		$pk = <?php echo $to_class_name ?>::getPrimaryKey();
-		$column = '<?php echo $to_column ?>';
-		if($pk != $column)
-			throw new Exception('Foreign key references a column that is not a primary key.');
-		if($this->getCacheResults() && $this->_<?php echo $to_class_name ?> !== null)
-			return $this->_<?php echo $to_class_name ?>;
+		if($this->getCacheResults() && $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> !== null)
+			return $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>;
+<?php 
+	$foreign_column = $this->database->getTable($to_table)->getColumn($to_column);
+	if($foreign_column->isPrimaryKey()) {
+?>
 		$result = <?php echo $to_class_name ?>::retrieveByPK($this->get<?echo $from_column ?>());
+<?php 
+	} else {
+?>
+		$result = <?php echo $to_class_name ?>::retrieveBy<?php echo $from_column ?>($this->get<?echo $from_column ?>());
+<?php } ?>
 		if($this->getCacheResults())
-			$this->_<?php echo $to_class_name ?> = $result;
+			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> = $result;
 		return $result;
 	}
 
@@ -513,6 +554,34 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	}
 
 <?php
+	}
+	if($to_table_list[$to_table] < 2) {
+		if(!in_array("get$to_class_name", $used_functions)) {
+?>
+	/**
+	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
+
+	 * that matches $this-><?php echo $from_column ?>.
+	 * @return <?php echo $to_class_name ?>
+
+	 */
+<?php $used_functions[] = "get$to_class_name"; ?>
+	function get<?php echo $to_class_name ?>(){
+		return $this->get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>();
+	}
+
+<?
+		}
+		if(!in_array("set$to_class_name", $used_functions)) {
+
+?>
+<?php $used_functions[] = "set$to_class_name"; ?>
+	function set<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
+		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
+	}
+
+<?
+		}
 	}
 ?>
 	/**
@@ -535,47 +604,6 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	}
 
 <?php endforeach ?>
-
-<?php
-	foreach($this->getForeignKeysFromTable($table_name) as $r){
-		$to_table = $r['to_table'];
-		$to_class_name = $this->getModelName($to_table);
-		$to_column = $r['to_column'];
-		$from_column = $r['from_column'];
-		if($to_table_list[$to_table] < 2) {
-			if(!in_array("get$to_class_name", $used_functions)) {
-?>
-	/**
-	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
-	 * that matches $this-><?php echo $from_column ?>.
-	 * @return <?php echo $to_class_name ?>
-	 */
-<?php $used_functions[] = "get$to_class_name"; ?>
-	function get<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
-		$this->get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
-	}
-
-<?
-			}
-			if(!in_array("set$to_class_name", $used_functions)) {
-			
-?>
-	/**
-	 * Returns a <?php echo $to_table ?> object with a <?php echo $to_column ?>
-	 * that matches $this-><?php echo $from_column ?>.
-	 * @return <?php echo $to_class_name ?>
-	 */
-<?php $used_functions[] = "set$to_class_name"; ?>
-	function set<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
-		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
-	}
-
-<?
-			}
-		}
-	}
-?>
-
 	/**
 	 * @return <?php echo $class_name ?>[]
 	 */
@@ -589,10 +617,10 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 			$columns[] = $this_table.'.*';
 <?php
 	foreach($this->getForeignKeysFromTable($table_name) as $r):
-		$to_table = $r['to_table'];
+		$to_table = $r->getForeignTableName();
 		$to_class_name = $this->getModelName($to_table);
-		$to_column = $r['to_column'];
-		$from_column = $r['from_column'];
+		$to_column = array_shift($r->getForeignColumns());
+		$from_column = array_shift($r->getLocalColumns());
 ?>
 
 		$to_table = <?php echo $to_class_name ?>::getTableName();
@@ -608,13 +636,13 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 <?php $used_functions[] = "getForeignObjectsQuery"; ?>
 	/**
 	 *
-	 * @param <type> $tablename
-	 * @param <type> $columnname
+	 * @param string $tablename
+	 * @param string $columnname
 	 * @param Query $q
 	 * @return Query
 	 */
-	protected function getForeignObjectsQuery($tablename, $columnname, Query $q = null){
-		$value = $this->{"get$columnname"}();
+	protected function getForeignObjectsQuery($tablename, $columnname, $localcolumn, Query $q = null){
+		$value = $this->{"get$localcolumn"}();
 		if($value ===null)
 			throw new Exception('NULL cannot be used to match keys.');
 		$conn = $this->getConnection();
@@ -633,15 +661,17 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 
 <?php
 $from_table_list = array();
+
 foreach($this->getForeignKeysToTable($table_name) as $r):
-	$from_table = $r['from_table'];
+	$from_table = $r->getTableName();
 	if(isset($from_table_list[$from_table]))
 		$from_table_list[$from_table] += 1;
 	else
 		$from_table_list[$from_table] = 1;
 	$from_class_name = $this->getModelName($from_table);
-	$from_column = $r['from_column'];
-	$to_column = $r['to_column'];
+	$from_column = array_shift($r->getLocalColumns());
+	$to_column = array_shift($r->getForeignColumns());
+	$to_table = $r->getForeignTableName();
 ?>
 	/**
 	 * Returns a Query for selecting <?php echo $from_table ?> Objects(rows) from the <?php echo $from_table ?> table
@@ -650,7 +680,7 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	 */
 <?php $used_functions[] = "get$from_class_name" . "sRelatedBy$from_column" . "Query"; ?>
 	function get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query(Query $q = null) {
-		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>', $q);
+		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>', '<?php echo $to_column ?>', $q);
 	}
 
 	/**
@@ -707,13 +737,14 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 		return $<?php echo $from_table ?>s;
 	}
 <?php endforeach ?>
-
 <?php
 	foreach($this->getForeignKeysToTable($table_name) as $r){
-		$from_table = $r['from_table'];
+		$from_table = $r->getTableName();
+
 		$from_class_name = $this->getModelName($from_table);
-		$from_column = $r['from_column'];
-		$to_column = $r['to_column'];
+		$from_column = array_shift($r->getLocalColumns());
+		$to_column = array_shift($r->getForeignColumns());
+		$to_table = $r->getForeignTableName();
 		if($from_table_list[$from_table] < 2) {
 			if(!in_array("get$from_class_name"."s", $used_functions)) {
 ?>
@@ -724,7 +755,7 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	 */
 <?php $used_functions[] = "get$from_class_name"."s"; ?>
 	function get<?php echo $from_class_name ?>s($extra = null){
-		$this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($extra);
+		return $this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($extra);
 	}
 
 <?
@@ -738,7 +769,7 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	  */
 <?php $used_functions[] = "get$from_class_name" . "sQuery"; ?>
 	function get<?php echo $from_class_name ?>sQuery(Query $q = null) {
-		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>', $q);
+		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>','<?php echo $to_column ?>', $q);
 	}
 
 <?
@@ -774,4 +805,25 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 		}
 	}
 ?>
+	/**
+	 * Returns true if the column values validate.
+	 * @return bool
+	 */
+	function validate() {
+		$this->_validationErrors = array();
+		$validation_passed = true;
+<?php 
+	foreach($fields as $key => &$field){
+		if($field->isNotNull() && !$field->isAutoIncrement() && !$field->getDefaultValue() && !$field->isPrimaryKey() && !in_array($field->getName(), array('Created', 'Updated'))) {
+?>
+		if(!$this->get<?php echo $field->getName() ?>()) {
+			$validation_passed = false;
+			$this->_validationErrors[] = "<?php echo $field->getName()?> must not be null";
+		}
+<?php
+		}
+	}
+?>
+		return $validation_passed;
+	}
 }

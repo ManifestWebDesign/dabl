@@ -59,3 +59,7 @@ h1 .ui-button-link{
 .ui-state-highlight, ui-state-error{
 	margin-top:5px;
 }
+
+.float-right {
+	float: right;
+}
