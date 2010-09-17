@@ -485,7 +485,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	if($namedID) {
 ?>
 <?php $used_functions[] = "set$from_column_clean"; ?>
-	function set<?php echo $from_column_clean ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
+	function set<?php echo $from_column_clean ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?> = null){
 		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
 	}
 
@@ -493,12 +493,16 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	}
 ?>
 <?php $used_functions[] = "set$to_class_name" . "RelatedBy$from_column"; ?>
-	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
-		if(!$<?php echo $to_class_name ?>->get<?php echo $to_column ?>())
-			throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $to_column ?>');
+	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?> = null){
+		if($<?php echo $to_class_name ?> === null)
+			$this->set<?php echo $to_column ?>(null);
+		else {
+			if(!$<?php echo $to_class_name ?>->get<?php echo $to_column ?>())
+				throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $to_column ?>');
+			$this->set<?echo $from_column ?>($<?php echo $to_class_name ?>->get<?php echo $to_column ?>());
+		}
 		if($this->getCacheResults())
 			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> = $<?php echo $to_class_name ?>;
-		$this->set<?echo $from_column ?>($<?php echo $to_class_name ?>->get<?php echo $to_column ?>());
 	}
 <?php
 	if($namedID) {
@@ -528,18 +532,22 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 	 */
 <?php $used_functions[] = "get$to_class_name" . "RelatedBy$from_column"; ?>
 	function get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>() {
-		if($this->getCacheResults() && $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> !== null)
-			return $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>;
+		if($this->get<?echo $from_column ?>() === null)
+			$result = null;
+		else {
+			if($this->getCacheResults() && $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> !== null)
+				return $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>;
 <?php 
 	$foreign_column = $this->database->getTable($to_table)->getColumn($to_column);
 	if($foreign_column->isPrimaryKey()) {
 ?>
-		$result = <?php echo $to_class_name ?>::retrieveByPK($this->get<?echo $from_column ?>());
+			$result = <?php echo $to_class_name ?>::retrieveByPK($this->get<?echo $from_column ?>());
 <?php 
-	} else {
+		} else {
 ?>
-		$result = <?php echo $to_class_name ?>::retrieveBy<?php echo $from_column ?>($this->get<?echo $from_column ?>());
+			$result = <?php echo $to_class_name ?>::retrieveBy<?php echo $from_column ?>($this->get<?echo $from_column ?>());
 <?php } ?>
+		}
 		if($this->getCacheResults())
 			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> = $result;
 		return $result;
