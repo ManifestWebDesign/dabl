@@ -495,7 +495,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 <?php $used_functions[] = "set$to_class_name" . "RelatedBy$from_column"; ?>
 	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?> = null){
 		if($<?php echo $to_class_name ?> === null)
-			$this->set<?php echo $to_column ?>(null);
+			$this->set<?php echo $from_column ?>(null);
 		else {
 			if(!$<?php echo $to_class_name ?>->get<?php echo $to_column ?>())
 				throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $to_column ?>');
@@ -584,7 +584,7 @@ foreach($this->getForeignKeysFromTable($table_name) as $r):
 
 ?>
 <?php $used_functions[] = "set$to_class_name"; ?>
-	function set<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?>){
+	function set<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $to_class_name ?> = null){
 		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $to_class_name ?>);
 	}
 
