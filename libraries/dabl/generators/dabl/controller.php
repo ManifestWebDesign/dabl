@@ -3,7 +3,7 @@
 class <?php echo $controller_name ?> extends ApplicationController {
 
 	function index($page=1){
-		$pageString = site_url('<?php echo $single ?>/index/$page_num');
+		$pageString = site_url('<?php echo $plural ?>/index/$page_num');
 
 		$q = new Query('<?php echo $single ?>');
 		if(isset($_REQUEST['SortBy'])) {
