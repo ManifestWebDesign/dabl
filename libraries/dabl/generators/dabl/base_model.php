@@ -276,8 +276,8 @@ foreach($fields as $key => &$field):
 	}
 ?>
 	static function retrieveByColumn($field, $value) {
-		$conn = <?php echo $table_name ?>::getConnection();
-		return array_shift(<?php echo $class_name ?>::doSelect(Query::create()->add($conn->quoteIdentifier($field), $value)->setLimit(1)->orderBy('<?php echo $PK ?>')));
+		$conn = <?php echo $class_name ?>::getConnection();
+		return array_shift(<?php echo $class_name ?>::doSelect(Query::create()->add($conn->quoteIdentifier($field), $value)->setLimit(1)->order('<?php echo $PK ?>')));
 	}
 
 	/**
