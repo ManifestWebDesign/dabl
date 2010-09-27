@@ -1,5 +1,7 @@
 <?php
 
+require_once ROOT.'libraries/propel/platform/Platform.php';
+
 abstract class BaseGenerator {
 
 	/**
