@@ -85,7 +85,7 @@ SELECT A.*, rownum AS PROPEL\$ROWNUM
 FROM (
   $sql
 ) A
-WHERE PROPEL\$ROWNUM <= $max
+WHERE rownum <= $max
 EOF;
 
 		if ($offset > 0) {
