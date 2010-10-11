@@ -419,6 +419,16 @@ class Query {
 		$query_s = "";
 		$statement = new QueryStatement($conn);
 
+		// split apart table names by dots
+		if (strpos($table_name, ' ')!==false) {
+			$table = $table_name;
+		} elseif ($conn) {
+			$table = join('.', array_map(array($conn, 'quoteIdentifier'), explode('.', $table_name)));
+			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
+		} else {
+			$table = '`'.join('`.`', explode('.', $table_name)).'`';
+		}
+
 		if ($this->_columns) {
 			$columns = implode(', ', $this->_columns);
 		} elseif ($alias) {
@@ -429,16 +439,6 @@ class Query {
 
 		if ($this->_distinct) {
 			$columns = "DISTINCT $columns";
-		}
-
-		// split apart table names by dots
-		if (strpos($table_name, ' ')!==false) {
-			$table = $table_name;
-		} elseif ($conn) {
-			$table = join('.', array_map(array($conn, 'quoteIdentifier'), explode('.', $table_name)));
-			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
-		} else {
-			$table = '`'.join('`.`', explode('.', $table_name)).'`';
 		}
 
 		$table = $alias ? "$table $alias" : $table;
