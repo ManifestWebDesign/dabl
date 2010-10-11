@@ -68,26 +68,34 @@ class DBOracle extends DABLPDO {
 	}
 
 	/**
-	 * @see		DABLPDO::applyLimit()
+	 * Returns SQL which limits the result set.
+	 *
+	 * @param string $sql
+	 * @param int $offset
+	 * @param int $limit
+	 * @see DABLPDO::applyLimit()
 	 */
-	function applyLimit(&$sql, $offset, $limit){
-		 $sql =
-			'SELECT B.* FROM (  '
-			.  'SELECT A.*, rownum AS PROPEL$ROWNUM FROM (  '
-			. $sql
-			. '  ) A '
-			.  ' ) B WHERE ';
+	function applyLimit(&$sql, $offset, $limit) {
 
-		if ( $offset > 0 ) {
-			$sql				.= ' B.PROPEL$ROWNUM > ' . $offset;
+		$max = $offset + $limit;
 
-			if ( $limit > 0 )
-			{
-				$sql			.= ' AND B.PROPEL$ROWNUM <= '
-									. ( $offset + $limit );
-			}
-		} else {
-			$sql				.= ' B.PROPEL$ROWNUM <= ' . $limit;
+		// nesting all queries, in case there's already a WHERE clause
+		$sql = <<<EOF
+SELECT A.*, rownum AS PROPEL\$ROWNUM
+FROM (
+  $sql
+) A
+WHERE PROPEL\$ROWNUM <= $max
+EOF;
+
+		if ($offset > 0) {
+			$sql = <<<EOF
+SELECT B.*
+FROM (
+  $sql
+) B
+WHERE B.PROPEL\$ROWNUM > $offset
+EOF;
 		}
 	}
 
