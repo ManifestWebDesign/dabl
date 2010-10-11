@@ -424,7 +424,6 @@ class Query {
 			$table = $table_name;
 		} elseif ($conn) {
 			$table = join('.', array_map(array($conn, 'quoteIdentifier'), explode('.', $table_name)));
-			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
 		} else {
 			$table = '`'.join('`.`', explode('.', $table_name)).'`';
 		}
