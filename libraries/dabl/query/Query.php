@@ -431,13 +431,17 @@ class Query {
 			$columns = "DISTINCT $columns";
 		}
 
+		// split apart table names by dots
 		if (strpos($table_name, ' ')!==false) {
-			$table = $alias ? "$table_name $alias" : $table_name;
+			$table = $table_name;
 		} elseif ($conn) {
+			$table = join('.', array_map(array($conn, 'quoteIdentifier'), explode('.', $table_name)));
 			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
 		} else {
-			$table = $alias ? "`$table_name` $alias" : "`$table_name`";
+			$table = '`'.join('`.`', explode('.', $table_name)).'`';
 		}
+
+		$table = $alias ? "$table $alias" : $table;
 
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
