@@ -8,7 +8,7 @@
  *
  */
 <?php $used_functions = array(); ?>
-abstract class base<?php echo $class_name ?> extends ApplicationBaseModel {
+abstract class base<?php echo $class_name ?> extends ApplicationModel {
 
 	/**
 	 * Name of the table

@@ -38,7 +38,7 @@ abstract class BaseGenerator {
 	/**
 	 * @var string
 	 */
-	protected $applicationBaseModelTemplate = '/dabl/application_base_model.php';
+	protected $applicationModelTemplate = '/dabl/application_model.php';
 
 	/**
 	 * Constructor function
@@ -196,8 +196,8 @@ abstract class BaseGenerator {
 	/**
 	 * @return string Path to application base model template file relative to dirname(__FILE__) with leading /
 	 */
-	function getApplicationBaseModelTemplate(){
-		return $this->applicationBaseModelTemplate;
+	function getApplicationModelTemplate(){
+		return $this->applicationModelTemplate;
 	}
 
 
@@ -339,10 +339,10 @@ abstract class BaseGenerator {
 			die('The directory ' . $options['base_model_path'] . ' does not exist.');
 
 		//Write php files for classes
-		$app_base_model_path = $options['model_path'].'ApplicationBaseModel.php';
+		$app_base_model_path = $options['model_path'].'ApplicationModel.php';
 		if (!file_exists($app_base_model_path)) {
 			ob_start();
-			require dirname(__FILE__).$this->getApplicationBaseModelTemplate();
+			require dirname(__FILE__).$this->getApplicationModelTemplate();
 			file_put_contents($app_base_model_path, ob_get_clean());
 		}
 		unset($app_base_model_path);
