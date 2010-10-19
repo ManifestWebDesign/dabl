@@ -20,7 +20,7 @@ function checkAll(name, connection, checked){
 </script>
 <h1>DABL Generator</h1>
 <div>
-	Please choose which table to generate for.  Only the base models
+	Please choose which tables to generate for.  Only the base models
 	can be overwritten.  Models, views and controllers will not be overwritten if
 	they already exist.  Generating a view or controller without generating the model is not recommended.
 </div>

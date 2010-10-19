@@ -415,22 +415,22 @@ class Database extends XMLElement {
 
 	public function doFinalInitialization()
 	{
-	  $config = $this->getGeneratorConfig();
-    if($config && ($defaultBehaviors = $config->getBuildProperty('behaviorDefault')))
-    {
-      // add generic behaviors from build.properties 
-      $defaultBehaviors = explode(',', $defaultBehaviors);
-      foreach ($defaultBehaviors as $behavior)
-      {
-        $this->addBehavior(array('name' => trim($behavior)));
-      }
-    }
-    
-    // execute behavior database modifiers
-    foreach ($this->getBehaviors() as $behavior)
-    {
-      $behavior->modifyDatabase();
-    }
+//	  $config = $this->getGeneratorConfig();
+//    if($config && ($defaultBehaviors = $config->getBuildProperty('behaviorDefault')))
+//    {
+//      // add generic behaviors from build.properties
+//      $defaultBehaviors = explode(',', $defaultBehaviors);
+//      foreach ($defaultBehaviors as $behavior)
+//      {
+//        $this->addBehavior(array('name' => trim($behavior)));
+//      }
+//    }
+//
+//    // execute behavior database modifiers
+//    foreach ($this->getBehaviors() as $behavior)
+//    {
+//      $behavior->modifyDatabase();
+//    }
 
 		$tables = $this->getTables();
 
@@ -467,6 +467,7 @@ class Database extends XMLElement {
 
 			// setup reverse fk relations
 			$fks = $currTable->getForeignKeys();
+
 			for ($j=0, $fksLen=count($fks); $j < $fksLen; $j++) {
 				$currFK = $fks[$j];
 				$foreignTable = $this->getTable($currFK->getForeignTableName());
@@ -475,7 +476,7 @@ class Database extends XMLElement {
 					. " key to nonexistent table, "
 					. $currFK->getForeignTableName() . "!");
 				}
-
+				
 				$referrers = $foreignTable->getReferrers();
 				if ($referrers === null || !in_array($currFK, $referrers, true) ) {
 					$foreignTable->addReferrer($currFK);

@@ -62,10 +62,10 @@ class DABLGenerator extends BaseGenerator {
 
 		$fkeys_to = $this->getForeignKeysToTable($table_name);
 		foreach ($fkeys_to as $k => &$r) {
-			$from_table = $r['from_table'];
-			$from_className = $this->getModelName($from_table);
-			$from_column = $r['from_column'];
-			$to_column = $r['to_column'];
+			$from_table = $r->getTableName();
+			$from_class_name = $this->getModelName($from_table);
+			$from_column = array_shift($r->getLocalColumns());
+			$to_column = array_shift($r->getForeignColumns());
 			if (@$used_to[$from_table]) {
 					unset($fkeys_to[$k]);
 					continue;

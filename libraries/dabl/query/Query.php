@@ -417,15 +417,15 @@ class Query {
 		}
 
 		$query_s = "";
+
 		$statement = new QueryStatement($conn);
 
-		// split apart table names by dots
 		if (strpos($table_name, ' ')!==false) {
-			$table = $table_name;
+			$table = $alias ? "$table_name $alias" : $table_name;
 		} elseif ($conn) {
-			$table = join('.', array_map(array($conn, 'quoteIdentifier'), explode('.', $table_name)));
+			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
 		} else {
-			$table = '`'.join('`.`', explode('.', $table_name)).'`';
+			$table = $alias ? "`$table_name` $alias" : "`$table_name`";
 		}
 
 		if ($this->_columns) {
@@ -433,14 +433,12 @@ class Query {
 		} elseif ($alias) {
 			$columns = "$alias.*";
 		} else {
-			$columns = "$table_name.*"; //always use the table name of the object trying to retrieve
+			$columns = "$table.*"; //always use the table name of the object trying to retrieve
 		}
 
 		if ($this->_distinct) {
 			$columns = "DISTINCT $columns";
 		}
-
-		$table = $alias ? "$table $alias" : $table;
 
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
