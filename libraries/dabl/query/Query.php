@@ -419,6 +419,15 @@ class Query {
 		$query_s = "";
 		$statement = new QueryStatement($conn);
 
+		// split apart table names by dots
+		if (strpos($table_name, ' ')!==false) {
+			$table = $table_name;
+		} elseif ($conn) {
+			$table = join('.', array_map(array($conn, 'quoteIdentifier'), explode('.', $table_name)));
+		} else {
+			$table = '`'.join('`.`', explode('.', $table_name)).'`';
+		}
+
 		if ($this->_columns) {
 			$columns = implode(', ', $this->_columns);
 		} elseif ($alias) {
@@ -431,13 +440,7 @@ class Query {
 			$columns = "DISTINCT $columns";
 		}
 
-		if (strpos($table_name, ' ')!==false) {
-			$table = $alias ? "$table_name $alias" : $table_name;
-		} elseif ($conn) {
-			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
-		} else {
-			$table = $alias ? "`$table_name` $alias" : "`$table_name`";
-		}
+		$table = $alias ? "$table $alias" : $table;
 
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
