@@ -33,19 +33,19 @@ ini_set('log_errors', true);
 //file for error logging
 ini_set('error_log', ROOT.'logs/error_log');
 
-//load Module class for magic class loading
-require_once ROOT.'libraries/Module.php';
+//load ClassLoader class for magic class loading
+require_once ROOT.'libraries/ClassLoader.php';
 
 //specify directories that contain classes
-Module::addRepository('ROOT', ROOT);
-Module::import('ROOT:models');
-Module::import('ROOT:models:base');
-Module::import('ROOT:libraries:dabl');
-Module::import('ROOT:libraries:dabl:query');
-Module::import('ROOT:controllers');
-Module::import('ROOT:libraries');
-Module::import('ROOT:libraries:dabl:adapter');
-if(!class_exists('PDO')) Module::import('ROOT:libraries:PDO');
+ClassLoader::addRepository('ROOT', ROOT);
+ClassLoader::import('ROOT:models');
+ClassLoader::import('ROOT:models:base');
+ClassLoader::import('ROOT:libraries:dabl');
+ClassLoader::import('ROOT:libraries:dabl:query');
+ClassLoader::import('ROOT:controllers');
+ClassLoader::import('ROOT:libraries');
+ClassLoader::import('ROOT:libraries:dabl:adapter');
+if(!class_exists('PDO')) ClassLoader::import('ROOT:libraries:PDO');
 
 $db_connections['my_connection_name'] = array(
 	'driver' => 'mysql',
@@ -57,7 +57,7 @@ $db_connections['my_connection_name'] = array(
 
 //connect to database(s)
 foreach($db_connections as $connection_name => $db_params){
-	Module::import('ROOT:libraries:dabl:adapter:'.$db_params['driver']);
+	ClassLoader::import('ROOT:libraries:dabl:adapter:'.$db_params['driver']);
 	DBManager::addConnection($connection_name, $db_params);
 }
 

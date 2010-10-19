@@ -119,13 +119,13 @@ class DBPostgres extends DABLPDO {
 	 */
 	function getDatabaseSchema(){
 
-		Module::import('ROOT:libraries:propel');
-		Module::import('ROOT:libraries:propel:database');
-		Module::import('ROOT:libraries:propel:database:model');
-		Module::import('ROOT:libraries:propel:database:reverse');
-		Module::import('ROOT:libraries:propel:database:reverse:pgsql');
-		Module::import('ROOT:libraries:propel:database:tranform');
-		Module::import('ROOT:libraries:propel:platform');
+		ClassLoader::import('ROOT:libraries:propel');
+		ClassLoader::import('ROOT:libraries:propel:database');
+		ClassLoader::import('ROOT:libraries:propel:database:model');
+		ClassLoader::import('ROOT:libraries:propel:database:reverse');
+		ClassLoader::import('ROOT:libraries:propel:database:reverse:pgsql');
+		ClassLoader::import('ROOT:libraries:propel:database:tranform');
+		ClassLoader::import('ROOT:libraries:propel:platform');
 
 		$parser = new PgsqlSchemaParser();
 		$parser->setConnection($this);

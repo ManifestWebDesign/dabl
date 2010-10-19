@@ -1,13 +1,14 @@
 <?php
 
-class Module {
+class ClassLoader {
 	static $root_modules;
 	static $namespaces = array();
 	static $classes = array();
+	static $delimiter = ':';
 
 	static function autoload($class_name) {
 		foreach(self::$namespaces as $namespace => &$namespace_a) {
-			$class_path = MODULE::$root_modules[$namespace_a[0]].DIRECTORY_SEPARATOR.
+			$class_path = self::$root_modules[$namespace_a[0]].DIRECTORY_SEPARATOR.
 				$namespace_a[1].DIRECTORY_SEPARATOR.
 				$class_name.'.php';
 
@@ -20,7 +21,7 @@ class Module {
 	}
 
 	static function import($namespace) {
-		$namespace_a = explode(':', $namespace);
+		$namespace_a = explode(self::$delimiter, $namespace);
 		$root = array_shift($namespace_a);
 		$ns_path = implode(DIRECTORY_SEPARATOR, $namespace_a);
 		self::$namespaces[$namespace] = array($root, $ns_path);
@@ -35,4 +36,4 @@ class Module {
 	}
 }
 
-spl_autoload_register(array('Module', 'autoload'));
+spl_autoload_register(array('ClassLoader', 'autoload'));
