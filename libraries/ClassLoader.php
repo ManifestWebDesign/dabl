@@ -1,9 +1,9 @@
 <?php
 
 class ClassLoader {
-	static $root_modules;
-	static $namespaces = array();
-	static $classes = array();
+
+	private static $rootModules;
+	private static $namespaces = array();
 	static $delimiter = ':';
 
 	/**
@@ -11,10 +11,10 @@ class ClassLoader {
 	 * @param string $class_name
 	 */
 	static function autoload($class_name) {
-		foreach(self::$namespaces as $namespace => &$namespace_a) {
-			$class_path = self::$root_modules[$namespace_a[0]].DIRECTORY_SEPARATOR.
-				$namespace_a[1].DIRECTORY_SEPARATOR.
-				$class_name.'.php';
+		foreach (self::$namespaces as $namespace => &$namespace_a) {
+			$class_path = self::$rootModules[$namespace_a[0]] . DIRECTORY_SEPARATOR .
+					$namespace_a[1] . DIRECTORY_SEPARATOR .
+					$class_name . '.php';
 
 			// require file if it exists
 			if (is_file($class_path)) {
@@ -50,8 +50,9 @@ class ClassLoader {
 	 * @param string $module_path
 	 */
 	static function addRepository($name, $module_path) {
-		self::$root_modules[$name] = rtrim($module_path, '\\/');
+		self::$rootModules[$name] = rtrim($module_path, '\\/');
 	}
+
 }
 
 spl_autoload_register(array('ClassLoader', 'autoload'));
