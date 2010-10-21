@@ -76,8 +76,8 @@ abstract class BaseController extends ArrayObject {
 		$action_name = $action_name ? $action_name : DEFAULT_CONTROLLER;
 		$method_name = str_replace(array('-', '_', ' '), '', $action_name);
 		$view = $this->getViewDir($action_name).$action_name;
-
-		method_exists($this, $method_name) || file_not_found($view);
+		if((!method_exists($this, $method_name) && !method_exists($this, '__call')) || strpos($action_name, '_') === 0)
+			file_not_found($view);
 
 		call_user_func_array(array($this, $method_name), $params);
 
