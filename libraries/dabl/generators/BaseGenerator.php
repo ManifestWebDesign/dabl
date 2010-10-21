@@ -1,6 +1,6 @@
 <?php
 
-require_once ROOT.'libraries/propel/platform/Platform.php';
+require_once ROOT . 'libraries/propel/platform/Platform.php';
 
 abstract class BaseGenerator {
 
@@ -8,37 +8,31 @@ abstract class BaseGenerator {
 	 * @var array
 	 */
 	private $options;
-
 	/**
 	 * @var string
 	 */
 	private $connectionName;
-
 	/**
 	 * @var DOMDocument
 	 */
 	private $dbSchema;
-
 	/**
 	 *
 	 * @var Database
 	 */
 	private $database;
-
 	/**
 	 * @var string
 	 */
 	protected $baseModelTemplate = '/dabl/base_model.php';
-
 	/**
 	 * @var string
 	 */
 	protected $modelTemplate = '/dabl/model.php';
-
 	/**
 	 * @var string
 	 */
-	protected $applicationBaseModelTemplate = '/dabl/application_base_model.php';
+	protected $applicationModelTemplate = '/dabl/application_model.php';
 
 	/**
 	 * Constructor function
@@ -161,7 +155,7 @@ abstract class BaseGenerator {
 	/**
 	 * @return array
 	 */
-	function getTemplateParams(){
+	function getTemplateParams() {
 		return array();
 	}
 
@@ -169,10 +163,11 @@ abstract class BaseGenerator {
 	 * @param string $template Path to file relative to dirname(__FILE__) with leading /
 	 * @return string
 	 */
-	function renderTemplate($table_name, $template, $extraparams = array()){
+	function renderTemplate($table_name, $template, $extraparams = array()) {
 		$params = $this->getTemplateParams($table_name);
 		$params = array_merge($params, $extraparams);
-		foreach ($params as $key => &$value)$$key = $value;
+		foreach ($params as $key => &$value)
+			$$key = $value;
 
 		ob_start();
 		require dirname(__FILE__) . $template;
@@ -182,36 +177,35 @@ abstract class BaseGenerator {
 	/**
 	 * @return string Path to base model template file relative to dirname(__FILE__) with leading /
 	 */
-	function getBaseModelTemplate(){
+	function getBaseModelTemplate() {
 		return $this->baseModelTemplate;
 	}
 
 	/**
 	 * @return string Path to model template file relative to dirname(__FILE__) with leading /
 	 */
-	function getModelTemplate(){
+	function getModelTemplate() {
 		return $this->modelTemplate;
 	}
 
 	/**
 	 * @return string Path to application base model template file relative to dirname(__FILE__) with leading /
 	 */
-	function getApplicationBaseModelTemplate(){
-		return $this->applicationBaseModelTemplate;
+	function getApplicationModelTemplate() {
+		return $this->applicationModelTemplate;
 	}
-
 
 	/**
 	 * @return array Paths to view template files relative to dirname(__FILE__) with leading /
 	 */
-	function getViewTemplates(){
+	function getViewTemplates() {
 		return $this->viewTemplates;
 	}
 
 	/**
 	 * @return string Path to controller template file relative to dirname(__FILE__) with leading /
 	 */
-	function getControllerTemplate(){
+	function getControllerTemplate() {
 		return $this->controllerTemplate;
 	}
 
@@ -302,13 +296,13 @@ abstract class BaseGenerator {
 	 * @return array
 	 */
 	function getViews($table_name) {
-	$rendered_views = array();
-	foreach($this->getViewTemplates() as $file_name => $view_template)
-		$rendered_views[$file_name] = $this->renderTemplate($table_name, $view_template);
-	foreach($this->database->getTable($table_name)->getForeignKeys() as $fk) {
-		$rendered_views[$fk->getForeignTableName().'.php'] = $this->renderTemplate($table_name, '/dabl/fkgrid.php', array('foreign_key' => $fk));
-	}
-	return $rendered_views;
+		$rendered_views = array();
+		foreach ($this->getViewTemplates() as $file_name => $view_template)
+			$rendered_views[$file_name] = $this->renderTemplate($table_name, $view_template);
+		foreach ($this->database->getTable($table_name)->getForeignKeys() as $fk) {
+			$rendered_views[$fk->getForeignTableName() . '.php'] = $this->renderTemplate($table_name, '/dabl/fkgrid.php', array('foreign_key' => $fk));
+		}
+		return $rendered_views;
 	}
 
 	/**
@@ -339,10 +333,10 @@ abstract class BaseGenerator {
 			die('The directory ' . $options['base_model_path'] . ' does not exist.');
 
 		//Write php files for classes
-		$app_base_model_path = $options['model_path'].'ApplicationBaseModel.php';
+		$app_base_model_path = $options['model_path'] . 'ApplicationModel.php';
 		if (!file_exists($app_base_model_path)) {
 			ob_start();
-			require dirname(__FILE__).$this->getApplicationBaseModelTemplate();
+			require dirname(__FILE__) . $this->getApplicationModelTemplate();
 			file_put_contents($app_base_model_path, ob_get_clean());
 		}
 		unset($app_base_model_path);

@@ -16,7 +16,7 @@ $options = array(
 	'controller_path' => ROOT."controllers/",
 );
 
-Module::import('ROOT:libraries:dabl:generators');
+ClassLoader::import('ROOT:libraries:dabl:generators');
 
 $generators = array();
 foreach(DBManager::getConnectionNames() as $connection_name){
