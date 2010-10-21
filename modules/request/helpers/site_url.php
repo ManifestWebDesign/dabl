@@ -19,7 +19,7 @@ function site_url($url = '', $version = false) {
 		return $url;
 
 	if ($version) {
-		$path = ROOT . '/public/' . $url;
+		$path = PUBLIC_DIR . $url;
 		if (!is_file($path))
 			throw new Exception('File ' . $url . ' not found.');
 		$char = (strpos($url, '?') === false) ? '?' : '&';

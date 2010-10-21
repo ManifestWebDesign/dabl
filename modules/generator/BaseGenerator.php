@@ -1,6 +1,6 @@
 <?php
 
-require_once ROOT . 'modules/database/propel/platform/Platform.php';
+require_once MODULES_DIR . 'database/propel/platform/Platform.php';
 
 abstract class BaseGenerator {
 

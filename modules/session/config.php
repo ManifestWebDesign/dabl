@@ -2,8 +2,4 @@
 
 $module_root = dirname(__FILE__).DIRECTORY_SEPARATOR;
 
-foreach (glob($module_root . 'helpers/*.php') as $filename)
-	require_once($filename);
-
-// start the session
-session_start();
+require_once $module_root.'helpers/persist.php';
