@@ -72,7 +72,7 @@ abstract class BaseModel {
 		} else {
 			// PDO::FETCH_PROPS_LATE is required to call the ctor after hydrating the fields
 			$flags = PDO::FETCH_CLASS;
-			if (defined(PDO::FETCH_PROPS_LATE)) $flags |= PDO::FETCH_PROPS_LATE;
+			if (defined('PDO::FETCH_PROPS_LATE')) $flags |= PDO::FETCH_PROPS_LATE;
 			$result->setFetchMode($flags, $class_name);
 			while ($object = $result->fetch()) {
 				$object = clone $object;
