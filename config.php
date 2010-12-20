@@ -38,15 +38,9 @@ require_once MODULES_DIR . '/loaders/init.php';
 
 ModuleLoader::loadAll();
 
-Hook::call('after_modules_loaded');
-
 $config_files = glob(CONFIG_DIR . '*.php');
 
 sort($config_files);
 
 foreach ($config_files as $filename)
 	require_once($filename);
-
-//print_r2($config_files);
-
-Hook::call('after_config_loaded');
