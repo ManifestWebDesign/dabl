@@ -21,7 +21,7 @@ abstract class BaseController extends ArrayObject {
 	 * Returns an array with the view parameters
 	 * @return array
 	 */
-	function getParams(){
+	function getParams() {
 		return $this->getArrayCopy();
 	}
 
@@ -29,21 +29,22 @@ abstract class BaseController extends ArrayObject {
 	 * Replaces the view parameters with the given array
 	 * @param array $array
 	 */
-	function setParams($array){
+	function setParams($array) {
 		$this->exchangeArray($array);
 	}
 
 	/**
 	 * @return string
 	 */
-	protected function getViewDir(){
+	protected function getViewDir() {
 		$view = str_replace('\\', '/', $this->viewDir);
 		$view = trim($view, '/');
 
-		if ($view===DEFAULT_CONTROLLER) $view = '';
-		$index_view = '/'.DEFAULT_CONTROLLER;
+		if ($view === DEFAULT_CONTROLLER)
+			$view = '';
+		$index_view = '/' . DEFAULT_CONTROLLER;
 		$pos = strrpos($view, $index_view);
-		if ($pos!==false && strlen($view)===($pos+strlen($index_view))) {
+		if ($pos !== false && strlen($view) === ($pos + strlen($index_view))) {
 			$view = substr($view, 0, $pos);
 		}
 		$view .= '/';
@@ -51,18 +52,18 @@ abstract class BaseController extends ArrayObject {
 		return str_replace('/', DIRECTORY_SEPARATOR, $view);
 	}
 
-	function renderView($view){
+	function renderView($view) {
 		return $this->loadView($view);
 	}
 
-	function loadView($view){
+	function loadView($view) {
 		$output_format = $this->outputFormat;
 		$params = $this->getParams();
 
-		$use_layout = ($this->layout && $this->renderPartial===false && $output_format == 'html');
+		$use_layout = ($this->layout && $this->renderPartial === false && $output_format == 'html');
 		$params['content'] = load_view($view, $params, $use_layout, $output_format);
 
-		if($use_layout)
+		if ($use_layout)
 			load_view($this->layout, $params, false, $output_format);
 
 		$this->loadView = false;
@@ -72,16 +73,17 @@ abstract class BaseController extends ArrayObject {
 	 * @param string $action_name
 	 * @param array $params
 	 */
-	function doAction($action_name=null, $params = array()){
+	function doAction($action_name=null, $params = array()) {
 		$action_name = $action_name ? $action_name : DEFAULT_CONTROLLER;
 		$method_name = str_replace(array('-', '_', ' '), '', $action_name);
-		$view = $this->getViewDir($action_name).$action_name;
-		if((!method_exists($this, $method_name) && !method_exists($this, '__call')) || strpos($action_name, '_') === 0)
+		$view = $this->getViewDir($action_name) . $action_name;
+		if ((!method_exists($this, $method_name) && !method_exists($this, '__call')) || strpos($action_name, '_') === 0)
 			file_not_found($view);
 
 		call_user_func_array(array($this, $method_name), $params);
 
-		if(!$this->loadView)return;
+		if (!$this->loadView
+			)return;
 		$this->loadView($view);
 	}
 

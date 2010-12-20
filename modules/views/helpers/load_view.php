@@ -12,7 +12,7 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 
 	$_ = array(
 		'view' => $view,
-		'params' => $params,
+		'params' => &$params,
 		'return_output' => $return_output,
 		'output_format' => $output_format
 	);
@@ -36,13 +36,15 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 			echo xml_encode_all($_['params']);
 			break;
 
+		case '':
 		case 'html':
-			foreach ($_['params'] as $_var => $_value) {
+			foreach ($_['params'] as $_var => &$_value) {
 				if ('_' == $_var)
 					throw new Exception('Attempting to overwrite $_ with view parameter');
-				$$_var = $_value;
+				$$_var = &$_value;
 			}
 
+			$_['orig_view'] = $_['view'];
 			$_['view'] = str_replace('\\', '/', $_['view']);
 			$_['view'] = trim($view, '/');
 			$_['view'] = str_replace('/', DIRECTORY_SEPARATOR, $_['view']);
@@ -53,7 +55,7 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 			$_['view'] = VIEWS_DIR . "{$_['view']}.php";
 
 			if (!is_file($_['view']))
-				file_not_found($_['view']);
+				file_not_found($_['orig_view']);
 
 			require $_['view'];
 			break;

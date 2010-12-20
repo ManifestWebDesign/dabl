@@ -1,8 +1,13 @@
 <?php
 
 // timestamp to use for Created and Updated column values
-define('CURRENT_TIME', time());
+define('CURRENT_TIMESTAMP', time());
 
-define('MODELS_DIR', APP_ROOT . 'models/');
+define('MODELS_DIR', APP_DIR . 'models/');
 
 define('MODELS_BASE_DIR', MODELS_DIR . 'base/');
+
+ClassLoader::addRepository('MODELS', MODELS_DIR);
+ClassLoader::import('MODELS');
+ClassLoader::import('MODELS:models');
+ClassLoader::import('MODELS:models:base');

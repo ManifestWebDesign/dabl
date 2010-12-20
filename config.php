@@ -3,23 +3,23 @@
 // lets other scripts know that this file has been included
 define('CONFIG_LOADED', true);
 
-// application root
+// directory where this file lives.  Borderline deprecated, so use APP_DIR
 define('ROOT', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 
-// application root
-define('APP_ROOT', ROOT);
+// directory where application lives, usually the same as ROOT
+define('APP_DIR', ROOT);
 
 // directory of configurations files
-define('CONFIG_DIR', APP_ROOT . 'config' . DIRECTORY_SEPARATOR);
+define('CONFIG_DIR', APP_DIR . 'config' . DIRECTORY_SEPARATOR);
 
 // directory where modules are located
-define('MODULES_DIR', APP_ROOT . 'modules' . DIRECTORY_SEPARATOR);
+define('MODULES_DIR', APP_DIR . 'modules' . DIRECTORY_SEPARATOR);
 
 // directory for public html files that are directly exposed to the web server
-define('PUBLIC_DIR', APP_ROOT . 'public' . DIRECTORY_SEPARATOR);
+define('PUBLIC_DIR', APP_DIR . 'public' . DIRECTORY_SEPARATOR);
 
 // directory for logs
-define('LOGS_DIR', APP_ROOT . 'log' . DIRECTORY_SEPARATOR);
+define('LOGS_DIR', APP_DIR . 'log' . DIRECTORY_SEPARATOR);
 
 // output errors to brower
 ini_set('display_errors', true);
@@ -34,9 +34,19 @@ ini_set('log_errors', true);
 ini_set('error_log', LOGS_DIR . 'error_log');
 
 // load ClassLoader class for magic class loading
-require_once MODULES_DIR . '/loaders/config.php';
+require_once MODULES_DIR . '/loaders/init.php';
 
 ModuleLoader::loadAll();
 
-foreach (glob(CONFIG_DIR . '*.php') as $filename)
+Hook::call('after_modules_loaded');
+
+$config_files = glob(CONFIG_DIR . '*.php');
+
+sort($config_files);
+
+foreach ($config_files as $filename)
 	require_once($filename);
+
+//print_r2($config_files);
+
+Hook::call('after_config_loaded');

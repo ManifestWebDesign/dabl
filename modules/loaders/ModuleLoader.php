@@ -6,7 +6,6 @@ class ModuleLoader {
 	private static $loaded = array();
 
 	static function setModuleRoot($dir) {
-
 		if (!is_dir($dir))
 			throw new Exception($dir . ' is not a directory');
 
@@ -14,23 +13,16 @@ class ModuleLoader {
 	}
 
 	static function getModuleRoot() {
+		if (null == self::$moduleRoot)
+			throw new Exception("Module root has not been set");
+
 		return self::$moduleRoot;
 	}
 
 	static function loadAll() {
-		if (null == self::$moduleRoot)
-			return false;
+		foreach (glob(self::getModuleRoot() . '*/init.php') as $filename)
+			self::load(basename(dirname($filename)));
 
-		// load modules
-		foreach (glob(self::$moduleRoot . '*/config.php') as $filename) {
-			$module_name = basename(dirname($filename));
-
-			if (self::isLoaded($module_name))
-				continue;
-
-			self::$loaded[$module_name] = $filename;
-			require_once($filename);
-		}
 		return true;
 	}
 
@@ -39,13 +31,10 @@ class ModuleLoader {
 	}
 
 	static function load($module_name) {
-		if (null == self::$moduleRoot)
-			return false;
-
 		if (self::isLoaded($module_name))
 			return true;
 
-		$filename = self::$moduleRoot . $module_name . '/config.php';
+		$filename = self::getModuleRoot() . $module_name . '/init.php';
 		self::$loaded[$module_name] = $filename;
 		require_once($filename);
 		return true;
