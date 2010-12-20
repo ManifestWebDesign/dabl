@@ -9,5 +9,4 @@ define('MODELS_BASE_DIR', MODELS_DIR . 'base/');
 
 ClassLoader::addRepository('MODELS', MODELS_DIR);
 ClassLoader::import('MODELS');
-ClassLoader::import('MODELS:models');
-ClassLoader::import('MODELS:models:base');
+ClassLoader::import('MODELS:base');
