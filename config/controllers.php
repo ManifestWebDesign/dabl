@@ -3,4 +3,4 @@
 // default controller, action, and view
 define('DEFAULT_CONTROLLER', 'index');
 
-define('CONTROLLERS_DIR', MODULES_DIR . 'controllers/controllers/');
+define('CONTROLLERS_DIR', APP_ROOT . 'controllers/');
