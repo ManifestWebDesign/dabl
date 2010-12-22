@@ -2,7 +2,7 @@
 
 class Hook {
 
-	private static $listeners = array();
+	private static $hooks = array();
 
 	/**
 	 * Registers a callback for the given $hook_name
@@ -11,11 +11,11 @@ class Hook {
 	 * @param int $priority
 	 */
 	static function add($hook_name, $callback, $priority = 100) {
-		if (!isset(self::$listeners[$hook_name]))
-			self::$listeners[$hook_name] = array();
+		if (!isset(self::$hooks[$hook_name]))
+			self::$hooks[$hook_name] = array();
 
 		$callback_id = md5(print_r($callback, true));
-		self::$listeners[$hook_name][$priority][$callback_id] = $callback;
+		self::$hooks[$hook_name][$priority][$callback_id] = $callback;
 	}
 
 	/**
@@ -25,53 +25,34 @@ class Hook {
 	 * @param int $priority
 	 */
 	static function remove($hook_name, $callback, $priority = 100) {
-		if (!isset(self::$listeners[$hook_name]) || !isset(self::$listeners[$hook_name][$priority]))
+		if (!isset(self::$hooks[$hook_name]) || !isset(self::$hooks[$hook_name][$priority]))
 			return;
 
 		$callback_id = md5(print_r($callback, true));
-		unset(self::$listeners[$hook_name][$priority][$callback_id]);
+		unset(self::$hooks[$hook_name][$priority][$callback_id]);
 	}
 
 	/**
 	 * Loops through all registered hook callbacks for the given $hook_name
 	 * and calls them using the given $arguments
 	 * @param string $hook_name
-	 * @param array $arguments
+	 * @param array $arguments Can be an array of arguments, or a single argument
 	 */
 	static function call($hook_name, $arguments = array()) {
-
-		if (!isset(self::$listeners[$hook_name]))
+		if (!isset(self::$hooks[$hook_name]))
 			return;
 
-		ksort(self::$listeners[$hook_name]);
+		if(!is_array($arguments) && !($arguments instanceof ArrayObject)){
+			$arguments = array($arguments);
+		}
 
-		foreach (self::$listeners[$hook_name] as $priority => $callback_array) {
+		ksort(self::$hooks[$hook_name]);
+
+		foreach (self::$hooks[$hook_name] as $priority => $callback_array) {
 			foreach ($callback_array as $callback) {
 				call_user_func_array($callback, $arguments);
 			}
 		}
-	}
-
-	/**
-	 * Just like hook, but treats the array of hook callbacks as filters, where each callback
-	 * is expected to return a filtered version of the first argument passed to it
-	 * @param string $hook_name
-	 * @param array $arguments
-	 */
-	static function filter($hook_name, $arguments = array()) {
-		$result = @$arguments[0];
-
-		if (!isset(self::$listeners[$hook_name]))
-			return $result;
-
-		ksort(self::$listeners[$hook_name]);
-
-		foreach (self::$listeners[$hook_name] as $priority => $callback_array) {
-			foreach ($callback_array as $callback) {
-				$result = $arguments[0] = call_user_func_array($callback, $arguments);
-			}
-		}
-		return $result;
 	}
 
 }
