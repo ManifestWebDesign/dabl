@@ -17,6 +17,9 @@ class QueryPager {
 	private $page = 1;
 	private $limit = 50;
 	private $total;
+	/**
+	 * @var Query
+	 */
 	private $query;
 	private $className;
 
@@ -184,6 +187,7 @@ class QueryPager {
 		$q = clone $this->query;
 		$q->setLimit($this->getLimit());
 		$q->setOffset($this->getOffset());
+
 		if ($this->className)
 			return call_user_func_array(array($this->className, 'doSelect'), array($q));
 		else

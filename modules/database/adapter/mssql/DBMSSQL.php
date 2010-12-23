@@ -73,7 +73,7 @@ class DBMSSQL extends DABLPDO {
 	 * @see		DABLPDO::random()
 	 */
 	function random($seed = null) {
-		return 'rand('.((int) $seed).')';
+		return 'rand(' . ((int) $seed) . ')';
 	}
 
 	/**
@@ -90,19 +90,18 @@ class DBMSSQL extends DABLPDO {
 
 		//split the select and from clauses out of the original query
 		$selectSegment = array();
-		preg_match('/\Aselect(.*)from(.*)/si',$sql,$selectSegment);
-		if (count($selectSegment)==3) {
+		preg_match('/\Aselect(.*)from(.*)/si', $sql, $selectSegment);
+		if (count($selectSegment) == 3) {
 			$selectStatement = trim($selectSegment[1]);
 			$fromStatement = trim($selectSegment[2]);
-		}
-		else {
+		} else {
 			throw new Exception("DBMSSQL::applyLimit() could not locate the select statement at the start of the query. ");
 		}
 
 		//handle the ORDER BY clause if present
 		$orderSegment = array();
-		preg_match('/order by(.*)\Z/si',$fromStatement,$orderSegment);
-		if (count($orderSegment)==2) {
+		preg_match('/order by(.*)\Z/si', $fromStatement, $orderSegment);
+		if (count($orderSegment) == 2) {
 			//remove the ORDER BY from $sql
 			$fromStatement = trim(str_replace($orderSegment[0], '', $fromStatement));
 			//the ORDER BY clause is used in our inner select ROW_NUMBER() clause
@@ -112,27 +111,27 @@ class DBMSSQL extends DABLPDO {
 		//setup inner and outer select selects
 		$innerSelect = '';
 		$outerSelect = '';
-		foreach(explode(', ',$selectStatement) as $selCol) {
-			@list($column,,$alias) = explode(' ', $selCol);
+		foreach (explode(', ', $selectStatement) as $selCol) {
+			@list($column,, $alias) = explode(' ', $selCol);
 			//make sure the current column isn't * or an aggregate
-			if ($column!='*' && !strstr($column,'(')) {
+			if ($column !== '*' && false === strpos($column, '*') && !strstr($column, '(')) {
 				//we can use the first non-aggregate column for ROW_NUMBER() if it wasn't already set from an order by clause
-				if(!isset($countColumn)) {
+				if (!isset($countColumn)) {
 					$countColumn = $column;
 				}
 
 				//add an alias to the inner select so all columns will be unique
-				$innerSelect .= $column." AS [$column],";
+				$innerSelect .= $column . " AS $column,";
 
 				//use the alias in the outer select if one was present on the original select column
-				if(isset($alias)) {
-					$outerSelect .= "[$column] AS $alias,";
+				if (isset($alias)) {
+					$outerSelect .= "$column AS $alias,";
 				} else {
-					$outerSelect .= "[$column],";
+					$outerSelect .= "$column,";
 				}
 			} else {
 				//agregate columns must always have an alias clause
-				if(!isset($alias)) {
+				if (!isset($alias)) {
 					throw new Exception("DBMSSQL::applyLimit() requires aggregate columns to have an Alias clause");
 				}
 				//use the whole aggregate column in the inner select
@@ -143,17 +142,17 @@ class DBMSSQL extends DABLPDO {
 		}
 
 		//check if we got this far and still don't have a viable column to user with ROW_NUMBER()
-		if(!isset($countColumn)) {
+		if (!isset($countColumn)) {
 			throw new Exception("DBMSSQL::applyLimit() requires an ORDER BY clause or at least one non-aggregate column in the select statement");
 		}
 
 		//ROW_NUMBER() starts at 1 not 0
-		$from = ($offset+1);
-		$to = ($limit+$offset);
+		$from = ($offset + 1);
+		$to = ($limit + $offset);
 
 		//substring our select strings to get rid of the last comma and add our FROM and SELECT clauses
-		$innerSelect = "SELECT ROW_NUMBER() OVER(ORDER BY $countColumn) AS RowNumber, ".substr($innerSelect,0,-1).' FROM';
-		$outerSelect = 'SELECT '.substr($outerSelect,0,-1).' FROM';
+		$innerSelect = "SELECT ROW_NUMBER() OVER(ORDER BY $countColumn) AS RowNumber, " . substr($innerSelect, 0, -1) . ' FROM';
+		$outerSelect = 'SELECT ' . substr($outerSelect, 0, -1) . ' FROM';
 
 		// build the query
 		$sql = "$outerSelect ($innerSelect $fromStatement) AS derivedb WHERE RowNumber BETWEEN $from AND $to";
@@ -162,15 +161,15 @@ class DBMSSQL extends DABLPDO {
 	function lastInsertId() {
 		$query = "SELECT scope_identity() as ID";
 		$result = $this->query($query);
-		foreach($result as $r) {
-			return (int)$r['ID'];
+		foreach ($result as $r) {
+			return (int) $r['ID'];
 		}
 	}
 
 	/**
 	 * @return Database
 	 */
-	function getDatabaseSchema(){
+	function getDatabaseSchema() {
 
 		ClassLoader::import('DATABASE:propel:');
 		ClassLoader::import('DATABASE:propel:database');
