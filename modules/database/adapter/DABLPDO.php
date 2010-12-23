@@ -101,18 +101,25 @@ abstract class DABLPDO extends PDO {
 				case 'mssql':
 				case 'sybase':
 				case 'dblib':
-					if (@$connection_params['host'])
-						$parts[] = 'host=' . $connection_params['host'];
+					if (@$connection_params['host']){
+						$part = 'host=' . $connection_params['host'];
+						if (@$connection_params['port'])
+							$part .= ',' . $connection_params['port'];
+						$parts[] = $part;
+					}
+
 					if (@$connection_params['dbname'])
 						$parts[] = 'dbname=' . $connection_params['dbname'];
 					if (@$connection_params['charset'])
 						$parts[] = 'charset=' . $connection_params['charset'];
 					if (@$connection_params['appname'])
 						$parts[] = 'appname=' . $connection_params['appname'];
+
 					foreach ($parts as &$v) {
 						$v = str_replace(';', '\;', $v);
 					}
 					$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
+
 					$conn = new DBMSSQL($dsn, @$connection_params['user'], @$connection_params['password']);
 					break;
 

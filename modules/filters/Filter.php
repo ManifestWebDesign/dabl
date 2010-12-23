@@ -46,14 +46,15 @@ class Filter {
 	 * @return mixed
 	 */
 	static function call($filter_name, $arguments = array()) {
-		if (!isset(self::$filters[$filter_name]))
-			return $result;
 
 		if(!is_array($arguments) && !($arguments instanceof ArrayObject)){
 			$arguments = array($arguments);
 		}
-		
+
 		$result = @$arguments[0];
+
+		if (!isset(self::$filters[$filter_name]))
+			return $result;
 
 		ksort(self::$filters[$filter_name]);
 
