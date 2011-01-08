@@ -52,15 +52,55 @@ class Query {
 	const DESC = "DESC";
 
 	private $_action = self::ACTION_SELECT;
+
+	/**
+	 * @var array
+	 */
 	private $_columns = array();
+
+	/**
+	 * @var mixed
+	 */
 	private $_table;
+
+	/**
+	 * @var array
+	 */
 	private $_joins = array();
+
+	/**
+	 * @var Condition
+	 */
 	private $_where;
+
+	/**
+	 * @var array
+	 */
 	private $_orders = array();
+
+	/**
+	 * @var array
+	 */
 	private $_groups = array();
+
+	/**
+	 * @var Condition
+	 */
 	private $_having;
+
+	/**
+	 * @var int
+	 */
 	private $_limit;
+
+	/**
+	 * @var int
+	 */
 	private $_offset;
+
+	/**
+	 * @var bool
+	 */
 	private $_distinct = false;
 
 	/**
@@ -287,7 +327,11 @@ class Query {
 	 * Alias of {@link addAnd()}
 	 */
 	function add($column, $value=null, $operator=self::EQUAL, $quote = null) {
-		return $this->addAnd($column, $value, $operator, $quote);
+		if(func_num_args () === 1){
+			return $this->addAnd($column);
+		} else {
+			return $this->addAnd($column, $value, $operator, $quote);
+		}
 	}
 
 	/**
@@ -299,7 +343,11 @@ class Query {
 	 * @param $quote Int[optional]
 	 */
 	function addAnd($column, $value=null, $operator=self::EQUAL, $quote = null) {
-		$this->_where->addAnd($column, $value, $operator, $quote);
+		if(func_num_args () === 1){
+			$this->_where->addAnd($column);
+		} else {
+			$this->_where->addAnd($column, $value, $operator, $quote);
+		}
 		return $this;
 	}
 
@@ -312,7 +360,11 @@ class Query {
 	 * @param $quote Int[optional]
 	 */
 	function addOr($column, $value=null, $operator=self::EQUAL, $quote = null) {
-		$this->_where->addOr($column, $value, $operator, $quote);
+		if(func_num_args () === 1){
+			$this->_where->addOr($column);
+		} else {
+			$this->_where->addOr($column, $value, $operator, $quote);
+		}
 		return $this;
 	}
 

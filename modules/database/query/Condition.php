@@ -52,10 +52,10 @@ class Condition{
 	 * @return string
 	 */
 	private function processCondition($left = null, $right=null, $operator=Query::EQUAL, $quote = null){
-		$statement = new QueryStatement;
-
 		if($left===null)
 			return null;
+
+		$statement = new QueryStatement;
 
 		//Left can be a Condition
 		if($left instanceof self){
@@ -177,6 +177,9 @@ class Condition{
 	 * @return Condition
 	 */
 	function add($left, $right=null, $operator=Query::EQUAL, $quote = null){
+		if(func_num_args () === 1){
+			return $this->addAnd($left);
+		}
 		return $this->addAnd($left, $right, $operator, $quote);
 	}
 
@@ -195,7 +198,11 @@ class Condition{
 			return $this;
 		}
 
-		$condition = $this->processCondition($left, $right, $operator, $quote);
+		if(func_num_args () === 1){
+			$condition = $this->processCondition($left);
+		} else {
+			$condition = $this->processCondition($left, $right, $operator, $quote);
+		}
 		if($condition)
 			$this->ands[] = $condition;
 		return $this;
@@ -216,7 +223,11 @@ class Condition{
 			return $this;
 		}
 
-		$condition = $this->processCondition($left, $right, $operator, $quote);
+		if(func_num_args () === 1){
+			$condition = $this->processCondition($left);
+		} else {
+			$condition = $this->processCondition($left, $right, $operator, $quote);
+		}
 		if($condition)
 			$this->ors[] = $condition;
 		return $this;
