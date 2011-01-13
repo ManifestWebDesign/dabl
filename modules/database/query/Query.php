@@ -60,7 +60,7 @@ class Query {
 	private $_groups = array();
 	private $_having;
 	private $_limit;
-	private $_offset;
+	private $_offset = 0;
 	private $_distinct = false;
 
 	/**
@@ -420,12 +420,13 @@ class Query {
 
 		$statement = new QueryStatement($conn);
 
-		if (strpos($table_name, ' ')!==false) {
-			$table = $alias ? "$table_name $alias" : $table_name;
-		} elseif ($conn) {
-			$table = $alias ? $conn->quoteIdentifier($table_name) . " $alias" : $conn->quoteIdentifier($table_name);
+		// split apart table names by dots
+		if ($conn) {
+			$table = $conn->quoteIdentifierTable($table_name);
+		} elseif (strpos($table_name, ' ')!==false) {
+			$table = $table_name;
 		} else {
-			$table = $alias ? "`$table_name` $alias" : "`$table_name`";
+			$table = '`'.join('`.`', explode('.', $table_name)).'`';
 		}
 
 		if ($this->_columns) {
@@ -439,6 +440,8 @@ class Query {
 		if ($this->_distinct) {
 			$columns = "DISTINCT $columns";
 		}
+
+		$table = $alias ? "$table $alias" : $table;
 
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:

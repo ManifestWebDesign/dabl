@@ -61,6 +61,9 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 <?php
 foreach($fields as $key => &$field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
+	// fix for MSSQL default value weirdness
+	if($field->isNumericType())
+		$default = trim($default, '()');
 ?>
 
 	/**

@@ -354,7 +354,17 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string The quoted table name
 	 * */
 	function quoteIdentifierTable($table) {
-		return implode(" ", array_map(array($this, "quoteIdentifier"), explode(" ", $table)));
+		if(strpos($table, '[') !== false || strpos($table, '`') !== false || strpos($table, '"') !== false){
+			return $table;
+		}
+
+		$pieces = explode(' ', $table);
+		$table = implode('.', array_map(array($this, 'quoteIdentifier'), explode('.', array_shift($pieces))));
+		if(count($pieces) == 1){
+			$alias = $this->quoteIdentifier(array_shift($pieces));
+			$table = $table.' '.$alias;
+		}
+		return $table;
 	}
 
 	/**

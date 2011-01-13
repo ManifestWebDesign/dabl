@@ -350,7 +350,7 @@ abstract class BaseModel {
 			$placeholders[] = '?';
 		}
 
-		$quotedTable = $conn->quoteIdentifier($this->getTableName());
+		$quotedTable = $conn->quoteIdentifierTable($this->getTableName());
 		$queryString = "INSERT INTO $quotedTable (" . implode(", ", $fields) . ") VALUES (" . implode(', ', $placeholders) . ") ";
 
 		$statement = new QueryStatement($conn);
@@ -382,7 +382,7 @@ abstract class BaseModel {
 	 */
 	protected function replace() {
 		$conn = $this->getConnection();
-		$quotedTable = $conn->quoteIdentifier($this->getTableName());
+		$quotedTable = $conn->quoteIdentifierTable($this->getTableName());
 
 		$fields = array();
 		$values = array();
@@ -413,7 +413,7 @@ abstract class BaseModel {
 	 */
 	protected function update() {
 		$conn = $this->getConnection();
-		$quotedTable = $conn->quoteIdentifier($this->getTableName());
+		$quotedTable = $conn->quoteIdentifierTable($this->getTableName());
 
 		if (!$this->getPrimaryKeys())
 			throw new Exception('This table has no primary keys');
