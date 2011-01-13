@@ -827,7 +827,7 @@ foreach($this->getForeignKeysToTable($table_name) as $r):
 	foreach($fields as $key => &$field){
 		if($field->isNotNull() && !$field->isAutoIncrement() && !$field->getDefaultValue() && !$field->isPrimaryKey() && !in_array($field->getName(), array('Created', 'Updated'))) {
 ?>
-		if(!$this->get<?php echo $field->getName() ?>()) {
+		if(null===$this->get<?php echo $field->getName() ?>()) {
 			$validation_passed = false;
 			$this->_validationErrors[] = "<?php echo $field->getName()?> must not be null";
 		}
