@@ -101,7 +101,7 @@ abstract class DABLPDO extends PDO {
 				case 'mssql':
 				case 'sybase':
 				case 'dblib':
-					if (@$connection_params['host']){
+					if (@$connection_params['host']) {
 						$part = 'host=' . $connection_params['host'];
 						if (@$connection_params['port'])
 							$part .= ',' . $connection_params['port'];
@@ -138,7 +138,7 @@ abstract class DABLPDO extends PDO {
 		$args = func_get_args();
 		$result = call_user_func_array(array('parent', '__construct'), $args);
 		if ($this->logQueries)
-           	$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('LoggedPDOStatement', array($this)));
+			$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('LoggedPDOStatement', array($this)));
 		return $result;
 	}
 
@@ -203,7 +203,7 @@ abstract class DABLPDO extends PDO {
 		$string .= '<tr><td></td><td nowrap="nowrap">Total Time: </td><td>' . round($total_time, 6) . '</td><td>&nbsp;</td></tr>';
 		$string .= '</tbody></table>';
 		echo $string;
-		echo '<br />'.'Max Memory Usage: '.memory_get_peak_usage() / (1024 * 1024) .' MB';
+		echo '<br />' . 'Max Memory Usage: ' . memory_get_peak_usage() / (1024 * 1024) . ' MB';
 	}
 
 	/**
@@ -276,7 +276,7 @@ abstract class DABLPDO extends PDO {
 		if (is_bool($value))
 			return $value ? 1 : 0;
 
-		if ($value===null)
+		if ($value === null)
 			return 'NULL';
 
 		return $this->quote($value);
@@ -354,15 +354,19 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string The quoted table name
 	 * */
 	function quoteIdentifierTable($table) {
-		if(strpos($table, '[') !== false || strpos($table, '`') !== false || strpos($table, '"') !== false){
+		if (strpos($table, '[') !== false || strpos($table, '`') !== false || strpos($table, '"') !== false) {
 			return $table;
 		}
 
 		$pieces = explode(' ', $table);
+		if (count($pieces) > 2) {
+			return $table;
+		}
+
 		$table = implode('.', array_map(array($this, 'quoteIdentifier'), explode('.', array_shift($pieces))));
-		if(count($pieces) == 1){
+		if (count($pieces) == 1) {
 			$alias = $this->quoteIdentifier(array_shift($pieces));
-			$table = $table.' '.$alias;
+			$table = $table . ' ' . $alias;
 		}
 		return $table;
 	}
