@@ -201,6 +201,14 @@ class DBMSSQL extends DABLPDO {
 		return;
 	}
 
+	function lastInsertId() {
+		$query = "SELECT scope_identity() as ID";
+		$result = $this->query($query);
+		foreach($result as $r) {
+			return (int)$r['ID'];
+		}
+	}
+
 	/**
 	 * @return Database
 	 */
