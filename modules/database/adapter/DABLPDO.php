@@ -279,6 +279,7 @@ abstract class DABLPDO extends PDO {
 
 	/**
 	 * Deprecated method name.  Use prepareInput()
+	 * @deprecated
 	 * @param mixed $value
 	 * @return mixed
 	 */
