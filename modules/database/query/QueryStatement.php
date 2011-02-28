@@ -85,7 +85,7 @@ class QueryStatement {
 		$conn = $this->connection;
 		
 		if(null != $conn)
-			$params = $conn->prepareInput($params);
+		$params = $conn->prepareInput($params);
 
 		//escape % by making it %%
 		$string = str_replace('%', '%%', $string);

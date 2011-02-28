@@ -66,6 +66,17 @@ class DBMSSQL extends DABLPDO {
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
 	function quoteIdentifier($text) {
+		if(is_array($text)){
+			$quoted = array();
+			foreach($text as $key => $value){
+				$quoted[$key] = $this->quoteIdentifier($value);
+			}
+			return $quoted;
+		}
+
+		if (strpos($text, '[') !== false || strpos($text, ' ') !== false) {
+			return $text;
+		}
 		return '[' . $text . ']';
 	}
 
@@ -74,6 +85,69 @@ class DBMSSQL extends DABLPDO {
 	 */
 	function random($seed = null) {
 		return 'rand(' . ((int) $seed) . ')';
+	}
+
+	/**
+	 * Convert $field to the format given in $format.
+	 *
+	 * @see DABLPDO::dateFormat
+	 * @param string $field This will *not* be quoted
+	 * @param string $format Date format
+	 * @param string $alias Alias for the new field - WILL be quoted, if provided
+	 * @return string
+	 */
+	function dateFormat($field, $format, $alias=null) {
+		$alias = $alias ? " AS ".$this->quoteIdentifier($alias) : '';
+
+		// todo: use strtok() to parse $format
+		$parts = array();
+		foreach(explode('-', $format) as $part) {
+			$expr = false;
+			switch (strtolower($part)) {
+				case 'yyyy': case 'yy': case '%y':
+					$expr = "DATEPART(YY, {$field})";
+					break;
+				case '%x':
+					$expr = "(CASE WHEN DATEPART(ISOWK, {$field}) - DATEPART(WW, {$field}) > 49 THEN -1 ELSE 0 END)+DATEPART(YY, {$field})";
+					break;
+				case 'ww': case 'w': case '%v':
+					$expr = "DATEPART(ISOWK, {$field})";
+					break;
+				case 'mm': case 'm': case '%m':
+					$expr = "DATEPART(MM, {$field})";
+					break;
+				case 'dd': case 'd': case '%d':
+					$expr = "DATEPART(DD, {$field})";
+					break;
+				default:
+					$expr = "DATEPART({$part}, {$field})";
+					break;
+			}
+			if ($expr) {
+				$expr = "CAST({$expr} AS VARCHAR)";
+				$length = false;
+
+				switch ($part) {
+					case 'YYYY': case 'yyyy': case '%Y':
+						$length = 4;
+						break;
+					case 'YY': case 'yy': case '%y':
+					case '%d': case 'DD': case 'dd':
+					case '%m': case 'MM': case 'mm':
+						$length = 2;
+						break;
+				}
+
+				if ($length) {
+					$expr = "RIGHT('".str_repeat('0', $length)."' + {$expr}, {$length})";
+				}
+
+				$parts[] = $expr;
+			}
+		}
+
+		foreach($parts as &$v) $v = "CAST({$v} AS VARCHAR)";
+		return join("+ '-' +", $parts).$alias;
 	}
 
 	/**
@@ -214,13 +288,13 @@ class DBMSSQL extends DABLPDO {
 	 */
 	function getDatabaseSchema() {
 
-		ClassLoader::import('DATABASE:propel:');
-		ClassLoader::import('DATABASE:propel:database');
-		ClassLoader::import('DATABASE:propel:database:model');
-		ClassLoader::import('DATABASE:propel:database:reverse');
-		ClassLoader::import('DATABASE:propel:database:reverse:mssql');
-		ClassLoader::import('DATABASE:propel:database:tranform');
-		ClassLoader::import('DATABASE:propel:platform');
+		ClassLoader::import('ROOT:libraries:propel');
+		ClassLoader::import('ROOT:libraries:propel:database');
+		ClassLoader::import('ROOT:libraries:propel:database:model');
+		ClassLoader::import('ROOT:libraries:propel:database:reverse');
+		ClassLoader::import('ROOT:libraries:propel:database:reverse:mssql');
+		ClassLoader::import('ROOT:libraries:propel:database:tranform');
+		ClassLoader::import('ROOT:libraries:propel:platform');
 
 		$parser = new MssqlSchemaParser();
 		$parser->setConnection($this);
@@ -232,7 +306,7 @@ class DBMSSQL extends DABLPDO {
 
 	function beginTransaction() {
 		$this->query('BEGIN TRANSACTION');
-}
+	}
 
 	function commit() {
 		$this->query('COMMIT TRANSACTION');

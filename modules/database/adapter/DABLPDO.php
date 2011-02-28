@@ -101,13 +101,8 @@ abstract class DABLPDO extends PDO {
 				case 'mssql':
 				case 'sybase':
 				case 'dblib':
-					if (@$connection_params['host']) {
-						$part = 'host=' . $connection_params['host'];
-						if (@$connection_params['port'])
-							$part .= ',' . $connection_params['port'];
-						$parts[] = $part;
-					}
-
+					if (@$connection_params['host'])
+						$parts[] = 'host=' . $connection_params['host'];
 					if (@$connection_params['dbname'])
 						$parts[] = 'dbname=' . $connection_params['dbname'];
 					if (@$connection_params['charset'])
@@ -345,6 +340,17 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string The quoted identifier.
 	 */
 	function quoteIdentifier($text) {
+		if(is_array($text)){
+			$quoted = array();
+			foreach($text as $key => $value){
+				$quoted[$key] = $this->quoteIdentifier($value);
+			}
+			return $quoted;
+		}
+
+		if (strpos($text, '`') !== false || strpos($text, ' ') !== false) {
+			return $text;
+		}
 		return '"' . $text . '"';
 	}
 

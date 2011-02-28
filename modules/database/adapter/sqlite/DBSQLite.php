@@ -76,6 +76,17 @@ class DBSQLite extends DABLPDO {
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
 	function quoteIdentifier($text) {
+		if(is_array($text)){
+			$quoted = array();
+			foreach($text as $key => $value){
+				$quoted[$key] = $this->quoteIdentifier($value);
+			}
+			return $quoted;
+		}
+
+		if (strpos($text, '[') !== false || strpos($text, ' ') !== false) {
+			return $text;
+		}
 		return '[' . $text . ']';
 	}
 
@@ -99,13 +110,13 @@ class DBSQLite extends DABLPDO {
 	 */
 	function getDatabaseSchema(){
 
-		ClassLoader::import('DATABASE:propel:');
-		ClassLoader::import('DATABASE:propel:database');
-		ClassLoader::import('DATABASE:propel:database:model');
-		ClassLoader::import('DATABASE:propel:database:reverse');
-		ClassLoader::import('DATABASE:propel:database:reverse:sqlite');
-		ClassLoader::import('DATABASE:propel:database:tranform');
-		ClassLoader::import('DATABASE:propel:platform');
+		ClassLoader::import('ROOT:libraries:propel');
+		ClassLoader::import('ROOT:libraries:propel:database');
+		ClassLoader::import('ROOT:libraries:propel:database:model');
+		ClassLoader::import('ROOT:libraries:propel:database:reverse');
+		ClassLoader::import('ROOT:libraries:propel:database:reverse:sqlite');
+		ClassLoader::import('ROOT:libraries:propel:database:tranform');
+		ClassLoader::import('ROOT:libraries:propel:platform');
 
 		$parser = new SqliteSchemaParser();
 		$parser->setConnection($this);

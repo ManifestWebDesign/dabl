@@ -95,6 +95,17 @@ class DBMySQL extends DABLPDO {
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
 	function quoteIdentifier($text){
+		if(is_array($text)){
+			$quoted = array();
+			foreach($text as $key => $value){
+				$quoted[$key] = $this->quoteIdentifier($value);
+			}
+			return $quoted;
+		}
+
+		if (strpos($text, '`') !== false || strpos($text, ' ') !== false) {
+			return $text;
+		}
 		return '`' . $text . '`';
 	}
 
@@ -121,6 +132,21 @@ class DBMySQL extends DABLPDO {
 	 */
 	function random($seed = null){
 		return 'rand('.((int) $seed).')';
+	}
+
+	/**
+	 * Convert $field to the format given in $format.
+	 *
+	 * @see DABLPDO::dateFormat
+	 * @param string $field This will *not* be quoted
+	 * @param string $format Date format
+	 * @param string $alias Alias for the new field - WILL be quoted, if provided
+	 * @return string
+	 */
+	function dateFormat($field, $format, $alias=null) {
+		$alias = $alias ? " AS ".$this->quoteIdentifier($alias) : '';
+
+		return "DATE_FORMAT({$field}, '{$format}'){$alias}";
 	}
 
 	/**

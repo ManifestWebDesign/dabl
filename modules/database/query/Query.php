@@ -181,6 +181,24 @@ class Query {
 	}
 
 	/**
+	 * Set array of strings of groups to be selected
+	 * @param array $groups_array
+	 * @return Query
+	 */
+	function setGroups($groups_array) {
+		$this->_groups = $groups_array;
+		return $this;
+	}
+
+	/**
+	 * Return array of groups to be selected
+	 * @return array
+	 */
+	function getGroups() {
+		return $this->_groups;
+	}
+
+	/**
 	 * Sets the table to be queried. This can be a string table name
 	 * or an instance of Query if you would like to nest queries.
 	 * This function also supports arbitrary SQL.
@@ -305,12 +323,25 @@ class Query {
 		// TODO: this is not supported correctly. Query class needs an array of secondary tables for the query and when
 		// no on_clause is given this should just add to that array and produce something like
 		// SELECT * FROM primary_table, secondary_table1, secondary_table2
-		if ($on_clause == null)
-			$on_clause = 1;
+		if (null === $on_clause) {
+			$on_clause = '1 = 1';
+		}
 
-		$statement->setString("$join_type $table ON ($on_clause)");
+		if ('' !== $on_clause) {
+			$on_clause = "ON ($on_clause)";
+		}
+
+		$statement->setString("$join_type $table $on_clause");
 		$this->_joins[] = $statement;
 		return $this;
+	}
+
+	function getJoins() {
+		return $this->_joins;
+	}
+
+	function setJoins($joins) {
+		$this->_joins = $joins;
 	}
 
 	/**
@@ -445,7 +476,7 @@ class Query {
 	 * Builds and returns the query string
 	 *
 	 * @param mixed $conn Database connection to use
-	 * @return string
+	 * @return QueryStatement
 	 */
 	function getQuery($conn = null) {
 		$table_name = $this->getTableName();
@@ -485,10 +516,10 @@ class Query {
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
-				$query_s .="SELECT $columns \n FROM $table ";
+				$query_s .="SELECT $columns \nFROM $table ";
 				break;
 			case self::ACTION_DELETE:
-				$query_s .="DELETE \n FROM $table ";
+				$query_s .="DELETE \nFROM $table ";
 				break;
 			default:
 				break;
@@ -496,7 +527,7 @@ class Query {
 
 		if ($this->_joins) {
 			foreach ($this->_joins as $join_statement) {
-				$query_s .= "\n " . $join_statement->getString() . ' ';
+				$query_s .= "\n\t" . $join_statement->getString() . ' ';
 				$statement->addParams($join_statement->getParams());
 			}
 		}
@@ -504,29 +535,29 @@ class Query {
 		$where_statement = $this->getWhere()->getClause();
 
 		if ($where_statement) {
-			$query_s .= "\n WHERE " . $where_statement->getString() . ' ';
+			$query_s .= "\nWHERE " . $where_statement->getString() . ' ';
 			$statement->addParams($where_statement->getParams());
 		}
 
 		if ($this->_groups)
-			$query_s .= "\n GROUP BY " . implode(', ', $this->_groups) . ' ';
+			$query_s .= "\nGROUP BY " . implode(', ', $this->_groups) . ' ';
 
 		if ($this->getHaving()) {
 			$having_statement = $this->getHaving()->getClause();
 			if ($having_statement) {
-				$query_s .= "\n HAVING " . $having_statement->getString() . ' ';
+				$query_s .= "\nHAVING " . $having_statement->getString() . ' ';
 				$statement->addParams($having_statement->getParams());
 			}
 		}
 
 		if ($this->getAction() != self::ACTION_COUNT && $this->_orders)
-			$query_s .= "\n ORDER BY " . implode(', ', $this->_orders) . ' ';
+			$query_s .= "\nORDER BY " . implode(', ', $this->_orders) . ' ';
 
 		if ($this->_limit) {
 			if ($conn)
 				$conn->applyLimit($query_s, $this->_offset, $this->_limit);
 			else
-				$query_s .= "\n LIMIT " . ($this->_offset ? $this->_offset . ', ' : '') . $this->_limit;
+				$query_s .= "\nLIMIT " . ($this->_offset ? $this->_offset . ', ' : '') . $this->_limit;
 		}
 
 		if ($this->getAction() == self::ACTION_COUNT)
