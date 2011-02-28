@@ -1,52 +1,57 @@
 <?php
 
+/**
+ * 
+ */
 class ControllerRoute {
 
 	/**
 	 * @var string
 	 */
-	private $route;
+	protected $route;
+	
 	/**
 	 * @var array
 	 */
-	private $segments = array();
+	protected $segments = array();
+	
 	/**
 	 * @var string
 	 */
-	private $controllerDir;
+	protected $controllerDir;
+	
 	/**
 	 * @var string
 	 */
-	private $controllerClass;
-	/**
-	 * @var Controller
-	 */
-	private $controller;
+	protected $controllerClass;
+	
 	/**
 	 * @var string
 	 */
-	private $action;
+	protected $action;
+	
 	/**
 	 * @var array
 	 */
-	private $params = array();
+	protected $params = array();
+	
 	/**
 	 * @var string
 	 */
-	private $extension;
+	protected $extension;
+	
 	/**
 	 * @var bool
 	 */
-	private $partial = false;
+	protected $partial = false;
+	
 	/**
 	 * @var string
 	 */
-	private $viewDir;
+	protected $viewDir;
 
 	function __construct($route) {
 		$this->setRoute($route);
-
-		$this->controller = $this->getController();
 	}
 
 	function setRoute($route) {
@@ -175,6 +180,9 @@ class ControllerRoute {
 		return $this->params;
 	}
 
+	/**
+	 * @param bool $bool 
+	 */
 	function setPartial($bool) {
 		$this->partial = (bool) $bool;
 	}
@@ -211,21 +219,20 @@ class ControllerRoute {
 		require_once $this->controllerDir . DIRECTORY_SEPARATOR . $this->controllerClass . '.php';
 		$instance = new $this->controllerClass;
 
-		if (!$instance->viewDir)
+		if (!$instance->viewDir) {
 			$instance->viewDir = $this->viewDir;
+		}
 
-		if ($this->isPartial())
+		if ($this->partial) {
 			$instance->renderPartial = true;
+		}
 
-		if (null !== $this->extension)
+		if (null !== $this->extension) {
 			$instance->outputFormat = $this->extension;
+		}
 
 		// Restore Flash params
-		$instance->setParams(
-				array_merge_recursive(
-						get_clean_persistant_values(),
-						$instance->getParams()
-		));
+		$instance->setParams(array_merge_recursive(get_clean_persistant_values(), $instance->getParams()));
 		return $instance;
 	}
 

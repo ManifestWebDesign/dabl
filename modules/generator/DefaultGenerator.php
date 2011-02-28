@@ -6,12 +6,12 @@ class DefaultGenerator extends BaseGenerator {
 	 * @var array
 	 */
 	protected $actionIcons = array('Edit' => 'pencil', 'Show' => 'search', 'Delete' => 'trash');
-
+	
 	/**
 	 * @var array
 	 */
 	protected $standardActions = array('Show', 'Edit', 'Delete');
-
+	
 	/**
 	 * @var array
 	 */
@@ -21,7 +21,7 @@ class DefaultGenerator extends BaseGenerator {
 		'grid.php' => '/templates/grid.php',
 		'show.php' => '/templates/show.php'
 	);
-
+	
 	/**
 	 * @var string
 	 */
@@ -55,7 +55,8 @@ class DefaultGenerator extends BaseGenerator {
 		$pk = call_user_func(array($class_name, 'getPrimaryKey'));
 		$pkMethod = "get$pk";
 		$actions = array();
-		if (!$pk)return $actions;
+		if (!$pk)
+			return $actions;
 
 		foreach ($this->standardActions as &$staction)
 			$actions[$staction] = "<?php echo site_url('" . $this->getPluralURL($table_name) . "/" . strtolower($staction) . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
@@ -67,8 +68,8 @@ class DefaultGenerator extends BaseGenerator {
 			$from_column = array_shift($r->getLocalColumns());
 			$to_column = array_shift($r->getForeignColumns());
 			if (@$used_to[$from_table]) {
-					unset($fkeys_to[$k]);
-					continue;
+				unset($fkeys_to[$k]);
+				continue;
 			}
 			$used_to[$from_table] = $from_column;
 			$actions[ucwords(self::spaceTitleCase(self::pluralize($from_table)))] = "<?php echo site_url('" . $this->getPluralURL($from_table) . '/' . $single . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
