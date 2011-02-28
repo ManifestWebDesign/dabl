@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 
+ * Represents a url string for loading a controller action.
  */
 class ControllerRoute {
 
