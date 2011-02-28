@@ -4,6 +4,7 @@
  * This class is basically a clone of Hook, but each callback
  * will alter the original value passed to it.  A chained sequence of
  * filter callbacks will pass their results to each other as they run.
+ * @see Hook
  */
 class Filter {
 
@@ -47,7 +48,7 @@ class Filter {
 	 */
 	static function call($filter_name, $arguments = array()) {
 
-		if(!is_array($arguments) && !($arguments instanceof ArrayObject)){
+		if (!is_array($arguments) && !($arguments instanceof ArrayObject)) {
 			$arguments = array($arguments);
 		}
 

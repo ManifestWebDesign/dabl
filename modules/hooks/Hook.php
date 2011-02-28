@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * This class manages Hooks.  A Hook is a named callback that is like a JavaScript event.
+ */
 class Hook {
 
 	private static $hooks = array();
