@@ -135,7 +135,7 @@ class Condition{
 			//Handle empty arrays
 			if(is_array($right) && !$right){
 				if($operator==Query::IN){
-					$statement->setString('0');
+					$statement->setString('(0=1)');
 					return $statement;
 				}
 				elseif($operator==Query::NOT_IN)
