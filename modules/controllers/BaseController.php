@@ -6,27 +6,27 @@ abstract class BaseController extends ArrayObject {
 	 * @var string The layout to render around the view if renderPartial is false
 	 */
 	public $layout = 'layouts/main';
-	
+
 	/**
 	 * @var string Path where the view should reside
 	 */
 	public $viewDir = '';
-	
+
 	/**
 	 * @var string Inticates how to render the view
 	 */
 	public $outputFormat = 'html';
-	
+
 	/**
 	 * @var bool Whether or not to automatically load the view after the action has been called
 	 */
 	public $loadView = true;
-	
+
 	/**
 	 * @var bool Whether to skip loading the layout and only load the view
 	 */
 	public $renderPartial = false;
-	
+
 	/**
 	 * @var array containing controller params that should persist until the next request
 	 */
@@ -62,20 +62,20 @@ abstract class BaseController extends ArrayObject {
 		if ($view === DEFAULT_CONTROLLER) {
 			$view = '';
 		}
-		
+
 		$index_view = '/' . DEFAULT_CONTROLLER;
-		
+
 		$pos = strrpos($view, $index_view);
-		
+
 		if ($pos !== false && strlen($view) === ($pos + strlen($index_view))) {
 			$view = substr($view, 0, $pos);
 		}
-		
+
 		$view .= '/';
 
 		return str_replace('/', DIRECTORY_SEPARATOR, $view);
 	}
-	
+
 	/**
 	 * Appends the given $action_name to the viewDir and appends the resulting string
 	 * @param string $action_name
@@ -117,11 +117,15 @@ abstract class BaseController extends ArrayObject {
 	 * @param array $params
 	 */
 	function doAction($action_name = null, $params = array()) {
-		
+
 		$action_name = $action_name ? $action_name : DEFAULT_CONTROLLER;
 		$method_name = str_replace(array('-', '_', ' '), '', $action_name);
 		$view = $this->getView($action_name);
 		
+		if (!is_array($params) && !($params instanceof ArrayObject)) {
+			$params = array($params);
+		}
+
 		if ((!method_exists($this, $method_name) && !method_exists($this, '__call')) || strpos($action_name, '_') === 0) {
 			file_not_found($view);
 		}
