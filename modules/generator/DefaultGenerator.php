@@ -41,7 +41,7 @@ class DefaultGenerator extends BaseGenerator {
 			'single' => self::getSingularName($table_name),
 			'single_url' => self::getSingularURL($table_name),
 			'pk' => $pk,
-			'pkMethod' => "get$pk",
+			'pkMethod' => $pk ? "get$pk" : null,
 			'actions' => $this->getActions($table_name),
 			'columns' => $this->getColumns($table_name)
 		);
