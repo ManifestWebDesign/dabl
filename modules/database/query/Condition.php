@@ -111,7 +111,7 @@ class Condition {
 
 		// $right can be an array
 		if ($is_array) {
-			//BETWEEN
+			// BETWEEN
 			if (is_array($right) && count($right) == 2 && $operator == Query::BETWEEN) {
 				$statement->setString("$left $operator ? AND ?");
 				$statement->addParams($right);
