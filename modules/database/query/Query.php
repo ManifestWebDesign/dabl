@@ -225,7 +225,8 @@ class Query {
 	function setTable($table_name, $alias=null) {
 		if ($table_name instanceof Query) {
 			if (!$alias)
-				throw new Exception("The nested query must have an alias.");
+				throw new Exception('The nested query must have an alias.');
+			$table_name = clone $table_name;
 		} else {
 			$space = strrpos($table_name, ' ');
 			if ($space) {
@@ -316,7 +317,7 @@ class Query {
 		} else {
 			$conn = DBManager::getConnection();
 			if ($conn) {
-				$table_parts = explode(' ', str_replace("`", "", trim($table)));
+				$table_parts = explode(' ', str_replace('`', '', trim($table)));
 				if (count($table_parts) == 1)
 					$table = $conn->quoteIdentifier($table);
 				elseif (count($table_parts) == 2) {
@@ -610,7 +611,7 @@ class Query {
 		$q = clone $this;
 
 		if (!$q->getTable())
-			throw new Exception("No table specified.");
+			throw new Exception('No table specified.');
 
 		$q->setAction(self::ACTION_COUNT);
 		return $q->getQuery($conn)->bindAndExecute()->fetchColumn();
@@ -626,7 +627,7 @@ class Query {
 		$q = clone $this;
 
 		if (!$q->getTable())
-			throw new Exception("No table specified.");
+			throw new Exception('No table specified.');
 
 		$q->setAction(self::ACTION_DELETE);
 		return $q->getQuery($conn)->bindAndExecute()->rowCount();
@@ -640,7 +641,7 @@ class Query {
 	function doSelect(PDO $conn = null) {
 		$q = clone $this;
 		if (!$q->getTable())
-			throw new Exception("No table specified.");
+			throw new Exception('No table specified.');
 
 		$q->setAction(self::ACTION_SELECT);
 		return $q->getQuery($conn)->bindAndExecute();
