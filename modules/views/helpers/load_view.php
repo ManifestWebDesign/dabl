@@ -37,7 +37,10 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 
 		case '':
 		case 'html':
-			extract($params, EXTR_REFS | EXTR_OVERWRITE);
+			foreach($_['params'] as $_var => $_value) {
+				if ('_'===$_var) throw new Exception('Attempting to overwrite $_ with view parameter');
+				$$_var = $_value;
+			}
 
 			$_['orig_view'] = $_['view'];
 			$_['view'] = str_replace('\\', '/', $_['view']);
