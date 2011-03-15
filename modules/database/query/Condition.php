@@ -56,6 +56,10 @@ class Condition {
 		if ($left === null)
 			return null;
 
+		if (1 === func_num_args() && $left instanceof QueryStatement) {
+			return $left;
+		}
+
 		$statement = new QueryStatement;
 
 		//Left can be a Condition
@@ -236,8 +240,9 @@ class Condition {
 		} else {
 			$condition = $this->processCondition($left, $right, $operator, $quote);
 		}
-		if ($condition)
+		if ($condition) {
 			$this->ors[] = $condition;
+		}
 		return $this;
 	}
 
