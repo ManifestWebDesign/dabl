@@ -14,6 +14,10 @@ table.object-grid th.grid-action-column{
 	width:0px;
 }
 
+table.object-grid th a {
+	display: block;
+}
+
 /* Form */
 form p label{
 	display:block;

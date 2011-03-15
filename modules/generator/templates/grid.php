@@ -6,7 +6,7 @@
 			$column_name = $column->getName();
 ?>
 			<th class="ui-widget-header <?php if($key==0)echo 'ui-corner-tl' ?>">
-				<a class="display-block" href="<?php echo "<?php echo" ?> '?SortBy=<?php echo $column_name ?>' . (!isset($_REQUEST['Dir']) && @$_REQUEST['SortBy'] == '<?php echo $column_name ?>' ? '&Dir=DESC' : '') <?php echo "?>" ?>">
+				<a href="<?php echo "<?php echo" ?> '?SortBy=<?php echo $column_name ?>' . (!isset($_REQUEST['Dir']) && @$_REQUEST['SortBy'] == '<?php echo $column_name ?>' ? '&Dir=DESC' : '') <?php echo "?>" ?>">
 				<?php echo "<?" ?> if( @$_REQUEST['SortBy'] == '<?php echo $column_name ?>'):<?php echo "?>" ?><span class="ui-icon ui-icon-carat-1-<?php echo "<?php" ?> echo isset($_REQUEST['Dir'])?'s' :'n'<?php echo "?>" ?> float-right"></span><?php echo "<?" ?>endif;<?php echo "?>"?>
 				<?php echo $column_name ?>
 				</a>
