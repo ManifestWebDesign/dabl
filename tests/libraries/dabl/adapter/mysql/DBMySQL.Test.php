@@ -5,7 +5,7 @@ require_once '../config.php';
 
 class TestDBMySQL extends PHPUnit_Framework_TestCase {
 
-	const CONNECTION_NAME = 'my_connection_name';
+	const CONNECTION_NAME = 'default_connection';
 
 	/**
 	 * @group NestedTransaction
