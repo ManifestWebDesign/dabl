@@ -160,15 +160,18 @@ abstract class BaseModel {
 
 	/**
 	 * Clears the array of modified column names
+	 * @return BaseModel
 	 */
 	function resetModified() {
 		$this->_modifiedColumns = array();
+		return $this;
 	}
 
 	/**
 	 * Populates $this with the values of an associative Array.
 	 * Array keys must match column names to be used.
 	 * @param array $array
+	 * @return BaseModel
 	 */
 	function fromArray($array) {
 		$columns = $this->getColumnNames();
@@ -177,6 +180,7 @@ abstract class BaseModel {
 				continue;
 			$this->{'set' . $column}($v);
 		}
+		return $this;
 	}
 
 	/**
@@ -195,9 +199,11 @@ abstract class BaseModel {
 	 * Sets whether to use cached results for foreign keys or to execute
 	 * the query each time, even if it hasn't changed.
 	 * @param bool $value[optional]
+	 * @return BaseModel
 	 */
 	function setCacheResults($value=true) {
 		$this->_cacheResults = (bool) $value;
+		return $this;
 	}
 
 	/**
@@ -296,8 +302,9 @@ abstract class BaseModel {
 	 * @return int number of records inserted or updated
 	 */
 	function save() {
-		if (!$this->validate())
-			return 0;
+		if (!$this->validate()) {
+			throw new Exception('Cannot save ' . get_class($this) . ' with validation errors: ' . implode(', ', $this->getValidationErrors()));
+		}
 
 		if ($this->isNew() && $this->hasColumn('Created') && !$this->isColumnModified('Created')) {
 			$this->setCreated(CURRENT_TIMESTAMP);
@@ -325,9 +332,11 @@ abstract class BaseModel {
 	/**
 	 * Indicate whether this object has been saved to the database
 	 * @param bool $bool
+	 * @return BaseModel
 	 */
 	function setNew($bool) {
 		$this->_isNew = (bool) $bool;
+		return $this;
 	}
 
 	/**
