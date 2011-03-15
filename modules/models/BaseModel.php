@@ -320,6 +320,20 @@ abstract class BaseModel {
 		}
 		return $this->replace();
 	}
+	
+	function archive() {
+		if (!$this->hasColumn('Archived')) {
+			throw new Exception('Cannot call archive on models without "Archived" column');
+		}
+
+		if (null !== $this->getArchived()) {
+			throw new Exception('This ' . get_class($this) . ' is already archived.');
+		}
+		
+		$this->setArchived(CURRENT_TIMESTAMP);
+		
+		return $this->save();
+	}
 
 	/**
 	 * Returns true if this has not yet been saved to the database
