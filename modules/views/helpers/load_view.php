@@ -37,8 +37,10 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 
 		case '':
 		case 'html':
-			foreach($_['params'] as $_var => $_value) {
-				if ('_'===$_var) throw new Exception('Attempting to overwrite $_ with view parameter');
+			foreach ($_['params'] as $_var => $_value) {
+				if ('_' === $_var) {
+					throw new Exception('Attempting to overwrite $_ with view parameter');
+				}
 				$$_var = $_value;
 			}
 
