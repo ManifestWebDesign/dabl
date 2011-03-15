@@ -13,11 +13,12 @@ function object_to_array($var) {
 	$references = array();
 
 	//use toArray() if it exists so object can control array conversion if it wants to
-	if(is_object($var)){
-		if(method_exists($var, 'toArray'))
+	if (is_object($var)) {
+		if (method_exists($var, 'toArray')) {
 			$var = $var->toArray();
-		else
+		} else {
 			$var = get_object_vars($var);
+		}
 	}
 
 	// loop over elements/properties
