@@ -12,6 +12,7 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 
 	$_ = array(
 		'view' => $view,
+		'params' => $params,
 		'return_output' => $return_output,
 		'output_format' => $output_format
 	);
