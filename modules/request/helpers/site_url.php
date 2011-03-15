@@ -12,11 +12,13 @@
  * @author Dan Blaisdell
  */
 function site_url($url = '', $version = false) {
-	if (is_array($url))
+	if (is_array($url)) {
 		$url = implode('/', $url);
+	}
 
-	if (strpos($url, 'https://') === 0 || strpos($url, 'http://') === 0)
+	if (strpos($url, 'https://') === 0 || strpos($url, 'http://') === 0 || strpos($url, 'javascript:') === 0) {
 		return $url;
+	}
 
 	if ($version) {
 		$path = PUBLIC_DIR . $url;
