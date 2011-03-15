@@ -3,7 +3,7 @@
 abstract class ApplicationController extends BaseController {
 
 	function __construct() {
-		$this['title'] = "Site Title";
+		$this['title'] = 'Site Title';
 
 		$this['actions'] = array();
 		foreach (glob(dirname(__FILE__) . '/*.php') as $controller_file) {
