@@ -56,38 +56,53 @@ class Query {
 	 * @var array
 	 */
 	private $_columns = array();
+	
 	/**
 	 * @var mixed
 	 */
 	private $_table;
+	
+	/**
+	 * @var string
+	 */
+	private $_tableAlias;
+	
 	/**
 	 * @var array
 	 */
+	
 	private $_joins = array();
+	
 	/**
 	 * @var Condition
 	 */
 	private $_where;
+	
 	/**
 	 * @var array
 	 */
 	private $_orders = array();
+	
 	/**
 	 * @var array
 	 */
 	private $_groups = array();
+	
 	/**
 	 * @var Condition
 	 */
 	private $_having;
+	
 	/**
 	 * @var int
 	 */
 	private $_limit;
+	
 	/**
 	 * @var int
 	 */
 	private $_offset = 0;
+	
 	/**
 	 * @var bool
 	 */
@@ -203,56 +218,55 @@ class Query {
 	 * or an instance of Query if you would like to nest queries.
 	 * This function also supports arbitrary SQL.
 	 *
-	 * @param String|Query $tableName Name of the table to add, or sub-Query
+	 * @param String|Query $table_name Name of the table to add, or sub-Query
 	 * @param String[optional] $alias Alias for the table
 	 * @return Query
 	 */
-	function setTable($tableName, $alias=null) {
-		if ($tableName instanceof Query) {
+	function setTable($table_name, $alias=null) {
+		if ($table_name instanceof Query) {
 			if (!$alias)
 				throw new Exception("The nested query must have an alias.");
-			$tableName = "($tableName) $alias";
-		} elseif ($alias) {
-			$tableName = "$tableName $alias";
+		} else {
+			$space = strrpos($table_name, ' ');
+			if ($space) {
+				$table_name = substr($table_name, 0, $space + 1);
+				$alias = substr($table_name, $space);
+			}
+		}
+		
+		if ($alias){
+			$this->setAlias($alias);
 		}
 
-		$this->_table = $tableName;
+		$this->_table = $table_name;
 		return $this;
 	}
 
 	/**
 	 * Returns a String representation of the table being queried,
-	 * including its alias if present.
+	 * NOT including its alias.
 	 *
 	 * @return String
 	 */
 	function getTable() {
 		return $this->_table;
 	}
-
-	/**
-	 * Returns a String representation of the table being queried,
-	 * not including its alias.
-	 *
-	 * @return String
-	 */
-	function getTableName() {
-		$space = strrpos($this->_table, ' ');
-
-		return false === $space ? $this->_table : substr($this->_table, 0, $space);
+	
+	function setAlias($alias) {
+		$this->_tableAlias = $alias;
+		return $this;
 	}
-
+	
 	/**
-	 * Returns a String of the alias of the talbe being queried,
+	 * Returns a String of the alias of the table being queried,
 	 * if present.
 	 *
 	 * @return String
 	 */
 	function getAlias() {
-		$space = strrpos($this->_table, ' ');
-
-		return false === $space ? null : substr($this->_table, $space + 1);
+		return $this->_tableAlias;
 	}
+
 
 	/**
 	 * Provide the Condition object to generate the WHERE clause of
@@ -479,26 +493,28 @@ class Query {
 	 * @return QueryStatement
 	 */
 	function getQuery($conn = null) {
-		$table_name = $this->getTableName();
+		$table = (string) $this->getTable();
 
-		if (!$table_name)
-			throw new Exception("No table specified.");
+		if (!$table) {
+			throw new Exception('No table specified.');
+		}
 
 		$alias = $this->getAlias();
+
 		if (!$conn) {
 			$conn = DBManager::getConnection();
 		}
 
-		$query_s = "";
+		$query_s = '';
 
 		$statement = new QueryStatement($conn);
 
-		if ($conn) {
-			$table = $conn->quoteIdentifierTable($table_name);
-		} elseif (strpos($table_name, ' ') !== false) {
-			$table = $table_name;
-		} else {
-			$table = '`' . join('`.`', explode('.', $table_name)) . '`';
+		if (strpos($table, ' ') === false) {
+			if ($conn) {
+				$table = $conn->quoteIdentifier($table);
+			} else {
+				$table = '`' . join('`.`', explode('.', $table_name)) . '`';
+			}
 		}
 
 		if ($this->_columns) {
@@ -513,6 +529,10 @@ class Query {
 			$columns = "DISTINCT $columns";
 		}
 
+		if ($alias) {
+			$table .= " $alias";
+		}
+		
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
@@ -539,8 +559,9 @@ class Query {
 			$statement->addParams($where_statement->getParams());
 		}
 
-		if ($this->_groups)
+		if ($this->_groups) {
 			$query_s .= "\nGROUP BY " . implode(', ', $this->_groups) . ' ';
+		}
 
 		if ($this->getHaving()) {
 			$having_statement = $this->getHaving()->getClause();
@@ -550,18 +571,21 @@ class Query {
 			}
 		}
 
-		if ($this->getAction() != self::ACTION_COUNT && $this->_orders)
+		if ($this->getAction() != self::ACTION_COUNT && $this->_orders) {
 			$query_s .= "\nORDER BY " . implode(', ', $this->_orders) . ' ';
-
-		if ($this->_limit) {
-			if ($conn)
-				$conn->applyLimit($query_s, $this->_offset, $this->_limit);
-			else
-				$query_s .= "\nLIMIT " . ($this->_offset ? $this->_offset . ', ' : '') . $this->_limit;
 		}
 
-		if ($this->getAction() == self::ACTION_COUNT)
+		if ($this->_limit) {
+			if ($conn) {
+				$conn->applyLimit($query_s, $this->_offset, $this->_limit);
+			} else {
+				$query_s .= "\nLIMIT " . ($this->_offset ? $this->_offset . ', ' : '') . $this->_limit;
+			}
+		}
+
+		if ($this->getAction() == self::ACTION_COUNT) {
 			$query_s = "SELECT count(0) FROM ($query_s) a";
+		}
 
 		$statement->setString($query_s);
 		return $statement;

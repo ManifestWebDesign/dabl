@@ -114,10 +114,12 @@ foreach ($fields as $key => &$field):
 ?>
 	function get<?php echo $method_name ?>(<?php echo $params ?>) {
 <?php if ($field->isTemporalType()): ?>
-		if (null === $this-><?php echo $field_name ?> || null === $format)
+		if (null === $this-><?php echo $field_name ?> || null === $format) {
 			return $this-><?php echo $field_name ?>;
-		if (0 === strpos($this-><?php echo $field_name ?>, '0000-00-00'))
+		}
+		if (0 === strpos($this-><?php echo $field_name ?>, '0000-00-00')) {
 			return null;
+		}
 		return date($format, strtotime($this-><?php echo $field_name ?>));
 <?php else: ?>
 		return $this-><?php echo $field_name ?>;
@@ -126,22 +128,21 @@ foreach ($fields as $key => &$field):
 <?php $used_functions[] = "set$method_name"; ?>
 	function set<?php echo $method_name ?>($value) {
 <?php if ($field->isNumericType() || $field->isTemporalType()): ?>
-		if ('' === $value)
+		if ('' === $value) {
 			$value = null;
-<?php if ($field->isTemporalType()): ?>
-		elseif (null !== $value && $this->_formatDates)
+		}<?php if ($field->isTemporalType()): ?> elseif (null !== $value && $this->_formatDates) {
 			$value = date('<?php echo $formatter ?>', is_int($value) ? $value : strtotime($value));
+		}
 <?php endif ?>
 <?php endif ?>
 <?php if ($options['protect_not_null'] && $field->getName() != $PK && $field->isNotNull()): ?>
-		if (null === $value)
+		if (null === $value) {
 			$value = <?php echo $field->isNumericType() ? '0' : "''" ?>;
+		}<?php endif ?><?php if ($field->getPdoType() == PDO::PARAM_INT): ?> elseif (null !== $value) {
+			$value = (int) $value;
+		}
 <?php endif ?>
-<?php if ($field->getPdoType() == PDO::PARAM_INT): ?>
-		elseif (null !== $value)
-			$value = (int)$value;
-<?php endif ?>
-		if ($this-><?php echo $field_name ?> !== $value){
+		if ($this-><?php echo $field_name ?> !== $value) {
 			$this->_modifiedColumns[] = '<?php echo $field_name ?>';
 			$this-><?php echo $field_name ?> = $value;
 		}
@@ -323,7 +324,7 @@ foreach ($fields as $key => &$field):
 	function castInts() {
 <?php foreach ($fields as $key => &$field): ?>
 <?php if ($field->getPdoType() == PDO::PARAM_INT): ?>
-		$this-><?php echo $field->getName() ?> = (null === $this-><?php echo $field->getName() ?>) ? null : (int)$this-><?php echo $field->getName() ?>;
+		$this-><?php echo $field->getName() ?> = (null === $this-><?php echo $field->getName() ?>) ? null : (int) $this-><?php echo $field->getName() ?>;
 <?php endif ?>
 <?php endforeach ?>
 	}
@@ -340,9 +341,11 @@ foreach ($fields as $key => &$field):
 		// This table doesn't have primary keys, so there's no way to key the instance pool array
 		return;
 <?php endif ?>
-		if (<?php echo $class_name ?>::$_instancePoolCount > <?php echo $class_name ?>::MAX_INSTANCE_POOL_SIZE) return;
+		if (<?php echo $class_name ?>::$_instancePoolCount > <?php echo $class_name ?>::MAX_INSTANCE_POOL_SIZE) {
+			return;
+		}
 
-		<?php echo $class_name ?>::$_instancePool[implode('-',$object->getPrimaryKeyValues())] = clone $object;
+		<?php echo $class_name ?>::$_instancePool[implode('-', $object->getPrimaryKeyValues())] = clone $object;
 		++<?php echo $class_name ?>::$_instancePoolCount;
 	}
 
@@ -355,10 +358,12 @@ foreach ($fields as $key => &$field):
 	 */
 <?php $used_functions[] = 'retrieveFromPool'; ?>
 	static function retrieveFromPool($pk) {
-		if (null === $pk)
+		if (null === $pk) {
 			return null;
-		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool))
+		}
+		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool)) {
 			return clone <?php echo $class_name ?>::$_instancePool[$pk];
+		}
 
 		return null;
 	}
@@ -373,7 +378,7 @@ foreach ($fields as $key => &$field):
 	static function removeFromPool($object) {
 		$pk = is_object($object) ? implode('-', $object->getPrimaryKeyValues()) : $object;
 
-		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool)){
+		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool)) {
 			unset(<?php echo $class_name ?>::$_instancePool[$pk]);
 			--<?php echo $class_name ?>::$_instancePoolCount;
 		}
@@ -410,8 +415,9 @@ foreach ($fields as $key => &$field):
 	static function doCount(Query $q) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
-		if (!$q->getTable() || false === strrpos($q->getTable(), <?php echo $class_name ?>::getTableName()))
+		if (!$q->getTable() || <?php echo $class_name ?>::getTableName() != $q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
+		}
 		return $q->doCount($conn);
 	}
 
@@ -424,12 +430,14 @@ foreach ($fields as $key => &$field):
 	static function doDelete(Query $q, $dump_cache = true) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
-		if (!$q->getTable() || false === strrpos($q->getTable(), <?php echo $class_name ?>::getTableName()))
+		if (!$q->getTable() || <?php echo $class_name ?>::getTableName() != $q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
+		}
 		$result = $q->doDelete($conn);
 
-		if ($dump_cache)
+		if ($dump_cache) {
 			<?php echo $class_name ?>::$_instancePool = array();
+		}
 
 		return $result;
 	}
@@ -442,7 +450,7 @@ foreach ($fields as $key => &$field):
 	 */
 <?php $used_functions[] = 'doSelect'; ?>
 	static function doSelect(Query $q, $write_cache = false, $additional_classes = null) {
-		if (is_array($additional_classes)){
+		if (is_array($additional_classes)) {
 			array_unshift($additional_classes, '<?php echo $class_name ?>');
 			$class = $additional_classes;
 		} else {
@@ -459,8 +467,9 @@ foreach ($fields as $key => &$field):
 	static function doSelectRS(Query $q) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
-		if (!$q->getTable() || false === strrpos($q->getTable(), <?php echo $class_name ?>::getTableName()))
+		if (!$q->getTable() || <?php echo $class_name ?>::getTableName() != $q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
+		}
 
 		return $q->doSelect($conn);
 	}
@@ -470,10 +479,11 @@ $to_table_list = array();
 
 foreach ($this->getForeignKeysFromTable($table_name) as $r){
 	$to_table = $r->getForeignTableName();
-	if (isset($to_table_list[$to_table]))
+	if (isset($to_table_list[$to_table])) {
 		$to_table_list[$to_table] += 1;
-	else
+	} else {
 		$to_table_list[$to_table] = 1;
+	}
 }
 
 foreach ($this->getForeignKeysFromTable($table_name) as $r):
@@ -507,15 +517,16 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 ?>
 <?php $used_functions[] = "set$to_class_name" . "RelatedBy$from_column"; ?>
 	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
-		if (null === $<?php echo $lc_to_class_name ?>)
+		if (null === $<?php echo $lc_to_class_name ?>) {
 			$this->set<?php echo $from_column ?>(null);
-		else {
+		} else {
 			if (!$<?php echo $lc_to_class_name ?>->get<?php echo $to_column ?>())
 				throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $to_column ?>');
 			$this->set<?echo $from_column ?>($<?php echo $lc_to_class_name ?>->get<?php echo $to_column ?>());
 		}
-		if ($this->getCacheResults())
+		if ($this->getCacheResults()) {
 			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> = $<?php echo $lc_to_class_name ?>;
+		}
 	}
 <?php
 	if ($namedID) {
@@ -545,9 +556,9 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	 */
 <?php $used_functions[] = "get$to_class_name" . "RelatedBy$from_column"; ?>
 	function get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>() {
-		if (null === $this->get<?echo $from_column ?>())
+		if (null === $this->get<?echo $from_column ?>()) {
 			$result = null;
-		else {
+		} else {
 			if ($this->getCacheResults() && null !== $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>)
 				return $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>;
 <?php 
@@ -613,8 +624,9 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		$columns = $q->getColumns();
 		$alias = $q->getAlias();
 		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
-		if (!$columns)
+		if (!$columns) {
 			$columns[] = $this_table . '.*';
+		}
 
 		$to_table = <?php echo $to_class_name ?>::getTableName();
 		$q->join($to_table, $this_table . '.<?php echo $from_column ?> = ' . $to_table . '.<?php echo $to_column ?>', $join_type);
@@ -634,8 +646,9 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		$classes = array();
 		$alias = $q->getAlias();
 		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
-		if (!$columns)
+		if (!$columns) {
 			$columns[] = $this_table . '.*';
+		}
 <?php
 	foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		$to_table = $r->getForeignTableName();
@@ -664,15 +677,17 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	 */
 	protected function getForeignObjectsQuery($tablename, $columnname, $localcolumn, Query $q = null) {
 		$value = $this->{"get$localcolumn"}();
-		if (null === $value)
+		if (null === $value) {
 			throw new Exception('NULL cannot be used to match keys.');
+		}
 		$conn = $this->getConnection();
 		$column = $conn->quoteIdentifier($columnname);
-		if ($q){
+		if ($q) {
 			$q = clone $q;
 			$alias = $q->getAlias();
-			if ($alias && $tablename == $q->getTableName())
+			if ($alias && $tablename == $q->getTable()) {
 				$column = "$alias.$column";
+			}
 		} else {
 			$q = new Query;
 		}
@@ -851,4 +866,5 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 ?>
 		return 0 === count($this->_validationErrors);
 	}
+
 }
