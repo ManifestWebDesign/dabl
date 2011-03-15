@@ -9,9 +9,9 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		if (isset($_REQUEST['SortBy'])) {
 			$q->order($_REQUEST['SortBy'], isset($_REQUEST['Dir']) ? Query::DESC : Query::ASC);
 			$pageString .= '?SortBy=' . $_REQUEST['SortBy'];
-		}
-		if (isset($_REQUEST['Dir'])) {
-			$pageString .= '&Dir=' . $_REQUEST['Dir'];
+			if (isset($_REQUEST['Dir'])) {
+				$pageString .= '&Dir=' . $_REQUEST['Dir'];
+			}
 		}
 
 		$qp = new QueryPager($q, 25, $page, '<?php echo $model_name ?>');
@@ -21,26 +21,23 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		$this['pager'] = $qp;
 	}
 
-	function save($id = null) {
-		$id = $id ? $id : @$_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
-		$<?php echo $single ?> = $id ? <?php echo $model_name ?>::retrieveByPK($id) : new <?php echo $model_name ?>;
-		$<?php echo $single ?>->fromArray($_REQUEST);
+	function save(<? if(@$pkMethod): ?>$id = null<? endif ?>) {
+		$this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$id<? endif ?>)->fromArray($_REQUEST);
 
-		if ($<?php echo $single ?>->save() || (!$<?php echo $single ?>->isModified() && !$<?php echo $single ?>->isNew())) {
+		if ($this['<?php echo $single ?>']->validate()) {
+			$this['<?php echo $single ?>']->save();
 			$this->persistant['messages'][] = '<?php echo self::spaceTitleCase($single) ?> saved';
-			redirect('<?php echo $plural_url ?>/show/' . $<?php echo $single ?>-><?php echo $pkMethod ?>());
-		} else {
-			$this['errors'] = $<?php echo $single ?>->getValidationErrors();
-			$this['<?php echo $single ?>'] = $<?php echo $single ?>;
-			$this->loadView($this->getView('edit'));
+			<? if(@$pkMethod): ?>redirect('<?php echo $plural_url ?>/show/' . $this['<?php echo $single ?>']-><?php echo $pkMethod ?>());<? else: ?>redirect('<?php echo $plural_url ?>');<? endif ?>
+
 		}
+		
+		$this->persistant['errors'] = $this['<?php echo $single ?>']->getValidationErrors();
+		$this->persistant['<?php echo $single ?>'] = $this['<?php echo $single ?>'];
+		redirect('<?php echo $plural_url ?>/edit/'<? if(@$pkMethod): ?> . $this['<?php echo $single ?>']-><?php echo $pkMethod ?>()<? endif ?>);
 	}
 
-	function delete($id = null) {
-		$id = $id ? $id : @$_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
-		$<?php echo $single ?> = <?php echo $model_name ?>::retrieveByPK($id);
-
-		if ($<?php echo $single ?>->delete()) {
+<? if(@$pkMethod): ?>	function delete($id = null) {
+		if (null !== $this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$id<? endif ?>) && $this['<?php echo $single ?>']->delete()) {
 			$this->persistant['messages'][] = '<?php echo self::spaceTitleCase($single) ?> deleted';
 		} else {
 			$this->persistant['errors'][] = '<?php echo self::spaceTitleCase($single) ?> could not be deleted';
@@ -50,16 +47,11 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	}
 
 	function show($id = null) {
-		$id = $id ? $id : @$_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
-		$<?php echo $single ?> = $id ? <?php echo $model_name ?>::retrieveByPK($id) : new <?php echo $model_name ?>;
-		$this['<?php echo $single ?>'] = $<?php echo $single ?>;
+		$this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$id<? endif ?>);
 	}
 
-	function edit($id = null) {
-		$id = $id ? $id : @$_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
-		$<?php echo $single ?> = $id ? <?php echo $model_name ?>::retrieveByPK($id) : new <?php echo $model_name ?>;
-		$<?php echo $single ?>->fromArray(@$_REQUEST);
-		$this['<?php echo $single ?>'] = $<?php echo $single ?>;
+<? endif ?>	function edit(<? if(@$pkMethod): ?>$id = null<? endif ?>) {
+		$this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$id<? endif ?>)->fromArray(@$_REQUEST);
 	}
 
 <?php
@@ -82,4 +74,33 @@ class <?php echo $controller_name ?> extends ApplicationController {
 <?php
 		}
 ?>
+	/**
+	 * @return <?php echo $model_name ?>
+
+	 */
+	private function _get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$id = null<? endif ?>) {
+		if (isset($this['<?php echo $single ?>']) && null !== $this['<?php echo $single ?>']) {
+			// if <?php echo $single ?> has already been set manually, don't mess with it
+			return $this['<?php echo $single ?>'];
+		}
+		
+<? if(@$pkMethod): ?>
+		// look for id in param or in $_REQUEST array
+		if (null === $id && isset($_REQUEST[<?php echo $model_name ?>::getPrimaryKey()])) {
+			$id = $_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
+		}
+		
+		if ('' === $id || null === $id) {
+			// if no primary key found, create new <?php echo $model_name ?>
+
+			$this['<?php echo $single ?>'] = new <?php echo $model_name ?>;
+		} else {
+			// if primary key found, retrieve the record from the db
+			$this['<?php echo $single ?>'] = <?php echo $model_name ?>::retrieveByPK($id);
+		}
+<? else: ?>		$this['<?php echo $single ?>'] = new <?php echo $model_name ?>;
+<? endif ?>
+		return $this['<?php echo $single ?>'];
+	}
+	
 }
