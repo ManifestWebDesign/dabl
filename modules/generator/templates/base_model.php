@@ -667,34 +667,6 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		return <?php echo $class_name ?>::doSelect($q, $write_cache, $classes);
 	}
 
-<?php $used_functions[] = 'getForeignObjectsQuery'; ?>
-	/**
-	 *
-	 * @param string $tablename
-	 * @param string $columnname
-	 * @param Query $q
-	 * @return Query
-	 */
-	protected function getForeignObjectsQuery($tablename, $columnname, $localcolumn, Query $q = null) {
-		$value = $this->{"get$localcolumn"}();
-		if (null === $value) {
-			throw new Exception('NULL cannot be used to match keys.');
-		}
-		$conn = $this->getConnection();
-		$column = $conn->quoteIdentifier($columnname);
-		if ($q) {
-			$q = clone $q;
-			$alias = $q->getAlias();
-			if ($alias && $tablename == $q->getTable()) {
-				$column = "$alias.$column";
-			}
-		} else {
-			$q = new Query;
-		}
-		$q->add($column, $value);
-		return $q;
-	}
-
 <?php
 $from_table_list = array();
 

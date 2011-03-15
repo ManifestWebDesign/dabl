@@ -477,4 +477,30 @@ abstract class BaseModel {
 	 * Cast returned values from the database into integers where appropriate.
 	 */
 	abstract function castInts();
+	
+	/**
+	 * @param string $foreign_table
+	 * @param string $foreign_column
+	 * @param Query $q
+	 * @return Query
+	 */
+	protected function getForeignObjectsQuery($foreign_table, $foreign_column, $local_column, Query $q = null) {
+		$value = $this->{"get$local_column"}();
+		if (null === $value) {
+			throw new Exception('NULL cannot be used to match keys.');
+		}
+		$conn = $this->getConnection();
+		$column = $conn->quoteIdentifier($foreign_column);
+		if ($q) {
+			$q = clone $q;
+			$alias = $q->getAlias();
+			if ($alias && $foreign_table == $q->getTable()) {
+				$column = "$alias.$column";
+			}
+		} else {
+			$q = new Query;
+		}
+		$q->add($column, $value);
+		return $q;
+	}
 }
