@@ -50,7 +50,7 @@
 			if($action_label == 'Index') continue;
 ?>
 			<td>
-				<a<?php if(in_array($action_label, $this->standardActions)) : ?> class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" title="<?php echo $action_label . " " . ucfirst($single) ?>"<?php endif ?> href="<?php echo $action_url ?>"<?php if(strtolower($action_label) == 'delete') echo ' onclick="return confirm(\'Are you sure?\');"' ?>>
+				<a<?php if(in_array($action_label, $this->standardActions)) : ?> class="ui-widget ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . " " . ucfirst($single) ?>"<?php endif ?> href="<?php echo $action_url ?>"<?php if(strtolower($action_label) == 'delete') echo ' onclick="return confirm(\'Are you sure?\');"' ?>>
 					<?php if(array_key_exists($action_label, $this->actionIcons)): ?><span class="ui-icon <?php if(array_key_exists($action_label, $this->actionIcons)) echo 'ui-icon-'.$this->actionIcons[$action_label]; ?>"><?php endif ?><?php echo $action_label ?><?php if(array_key_exists($action_label, $this->actionIcons)): ?></span><?php endif ?>
 					<?php echo $action_label . " " . ucfirst($single) ?>
 				</a>
