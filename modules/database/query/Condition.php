@@ -62,7 +62,7 @@ class Condition {
 
 		$statement = new QueryStatement;
 
-		//Left can be a Condition
+		// Left can be a Condition
 		if ($left instanceof self) {
 			$clause_statement = $left->getClause();
 			if (!$clause_statement)
@@ -72,7 +72,7 @@ class Condition {
 		}
 
 		if ($quote === null) {
-			//You can skip $operator and specify $quote with parameter 3
+			// You can skip $operator and specify $quote with parameter 3
 			if (is_int($operator)) {
 				$quote = $operator;
 				$operator = Query::EQUAL;
@@ -81,10 +81,10 @@ class Condition {
 			}
 		}
 
-		//Get rid of white-space on sides of $operator
+		// Get rid of white-space on sides of $operator
 		$operator = trim($operator);
 
-		//Escape $left
+		// Escape $left
 		if ($quote == self::QUOTE_LEFT || $quote == self::QUOTE_BOTH) {
 			$statement->addParam($left);
 			$left = '?';
@@ -94,7 +94,7 @@ class Condition {
 		if (is_array($right) || ($right instanceof Query && $right->getLimit() !== 1))
 			$is_array = true;
 
-		//Right can be a Query, if you're trying to nest queries, like "WHERE MyColumn = (SELECT OtherColumn From MyTable LIMIT 1)"
+		// Right can be a Query, if you're trying to nest queries, like "WHERE MyColumn = (SELECT OtherColumn From MyTable LIMIT 1)"
 		if ($right instanceof Query) {
 			if (!$right->getTable())
 				throw new Exception("$right does not have a table, so it cannot be nested.");
@@ -109,7 +109,7 @@ class Condition {
 				$quote = self::QUOTE_NONE;
 		}
 
-		//$right can be an array
+		// $right can be an array
 		if ($is_array) {
 			//BETWEEN
 			if (is_array($right) && count($right) == 2 && $operator == Query::BETWEEN) {
@@ -118,8 +118,8 @@ class Condition {
 				return $statement;
 			}
 
-			//Convert any sort of equal operator to something suitable
-			//for arrays
+			// Convert any sort of equal operator to something suitable
+			// for arrays
 			switch ($operator) {
 				//Various forms of equal
 				case Query::IN:
@@ -136,7 +136,7 @@ class Condition {
 					throw new Exception("$operator unknown for comparing an array.");
 			}
 
-			//Handle empty arrays
+			// Handle empty arrays
 			if (is_array($right) && !$right) {
 				if ($operator == Query::IN) {
 					$statement->setString('(0=1)');
@@ -145,7 +145,7 @@ class Condition {
 					return null;
 			}
 
-			//IN or NOT_IN
+			// IN or NOT_IN
 			if ($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
 				$statement->addParams($right);
 				$placeholders = array();
@@ -154,11 +154,11 @@ class Condition {
 				$right = '(' . implode(',', $placeholders) . ')';
 			}
 		} else {
-			//IS NOT NULL
+			// IS NOT NULL
 			if ($right === null && ($operator == Query::NOT_EQUAL || $operator == Query::ALT_NOT_EQUAL))
 				$operator = Query::IS_NOT_NULL;
 
-			//IS NULL
+			// IS NULL
 			elseif ($right === null && $operator == Query::EQUAL)
 				$operator = Query::IS_NULL;
 
