@@ -70,7 +70,11 @@ class Query {
 	/**
 	 * @var array
 	 */
+	private $_extraTables = array();
 	
+	/**
+	 * @var QueryJoin[]
+	 */
 	private $_joins = array();
 	
 	/**
@@ -122,10 +126,15 @@ class Query {
 	}
 
 	function __clone() {
-		if ($this->_where instanceof Condition)
+		if ($this->_where instanceof Condition) {
 			$this->_where = clone $this->_where;
-		if ($this->_having instanceof Condition)
+		}
+		if ($this->_having instanceof Condition) {
 			$this->_having = clone $this->_having;
+		}
+		foreach ($this->_joins as $key => $join) {
+			$this->_joins[$key] = clone $join;
+		}
 	}
 
 	/**
@@ -227,7 +236,7 @@ class Query {
 			if (!$alias)
 				throw new Exception('The nested query must have an alias.');
 			$table_name = clone $table_name;
-		} else {
+		} elseif(null === $alias) {
 			$space = strrpos($table_name, ' ');
 			if ($space) {
 				$table_name = substr($table_name, 0, $space + 1);
@@ -268,6 +277,29 @@ class Query {
 		return $this->_tableAlias;
 	}
 
+	/**
+	 * @param type $table_name
+	 * @param type $alias
+	 * @return Query 
+	 */
+	function addTable($table_name, $alias = null) {
+		if ($table_name instanceof Query) {
+			if (!$alias) {
+				throw new Exception('The nested query must have an alias.');
+			}
+			$table_name = clone $table_name;
+		} elseif (null === $alias) {
+			$space = strrpos($table_name, ' ');
+			if ($space) {
+				$table_name = substr($table_name, 0, $space + 1);
+				$alias = substr($table_name, $space);
+			}
+			$alias = $table_name;
+		}
+		
+		$this->_extraTables[$alias] = $table_name;
+		return $this;
+	}
 
 	/**
 	 * Provide the Condition object to generate the WHERE clause of
@@ -308,46 +340,20 @@ class Query {
 	 * @return Query
 	 */
 	function addJoin($table, $on_clause=null, $join_type=self::JOIN) {
-		$statement = new QueryStatement;
-
-		if ($table instanceof Query) {
-			$table_statement = $table->getQuery();
-			$table = '(' . $table_statement->getString() . ')';
-			$statement->addParams($table_statement->getParams());
-		} else {
-			$conn = DBManager::getConnection();
-			if ($conn) {
-				$table_parts = explode(' ', str_replace('`', '', trim($table)));
-				if (count($table_parts) == 1)
-					$table = $conn->quoteIdentifier($table);
-				elseif (count($table_parts) == 2) {
-					$table_name = $table_parts[0];
-					$table_name = $conn->quoteIdentifier($table_name);
-					$alias = array_pop($table_parts);
-					$table = "$table_name $alias";
-				}
-			}
+		if ($table instanceof QueryJoin) {
+			$this->_joins[] = clone $table;
+			return $this;
 		}
-
-		if ($on_clause instanceof Condition) {
-			$on_clause_statement = $on_clause->getClause();
-			$on_clause = $on_clause_statement->getString();
-			$statement->addParams($on_clause_statement->getParams());
-		}
-
-		// TODO: this is not supported correctly. Query class needs an array of secondary tables for the query and when
-		// no on_clause is given this should just add to that array and produce something like
-		// SELECT * FROM primary_table, secondary_table1, secondary_table2
+		
 		if (null === $on_clause) {
+			if ($join_type == self::JOIN || $join_type == self::INNER_JOIN) {
+				$this->addTable($table);
+				return this;
+			}
 			$on_clause = '1 = 1';
 		}
-
-		if ('' !== $on_clause) {
-			$on_clause = "ON ($on_clause)";
-		}
-
-		$statement->setString("$join_type $table $on_clause");
-		$this->_joins[] = $statement;
+		
+		$this->_joins[] = new QueryJoin($table, $on_clause, $join_type);
 		return $this;
 	}
 
@@ -361,6 +367,7 @@ class Query {
 
 	/**
 	 * Alias of {@link addAnd()}
+	 * @return Query
 	 */
 	function add($column, $value=null, $operator=self::EQUAL, $quote = null) {
 		if (func_num_args () === 1) {
@@ -537,6 +544,22 @@ class Query {
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
+				if ($this->_extraTables) {
+					foreach ($this->_extraTables as $alias => $extra_table) {
+						$extra_table_string = $extra_table;
+						if (strpos($extra_table_string, ' ') === false) {
+							if ($conn) {
+								$extra_table_string = $conn->quoteIdentifier($extra_table_string);
+							} else {
+								$extra_table_string = '`' . join('`.`', explode('.', $extra_table_string)) . '`';
+							}
+						}
+						if ($alias != $extra_table) {
+							$extra_table_string .= " $alias";
+						}
+						$table .= ", $extra_table_string";
+					}
+				}
 				$query_s .="SELECT $columns \nFROM $table ";
 				break;
 			case self::ACTION_DELETE:
@@ -547,7 +570,8 @@ class Query {
 		}
 
 		if ($this->_joins) {
-			foreach ($this->_joins as $join_statement) {
+			foreach ($this->_joins as $join) {
+				$join_statement = $join->getQueryStatement($conn);
 				$query_s .= "\n\t" . $join_statement->getString() . ' ';
 				$statement->addParams($join_statement->getParams());
 			}
@@ -593,7 +617,7 @@ class Query {
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function __toString() {
 		$q = clone $this;

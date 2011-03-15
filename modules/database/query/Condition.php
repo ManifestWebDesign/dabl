@@ -266,24 +266,26 @@ class Condition {
 			$and_strings[] = $and_statement->getString();
 			$statement->addParams($and_statement->getParams());
 		}
-		if ($and_strings)
+		if ($and_strings) {
 			$AND = implode("\n\tAND ", $and_strings);
+		}
 
 		$or_strings = array();
 		foreach ($this->ors as $or_statement) {
 			$or_strings[] = $or_statement->getString();
 			$statement->addParams($or_statement->getParams());
 		}
-		if ($or_strings)
+		if ($or_strings) {
 			$OR = implode("\n\tOR ", $or_strings);
+		}
 
 		if ($and_strings || $or_strings) {
 			if ($and_strings && $or_strings)
-				$string .= "\n\t$AND\n\tOR $OR ";
+				$string .= "\n\t$AND\n\tOR $OR";
 			elseif ($and_strings)
-				$string .= "\n\t$AND ";
+				$string .= "\n\t$AND";
 			elseif ($or_strings)
-				$string .= "\n\t$OR ";
+				$string .= "\n\t$OR";
 			$statement->setString($string);
 			return $statement;
 		}
