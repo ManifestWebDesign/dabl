@@ -110,7 +110,6 @@ class DBManager {
 			return self::$connections[$key];
 
 		$conn = DABLPDO::factory(self::$parameters[$key]);
-		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		return (self::$connections[$key] = $conn);
 	}
 

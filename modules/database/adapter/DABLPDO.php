@@ -41,87 +41,118 @@ abstract class DABLPDO extends PDO {
 	 *
 	 */
 	static function factory($connection_params) {
-		try {
-			switch ($connection_params['driver']) {
-				case 'sqlite':
-					$dsn = 'sqlite:' . $connection_params['dbname'];
-					$conn = new DBSQLite($dsn);
-					break;
+		$class = '';
+		$dsn = '';
+		$user = null;
+		$password = null;
+		
+		if (@$connection_params['user']) {
+			$user = $connection_params['user'];
+		}
 
-				case 'mysql':
-					$parts = array();
-					if (@$connection_params['host'])
-						$parts[] = 'host=' . $connection_params['host'];
-					if (@$connection_params['port'])
-						$parts[] = 'port=' . $connection_params['port'];
-					if (@$connection_params['unix_socket'])
-						$parts[] = 'unix_socket=' . $connection_params['unix_socket'];
-					if (@$connection_params['dbname'])
-						$parts[] = 'dbname=' . $connection_params['dbname'];
-					foreach ($parts as &$v) {
-						$v = str_replace(';', '\;', $v);
-					}
-					$dsn = 'mysql:' . implode(';', $parts);
-					$conn = new DBMySQL($dsn, @$connection_params['user'], @$connection_params['password']);
-					break;
+		if (@$connection_params['password']) {
+			$password = $connection_params['password'];
+		}
+		
+		$options = array(
+			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+		);
 
-				case 'oracle':
-				case 'oci':
-					$parts = array();
-					if (@$connection_params['dbname'])
-						$parts[] = 'dbname=' . $connection_params['dbname'];
-					if (@$connection_params['charset'])
-						$parts[] = 'charset=' . $connection_params['charset'];
-					foreach ($parts as &$v) {
-						$v = str_replace(';', '\;', $v);
-					}
-					$dsn = 'oci:' . implode(';', $parts);
-					$conn = new DBOracle($dsn, @$connection_params['user'], @$connection_params['password']);
-					break;
-
-				case 'pgsql':
-					$parts = array();
-					if (@$connection_params['host'])
-						$parts[] = 'host=' . $connection_params['host'];
-					if (@$connection_params['port'])
-						$parts[] = 'port=' . $connection_params['port'];
-					if (@$connection_params['dbname'])
-						$parts[] = 'dbname=' . $connection_params['dbname'];
-					if (@$connection_params['user'])
-						$parts[] = 'user=' . $connection_params['user'];
-					if (@$connection_params['password'])
-						$parts[] = 'password=' . $connection_params['password'];
-					foreach ($parts as &$v) {
-						$v = str_replace(' ', '\ ', $v);
-					}
-					$dsn = 'pgsql:' . implode(' ', $parts);
-					$conn = new DBPostgres($dsn);
-					break;
-
-				case 'mssql':
-				case 'sybase':
-				case 'dblib':
-					if (@$connection_params['host'])
-						$parts[] = 'host=' . $connection_params['host'];
-					if (@$connection_params['dbname'])
-						$parts[] = 'dbname=' . $connection_params['dbname'];
-					if (@$connection_params['charset'])
-						$parts[] = 'charset=' . $connection_params['charset'];
-					if (@$connection_params['appname'])
-						$parts[] = 'appname=' . $connection_params['appname'];
-
-					foreach ($parts as &$v) {
-						$v = str_replace(';', '\;', $v);
-					}
-					$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
-
-					$conn = new DBMSSQL($dsn, @$connection_params['user'], @$connection_params['password']);
-					break;
-
-				default:
-					throw new Exception("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
-					break;
+		if (isset($connection_params['persistant'])) {
+			if (
+				true === @$connection_params['persistant']
+				|| 1 === @$connection_params['persistant']
+				|| 'true' === @$connection_params['persistant']
+				|| '1' === @$connection_params['persistant']
+			) {
+				$options[PDO::ATTR_PERSISTENT] = true;
 			}
+		}
+
+		switch ($connection_params['driver']) {
+			case 'sqlite':
+				$dsn = 'sqlite:' . $connection_params['dbname'];
+				$class = 'DBSQLite';
+				break;
+
+			case 'mysql':
+				$parts = array();
+				if (@$connection_params['host'])
+					$parts[] = 'host=' . $connection_params['host'];
+				if (@$connection_params['port'])
+					$parts[] = 'port=' . $connection_params['port'];
+				if (@$connection_params['unix_socket'])
+					$parts[] = 'unix_socket=' . $connection_params['unix_socket'];
+				if (@$connection_params['dbname'])
+					$parts[] = 'dbname=' . $connection_params['dbname'];
+				foreach ($parts as &$v) {
+					$v = str_replace(';', '\;', $v);
+				}
+				$dsn = 'mysql:' . implode(';', $parts);
+				$class = 'DBMySQL';
+				break;
+
+			case 'oracle':
+			case 'oci':
+				$parts = array();
+				if (@$connection_params['dbname'])
+					$parts[] = 'dbname=' . $connection_params['dbname'];
+				if (@$connection_params['charset'])
+					$parts[] = 'charset=' . $connection_params['charset'];
+				foreach ($parts as &$v) {
+					$v = str_replace(';', '\;', $v);
+				}
+				$dsn = 'oci:' . implode(';', $parts);
+				$class = 'DBOracle';
+				break;
+
+			case 'pgsql':
+				$parts = array();
+				if (@$connection_params['host'])
+					$parts[] = 'host=' . $connection_params['host'];
+				if (@$connection_params['port'])
+					$parts[] = 'port=' . $connection_params['port'];
+				if (@$connection_params['dbname'])
+					$parts[] = 'dbname=' . $connection_params['dbname'];
+				if (@$connection_params['user'])
+					$parts[] = 'user=' . $connection_params['user'];
+				if (@$connection_params['password'])
+					$parts[] = 'password=' . $connection_params['password'];
+				foreach ($parts as &$v) {
+					$v = str_replace(' ', '\ ', $v);
+				}
+				$dsn = 'pgsql:' . implode(' ', $parts);
+				$user = null;
+				$password = null;
+				$class = 'DBPostgres';
+				break;
+
+			case 'mssql':
+			case 'sybase':
+			case 'dblib':
+				if (@$connection_params['host'])
+					$parts[] = 'host=' . $connection_params['host'];
+				if (@$connection_params['dbname'])
+					$parts[] = 'dbname=' . $connection_params['dbname'];
+				if (@$connection_params['charset'])
+					$parts[] = 'charset=' . $connection_params['charset'];
+				if (@$connection_params['appname'])
+					$parts[] = 'appname=' . $connection_params['appname'];
+
+				foreach ($parts as &$v) {
+					$v = str_replace(';', '\;', $v);
+				}
+				$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
+				$class = 'DBMSSQL';
+				break;
+
+			default:
+				throw new Exception("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
+				break;
+		}
+
+		try {
+			$conn = new $class($dsn, $user, $password, $options);
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
 		}
@@ -341,9 +372,9 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string The quoted identifier.
 	 */
 	function quoteIdentifier($text) {
-		if(is_array($text)){
+		if (is_array($text)) {
 			$quoted = array();
-			foreach($text as $key => $value){
+			foreach ($text as $key => $value) {
 				$quoted[$key] = $this->quoteIdentifier($value);
 			}
 			return $quoted;
