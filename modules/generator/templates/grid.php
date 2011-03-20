@@ -7,8 +7,13 @@
 ?>
 			<th class="ui-widget-header <?php if($key==0)echo 'ui-corner-tl' ?>">
 				<a href="<?php echo "<?php echo" ?> '?SortBy=<?php echo $column_name ?>' . (!isset($_REQUEST['Dir']) && @$_REQUEST['SortBy'] == '<?php echo $column_name ?>' ? '&Dir=DESC' : '') <?php echo "?>" ?>">
-				<?php echo "<?" ?> if( @$_REQUEST['SortBy'] == '<?php echo $column_name ?>'):<?php echo "?>" ?><span class="ui-icon ui-icon-carat-1-<?php echo "<?php" ?> echo isset($_REQUEST['Dir'])?'s' :'n'<?php echo "?>" ?> float-right"></span><?php echo "<?" ?>endif;<?php echo "?>"?>
-				<?php echo $column_name ?>
+					<?php echo "<?" ?> if( @$_REQUEST['SortBy'] == '<?php echo $column_name ?>'):<?php echo "?>" ?>
+
+						<span class="ui-icon ui-icon-carat-1-<?php echo "<?php" ?> echo isset($_REQUEST['Dir']) ? 's' : 'n' <?php echo "?>" ?>"></span>
+					<?php echo "<?" ?>endif <?php echo "?>"?>
+
+					<?php echo $column_name ?>
+
 				</a>
 			</th>
 <?php
@@ -50,9 +55,16 @@
 			if($action_label == 'Index') continue;
 ?>
 			<td>
-				<a<?php if(in_array($action_label, $this->standardActions)) : ?> class="ui-widget ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . " " . ucfirst($single) ?>"<?php endif ?> href="<?php echo $action_url ?>"<?php if(strtolower($action_label) == 'delete') echo ' onclick="return confirm(\'Are you sure?\');"' ?>>
-					<?php if(array_key_exists($action_label, $this->actionIcons)): ?><span class="ui-icon <?php if(array_key_exists($action_label, $this->actionIcons)) echo 'ui-icon-'.$this->actionIcons[$action_label]; ?>"><?php endif ?><?php echo $action_label ?><?php if(array_key_exists($action_label, $this->actionIcons)): ?></span><?php endif ?>
-					<?php echo $action_label . " " . ucfirst($single) ?>
+				<a class="ui-widget ui-state-default ui-corner-all ui-button-link"<?php if(in_array($action_label, $this->standardActions)) : ?> title="<?php echo $action_label . " " . ucfirst($single) ?>"<?php endif ?>
+
+				   href="<?php echo $action_url ?>"<?php if(strtolower($action_label) == 'delete'): ?>
+
+				   onclick="return confirm('Are you sure?');"<?php endif ?>>
+<?php if(@$this->actionIcons[$action_label]): ?>
+					<span class="ui-icon ui-icon-<?php echo $this->actionIcons[$action_label]; ?>"><?php echo $action_label ?></span>
+<?php endif ?>
+					<?php echo $action_label . (in_array($action_label, $this->standardActions) ? ' ' . ucfirst($single) : '') ?>
+
 				</a>
 			</td>
 <?php

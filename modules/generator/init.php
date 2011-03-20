@@ -1,5 +1,6 @@
 <?php
 
+ModuleLoader::load('strings');
 ModuleLoader::load('controllers');
 ModuleLoader::load('views');
 ModuleLoader::load('models');

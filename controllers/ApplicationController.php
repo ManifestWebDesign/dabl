@@ -5,13 +5,23 @@ abstract class ApplicationController extends BaseController {
 	function __construct() {
 		$this['title'] = 'Site Title';
 
-		$this['actions'] = array();
+		$this['actions'] = array(
+			'Home' => site_url()
+		);
+		
+		$current_controller = str_replace('Controller', '', get_class($this));
+		
+		if('Index' == $current_controller){
+			$this['current_page'] = 'Home';
+		} else {
+			$this['current_page'] = StringFormat::titleCase($current_controller, ' ');
+		}
+		
 		foreach (glob(dirname(__FILE__) . '/*.php') as $controller_file) {
-			$action = str_replace(array('Controller', '.php'), '', basename($controller_file));
-			if ($action == 'Application' || $action == 'Index' || $action == 'Generator')
+			$controller = str_replace('Controller.php', '', basename($controller_file));
+			if ($controller == 'Application' || $controller == 'Index' || $controller == 'Generator')
 				continue;
-			$action = preg_replace('/([a-z])([A-Z])/', '$1-$2', $action);
-			$this['actions'][ucwords(str_replace('-', ' ', $action))] = site_url(strtolower($action));
+			$this['actions'][StringFormat::titleCase($controller, ' ')] = site_url(StringFormat::url($controller));
 		}
 	}
 

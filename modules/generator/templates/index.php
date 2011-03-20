@@ -1,5 +1,5 @@
 <h1>
-	<?php echo BaseGenerator::spaceTitleCase($plural) ?>
+	<?php echo StringFormat::titleCase($plural, ' ') ?>
 	<a href="<?php echo "<?php echo site_url('" . $plural_url . "/edit') ?>" ?>" class="ui-state-default ui-corner-all ui-button-link" title="New <?php echo str_replace('_', ' ', ucfirst($single)) ?>">
 		<span class="ui-icon ui-icon-plusthick"></span>New <?php echo str_replace('_', ' ', ucfirst($single)) ?>
 

@@ -36,10 +36,10 @@ class DefaultGenerator extends BaseGenerator {
 			'controller_name' => $this->getControllerName($table_name),
 			'model_name' => $class_name,
 			'column_names' => $column_names,
-			'plural' => self::getPluralName($table_name),
-			'plural_url' => self::getPluralURL($table_name),
-			'single' => self::getSingularName($table_name),
-			'single_url' => self::getSingularURL($table_name),
+			'plural' => StringFormat::pluralVariable($table_name),
+			'plural_url' => StringFormat::pluralURL($table_name),
+			'single' => StringFormat::variable($table_name),
+			'single_url' => StringFormat::url($table_name),
 			'pk' => $pk,
 			'pkMethod' => $pk ? "get$pk" : null,
 			'actions' => $this->getActions($table_name),
@@ -50,8 +50,8 @@ class DefaultGenerator extends BaseGenerator {
 	function getActions($table_name) {
 		$controller_name = $this->getControllerName($table_name);
 		$class_name = $this->getModelName($table_name);
-		$plural = self::getPluralName($table_name);
-		$single = self::getSingularName($table_name);
+		$plural = StringFormat::pluralVariable($table_name);
+		$single = StringFormat::variable($table_name);
 		$pk = call_user_func(array($class_name, 'getPrimaryKey'));
 		$pkMethod = "get$pk";
 		$actions = array();
@@ -59,7 +59,7 @@ class DefaultGenerator extends BaseGenerator {
 			return $actions;
 
 		foreach ($this->standardActions as &$staction)
-			$actions[$staction] = "<?php echo site_url('" . $this->getPluralURL($table_name) . "/" . strtolower($staction) . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
+			$actions[$staction] = "<?php echo site_url('" . StringFormat::pluralURL($table_name) . "/" . strtolower($staction) . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
 
 		$fkeys_to = $this->getForeignKeysToTable($table_name);
 		foreach ($fkeys_to as $k => &$r) {
@@ -72,7 +72,7 @@ class DefaultGenerator extends BaseGenerator {
 				continue;
 			}
 			$used_to[$from_table] = $from_column;
-			$actions[ucwords(self::spaceTitleCase(self::pluralize($from_table)))] = "<?php echo site_url('" . $this->getPluralURL($from_table) . '/' . $single . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
+			$actions[ucwords(StringFormat::titleCase(StringFormat::plural($from_table), ' '))] = "<?php echo site_url('" . StringFormat::pluralURL($from_table) . '/' . $single . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
 		}
 
 		return $actions;
@@ -84,7 +84,7 @@ class DefaultGenerator extends BaseGenerator {
 	 */
 	function getControllerName($table_name) {
 		$controller_name = str_replace(' ', '', ucwords(str_replace('_', ' ', $table_name)));
-		$controller_name = self::pluralize($controller_name);
+		$controller_name = StringFormat::plural($controller_name);
 		$controller_name = $controller_name . 'Controller';
 		return $controller_name;
 	}

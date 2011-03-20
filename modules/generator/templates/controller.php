@@ -16,7 +16,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 
 		$qp = new QueryPager($q, 25, $page, '<?php echo $model_name ?>');
 		$this['<?php echo $plural ?>'] = $qp->fetchPage();
-		$this['page'] = '<?php echo self::spaceTitleCase($plural) ?>';
+		$this['page'] = '<?php echo StringFormat::titleCase($plural, ' ') ?>';
 		$this['pageString'] = $pageString;
 		$this['pager'] = $qp;
 	}
@@ -26,7 +26,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 
 		if ($this['<?php echo $single ?>']->validate()) {
 			$this['<?php echo $single ?>']->save();
-			$this->persistant['messages'][] = '<?php echo self::spaceTitleCase($single) ?> saved';
+			$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> saved';
 			<? if(@$pkMethod): ?>redirect('<?php echo $plural_url ?>/show/' . $this['<?php echo $single ?>']-><?php echo $pkMethod ?>());<? else: ?>redirect('<?php echo $plural_url ?>');<? endif ?>
 
 		}
@@ -38,9 +38,9 @@ class <?php echo $controller_name ?> extends ApplicationController {
 
 <? if(@$pkMethod): ?>	function delete($id = null) {
 		if (null !== $this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$id<? endif ?>) && $this['<?php echo $single ?>']->delete()) {
-			$this->persistant['messages'][] = '<?php echo self::spaceTitleCase($single) ?> deleted';
+			$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> deleted';
 		} else {
-			$this->persistant['errors'][] = '<?php echo self::spaceTitleCase($single) ?> could not be deleted';
+			$this->persistant['errors'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> could not be deleted';
 		}
 
 		redirect('<?php echo $plural_url ?>');
@@ -69,7 +69,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 
 		$this['<?php echo $plural ?>'] = $<?php echo $fk_single ?>->get<?php echo $model_name ?>s();
 		$this['<?php echo $fk_single ?>'] = $<?php echo $fk_single ?>;
-		$this['page'] = '<?php echo self::spaceTitleCase($plural) ?> for <?php echo $fk_single ?>';
+		$this['page'] = '<?php echo StringFormat::titleCase($plural, ' ') ?> for <?php echo $fk_single ?>';
 	}
 <?php
 		}

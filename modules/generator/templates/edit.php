@@ -1,4 +1,4 @@
-<h1><?php echo '<?php echo $'.$single.'->isNew() ? "New" : "Edit" ?>' ?> <?php echo BaseGenerator::spaceTitleCase($table_name) ?></h1>
+<h1><?php echo '<?php echo $'.$single.'->isNew() ? "New" : "Edit" ?>' ?> <?php echo StringFormat::titleCase($table_name, ' ') ?></h1>
 <div class="ui-widget-content ui-corner-all">
 <form method="post" action="<?php echo "<?php echo site_url('".$plural_url."/save') ?>" ?>">
 <?php
