@@ -18,6 +18,10 @@ table.object-grid th a {
 	display: block;
 }
 
+table.object-grid th a span {
+	float: right;
+}
+
 /* Form */
 form p label{
 	display:block;
