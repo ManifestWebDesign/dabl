@@ -19,10 +19,18 @@ abstract class ApplicationController extends BaseController {
 		
 		foreach (glob(dirname(__FILE__) . '/*.php') as $controller_file) {
 			$controller = str_replace('Controller.php', '', basename($controller_file));
-			if ($controller == 'Application' || $controller == 'Index' || $controller == 'Generator')
+			if ($controller == 'Application' || $controller == 'Index')
 				continue;
 			$this['actions'][StringFormat::titleCase($controller, ' ')] = site_url(StringFormat::url($controller));
 		}
+	}
+	
+	public function doAction($action_name = null, $params = array()) {
+		if($this->outputFormat != 'html') {
+			unset($this['title'], $this['current_page'], $this['actions']);
+		}
+		
+		return parent::doAction($action_name, $params);
 	}
 
 }
