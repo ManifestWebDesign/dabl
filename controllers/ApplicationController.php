@@ -3,6 +3,10 @@
 abstract class ApplicationController extends BaseController {
 
 	function __construct() {
+		if($this->outputFormat != 'html') {
+			return;
+		}
+		
 		$this['title'] = 'Site Title';
 
 		$this['actions'] = array(
