@@ -1,8 +1,7 @@
 <?php
 
 ModuleLoader::load('views');
+ModuleLoader::load('session');
 
-$module_root = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-
-require_once $module_root . 'ControllerRoute.php';
-require_once $module_root . 'BaseController.php';
+require_once $MODULE_DIR . 'ControllerRoute.php';
+require_once $MODULE_DIR . 'BaseController.php';

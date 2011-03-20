@@ -15,11 +15,8 @@ define('CONFIG_DIR', APP_DIR . 'config' . DIRECTORY_SEPARATOR);
 // directory where modules are located
 define('MODULES_DIR', APP_DIR . 'modules' . DIRECTORY_SEPARATOR);
 
-// directory for public html files that are directly exposed to the web server
-define('PUBLIC_DIR', APP_DIR . 'public' . DIRECTORY_SEPARATOR);
-
 // directory for logs
-define('LOGS_DIR', APP_DIR . 'log' . DIRECTORY_SEPARATOR);
+define('LOGS_DIR', APP_DIR . 'logs' . DIRECTORY_SEPARATOR);
 
 // output errors to brower
 ini_set('display_errors', true);
@@ -33,14 +30,18 @@ ini_set('log_errors', true);
 // file for error logging
 ini_set('error_log', LOGS_DIR . 'error_log');
 
-// load ClassLoader class for magic class loading
-require_once MODULES_DIR . '/loaders/init.php';
+// load helper classes for loading modules and classes
+$MODULE_DIR = MODULES_DIR . 'loaders/';
+$MODULE_INIT_SCRIPT = $MODULE_DIR . 'init.php';
+require_once $MODULE_INIT_SCRIPT;
 
+// load all modules
+ModuleLoader::setModulesDir(MODULES_DIR);
 ModuleLoader::loadAll();
 
+// load all config files
 $config_files = glob(CONFIG_DIR . '*.php');
-
 sort($config_files);
-
-foreach ($config_files as $filename)
+foreach ($config_files as $filename) {
 	require_once($filename);
+}
