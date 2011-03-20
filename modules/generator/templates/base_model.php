@@ -163,6 +163,14 @@ foreach ($fields as $key => &$field):
 	static function getConnection() {
 		return DBManager::getConnection('<?php echo $this->getConnectionName() ?>');
 	}
+	
+	/**
+	 * @return <?php echo $class_name ?>
+
+	 */
+	static function create() {
+		return new <?php echo $class_name ?>();
+	}
 
 	/**
 	 * Returns String representation of table name
