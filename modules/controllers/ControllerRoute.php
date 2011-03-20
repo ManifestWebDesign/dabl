@@ -142,6 +142,18 @@ class ControllerRoute {
 		$this->params = $segments;
 	}
 
+	static function load($route) {
+		$controller_route = new self($route);
+
+		$controller = $controller_route->getController();
+
+		if (null === $controller) {
+			file_not_found($route);
+		}
+
+		$controller->doAction($controller_route->getAction(), $controller_route->getParams());
+	}
+	
 	/**
 	 * @return string
 	 */
