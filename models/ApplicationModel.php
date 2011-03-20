@@ -1,8 +1,5 @@
-<?php echo '<?php' ?>
+<?php
 
-/**
- * @package models
- */
 abstract class ApplicationModel extends BaseModel {
 
 }
