@@ -3,6 +3,10 @@
 abstract class ApplicationController extends BaseController {
 
 	function __construct() {
+		if($this->outputFormat != 'html') {
+			return;
+		}
+		
 		$this['title'] = 'Site Title';
 
 		$this['actions'] = array(
@@ -19,7 +23,7 @@ abstract class ApplicationController extends BaseController {
 		
 		foreach (glob(dirname(__FILE__) . '/*.php') as $controller_file) {
 			$controller = str_replace('Controller.php', '', basename($controller_file));
-			if ($controller == 'Application' || $controller == 'Index' || $controller == 'Generator')
+			if ($controller == 'Application' || $controller == 'Index')
 				continue;
 			$this['actions'][StringFormat::titleCase($controller, ' ')] = site_url(StringFormat::url($controller));
 		}
