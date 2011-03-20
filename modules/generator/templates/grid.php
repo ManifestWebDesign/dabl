@@ -55,7 +55,7 @@
 			if($action_label == 'Index') continue;
 ?>
 			<td>
-				<a class="ui-widget ui-state-default ui-corner-all ui-button-link"<?php if(in_array($action_label, $this->standardActions)) : ?> title="<?php echo $action_label . " " . ucfirst($single) ?>"<?php endif ?>
+				<a class="ui-widget ui-state-default ui-corner-all ui-button-link"<?php if(in_array($action_label, $this->standardActions)) : ?> title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php endif ?>
 
 				   href="<?php echo $action_url ?>"<?php if(strtolower($action_label) == 'delete'): ?>
 

@@ -59,7 +59,7 @@ class DefaultGenerator extends BaseGenerator {
 			return $actions;
 
 		foreach ($this->standardActions as &$staction)
-			$actions[$staction] = "<?php echo site_url('" . StringFormat::pluralURL($table_name) . "/" . strtolower($staction) . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
+			$actions[$staction] = "<?php echo site_url('" . StringFormat::pluralURL($table_name) . '/' . strtolower($staction) . "/'.$" . $single . '->' . $pkMethod . '()) ?>';
 
 		$fkeys_to = $this->getForeignKeysToTable($table_name);
 		foreach ($fkeys_to as $k => &$r) {
@@ -72,7 +72,7 @@ class DefaultGenerator extends BaseGenerator {
 				continue;
 			}
 			$used_to[$from_table] = $from_column;
-			$actions[ucwords(StringFormat::titleCase(StringFormat::plural($from_table), ' '))] = "<?php echo site_url('" . StringFormat::pluralURL($from_table) . '/' . $single . "/'.$" . $single . "->" . $pkMethod . "()) ?>";
+			$actions[ucwords(StringFormat::titleCase(StringFormat::plural($from_table), ' '))] = "<?php echo site_url('" . StringFormat::pluralURL($from_table) . '/' . $single . "/' . $" . $single . '->' . $pkMethod . '()) ?>';
 		}
 
 		return $actions;
@@ -90,7 +90,7 @@ class DefaultGenerator extends BaseGenerator {
 	}
 
 	function getControllerFileName($table_name) {
-		return $this->getControllerName($table_name) . ".php";
+		return $this->getControllerName($table_name) . '.php';
 	}
 
 }
