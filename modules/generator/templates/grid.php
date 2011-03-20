@@ -63,7 +63,7 @@
 <?php if(@$this->actionIcons[$action_label]): ?>
 					<span class="ui-icon ui-icon-<?php echo $this->actionIcons[$action_label]; ?>"><?php echo $action_label ?></span>
 <?php endif ?>
-					<?php echo $action_label . (in_array($action_label, $this->standardActions) ? ' ' . ucfirst($single) : '') ?>
+					<?php echo $action_label ?>
 
 				</a>
 			</td>
