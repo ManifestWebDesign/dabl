@@ -85,9 +85,6 @@ elseif ($default !== null && strtolower($default) !== 'null')
 ?>;
 <?php endforeach ?>
 
-	/**
-	 * Column Accessors and Mutators
-	 */
 <?php
 foreach ($fields as $key => &$field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
@@ -112,6 +109,9 @@ foreach ($fields as $key => &$field):
 <?php // GETTERS AND SETTERS
 	$used_functions[] = "get$method_name";
 ?>
+	/**
+	 * Gets the value of the <?php echo $field->getName() ?> field
+	 */
 	function get<?php echo $method_name ?>(<?php echo $params ?>) {
 <?php if ($field->isTemporalType()): ?>
 		if (null === $this-><?php echo $field_name ?> || null === $format) {
@@ -125,7 +125,13 @@ foreach ($fields as $key => &$field):
 		return $this-><?php echo $field_name ?>;
 <?php endif ?>
 	}
+	
 <?php $used_functions[] = "set$method_name"; ?>
+	/**
+	 * Sets the value of the <?php echo $field->getName() ?> field
+	 * @return <?php echo $class_name ?>
+
+	 */
 	function set<?php echo $method_name ?>($value) {
 <?php if ($field->isNumericType() || $field->isTemporalType()): ?>
 		if ('' === $value) {
@@ -146,6 +152,7 @@ foreach ($fields as $key => &$field):
 			$this->_modifiedColumns[] = '<?php echo $field_name ?>';
 			$this-><?php echo $field_name ?> = $value;
 		}
+		return $this;
 	}
 <?php endforeach ?>
 
@@ -321,12 +328,18 @@ foreach ($fields as $key => &$field):
 	}
 
 <?php $used_functions[] = 'castInts'; ?>
+	/**
+	 * Casts values of int fields to (int)
+	 * @return <?php echo $class_name ?>
+
+	 */
 	function castInts() {
 <?php foreach ($fields as $key => &$field): ?>
 <?php if ($field->getPdoType() == PDO::PARAM_INT): ?>
 		$this-><?php echo $field->getName() ?> = (null === $this-><?php echo $field->getName() ?>) ? null : (int) $this-><?php echo $field->getName() ?>;
 <?php endif ?>
 <?php endforeach ?>
+		return $this;
 	}
 
 	/**
@@ -508,14 +521,23 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	if ($namedID) {
 ?>
 <?php $used_functions[] = "set$from_column_clean"; ?>
+	/**
+	 * @return <?php echo $class_name ?>
+
+	 */
 	function set<?php echo $from_column_clean ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
 		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $lc_to_class_name ?>);
+		return $this;
 	}
 
 <?php
 	}
 ?>
 <?php $used_functions[] = "set$to_class_name" . "RelatedBy$from_column"; ?>
+	/**
+	 * @return <?php echo $class_name ?>
+
+	 */
 	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
 		if (null === $<?php echo $lc_to_class_name ?>) {
 			$this->set<?php echo $from_column ?>(null);
@@ -527,6 +549,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		if ($this->getCacheResults()) {
 			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> = $<?php echo $lc_to_class_name ?>;
 		}
+		return $this;
 	}
 <?php
 	if ($namedID) {
@@ -608,8 +631,12 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 
 ?>
 <?php $used_functions[] = "set$to_class_name"; ?>
+	/**
+	 * @return <?php echo $class_name ?>
+
+	 */
 	function set<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
-		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $lc_to_class_name ?>);
+		return $this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $lc_to_class_name ?>);
 	}
 
 <?
