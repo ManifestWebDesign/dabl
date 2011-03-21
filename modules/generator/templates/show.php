@@ -4,7 +4,10 @@ unset($actions['Show']);
 <h1>View <?php echo StringFormat::titleCase($table_name, ' ') ?></h1>
 <p>
 <?php foreach($actions as $action_label => $action_url): ?>
-	<a href="<?php echo $action_url ?>" class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php if(strtolower($action_label)=='delete') echo " onclick=\"return confirm('Are you sure?');\"";?>>
+	<a href="<?php echo $action_url ?>" 
+	   class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php if(strtolower($action_label) == 'delete'): ?>
+
+	   onclick="return confirm('Are you sure?');"<?php endif ?>>
 		<span class="ui-icon <?php if(array_key_exists($action_label, $this->actionIcons)) echo 'ui-icon-'.$this->actionIcons[$action_label]; ?>"></span><?php echo $action_label ?>
 
 	</a>
@@ -28,13 +31,11 @@ foreach($this->getColumns($table_name) as $column){
 			break;
 	}
 ?>
+	<p>
+		<strong><?php echo $column_name ?>:</strong>
+		<?php echo '<?php echo htmlentities($'.$single.'->'.$method.'('.$format.')) ?>' ?>
 
-<p>
-	<strong><?php echo $column_name ?>:</strong>
-	<?php echo '<?php echo htmlentities($'.$single.'->'.$method.'('.$format.')) ?>' ?>
-
-</p>
-
+	</p>
 <?php
 }
 ?>

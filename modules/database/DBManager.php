@@ -71,6 +71,7 @@ class DBManager {
 	 * @param string $connection_params Parameters for the connection
 	 */
 	static function addConnection($connection_name, $connection_params) {
+		ClassLoader::import('DATABASE:adapter:' . $connection_params['driver']);
 		self::$parameters[$connection_name] = $connection_params;
 	}
 

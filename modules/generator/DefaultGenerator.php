@@ -55,12 +55,14 @@ class DefaultGenerator extends BaseGenerator {
 		$pk = call_user_func(array($class_name, 'getPrimaryKey'));
 		$pkMethod = "get$pk";
 		$actions = array();
-		if (!$pk)
+		if (!$pk) {
 			return $actions;
+		}
 
-		foreach ($this->standardActions as &$staction)
-			$actions[$staction] = "<?php echo site_url('" . StringFormat::pluralURL($table_name) . '/' . strtolower($staction) . "/'.$" . $single . '->' . $pkMethod . '()) ?>';
-
+		foreach ($this->standardActions as &$staction) {
+			$actions[$staction] = "<?php echo site_url('" . StringFormat::pluralURL($table_name) . '/' . strtolower($staction) . "/' . $" . $single . '->' . $pkMethod . '()) ?>';
+		}
+			
 		$fkeys_to = $this->getForeignKeysToTable($table_name);
 		foreach ($fkeys_to as $k => &$r) {
 			$from_table = $r->getTableName();

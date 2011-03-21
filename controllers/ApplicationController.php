@@ -17,7 +17,7 @@ abstract class ApplicationController extends BaseController {
 			$this['current_page'] = StringFormat::titleCase($current_controller, ' ');
 		}
 		
-		foreach (glob(dirname(__FILE__) . '/*.php') as $controller_file) {
+		foreach (glob(CONTROLLERS_DIR . '*.php') as $controller_file) {
 			$controller = str_replace('Controller.php', '', basename($controller_file));
 			if ($controller == 'Application' || $controller == 'Index')
 				continue;
