@@ -1,10 +1,10 @@
 <h1><?php echo '<?php echo $'.$single.'->isNew() ? "New" : "Edit" ?>' ?> <?php echo StringFormat::titleCase($table_name, ' ') ?></h1>
 <div class="ui-widget-content ui-corner-all">
-<form method="post" action="<?php echo "<?php echo site_url('".$plural_url."/save') ?>" ?>">
+	<form method="post" action="<?php echo "<?php echo site_url('".$plural_url."/save') ?>" ?>">
 <?php
 if($pk){
 ?>
-	<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo htmlentities($'.$single.'->'."get$pk".'()) ?>' ?>" />
+		<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo htmlentities($'.$single.'->'."get$pk".'()) ?>' ?>" />
 <?php
 }
 foreach ($this->getColumns($table_name) as $column) {
@@ -28,45 +28,45 @@ foreach ($this->getColumns($table_name) as $column) {
 	}
 	$input_id = strtolower($single . '_' . $column_name);
 ?>
-	<p>
-		<label for="<?php echo $input_id ?>"><?php echo $label ?></label>
+		<p>
+			<label for="<?php echo $input_id ?>"><?php echo $label ?></label>
 <?php
 	switch($column->getType()){
 		case PropelTypes::LONGVARCHAR:
 ?>
-		<textarea id="<?php echo $input_id ?>" name="<?php echo $column_name ?>"><?php echo $output ?></textarea>
+			<textarea id="<?php echo $input_id ?>" name="<?php echo $column_name ?>"><?php echo $output ?></textarea>
 <?php
 			break;
 		default:
 			if($column->isForeignKey()){
 ?>
-		<select id="<?php echo $input_id ?>" name="<?php echo $column_name ?>">
-		<?php echo $foreign_open_foreach ?>
+			<select id="<?php echo $input_id ?>" name="<?php echo $column_name ?>">
+			<?php echo $foreign_open_foreach ?>
 
-			<?php echo $foreign_option ?>
+				<?php echo $foreign_option ?>
 
-		<?php echo $foreign_close_foreach ?>
+			<?php echo $foreign_close_foreach ?>
 
-		</select>
+			</select>
 <?php
 			}
 			else{
 ?>
-		<input id="<?php echo $input_id ?>" type="text" name="<?php echo $column_name ?>" value="<?php echo $output ?>" />
+			<input id="<?php echo $input_id ?>" type="text" name="<?php echo $column_name ?>" value="<?php echo $output ?>" />
 <?php
 			}
 			break;
 	}
 ?>
-	</p>
+		</p>
 <?php
 }
 ?>
-	<p>
-		<span class="ui-state-default ui-corner-all ui-button-link">
-			<span class="ui-icon ui-icon-disk"></span>
-			<input type="submit" value="<?php echo '<?php echo $'.$single.'->isNew() ? "Save" : "Save Changes" ?>' ?>" />
-		</span>
-	</p>
-</form>
+		<p>
+			<span class="ui-state-default ui-corner-all ui-button-link">
+				<span class="ui-icon ui-icon-disk"></span>
+				<input type="submit" value="<?php echo '<?php echo $'.$single.'->isNew() ? "Save" : "Save Changes" ?>' ?>" />
+			</span>
+		</p>
+	</form>
 </div>

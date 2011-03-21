@@ -3,21 +3,21 @@
 class <?php echo $controller_name ?> extends ApplicationController {
 
 	function index($page = 1) {
-		$pageString = site_url('<?php echo $plural_url ?>/index/$page_num');
+		$page_string = site_url('<?php echo $plural_url ?>/index/$page_num');
 
 		$q = new Query(<?php echo $model_name ?>::getTableName());
 		if (isset($_REQUEST['SortBy'])) {
 			$q->order($_REQUEST['SortBy'], isset($_REQUEST['Dir']) ? Query::DESC : Query::ASC);
-			$pageString .= '?SortBy=' . $_REQUEST['SortBy'];
+			$page_string .= '?SortBy=' . $_REQUEST['SortBy'];
 			if (isset($_REQUEST['Dir'])) {
-				$pageString .= '&Dir=' . $_REQUEST['Dir'];
+				$page_string .= '&Dir=' . $_REQUEST['Dir'];
 			}
 		}
 
 		$qp = new QueryPager($q, 25, $page, '<?php echo $model_name ?>');
 		$this['<?php echo $plural ?>'] = $qp->fetchPage();
 		$this['page'] = '<?php echo StringFormat::titleCase($plural, ' ') ?>';
-		$this['pageString'] = $pageString;
+		$this['page_string'] = $page_string;
 		$this['pager'] = $qp;
 	}
 
