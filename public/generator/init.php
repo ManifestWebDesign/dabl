@@ -9,5 +9,6 @@ foreach (DBManager::getConnectionNames() as $connection_name) {
 	$generators[$connection_name] = $generator;
 }
 
-if (!$generators)
+if (!$generators) {
 	die('Nothing to generate');
+}

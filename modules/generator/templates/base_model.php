@@ -141,13 +141,6 @@ foreach ($fields as $key => &$field):
 		}
 <?php endif ?>
 <?php endif ?>
-<?php if ($options['protect_not_null'] && $field->getName() != $PK && $field->isNotNull()): ?>
-		if (null === $value) {
-			$value = <?php echo $field->isNumericType() ? '0' : "''" ?>;
-		}<?php endif ?><?php if ($field->getPdoType() == PDO::PARAM_INT): ?> elseif (null !== $value) {
-			$value = (int) $value;
-		}
-<?php endif ?>
 		if ($this-><?php echo $field_name ?> !== $value) {
 			$this->_modifiedColumns[] = '<?php echo $field_name ?>';
 			$this-><?php echo $field_name ?> = $value;

@@ -21,8 +21,9 @@ function checkAll(name, connection, checked){
 <h1>DABL Generator</h1>
 <div>
 	Please choose which tables to generate for.  Only the base models
-	can be overwritten.  Models, views and controllers will not be overwritten if
+	can be overwritten.  <?php if(ModuleLoader::isLoaded('views') && ModuleLoader::isLoaded('controllers')): ?>Models, views and controllers will not be overwritten if
 	they already exist.  Generating a view or controller without generating the model is not recommended.
+	<?php endif ?>
 </div>
 
 <br />
@@ -34,13 +35,32 @@ function checkAll(name, connection, checked){
 
 <?php foreach($generators as $connection_name => $generator): ?>
 
-			<tr><th colspan="100"><h3>Database: <?php echo $generator->getDBName() ?> (<?php echo $connection_name ?>)</h3></th></tr>
+			<tr>
+				<th colspan="100">
+					<h3>Database: <?php echo $generator->getDBName() ?> (<?php echo $connection_name ?>)</h3>
+				</th>
+			</tr>
+	<?php if(ModuleLoader::isLoaded('views') || ModuleLoader::isLoaded('controllers')): ?>
 			<tr>
 				<th>&nbsp;</th>
-				<th><input type="checkbox" checked="checked" onclick="checkAll('Models', '<?php echo $connection_name ?>', this.checked)" /> Models</th>
-				<th><input type="checkbox" onclick="checkAll('Views', '<?php echo $connection_name ?>', this.checked)" /> Views</th>
-				<th><input type="checkbox" onclick="checkAll('Controllers', '<?php echo $connection_name ?>', this.checked)" /> Controllers</th>
+				<th>
+					<input type="checkbox" checked="checked" onclick="checkAll('Models', '<?php echo $connection_name ?>', this.checked)" />
+					Models
+				</th>
+		<?php if(ModuleLoader::isLoaded('views')): ?>
+				<th>
+					<input type="checkbox" onclick="checkAll('Views', '<?php echo $connection_name ?>', this.checked)" />
+					Views
+				</th>
+		<?php endif ?>
+		<?php if(ModuleLoader::isLoaded('controllers')): ?>
+				<th>
+					<input type="checkbox" onclick="checkAll('Controllers', '<?php echo $connection_name ?>', this.checked)" />
+					Controllers
+				</th>
 			</tr>
+		<?php endif ?>
+	<?php endif ?>
 
 	<?php foreach($generator->getTableNames() as $tableName): ?>
 
@@ -49,12 +69,16 @@ function checkAll(name, connection, checked){
 				<td>
 					<input type="checkbox" value="<?php echo $tableName ?>" name="Models[<?php echo $connection_name ?>][]" checked="checked" />
 				</td>
+		<?php if(ModuleLoader::isLoaded('views')): ?>
 				<td>
 					<input type="checkbox" value="<?php echo $tableName ?>" name="Views[<?php echo $connection_name ?>][]" />
 				</td>
+		<?php endif ?>
+		<?php if(ModuleLoader::isLoaded('controllers')): ?>
 				<td>
 					<input type="checkbox" value="<?php echo $tableName ?>" name="Controllers[<?php echo $connection_name ?>][]" />
 				</td>
+		<?php endif ?>
 			</tr>
 	<?php endforeach ?>
 
@@ -64,7 +88,7 @@ function checkAll(name, connection, checked){
 
 		</tbody>
 	</table>
-	<input type="submit" value="Generate Files!" />
+	<input type="submit" value="Generate" />
 </form>
 	</body>
 </html>

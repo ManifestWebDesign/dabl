@@ -53,24 +53,30 @@ abstract class BaseGenerator {
 		$this->options = array(
 			//convert table and column names to title case
 			'title_case' => true,
+			
 			//enforce an upper case first letter of classes
 			'cap_model_names' => true,
+			
 			//enforce an upper case first letter of get and set methods
 			'cap_method_names' => true,
-			//add some logic to the setter methods to not allow column values to be null if the column cannot be null
-			'protect_not_null' => false,
+			
 			//prepend this to class name
 			'model_prefix' => '',
+			
 			//append this to class name
 			'model_suffix' => '',
+			
 			//target directory for generated table classes
-			'model_path' => MODELS_DIR,
+			'model_path' => defined('MODELS_DIR') ? MODELS_DIR : null,
+			
 			//target directory for generated base table classes
-			'base_model_path' => MODELS_BASE_DIR,
+			'base_model_path' => defined('MODELS_BASE_DIR') ? MODELS_BASE_DIR : null,
+			
 			//set to true to generate views
-			'view_path' => VIEWS_DIR,
+			'view_path' => defined('VIEWS_DIR') ? VIEWS_DIR : null,
+			
 			//directory to save controller files in
-			'controller_path' => CONTROLLERS_DIR,
+			'controller_path' => defined('CONTROLLERS_DIR') ? CONTROLLERS_DIR : null,
 		);
 	}
 
