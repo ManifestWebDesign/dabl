@@ -66,9 +66,13 @@ class QueryJoin {
 			$table_name = clone $table_name;
 		} else {
 			$space = strrpos($table_name, ' ');
+			$as = strrpos(strtoupper($table_name), ' AS ');
+			if ($as != $space - 3) {
+				$as = false;
+			}
 			if ($space) {
-				$table_name = substr($table_name, 0, $space + 1);
-				$this->_alias = substr($table_name, $space);
+				$this->setAlias(trim(substr($table_name, $space + 1)));
+				$table_name = trim(substr($table_name, 0, $as === false ? $space : $as));
 			}
 		}
 		$this->_table = $table_name;
@@ -126,7 +130,7 @@ class QueryJoin {
 		}
 
 		if ($alias) {
-			$table .= " $alias";
+			$table .= " AS $alias";
 		}
 
 		if (null === $on_clause) {

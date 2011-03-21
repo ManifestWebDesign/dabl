@@ -238,9 +238,13 @@ class Query {
 			$table_name = clone $table_name;
 		} elseif(null === $alias) {
 			$space = strrpos($table_name, ' ');
+			$as = strrpos(strtoupper($table_name), ' AS ');
+			if ($as != $space - 3) {
+				$as = false;
+			}
 			if ($space) {
-				$table_name = substr($table_name, 0, $space + 1);
-				$alias = substr($table_name, $space);
+				$alias = trim(substr($table_name, $space + 1));
+				$table_name = trim(substr($table_name, 0, $as === false ? $space : $as));
 			}
 		}
 		
@@ -538,7 +542,7 @@ class Query {
 		}
 
 		if ($alias) {
-			$table .= " $alias";
+			$table .= " AS $alias";
 		}
 		
 		switch (strtoupper($this->getAction())) {
@@ -560,10 +564,10 @@ class Query {
 						$table .= ", $extra_table_string";
 					}
 				}
-				$query_s .="SELECT $columns \nFROM $table ";
+				$query_s .="SELECT $columns\nFROM $table";
 				break;
 			case self::ACTION_DELETE:
-				$query_s .="DELETE \nFROM $table ";
+				$query_s .="DELETE\nFROM $table";
 				break;
 			default:
 				break;
@@ -572,7 +576,7 @@ class Query {
 		if ($this->_joins) {
 			foreach ($this->_joins as $join) {
 				$join_statement = $join->getQueryStatement($conn);
-				$query_s .= "\n\t" . $join_statement->getString() . ' ';
+				$query_s .= "\n\t" . $join_statement->getString();
 				$statement->addParams($join_statement->getParams());
 			}
 		}
@@ -580,24 +584,24 @@ class Query {
 		$where_statement = $this->getWhere()->getClause();
 
 		if ($where_statement) {
-			$query_s .= "\nWHERE " . $where_statement->getString() . ' ';
+			$query_s .= "\nWHERE " . $where_statement->getString();
 			$statement->addParams($where_statement->getParams());
 		}
 
 		if ($this->_groups) {
-			$query_s .= "\nGROUP BY " . implode(', ', $this->_groups) . ' ';
+			$query_s .= "\nGROUP BY " . implode(', ', $this->_groups);
 		}
 
 		if ($this->getHaving()) {
 			$having_statement = $this->getHaving()->getClause();
 			if ($having_statement) {
-				$query_s .= "\nHAVING " . $having_statement->getString() . ' ';
+				$query_s .= "\nHAVING " . $having_statement->getString();
 				$statement->addParams($having_statement->getParams());
 			}
 		}
 
 		if ($this->getAction() != self::ACTION_COUNT && $this->_orders) {
-			$query_s .= "\nORDER BY " . implode(', ', $this->_orders) . ' ';
+			$query_s .= "\nORDER BY " . implode(', ', $this->_orders);
 		}
 
 		if ($this->_limit) {
