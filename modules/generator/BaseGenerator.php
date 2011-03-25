@@ -257,16 +257,21 @@ abstract class BaseGenerator {
 		$PKs = array();
 		$fields = $this->getColumns($table_name);
 		$conn = DBManager::getConnection($this->getConnectionName());
-
-		foreach ($fields as $field)
-			if ($field->isPrimaryKey())
-				$PKs[] = $field->getName();
-
 		$auto_increment = false;
+		
+		foreach ($fields as $field) {
+			if ($field->isPrimaryKey()) {
+				$PKs[] = $field->getName();
+				if ($field->isAutoIncrement()) {
+					$auto_increment = true;
+				}
+			}
+		}
+		
 		if (count($PKs) == 1) {
 			$PK = $PKs[0];
-			if ($fields[0]->isAutoIncrement())
-				$auto_increment = true;
+		} else {
+			$auto_increment = false;
 		}
 
 		ob_start();

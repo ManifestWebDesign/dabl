@@ -375,21 +375,30 @@ abstract class BaseModel {
 
 		$quotedTable = $conn->quoteIdentifierTable($this->getTableName());
 		$queryString = "INSERT INTO $quotedTable (" . implode(", ", $fields) . ") VALUES (" . implode(', ', $placeholders) . ") ";
+		
+		if($pk && $this->isAutoIncrement() && $conn instanceof DBPostgres) {
+			$queryString .= ' RETURNING ' . $conn->quoteIdentifier($pk);
+		}
 
 		$statement = new QueryStatement($conn);
 		$statement->setString($queryString);
 		$statement->setParams($values);
-
+		
 		$result = $statement->bindAndExecute();
 		$count = $result->rowCount();
 
 		if ($pk && $this->isAutoIncrement()) {
-			if ($conn instanceof DBPostgres)
-				$id = $conn->getId($this->getTableName(), $pk);
-			elseif ($conn->isGetIdAfterInsert())
+			$id = null;
+			if ($conn instanceof DBPostgres) {
+				$id = $result->fetchColumn(0);
+			} elseif ($conn->isGetIdAfterInsert()) {
 				$id = $conn->lastInsertId();
-			$this->{"set$pk"}($id);
+			}
+			if (null !== $id) {
+				$this->{"set$pk"}($id);
+			}
 		}
+		
 		$this->resetModified();
 		$this->setNew(false);
 
