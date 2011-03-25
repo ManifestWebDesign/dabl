@@ -283,7 +283,6 @@ abstract class BaseModel {
 				throw new Exception("Cannot delete using NULL primary key.");
 			$q->addAnd($conn->quoteIdentifier($pk), $this->$pk);
 		}
-		$q->setLimit(1);
 		$q->setTable($this->getTableName());
 		$result = $this->doDelete($q, false);
 		$this->removeFromPool($this);
