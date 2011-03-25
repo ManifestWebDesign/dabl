@@ -19,8 +19,9 @@ abstract class ApplicationController extends BaseController {
 		
 		foreach (glob(CONTROLLERS_DIR . '*.php') as $controller_file) {
 			$controller = str_replace('Controller.php', '', basename($controller_file));
-			if ($controller == 'Application' || $controller == 'Index')
+			if ($controller == 'Application' || $controller == 'Index') {
 				continue;
+			}
 			$this['actions'][StringFormat::titleCase($controller, ' ')] = site_url(StringFormat::url($controller));
 		}
 	}

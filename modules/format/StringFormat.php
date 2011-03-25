@@ -28,7 +28,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function url($table_name) {
-		return str_replace('_', '-', self::pluralVariable(self::removeAccents($table_name)));
+		return str_replace('_', '-', self::variable(self::removeAccents($table_name)));
 	}
 
 	/**
