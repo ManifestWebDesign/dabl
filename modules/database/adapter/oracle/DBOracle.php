@@ -2,15 +2,6 @@
 
 /**
  * Oracle adapter.
- *
- * @author	 David Giffin <david@giffin.org> (Propel)
- * @author	 Hans Lellelid <hans@xmpl.org> (Propel)
- * @author	 Jon S. Stevens <jon@clearink.com> (Torque)
- * @author	 Brett McLaughlin <bmclaugh@algx.net> (Torque)
- * @author	 Bill Schneider <bschneider@vecna.com> (Torque)
- * @author	 Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @version	$Revision: 718 $
- * @package	propel.adapter
  */
 class DBOracle extends DABLPDO {
 

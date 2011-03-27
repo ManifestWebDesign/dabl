@@ -53,26 +53,31 @@ abstract class BaseModel {
 				$startcol = 0;
 				foreach ($class_names as $key => $class_name) {
 					$object = new $class_name;
-					if(!$object->fromNumericResultArray($values, $startcol))
-							continue;
+					if (!$object->fromNumericResultArray($values, $startcol)) {
+						continue;
+					}
 
-					if ($write_cache)
+					if ($write_cache) {
 						$object->insertIntoPool($object);
+					}
 
 					if (!isset($main_object)) {
 						$main_object = $objects[] = $object;
 					} else {
-						if(method_exists($main_object, 'set'.$class_name))
-							$main_object->{'set'.$class_name}($object);
-						else
+						if (method_exists($main_object, 'set' . $class_name)) {
+							$main_object->{'set' . $class_name}($object);
+						} else {
 							$main_object->{$class_name} = $object;
+						}
 					}
 				}
 			}
 		} else {
 			// PDO::FETCH_PROPS_LATE is required to call the ctor after hydrating the fields
 			$flags = PDO::FETCH_CLASS;
-			if (defined('PDO::FETCH_PROPS_LATE')) $flags |= PDO::FETCH_PROPS_LATE;
+			if (defined('PDO::FETCH_PROPS_LATE')) {
+				$flags |= PDO::FETCH_PROPS_LATE;
+			}
 			$result->setFetchMode($flags, $class_name);
 			while ($object = $result->fetch()) {
 				$object = clone $object;
@@ -92,10 +97,12 @@ abstract class BaseModel {
 	 * @param int $startcol
 	 */
 	function fromNumericResultArray($values, &$startcol) {
-		foreach ($this->getColumnNames() as $column_name)
+		foreach ($this->getColumnNames() as $column_name) {
 			$this->{$column_name} = $values[$startcol++];
-		if($this->getPrimaryKeys() && !$this->hasPrimaryKeyValues())
+		}
+		if ($this->getPrimaryKeys() && !$this->hasPrimaryKeyValues()) {
 			return false;
+		}
 		$this->castInts();
 		$this->setNew(false);
 		return true;
@@ -106,12 +113,14 @@ abstract class BaseModel {
 	 * @param array $values
 	 */
 	function fromAssociativeResultArray($values) {
-		foreach ($this->getColumnNames() as $column_name){
-			if(array_key_exists($column_name, $values))
+		foreach ($this->getColumnNames() as $column_name) {
+			if (array_key_exists($column_name, $values)) {
 				$this->{$column_name} = $values[$column_name];
+			}
 		}
-		if($this->getPrimaryKeys() && !$this->hasPrimaryKeyValues())
+		if ($this->getPrimaryKeys() && !$this->hasPrimaryKeyValues()) {
 			return false;
+		}
 		$this->castInts();
 		$this->setNew(false);
 		return true;
@@ -274,13 +283,14 @@ abstract class BaseModel {
 	function delete() {
 		$conn = $this->getConnection();
 		$pks = $this->getPrimaryKeys();
-		if (!$pks
-
-			)throw new Exception("This table has no primary keys");
+		if (!$pks) {
+			throw new Exception('This table has no primary keys');
+		}
 		$q = new Query();
 		foreach ($pks as &$pk) {
-			if ($this->$pk === null)
-				throw new Exception("Cannot delete using NULL primary key.");
+			if ($this->$pk === null) {
+				throw new Exception('Cannot delete using NULL primary key.');
+			}
 			$q->addAnd($conn->quoteIdentifier($pk), $this->$pk);
 		}
 		$q->setTable($this->getTableName());
@@ -294,7 +304,7 @@ abstract class BaseModel {
 	 * existing row with a primary key(s) that matches $this, the row will
 	 * be updated.  Otherwise a new row will be inserted.  If there is only
 	 * 1 primary key, it will be set using the last_insert_id() function.
-	 * NOTE/BUG: If you alter pre-existing primary key(s) before saving, then you will be
+	 * NOTE: If you alter pre-existing primary key(s) before saving, then you will be
 	 * updating/inserting based on the new primary key(s) and not the originals,
 	 * leaving the original row unchanged(if it exists).
 	 * @todo find a way to solve the above issue
@@ -308,7 +318,7 @@ abstract class BaseModel {
 		if ($this->isNew() && $this->hasColumn('Created') && !$this->isColumnModified('Created')) {
 			$this->setCreated(CURRENT_TIMESTAMP);
 		}
-		if($this->hasColumn('Updated') && !$this->isColumnModified('Updated')) {
+		if ($this->hasColumn('Updated') && !$this->isColumnModified('Updated')) {
 			$this->setUpdated(CURRENT_TIMESTAMP);
 		}
 
@@ -319,7 +329,7 @@ abstract class BaseModel {
 		}
 		return $this->replace();
 	}
-	
+
 	function archive() {
 		if (!$this->hasColumn('Archived')) {
 			throw new Exception('Cannot call archive on models without "Archived" column');
@@ -328,9 +338,9 @@ abstract class BaseModel {
 		if (null !== $this->getArchived()) {
 			throw new Exception('This ' . get_class($this) . ' is already archived.');
 		}
-		
+
 		$this->setArchived(CURRENT_TIMESTAMP);
-		
+
 		return $this->save();
 	}
 
@@ -372,17 +382,17 @@ abstract class BaseModel {
 			$placeholders[] = '?';
 		}
 
-		$quotedTable = $conn->quoteIdentifierTable($this->getTableName());
-		$queryString = "INSERT INTO $quotedTable (" . implode(", ", $fields) . ") VALUES (" . implode(', ', $placeholders) . ") ";
-		
-		if($pk && $this->isAutoIncrement() && $conn instanceof DBPostgres) {
+		$quotedTable = $conn->quoteIdentifier($this->getTableName());
+		$queryString = "INSERT INTO $quotedTable (" . implode(', ', $fields) . ") VALUES (" . implode(', ', $placeholders) . ') ';
+
+		if ($pk && $this->isAutoIncrement() && $conn instanceof DBPostgres) {
 			$queryString .= ' RETURNING ' . $conn->quoteIdentifier($pk);
 		}
 
 		$statement = new QueryStatement($conn);
 		$statement->setString($queryString);
 		$statement->setParams($values);
-		
+
 		$result = $statement->bindAndExecute();
 		$count = $result->rowCount();
 
@@ -397,7 +407,7 @@ abstract class BaseModel {
 				$this->{"set$pk"}($id);
 			}
 		}
-		
+
 		$this->resetModified();
 		$this->setNew(false);
 
@@ -413,7 +423,7 @@ abstract class BaseModel {
 	 */
 	protected function replace() {
 		$conn = $this->getConnection();
-		$quotedTable = $conn->quoteIdentifierTable($this->getTableName());
+		$quotedTable = $conn->quoteIdentifier($this->getTableName());
 
 		$fields = array();
 		$values = array();
@@ -422,7 +432,7 @@ abstract class BaseModel {
 			$values[] = $this->$column;
 			$placeholders[] = '?';
 		}
-		$queryString = "REPLACE INTO $quotedTable (" . implode(", ", $fields) . ") VALUES (" . implode(', ', $placeholders) . ") ";
+		$queryString = "REPLACE INTO $quotedTable (" . implode(', ', $fields) . ") VALUES (" . implode(', ', $placeholders) . ') ';
 
 		$statement = new QueryStatement($conn);
 		$statement->setString($queryString);
@@ -444,31 +454,33 @@ abstract class BaseModel {
 	 */
 	protected function update() {
 		$conn = $this->getConnection();
-		$quotedTable = $conn->quoteIdentifierTable($this->getTableName());
+		$quotedTable = $conn->quoteIdentifier($this->getTableName());
 
-		if (!$this->getPrimaryKeys())
+		if (!$this->getPrimaryKeys()) {
 			throw new Exception('This table has no primary keys');
+		}
 
 		$fields = array();
 		$values = array();
 		foreach ($this->getModifiedColumns() as $column) {
-			$fields[] = $conn->quoteIdentifier($column) . '=?';
+			$fields[] = $conn->quoteIdentifier($column) . ' = ?';
 			$values[] = $this->$column;
 		}
 
 		//If array is empty there is nothing to update
-		if (!$fields)
+		if (!$fields) {
 			return 0;
+		}
 
 		$pkWhere = array();
 		foreach ($this->getPrimaryKeys() as $pk) {
 			if ($this->$pk === null)
 				throw new Exception('Cannot update with NULL primary key.');
-			$pkWhere[] = $conn->quoteIdentifier($pk) . '=?';
+			$pkWhere[] = $conn->quoteIdentifier($pk) . ' = ?';
 			$values[] = $this->$pk;
 		}
 
-		$queryString = "UPDATE $quotedTable SET " . implode(", ", $fields) . " WHERE " . implode(" AND ", $pkWhere);
+		$queryString = "UPDATE $quotedTable SET " . implode(', ', $fields) . ' WHERE ' . implode(' AND ', $pkWhere);
 		$statement = new QueryStatement($conn);
 		$statement->setString($queryString);
 		$statement->setParams($values);
@@ -485,7 +497,7 @@ abstract class BaseModel {
 	 * Cast returned values from the database into integers where appropriate.
 	 */
 	abstract function castInts();
-	
+
 	/**
 	 * @param string $foreign_table
 	 * @param string $foreign_column
@@ -511,4 +523,5 @@ abstract class BaseModel {
 		$q->add($column, $value);
 		return $q;
 	}
+
 }

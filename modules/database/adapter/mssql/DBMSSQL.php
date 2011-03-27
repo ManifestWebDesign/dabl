@@ -2,10 +2,6 @@
 
 /**
  * This is used to connect to a MSSQL database.
- *
- * @author	 Hans Lellelid <hans@xmpl.org> (Propel)
- * @version	$Revision: 989 $
- * @package	propel.adapter
  */
 class DBMSSQL extends DABLPDO {
 
@@ -74,10 +70,11 @@ class DBMSSQL extends DABLPDO {
 			return $quoted;
 		}
 
-		if (strpos($text, '[') !== false || strpos($text, ' ') !== false) {
+		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false) {
 			return $text;
 		}
-		return '[' . $text . ']';
+		
+		return '[' . implode('].[', explode('.', $text)) . ']';
 	}
 
 	/**

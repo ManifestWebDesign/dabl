@@ -2,10 +2,6 @@
 
 /**
  * This is used in order to connect to a SQLite database.
- *
- * @author	 Hans Lellelid <hans@xmpl.org>
- * @version	$Revision: 989 $
- * @package	propel.adapter
  */
 class DBSQLite extends DABLPDO {
 
@@ -84,10 +80,11 @@ class DBSQLite extends DABLPDO {
 			return $quoted;
 		}
 
-		if (strpos($text, '[') !== false || strpos($text, ' ') !== false) {
+		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false) {
 			return $text;
 		}
-		return '[' . $text . ']';
+		
+		return '[' . implode('].[', explode('.', $text)) . ']';
 	}
 
 	/**

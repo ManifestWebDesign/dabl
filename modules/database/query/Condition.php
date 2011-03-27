@@ -33,8 +33,9 @@ class Condition {
 	private $ors = array();
 
 	function __construct($left = null, $right=null, $operator=Query::EQUAL, $quote = null) {
-		if ($left !== null)
+		if ($left !== null) {
 			$this->add($left, $right, $operator, $quote);
+		}
 	}
 
 	/**
@@ -53,8 +54,9 @@ class Condition {
 	 * @return string
 	 */
 	private function processCondition($left = null, $right=null, $operator=Query::EQUAL, $quote = null) {
-		if ($left === null)
+		if ($left === null) {
 			return null;
+		}
 
 		if (1 === func_num_args() && $left instanceof QueryStatement) {
 			return $left;
@@ -65,8 +67,9 @@ class Condition {
 		// Left can be a Condition
 		if ($left instanceof self) {
 			$clause_statement = $left->getClause();
-			if (!$clause_statement)
+			if (!$clause_statement) {
 				return null;
+			}
 			$clause_statement->setString('(' . $clause_statement->getString() . ')');
 			return $clause_statement;
 		}
@@ -91,22 +94,26 @@ class Condition {
 		}
 
 		$is_array = false;
-		if (is_array($right) || ($right instanceof Query && $right->getLimit() !== 1))
+		if (is_array($right) || ($right instanceof Query && $right->getLimit() !== 1)) {
 			$is_array = true;
+		}
 
 		// Right can be a Query, if you're trying to nest queries, like "WHERE MyColumn = (SELECT OtherColumn From MyTable LIMIT 1)"
 		if ($right instanceof Query) {
-			if (!$right->getTable())
+			if (!$right->getTable()) {
 				throw new Exception("$right does not have a table, so it cannot be nested.");
-
+			}
+				
 			$clause_statement = $right->getQuery();
-			if (!$clause_statement)
+			if (!$clause_statement) {
 				return null;
+			}
 
 			$right = '(' . $clause_statement->getString() . ')';
 			$statement->addParams($clause_statement->getParams());
-			if ($quote != self::QUOTE_LEFT)
+			if ($quote != self::QUOTE_LEFT) {
 				$quote = self::QUOTE_NONE;
+			}
 		}
 
 		// $right can be an array
@@ -141,30 +148,34 @@ class Condition {
 				if ($operator == Query::IN) {
 					$statement->setString('(0=1)');
 					return $statement;
-				} elseif ($operator == Query::NOT_IN)
+				} elseif ($operator == Query::NOT_IN) {
 					return null;
+				}
 			}
 
 			// IN or NOT_IN
 			if ($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
 				$statement->addParams($right);
 				$placeholders = array();
-				foreach ($right as &$r)
+				foreach ($right as &$r) {
 					$placeholders[] = '?';
+				}
 				$right = '(' . implode(',', $placeholders) . ')';
 			}
 		} else {
 			// IS NOT NULL
-			if ($right === null && ($operator == Query::NOT_EQUAL || $operator == Query::ALT_NOT_EQUAL))
+			if ($right === null && ($operator == Query::NOT_EQUAL || $operator == Query::ALT_NOT_EQUAL)) {
 				$operator = Query::IS_NOT_NULL;
+			}
 
 			// IS NULL
-			elseif ($right === null && $operator == Query::EQUAL)
+			elseif ($right === null && $operator == Query::EQUAL) {
 				$operator = Query::IS_NULL;
+			}
 
-			if ($operator == Query::IS_NULL || $operator == Query::IS_NOT_NULL)
+			if ($operator == Query::IS_NULL || $operator == Query::IS_NOT_NULL) {
 				$right = null;
-			elseif ($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
+			} elseif ($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
 				$statement->addParam($right);
 				$right = '?';
 			}
@@ -195,8 +206,9 @@ class Condition {
 	 */
 	function addAnd($left, $right=null, $operator=Query::EQUAL, $quote = null) {
 		if (is_array($left)) {
-			foreach ($left as $key => &$value)
+			foreach ($left as $key => &$value) {
 				$this->addAnd($key, $value);
+			}
 			return $this;
 		}
 
@@ -230,8 +242,9 @@ class Condition {
 	 */
 	function addOr($left, $right=null, $operator=Query::EQUAL, $quote = null) {
 		if (is_array($left)) {
-			foreach ($left as $key => &$value)
+			foreach ($left as $key => &$value) {
 				$this->addOr($key, $value);
+			}
 			return $this;
 		}
 
@@ -280,12 +293,13 @@ class Condition {
 		}
 
 		if ($and_strings || $or_strings) {
-			if ($and_strings && $or_strings)
+			if ($and_strings && $or_strings) {
 				$string .= "\n\t$AND\n\tOR $OR";
-			elseif ($and_strings)
+			} elseif ($and_strings) {
 				$string .= "\n\t$AND";
-			elseif ($or_strings)
+			} elseif ($or_strings) {
 				$string .= "\n\t$OR";
+			}
 			$statement->setString($string);
 			return $statement;
 		}

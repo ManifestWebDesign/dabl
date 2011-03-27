@@ -2,13 +2,6 @@
 
 /**
  * This is used in order to connect to a MySQL database.
- *
- * @author	 Hans Lellelid <hans@xmpl.org> (Propel)
- * @author	 Jon S. Stevens <jon@clearink.com> (Torque)
- * @author	 Brett McLaughlin <bmclaugh@algx.net> (Torque)
- * @author	 Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @version	$Revision: 989 $
- * @package	propel.adapter
  */
 class DBMySQL extends DABLPDO {
 
@@ -94,19 +87,22 @@ class DBMySQL extends DABLPDO {
 	/**
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
-	function quoteIdentifier($text){
-		if(is_array($text)){
+	function quoteIdentifier($text) {
+		$quote = '`';
+		
+		if (is_array($text)) {
 			$quoted = array();
-			foreach($text as $key => $value){
+			foreach ($text as $key => $value) {
 				$quoted[$key] = $this->quoteIdentifier($value);
 			}
 			return $quoted;
 		}
 
-		if (strpos($text, '`') !== false || strpos($text, ' ') !== false) {
+		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false) {
 			return $text;
 		}
-		return '`' . $text . '`';
+		
+		return $quote . implode("$quote.$quote", explode('.', $text)) . $quote;
 	}
 
 	/**

@@ -372,6 +372,8 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string The quoted identifier.
 	 */
 	function quoteIdentifier($text) {
+		$quote = '"';
+		
 		if (is_array($text)) {
 			$quoted = array();
 			foreach ($text as $key => $value) {
@@ -380,33 +382,11 @@ abstract class DABLPDO extends PDO {
 			return $quoted;
 		}
 
-		if (strpos($text, '`') !== false || strpos($text, ' ') !== false) {
+		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false) {
 			return $text;
 		}
-		return '"' . $text . '"';
-	}
-
-	/**
-	 * Quotes a database table which could have space seperating it from an alias, both should be identified seperately
-	 * @param	  string $table The table name to quo
-	 * @return	 string The quoted table name
-	 * */
-	function quoteIdentifierTable($table) {
-		if (strpos($table, '[') !== false || strpos($table, '`') !== false || strpos($table, '"') !== false) {
-			return $table;
-		}
-
-		$pieces = explode(' ', $table);
-		if (count($pieces) > 2) {
-			return $table;
-		}
-
-		$table = implode('.', array_map(array($this, 'quoteIdentifier'), explode('.', array_shift($pieces))));
-		if (count($pieces) == 1) {
-			$alias = $this->quoteIdentifier(array_shift($pieces));
-			$table = $table . ' ' . $alias;
-		}
-		return $table;
+		
+		return $quote . implode("$quote.$quote", explode('.', $text)) . $quote;
 	}
 
 	/**

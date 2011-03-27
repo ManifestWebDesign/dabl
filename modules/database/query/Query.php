@@ -4,52 +4,52 @@
  * Used to build query strings using OOP
  */
 class Query {
-	const ACTION_COUNT = "COUNT";
-	const ACTION_DELETE = "DELETE";
-	const ACTION_SELECT = "SELECT";
+	const ACTION_COUNT = 'COUNT';
+	const ACTION_DELETE = 'DELETE';
+	const ACTION_SELECT = 'SELECT';
 
 	//Comparison types
-	const EQUAL = "=";
-	const NOT_EQUAL = "<>";
-	const ALT_NOT_EQUAL = "!=";
-	const GREATER_THAN = ">";
-	const LESS_THAN = "<";
-	const GREATER_EQUAL = ">=";
-	const LESS_EQUAL = "<=";
-	const LIKE = "LIKE";
-	const NOT_LIKE = "NOT LIKE";
-	const CUSTOM = "CUSTOM";
-	const DISTINCT = "DISTINCT";
-	const IN = "IN";
-	const NOT_IN = "NOT IN";
-	const ALL = "ALL";
-	const IS_NULL = "IS NULL";
-	const IS_NOT_NULL = "IS NOT NULL";
-	const BETWEEN = "BETWEEN";
+	const EQUAL = '=';
+	const NOT_EQUAL = '<>';
+	const ALT_NOT_EQUAL = '!=';
+	const GREATER_THAN = '>';
+	const LESS_THAN = '<';
+	const GREATER_EQUAL = '>=';
+	const LESS_EQUAL = '<=';
+	const LIKE = 'LIKE';
+	const NOT_LIKE = 'NOT LIKE';
+	const CUSTOM = 'CUSTOM';
+	const DISTINCT = 'DISTINCT';
+	const IN = 'IN';
+	const NOT_IN = 'NOT IN';
+	const ALL = 'ALL';
+	const IS_NULL = 'IS NULL';
+	const IS_NOT_NULL = 'IS NOT NULL';
+	const BETWEEN = 'BETWEEN';
 
 	//Comparison type for update
-	const CUSTOM_EQUAL = "CUSTOM_EQUAL";
+	const CUSTOM_EQUAL = 'CUSTOM_EQUAL';
 
 	//PostgreSQL comparison types
-	const ILIKE = "ILIKE";
-	const NOT_ILIKE = "NOT ILIKE";
+	const ILIKE = 'ILIKE';
+	const NOT_ILIKE = 'NOT ILIKE';
 
 	//JOIN TYPES
-	const JOIN = "JOIN";
-	const LEFT_JOIN = "LEFT JOIN";
-	const RIGHT_JOIN = "RIGHT JOIN";
-	const INNER_JOIN = "INNER JOIN";
-	const OUTER_JOIN = "OUTER JOIN";
+	const JOIN = 'JOIN';
+	const LEFT_JOIN = 'LEFT JOIN';
+	const RIGHT_JOIN = 'RIGHT JOIN';
+	const INNER_JOIN = 'INNER JOIN';
+	const OUTER_JOIN = 'OUTER JOIN';
 
 	//Binary AND
-	const BINARY_AND = "&";
+	const BINARY_AND = '&';
 
 	//Binary OR
-	const BINARY_OR = "|";
+	const BINARY_OR = '|';
 
-	//"Order by" qualifiers
-	const ASC = "ASC";
-	const DESC = "DESC";
+	//'Order by' qualifiers
+	const ASC = 'ASC';
+	const DESC = 'DESC';
 
 	private $_action = self::ACTION_SELECT;
 	/**
@@ -466,9 +466,9 @@ class Query {
 	 */
 	function addOrder($column, $dir=null) {
 		$dir = strtoupper($dir);
-		$allowed = array(self::DESC, self::ASC);
-		if ($dir && !in_array($dir, $allowed))
+		if (null != $dir && $dir !== self::ASC && $dir !== self::DESC) {
 			throw new Exception("$dir is not a valid sorting direction.");
+		}
 		$this->_orders[] = "$column $dir";
 		return $this;
 	}
@@ -589,7 +589,15 @@ class Query {
 		}
 
 		if ($this->_groups) {
-			$query_s .= "\nGROUP BY " . implode(', ', $this->_groups);
+			$groups = $this->_groups;
+			if ($conn) {
+				foreach ($groups as &$group) {
+					$group_parts = explode(' ', $group);
+					$group_parts[0] = $conn->quoteIdentifier($group_parts[0]);
+					$group = implode(' ', $group_parts);
+				}
+			}
+			$query_s .= "\nGROUP BY " . implode(', ', $groups);
 		}
 
 		if ($this->getHaving()) {
@@ -601,7 +609,15 @@ class Query {
 		}
 
 		if ($this->getAction() != self::ACTION_COUNT && $this->_orders) {
-			$query_s .= "\nORDER BY " . implode(', ', $this->_orders);
+			$orders = $this->_orders;
+			if ($conn) {
+				foreach ($orders as &$order) {
+					$order_parts = explode(' ', $order);
+					$order_parts[0] = $conn->quoteIdentifier($order_parts[0]);
+					$order = implode(' ', $order_parts);
+				}
+			}
+			$query_s .= "\nORDER BY " . implode(', ', $orders);
 		}
 
 		if ($this->_limit) {

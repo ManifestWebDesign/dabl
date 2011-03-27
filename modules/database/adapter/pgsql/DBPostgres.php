@@ -2,13 +2,6 @@
 
 /**
  * This is used to connect to PostgresQL databases.
- *
- * <a href="http://www.pgsql.org">http://www.pgsql.org</a>
- *
- * @author	 Hans Lellelid <hans@xmpl.org> (Propel)
- * @author	 Hakan Tandogan <hakan42@gmx.de> (Torque)
- * @version	$Revision: 1011 $
- * @package	propel.adapter
  */
 class DBPostgres extends DABLPDO {
 
