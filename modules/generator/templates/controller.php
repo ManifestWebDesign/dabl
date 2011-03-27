@@ -22,25 +22,34 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	}
 
 	function save(<? if(@$pkMethod): ?>$<?php echo $single ?>_id = null<? endif ?>) {
-		$<?php echo $single ?> = $this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id<? endif ?>)->fromArray($_REQUEST);
+		$<?php echo $single ?> = $this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id<? endif ?>);
+		
+		try {
+			$<?php echo $single ?>->fromArray($_REQUEST);
+			if ($<?php echo $single ?>->validate()) {
+				$<?php echo $single ?>->save();
+				$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> saved';
+				<? if(@$pkMethod): ?>redirect('<?php echo $plural_url ?>/show/' . $<?php echo $single ?>-><?php echo $pkMethod ?>());<? else: ?>redirect('<?php echo $plural_url ?>');<? endif ?>
 
-		if ($<?php echo $single ?>->validate()) {
-			$<?php echo $single ?>->save();
-			$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> saved';
-			<? if(@$pkMethod): ?>redirect('<?php echo $plural_url ?>/show/' . $<?php echo $single ?>-><?php echo $pkMethod ?>());<? else: ?>redirect('<?php echo $plural_url ?>');<? endif ?>
-
+			}
+			$this->persistant['errors'] = $<?php echo $single ?>->getValidationErrors();
+		} catch (Exception $e) {
+			$this->persistant['errors'][] = $e->getMessage();
 		}
 		
-		$this->persistant['errors'] = $<?php echo $single ?>->getValidationErrors();
 		$this->persistant['<?php echo $single ?>'] = $<?php echo $single ?>;
 		redirect('<?php echo $plural_url ?>/edit/'<? if(@$pkMethod): ?> . $<?php echo $single ?>-><?php echo $pkMethod ?>()<? endif ?>);
 	}
 
 <? if(@$pkMethod): ?>	function delete($<?php echo $single ?>_id = null) {
-		if (null !== $this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id<? endif ?>) && $this['<?php echo $single ?>']->delete()) {
-			$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> deleted';
-		} else {
-			$this->persistant['errors'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> could not be deleted';
+		try {
+			if (null !== $this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id<? endif ?>) && $this['<?php echo $single ?>']->delete()) {
+				$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> deleted';
+			} else {
+				$this->persistant['errors'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> could not be deleted';
+			}
+		} catch (Exception $e) {
+			$this->persistant['errors'][] = $e->getMessage();
 		}
 
 		redirect('<?php echo $plural_url ?>');

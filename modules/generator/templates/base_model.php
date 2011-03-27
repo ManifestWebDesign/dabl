@@ -57,15 +57,25 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 		'<?php echo $field->getName() ?>',
 <?php endforeach ?>
 	);
+	
+	/**
+	 * array of all column types
+	 * @var string[]
+	 */
+	protected static $_columnTypes = array(
+<?php foreach ($fields as $key => &$field): ?>
+		'<?php echo $field->getName() ?>' => BaseModel::COLUMN_TYPE_<?php echo $field->getType() ?>,
+<?php endforeach ?>
+	);
 
 <?php
-foreach ($fields as $key => &$field):
+foreach ($fields as $key => &$field) {
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 	// fix for MSSQL default value weirdness
-	if ($field->isNumericType())
+	if ($field->isNumericType()) {
 		$default = trim($default, '()');
+	}
 ?>
-
 	/**
 	 * <?php echo $conn->quoteIdentifier($field->getName()) ?> <?php echo $field->getType() ?>
 <?php if ($field->isNotNull()): ?> NOT NULL<?php endif ?>
@@ -83,30 +93,15 @@ if ($field->isNumericType() && $default !== null)
 elseif ($default !== null && strtolower($default) !== 'null')
 	echo " = '" . addslashes($default) . "'"
 ?>;
-<?php endforeach ?>
 
 <?php
+}
+
+// GETTERS AND SETTERS
 foreach ($fields as $key => &$field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 	$method_name = $options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName();
 	$params = $field->isTemporalType() ? '$format = null' : '';
-	$field_name = $field->getName();
-	if ($field->isTemporalType()){
-		switch($field->getType()){
-			case PropelTypes::TIMESTAMP:
-				$formatter = $conn->getTimestampFormatter();
-				break;
-			case PropelTypes::DATE:
-				$formatter = $conn->getDateFormatter();
-				break;
-			case PropelTypes::TIME:
-				$formatter = $conn->getTimeFormatter();
-				break;
-		}
-	}
-?>
-
-<?php // GETTERS AND SETTERS
 	$used_functions[] = "get$method_name";
 ?>
 	/**
@@ -114,15 +109,15 @@ foreach ($fields as $key => &$field):
 	 */
 	function get<?php echo $method_name ?>(<?php echo $params ?>) {
 <?php if ($field->isTemporalType()): ?>
-		if (null === $this-><?php echo $field_name ?> || null === $format) {
-			return $this-><?php echo $field_name ?>;
+		if (null === $this-><?php echo $field->getName() ?> || null === $format) {
+			return $this-><?php echo $field->getName() ?>;
 		}
-		if (0 === strpos($this-><?php echo $field_name ?>, '0000-00-00')) {
+		if (0 === strpos($this-><?php echo $field->getName() ?>, '0000-00-00')) {
 			return null;
 		}
-		return date($format, strtotime($this-><?php echo $field_name ?>));
+		return date($format, strtotime($this-><?php echo $field->getName() ?>));
 <?php else: ?>
-		return $this-><?php echo $field_name ?>;
+		return $this-><?php echo $field->getName() ?>;
 <?php endif ?>
 	}
 	
@@ -133,22 +128,10 @@ foreach ($fields as $key => &$field):
 
 	 */
 	function set<?php echo $method_name ?>($value) {
-<?php if ($field->isNumericType() || $field->isTemporalType()): ?>
-		if ('' === $value) {
-			$value = null;
-		}<?php if ($field->isTemporalType()): ?> elseif (null !== $value && $this->_formatDates) {
-			$value = date('<?php echo $formatter ?>', is_int($value) ? $value : strtotime($value));
-		}
-<?php endif ?>
-<?php endif ?>
-		if ($this-><?php echo $field_name ?> !== $value) {
-			$this->_modifiedColumns[] = '<?php echo $field_name ?>';
-			$this-><?php echo $field_name ?> = $value;
-		}
-		return $this;
+		return $this->setColumnValue('<?php echo $field->getName() ?>', $value, BaseModel::COLUMN_TYPE_<?php echo $field->getType() ?>);
 	}
-<?php endforeach ?>
 
+<?php endforeach ?>
 	/**
 	 * @return DABLPDO
 	 */
@@ -184,13 +167,32 @@ foreach ($fields as $key => &$field):
 	}
 
 	/**
+	 * Access to array of column types, indexed by column name
+	 * @return array
+	 */
+<?php $used_functions[] = 'getColumnTypes'; ?>
+	static function getColumnTypes() {
+		return <?php echo $class_name ?>::$_columnTypes;
+	}
+	
+	/**
+	 * Get the type of a column
+	 * @return array
+	 */
+<?php $used_functions[] = 'getColumnTypes'; ?>
+	static function getColumnType($column_name) {
+		return <?php echo $class_name ?>::$_columnTypes[$column_name];
+	}
+
+	/**
 	 * @return bool
 	 */
 <?php $used_functions[] = 'hasColumn'; ?>
 	static function hasColumn($column_name) {
-		static $lower_case_columns;
-		if (!$lower_case_columns)
+		static $lower_case_columns = null;
+		if (null === $lower_case_columns) {
 			$lower_case_columns = array_map('strtolower', <?php echo $class_name ?>::$_columnNames);
+		}
 		return in_array(strtolower($column_name), $lower_case_columns);
 	}
 
@@ -336,7 +338,7 @@ foreach ($fields as $key => &$field):
 	 */
 	function castInts() {
 <?php foreach ($fields as $key => &$field): ?>
-<?php if ($field->getPdoType() == PDO::PARAM_INT): ?>
+<?php if (BaseModel::isIntegerType($field->getType())): ?>
 		$this-><?php echo $field->getName() ?> = (null === $this-><?php echo $field->getName() ?>) ? null : (int) $this-><?php echo $field->getName() ?>;
 <?php endif ?>
 <?php endforeach ?>

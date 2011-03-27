@@ -4,6 +4,125 @@
  * @package dabl
  */
 abstract class BaseModel {
+	
+	const COLUMN_TYPE_CHAR = "CHAR";
+	const COLUMN_TYPE_VARCHAR = "VARCHAR";
+	const COLUMN_TYPE_LONGVARCHAR = "LONGVARCHAR";
+	const COLUMN_TYPE_CLOB = "CLOB";
+	const COLUMN_TYPE_NUMERIC = "NUMERIC";
+	const COLUMN_TYPE_DECIMAL = "DECIMAL";
+	const COLUMN_TYPE_TINYINT = "TINYINT";
+	const COLUMN_TYPE_SMALLINT = "SMALLINT";
+	const COLUMN_TYPE_INTEGER = "INTEGER";
+	const COLUMN_TYPE_BIGINT = "BIGINT";
+	const COLUMN_TYPE_REAL = "REAL";
+	const COLUMN_TYPE_FLOAT = "FLOAT";
+	const COLUMN_TYPE_DOUBLE = "DOUBLE";
+	const COLUMN_TYPE_BINARY = "BINARY";
+	const COLUMN_TYPE_VARBINARY = "VARBINARY";
+	const COLUMN_TYPE_LONGVARBINARY = "LONGVARBINARY";
+	const COLUMN_TYPE_BLOB = "BLOB";
+	const COLUMN_TYPE_DATE = "DATE";
+	const COLUMN_TYPE_TIME = "TIME";
+	const COLUMN_TYPE_TIMESTAMP = "TIMESTAMP";
+	const COLUMN_TYPE_BU_DATE = "BU_DATE";
+	const COLUMN_TYPE_BU_TIMESTAMP = "BU_TIMESTAMP";
+	const COLUMN_TYPE_BOOLEAN = "BOOLEAN";
+
+	private static $TEXT_TYPES = array(
+		self::COLUMN_TYPE_CHAR,
+		self::COLUMN_TYPE_VARCHAR,
+		self::COLUMN_TYPE_LONGVARCHAR,
+		self::COLUMN_TYPE_CLOB,
+		self::COLUMN_TYPE_DATE,
+		self::COLUMN_TYPE_TIME,
+		self::COLUMN_TYPE_TIMESTAMP,
+		self::COLUMN_TYPE_BU_DATE,
+		self::COLUMN_TYPE_BU_TIMESTAMP
+	);
+	
+	private static $INTEGER_TYPES = array(
+		self::COLUMN_TYPE_SMALLINT,
+		self::COLUMN_TYPE_TINYINT,
+		self::COLUMN_TYPE_INTEGER,
+		self::COLUMN_TYPE_BIGINT
+	);
+	
+	private static $LOB_TYPES = array(
+		self::COLUMN_TYPE_VARBINARY,
+		self::COLUMN_TYPE_LONGVARBINARY,
+		self::COLUMN_TYPE_BLOB
+	);
+	
+	private static $TEMPORAL_TYPES = array(
+		self::COLUMN_TYPE_DATE,
+		self::COLUMN_TYPE_TIME,
+		self::COLUMN_TYPE_TIMESTAMP,
+		self::COLUMN_TYPE_BU_DATE,
+		self::COLUMN_TYPE_BU_TIMESTAMP
+	);
+	
+	private static $NUMERIC_TYPES = array(
+		self::COLUMN_TYPE_SMALLINT,
+		self::COLUMN_TYPE_TINYINT,
+		self::COLUMN_TYPE_INTEGER,
+		self::COLUMN_TYPE_BIGINT,
+		self::COLUMN_TYPE_FLOAT,
+		self::COLUMN_TYPE_DOUBLE,
+		self::COLUMN_TYPE_NUMERIC,
+		self::COLUMN_TYPE_DECIMAL,
+		self::COLUMN_TYPE_REAL
+	);
+	
+	/**
+	 * Whether passed type is a temporal (date/time/timestamp) type.
+	 *
+	 * @param string $type Propel type
+	 * @return boolean
+	 */
+	static function isTemporalType($type) {
+		return in_array($type, self::$TEMPORAL_TYPES);
+	}
+
+	/**
+	 * Returns true if values for the type need to be quoted.
+	 *
+	 * @param string $type The Propel type to check.
+	 * @return boolean True if values for the type need to be quoted.
+	 */
+	static function isTextType($type) {
+		return in_array($type, self::$TEXT_TYPES);
+	}
+
+	/**
+	 * Returns true if values for the type are numeric.
+	 *
+	 * @param string $type The Propel type to check.
+	 * @return boolean True if values for the type need to be quoted.
+	 */
+	static function isNumericType($type) {
+		return in_array($type, self::$NUMERIC_TYPES);
+	}
+	
+	/**
+	 * Returns true if values for the type are integer.
+	 * 
+	 * @param string $type
+	 * @return boolean 
+	 */
+	static function isIntegerType($type) {
+		return in_array($type, self::$INTEGER_TYPES);
+	}
+	
+	/**
+	 * Returns true if type is a LOB type (i.e. would be handled by Blob/Clob class).
+	 * @param string $type Propel type to check.
+	 * @return boolean
+	 */
+	static function isLobType($type) {
+		return in_array($type, self::$LOB_TYPES);
+	}
+	
 	const MAX_INSTANCE_POOL_SIZE = 100;
 
 	/**
@@ -155,8 +274,8 @@ abstract class BaseModel {
 	 * Checks whether the given column is in the modified array
 	 * @return bool
 	 */
-	function isColumnModified($columnName) {
-		return in_array(strtolower($columnName), array_map('strtolower', $this->_modifiedColumns));
+	function isColumnModified($column_name) {
+		return in_array(strtolower($column_name), array_map('strtolower', $this->_modifiedColumns));
 	}
 
 	/**
@@ -167,6 +286,69 @@ abstract class BaseModel {
 		return $this->_modifiedColumns ? $this->_modifiedColumns : array();
 	}
 
+	/**
+	 * Sets the value of a property/column
+	 * @param string $column_name
+	 * @param mixed $value
+	 * @param string $column_type
+	 * @return BaseModel
+	 */
+	function setColumnValue($column_name, $value, $column_type = null) {
+		if (null === $column_type) {
+			$column_type = $this->getColumnType($column_name);
+		}
+		
+		$temporal = self::isTemporalType($column_type);
+		$numeric = self::isNumericType($column_type);
+		
+		if ($numeric || $temporal) {
+			if ('' === $value) {
+				$value = null;
+			} elseif (null !== $value) {
+				if ($numeric && !is_int($value)) {
+					if (self::isIntegerType($column_type)) {
+						$int_val = (int) $value;
+						if ((string) $int_val != (string) $value) {
+							throw new Exception($value . ' is not a valid integer');
+						}
+						$value = (int) $value;
+					} elseif (!is_float($value)) {
+						$float_val = (float) $value;
+						if ((string) $float_val != (string) $value) {
+							throw new Exception($value . ' is not a valid float');
+						}
+						$value = (float) $value;
+					}
+				}
+				if ($this->_formatDates && $temporal) {
+					$conn = $this->getConnection();
+					switch ($column_type) {
+						case BaseModel::COLUMN_TYPE_TIMESTAMP:
+							$formatter = $conn->getTimestampFormatter();
+							break;
+						case BaseModel::COLUMN_TYPE_DATE:
+							$formatter = $conn->getDateFormatter();
+							break;
+						case BaseModel::COLUMN_TYPE_TIME:
+							$formatter = $conn->getTimeFormatter();
+							break;
+					}
+					$timestamp = is_int($value) ? $value : strtotime($value);
+					if (false === $timestamp) {
+						throw new Exception('Unable to parse date: ' . $value);
+					}
+					$value = date($formatter, $timestamp);
+				}
+			}
+		}
+		
+		if ($this->$column_name !== $value) {
+			$this->_modifiedColumns[] = $column_name;
+			$this->$column_name = $value;
+		}
+		return $this;
+	}
+	
 	/**
 	 * Clears the array of modified column names
 	 * @return BaseModel
