@@ -138,7 +138,7 @@ class QueryJoin {
 		if (null === $on_clause) {
 			$on_clause = '1 = 1';
 		} elseif ($on_clause instanceof Condition) {
-			$on_clause_statement = $on_clause->getClause();
+			$on_clause_statement = $on_clause->getQueryStatement();
 			$on_clause = $on_clause_statement->getString();
 			$statement->addParams($on_clause_statement->getParams());
 		}

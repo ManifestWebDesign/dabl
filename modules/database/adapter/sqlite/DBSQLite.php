@@ -72,12 +72,8 @@ class DBSQLite extends DABLPDO {
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
 	function quoteIdentifier($text) {
-		if(is_array($text)){
-			$quoted = array();
-			foreach($text as $key => $value){
-				$quoted[$key] = $this->quoteIdentifier($value);
-			}
-			return $quoted;
+		if (is_array($text)) {
+			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
 		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {

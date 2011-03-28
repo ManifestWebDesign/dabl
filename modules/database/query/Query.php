@@ -631,7 +631,7 @@ class Query {
 			}
 		}
 
-		$where_statement = $this->getWhere()->getClause();
+		$where_statement = $this->getWhere()->getQueryStatement();
 		
 		if ($where_statement) {
 			$query_s .= "\nWHERE " . $where_statement->getString();
@@ -651,7 +651,7 @@ class Query {
 		}
 
 		if ($this->getHaving()) {
-			$having_statement = $this->getHaving()->getClause();
+			$having_statement = $this->getHaving()->getQueryStatement();
 			if ($having_statement) {
 				$query_s .= "\nHAVING " . $having_statement->getString();
 				$statement->addParams($having_statement->getParams());

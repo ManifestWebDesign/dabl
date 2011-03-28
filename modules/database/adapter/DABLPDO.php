@@ -375,11 +375,7 @@ abstract class DABLPDO extends PDO {
 		$quote = '"';
 		
 		if (is_array($text)) {
-			$quoted = array();
-			foreach ($text as $key => $value) {
-				$quoted[$key] = $this->quoteIdentifier($value);
-			}
-			return $quoted;
+			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
 		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {

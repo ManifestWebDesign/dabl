@@ -81,7 +81,7 @@ class Condition {
 
 		// Left can be a Condition
 		if ($left instanceof self) {
-			$clause_statement = $left->getClause();
+			$clause_statement = $left->getQueryStatement();
 			if (!$clause_statement) {
 				return null;
 			}
@@ -291,7 +291,7 @@ class Condition {
 	 * Builds and returns a string representation of $this Condition
 	 * @return QueryStatement
 	 */
-	function getClause() {
+	function getQueryStatement() {
 		$statement = new QueryStatement;
 		$string = '';
 
@@ -328,13 +328,13 @@ class Condition {
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Builds and returns a string representation of $this Condition
 	 * @return string
 	 */
 	function __toString() {
-		return (string) $this->getClause();
+		return (string) $this->getQueryStatement();
 	}
 
 }
