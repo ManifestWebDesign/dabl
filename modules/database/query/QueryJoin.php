@@ -125,8 +125,10 @@ class QueryJoin {
 			$table_statement = $table->getQuery($conn);
 			$table = '(' . $table_statement->getString() . ')';
 			$statement->addParams($table_statement->getParams());
-		} elseif ($conn) {
-			$table = $conn->quoteIdentifier($table);
+			$statement->addIdentifiers($table_statement->getIdentifiers());
+		} else {
+			$statement->addIdentifier($table);
+			$table = QueryStatement::IDENTIFIER;
 		}
 
 		if ($alias) {

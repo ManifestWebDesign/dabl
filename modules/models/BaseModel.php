@@ -473,7 +473,7 @@ abstract class BaseModel {
 			if ($this->$pk === null) {
 				throw new Exception('Cannot delete using NULL primary key.');
 			}
-			$q->addAnd($conn->quoteIdentifier($pk), $this->$pk);
+			$q->addAnd($pk, $this->$pk);
 		}
 		$q->setTable($this->getTableName());
 		$result = $this->doDelete($q, false);
@@ -692,17 +692,16 @@ abstract class BaseModel {
 			throw new Exception('NULL cannot be used to match keys.');
 		}
 		$conn = $this->getConnection();
-		$column = $conn->quoteIdentifier($foreign_column);
 		if ($q) {
 			$q = clone $q;
 			$alias = $q->getAlias();
 			if ($alias && $foreign_table == $q->getTable()) {
-				$column = "$alias.$column";
+				$foreign_column = "$alias.$foreign_column";
 			}
 		} else {
 			$q = new Query;
 		}
-		$q->add($column, $value);
+		$q->add($foreign_column, $value);
 		return $q;
 	}
 

@@ -262,7 +262,7 @@ foreach ($fields as $key => &$field):
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = new Query;
 <?php foreach ($PKs as $k => &$v): ?>
-		$q->add($conn->quoteIdentifier('<?php echo $v ?>'), $<?php echo strtolower(str_replace('-', '_', $v)) ?>);
+		$q->add('<?php echo $v ?>', $<?php echo strtolower(str_replace('-', '_', $v)) ?>);
 <?php endforeach ?>
 		$q->setLimit(1);
 		return array_shift(<?php echo $class_name ?>::doSelect($q, true));
@@ -291,7 +291,7 @@ foreach ($fields as $key => &$field):
 ?>
 	static function retrieveByColumn($field, $value) {
 		$conn = <?php echo $class_name ?>::getConnection();
-		return array_shift(<?php echo $class_name ?>::doSelect(Query::create()->add($conn->quoteIdentifier($field), $value)->setLimit(1)->order('<?php echo $PK ?>')));
+		return array_shift(<?php echo $class_name ?>::doSelect(Query::create()->add($field, $value)->setLimit(1)->order('<?php echo $PK ?>')));
 	}
 
 	/**

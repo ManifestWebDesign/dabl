@@ -233,8 +233,9 @@ class Query {
 	 */
 	function setTable($table_name, $alias=null) {
 		if ($table_name instanceof Query) {
-			if (!$alias)
+			if (!$alias) {
 				throw new Exception('The nested query must have an alias.');
+			}
 			$table_name = clone $table_name;
 		} elseif(null === $alias) {
 			$space = strrpos($table_name, ' ');
@@ -505,69 +506,111 @@ class Query {
 	 * @return QueryStatement
 	 */
 	function getQuery($conn = null) {
-		$table = (string) $this->getTable();
+		$table = $this->getTable();
 
 		if (!$table) {
 			throw new Exception('No table specified.');
 		}
-
-		$alias = $this->getAlias();
-
+		
 		if (!$conn) {
 			$conn = DBManager::getConnection();
 		}
-
+		
+		// the QueryStatement for the Query
+		$statement = new QueryStatement($conn);
+		
+		// the string $statement will use
 		$query_s = '';
 
-		$statement = new QueryStatement($conn);
-
-		if (strpos($table, ' ') === false) {
-			if ($conn) {
-				$table = $conn->quoteIdentifier($table);
-			} else {
-				$table = '`' . join('`.`', explode('.', $table_name)) . '`';
-			}
-		}
-
-		if ($this->_columns) {
-			$columns = implode(', ', $this->_columns);
-		} elseif ($alias) {
-			$columns = "$alias.*";
+		// if $table is a Query, get its QueryStatement
+		if ($table instanceof Query) {
+			$table_statement = $table->getQuery($conn);
+			$table_string = '(' . $table_statement->getString() . ')';
 		} else {
-			$columns = "$table.*"; //always use the table name of the object trying to retrieve
+			$table_statement = null;
 		}
-
-		if ($this->_distinct) {
-			$columns = "DISTINCT $columns";
-		}
-
+		
+		// append $alias, if it's not empty
+		$alias = $this->getAlias();
 		if ($alias) {
-			$table .= " AS $alias";
+			$table_string .= " AS $alias";
 		}
 		
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
-				if ($this->_extraTables) {
-					foreach ($this->_extraTables as $alias => $extra_table) {
-						$extra_table_string = $extra_table;
-						if (strpos($extra_table_string, ' ') === false) {
-							if ($conn) {
-								$extra_table_string = $conn->quoteIdentifier($extra_table_string);
-							} else {
-								$extra_table_string = '`' . join('`.`', explode('.', $extra_table_string)) . '`';
-							}
-						}
-						if ($alias != $extra_table) {
-							$extra_table_string .= " $alias";
-						}
-						$table .= ", $extra_table_string";
+				// setup $columns_string
+				if ($this->_columns) {
+					$columns = $this->_columns;
+					foreach ($columns as &$column) {
+						$statement->addIdentifier($column);
+						$column = QueryStatement::IDENTIFIER;
+					}
+					$columns_string = implode(', ', $columns);
+				} elseif ($alias) {
+					// default to selecting only columns from the target table
+					$columns_string = "$alias.*";
+				} else {
+					// default to selecting only columns from the target table
+					$columns_string = QueryStatement::IDENTIFIER . '.*';
+					$statement->addIdentifier($table);
+				}
+
+				if ($this->_distinct) {
+					$columns_string = "DISTINCT $columns_string";
+				}
+				
+				// setup identifiers for $table_string
+				if (null !== $table_statement) {
+					$statement->addIdentifiers($table_statement->getIdentifiers());
+					$statement->addParams($table_statement->getParams());
+				} else {
+					// if $table has no spaces, assume it is an identifier
+					if (strpos($table, ' ') === false) {
+						$statement->addIdentifier($table);
+						$table_string = QueryStatement::IDENTIFIER;
+					} else {
+						$table_string = $table;
 					}
 				}
-				$query_s .="SELECT $columns\nFROM $table";
+				
+				// setup identifiers for any additional tables
+				if ($this->_extraTables) {
+					foreach ($this->_extraTables as $alias => $extra_table) {
+						if ($extra_table instanceof Query) {
+							$extra_table_statement = $extra_table->getQuery($conn);
+							$extra_table_string = '(' . $extra_table_statement->getString() . ') AS ' . $alias;
+							$statement->addParams($extra_table_statement->getParams());
+							$statement->addIdentifiers($extra_table_statement->getIdentifiers());
+						} else {
+							$extra_table_string = $extra_table;
+							if (strpos($extra_table_string, ' ') === false) {
+								$extra_table_string = QueryStatement::IDENTIFIER;
+								$statement->addIdentifier($extra_table);
+							}
+							if ($alias != $extra_table) {
+								$extra_table_string .= " AS $alias";
+							}
+						}
+						$table_string .= ", $extra_table_string";
+					}
+				}
+				$query_s .="SELECT $columns_string\nFROM $table_string";
 				break;
 			case self::ACTION_DELETE:
-				$query_s .="DELETE\nFROM $table";
+				if (null !== $table_statement) {
+					$statement->addIdentifiers($table_statement->getIdentifiers());
+					$statement->addParams($table_statement->getParams());
+				} else {
+					// if $table has no spaces, assume it is an identifier
+					if (strpos($table, ' ') === false) {
+						$statement->addIdentifier($table);
+						$table_string = QueryStatement::IDENTIFIER;
+					} else {
+						$table_string = $table;
+					}
+				}
+				$query_s .="DELETE\nFROM $table_string";
 				break;
 			default:
 				break;
@@ -578,24 +621,25 @@ class Query {
 				$join_statement = $join->getQueryStatement($conn);
 				$query_s .= "\n\t" . $join_statement->getString();
 				$statement->addParams($join_statement->getParams());
+				$statement->addIdentifiers($join_statement->getIdentifiers());
 			}
 		}
 
 		$where_statement = $this->getWhere()->getClause();
-
+		
 		if ($where_statement) {
 			$query_s .= "\nWHERE " . $where_statement->getString();
 			$statement->addParams($where_statement->getParams());
+			$statement->addIdentifiers($where_statement->getIdentifiers());
 		}
-
+		
 		if ($this->_groups) {
 			$groups = $this->_groups;
-			if ($conn) {
-				foreach ($groups as &$group) {
-					$group_parts = explode(' ', $group);
-					$group_parts[0] = $conn->quoteIdentifier($group_parts[0]);
-					$group = implode(' ', $group_parts);
-				}
+			foreach ($groups as &$group) {
+				$group_parts = explode(' ', $group);
+				$statement->addIdentifier($group_parts[0]);
+				$group_parts[0] = QueryStatement::IDENTIFIER;
+				$group = implode(' ', $group_parts);
 			}
 			$query_s .= "\nGROUP BY " . implode(', ', $groups);
 		}
@@ -605,17 +649,17 @@ class Query {
 			if ($having_statement) {
 				$query_s .= "\nHAVING " . $having_statement->getString();
 				$statement->addParams($having_statement->getParams());
+				$statement->addIdentifiers($having_statement->getIdentifiers());
 			}
 		}
 
 		if ($this->getAction() != self::ACTION_COUNT && $this->_orders) {
 			$orders = $this->_orders;
-			if ($conn) {
-				foreach ($orders as &$order) {
-					$order_parts = explode(' ', $order);
-					$order_parts[0] = $conn->quoteIdentifier($order_parts[0]);
-					$order = implode(' ', $order_parts);
-				}
+			foreach ($orders as &$order) {
+				$order_parts = explode(' ', $order);
+				$statement->addIdentifier($order_parts[0]);
+				$order_parts[0] = QueryStatement::IDENTIFIER;
+				$order = implode(' ', $order_parts);
 			}
 			$query_s .= "\nORDER BY " . implode(', ', $orders);
 		}

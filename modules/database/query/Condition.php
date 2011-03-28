@@ -24,9 +24,24 @@
  * $q->addAnd($c);					- $q string = "SELECT * FROM table WHERE Column=$value OR Column2<$value2 OR (Column3=$value3 AND Column4=$value4)"
  */
 class Condition {
+	/**
+	 * escape only the first parameter
+	 */
 	const QUOTE_LEFT = 1;
+	
+	/**
+	 * escape only the second param
+	 */
 	const QUOTE_RIGHT = 2;
+	
+	/**
+	 * escape both params
+	 */
 	const QUOTE_BOTH = 3;
+	
+	/**
+	 * escape no params
+	 */
 	const QUOTE_NONE = 4;
 
 	private $ands = array();
@@ -90,7 +105,10 @@ class Condition {
 		// Escape $left
 		if ($quote == self::QUOTE_LEFT || $quote == self::QUOTE_BOTH) {
 			$statement->addParam($left);
-			$left = '?';
+			$left = QueryStatement::PARAM;
+		} else {
+			$statement->addIdentifier($left);
+			$left = QueryStatement::IDENTIFIER;
 		}
 
 		$is_array = false;
@@ -111,6 +129,7 @@ class Condition {
 
 			$right = '(' . $clause_statement->getString() . ')';
 			$statement->addParams($clause_statement->getParams());
+			$statement->addIdentifiers($clause_statement->getIdentifiers());
 			if ($quote != self::QUOTE_LEFT) {
 				$quote = self::QUOTE_NONE;
 			}
@@ -120,7 +139,7 @@ class Condition {
 		if ($is_array) {
 			// BETWEEN
 			if (is_array($right) && count($right) == 2 && $operator == Query::BETWEEN) {
-				$statement->setString("$left $operator ? AND ?");
+				$statement->setString("$left $operator " . QueryStatement::PARAM . ' AND ' . QueryStatement::PARAM);
 				$statement->addParams($right);
 				return $statement;
 			}
@@ -147,6 +166,8 @@ class Condition {
 			if (is_array($right) && !$right) {
 				if ($operator == Query::IN) {
 					$statement->setString('(0=1)');
+					$statement->setParams(array());
+					$statement->setIdentifiers(array());
 					return $statement;
 				} elseif ($operator == Query::NOT_IN) {
 					return null;
@@ -158,7 +179,7 @@ class Condition {
 				$statement->addParams($right);
 				$placeholders = array();
 				foreach ($right as &$r) {
-					$placeholders[] = '?';
+					$placeholders[] = QueryStatement::PARAM;
 				}
 				$right = '(' . implode(',', $placeholders) . ')';
 			}
@@ -177,7 +198,7 @@ class Condition {
 				$right = null;
 			} elseif ($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
 				$statement->addParam($right);
-				$right = '?';
+				$right = QueryStatement::PARAM;
 			}
 		}
 		$statement->setString("$left $operator $right");
@@ -278,6 +299,7 @@ class Condition {
 		foreach ($this->ands as $and_statement) {
 			$and_strings[] = $and_statement->getString();
 			$statement->addParams($and_statement->getParams());
+			$statement->addIdentifiers($and_statement->getIdentifiers());
 		}
 		if ($and_strings) {
 			$AND = implode("\n\tAND ", $and_strings);
@@ -287,6 +309,7 @@ class Condition {
 		foreach ($this->ors as $or_statement) {
 			$or_strings[] = $or_statement->getString();
 			$statement->addParams($or_statement->getParams());
+			$statement->addIdentifiers($or_statement->getIdentifiers());
 		}
 		if ($or_strings) {
 			$OR = implode("\n\tOR ", $or_strings);
