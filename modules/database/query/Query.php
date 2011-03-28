@@ -530,11 +530,7 @@ class Query {
 			$table_statement = null;
 		}
 		
-		// append $alias, if it's not empty
 		$alias = $this->getAlias();
-		if ($alias) {
-			$table_string .= " AS $alias";
-		}
 		
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
@@ -574,6 +570,11 @@ class Query {
 					}
 				}
 				
+				// append $alias, if it's not empty
+				if ($alias) {
+					$table_string .= " AS $alias";
+				}
+				
 				// setup identifiers for any additional tables
 				if ($this->_extraTables) {
 					foreach ($this->_extraTables as $alias => $extra_table) {
@@ -609,6 +610,11 @@ class Query {
 					} else {
 						$table_string = $table;
 					}
+				}
+				
+				// append $alias, if it's not empty
+				if ($alias) {
+					$table_string .= " AS $alias";
 				}
 				$query_s .="DELETE\nFROM $table_string";
 				break;
