@@ -5,7 +5,7 @@ class QueryStatement {
 	/**
 	 * character to use as a placeholder for a quoted identifier
 	 */
-	const IDENTIFIER = '?ident?';
+	const IDENTIFIER = '[?]';
 	
 	/**
 	 * character to use as a placeholder for an escaped parameter
