@@ -9,8 +9,8 @@ class QueryStatement {
 	/**
 	 * @param PDO $conn
 	 */
-	function  __construct(PDO $conn = null) {
-		if($conn !==null)
+	function __construct(PDO $conn = null) {
+		if ($conn !== null)
 			$this->setConnection($conn);
 	}
 
@@ -19,14 +19,14 @@ class QueryStatement {
 	 * executing the query
 	 * @param PDO $conn
 	 */
-	function setConnection(PDO $conn){
+	function setConnection(PDO $conn) {
 		$this->connection = $conn;
 	}
 
 	/**
 	 * @return PDO
 	 */
-	function getConnection(){
+	function getConnection() {
 		return $this->connection;
 	}
 
@@ -34,14 +34,14 @@ class QueryStatement {
 	 * Sets the SQL string to be used in a query
 	 * @param string $string
 	 */
-	function setString($string){
+	function setString($string) {
 		$this->string = $string;
 	}
 
 	/**
 	 * @return string
 	 */
-	function getString(){
+	function getString() {
 		return $this->string;
 	}
 
@@ -49,7 +49,7 @@ class QueryStatement {
 	 * Merges given array into params
 	 * @param array $params
 	 */
-	function addParams($params){
+	function addParams($params) {
 		$this->params = array_merge($this->params, $params);
 	}
 
@@ -57,7 +57,7 @@ class QueryStatement {
 	 * Replaces params with given array
 	 * @param array $params
 	 */
-	function setParams($params){
+	function setParams($params) {
 		$this->params = $params;
 	}
 
@@ -65,27 +65,28 @@ class QueryStatement {
 	 * Adds given param to param array
 	 * @param mixed $param
 	 */
-	function addParam($param){
+	function addParam($param) {
 		$this->params[] = $param;
 	}
 
 	/**
 	 * @return array
 	 */
-	function getParams(){
+	function getParams() {
 		return $this->params;
 	}
 
 	/**
 	 * @return string
 	 */
-	function __toString(){
+	function __toString() {
 		$string = $this->string;
 		$params = array_values($this->params);
 		$conn = $this->connection;
-		
-		if(null != $conn)
-		$params = $conn->prepareInput($params);
+
+		if (null != $conn) {
+			$params = $conn->prepareInput($params);
+		}
 
 		//escape % by making it %%
 		$string = str_replace('%', '%%', $string);
@@ -96,7 +97,7 @@ class QueryStatement {
 		//add $query to the beginning of the array
 		array_unshift($params, $string);
 
-		if(!($string = @call_user_func_array('sprintf', $params)))
+		if (!($string = @call_user_func_array('sprintf', $params)))
 			throw new Exception('Could not insert parameters into query string. The number of ?s might not match the number of parameters.');
 
 		return $string;
@@ -107,16 +108,16 @@ class QueryStatement {
 	 * Executes and returns the prepared statement.
 	 * @return PDOStatement
 	 */
-	function bindAndExecute(){
+	function bindAndExecute() {
 		$conn = $this->getConnection();
 		$result = $conn->prepare($this->getString());
-		foreach($this->getParams() as $key => $value){
+		foreach ($this->getParams() as $key => $value) {
 			$pdo_type = PDO::PARAM_STR;
-			if(is_int($value))
+			if (is_int($value))
 				$pdo_type = PDO::PARAM_INT;
-			elseif(is_null($value))
+			elseif (is_null($value))
 				$pdo_type = PDO::PARAM_NULL;
-			elseif(is_bool($value)){
+			elseif (is_bool($value)) {
 				$value = $value ? 1 : 0;
 				$pdo_type = PDO::PARAM_INT;
 			}
