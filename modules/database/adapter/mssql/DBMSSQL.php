@@ -70,7 +70,7 @@ class DBMSSQL extends DABLPDO {
 			return $quoted;
 		}
 
-		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false) {
+		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
 		
@@ -298,6 +298,7 @@ class DBMSSQL extends DABLPDO {
 		$database = new Database($this->getDBName());
 		$database->setPlatform(new MssqlPlatform());
 		$parser->parse($database);
+		$database->doFinalInitialization();
 		return $database;
 	}
 

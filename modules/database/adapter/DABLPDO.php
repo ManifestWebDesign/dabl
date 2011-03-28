@@ -382,7 +382,7 @@ abstract class DABLPDO extends PDO {
 			return $quoted;
 		}
 
-		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false) {
+		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
 		

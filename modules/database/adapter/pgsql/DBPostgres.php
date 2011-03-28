@@ -125,6 +125,7 @@ class DBPostgres extends DABLPDO {
 		$database = new Database($this->getDBName());
 		$database->setPlatform(new PgsqlPlatform());
 		$parser->parse($database);
+		$database->doFinalInitialization();
 		return $database;
 	}
 }

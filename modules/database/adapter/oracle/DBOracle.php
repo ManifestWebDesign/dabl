@@ -127,6 +127,7 @@ EOF;
 		$database = new Database($this->getDBName());
 		$database->setPlatform(new OraclePlatform());
 		$parser->parse($database);
+		$database->doFinalInitialization();
 		return $database;
 	}
 

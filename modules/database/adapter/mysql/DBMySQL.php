@@ -98,7 +98,7 @@ class DBMySQL extends DABLPDO {
 			return $quoted;
 		}
 
-		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false) {
+		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
 		

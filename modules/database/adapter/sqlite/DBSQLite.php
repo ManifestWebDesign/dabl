@@ -80,7 +80,7 @@ class DBSQLite extends DABLPDO {
 			return $quoted;
 		}
 
-		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false) {
+		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
 		
@@ -120,6 +120,7 @@ class DBSQLite extends DABLPDO {
 		$database = new Database($this->getDBName());
 		$database->setPlatform(new SqlitePlatform());
 		$parser->parse($database);
+		$database->doFinalInitialization();
 		return $database;
 	}
 
