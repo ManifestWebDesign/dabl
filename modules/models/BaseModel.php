@@ -305,19 +305,22 @@ abstract class BaseModel {
 			if ('' === $value) {
 				$value = null;
 			} elseif (null !== $value) {
-				if ($numeric && !is_int($value)) {
+				if ($numeric) {
 					if (self::isIntegerType($column_type)) {
-						$int_val = (int) $value;
-						if ((string) $int_val != (string) $value) {
-							throw new Exception($value . ' is not a valid integer');
+						// validate and cast
+						if (!is_int($value)) {
+							$int_val = intval($value);
+							if ((string) $int_val != (string) $value) {
+								throw new Exception($value . ' is not a valid integer or it is too large');
+							}
+							$value = $int_val;
 						}
-						$value = (int) $value;
-					} elseif (!is_float($value)) {
-						$float_val = (float) $value;
+					} else {
+						// only validates, doesn't cast...yet
+						$float_val = floatval($value);
 						if ((string) $float_val != (string) $value) {
-							throw new Exception($value . ' is not a valid float');
+							throw new Exception($value . ' is not a valid float or it is too large');
 						}
-						$value = (float) $value;
 					}
 				}
 				if ($this->_formatDates && $temporal) {
