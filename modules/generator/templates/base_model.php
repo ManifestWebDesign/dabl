@@ -102,7 +102,9 @@ foreach ($fields as $key => &$field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 	$method_name = $options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName();
 	$params = $field->isTemporalType() ? '$format = null' : '';
+	$param_vars = $field->isTemporalType() ? '$format' : '';
 	$used_functions[] = "get$method_name";
+	$better_method_name = StringFormat::titleCase($field->getName());
 ?>
 	/**
 	 * Gets the value of the <?php echo $field->getName() ?> field
@@ -130,7 +132,27 @@ foreach ($fields as $key => &$field):
 	function set<?php echo $method_name ?>($value) {
 		return $this->setColumnValue('<?php echo $field->getName() ?>', $value, BaseModel::COLUMN_TYPE_<?php echo $field->getType() ?>);
 	}
+	
+<?php if(strtolower($better_method_name) != strtolower($method_name)): ?>
+<?php $used_functions[] = "get$better_method_name"; ?>
+	/**
+	 * Gets the value of the <?php echo $field->getName() ?> field
+	 */
+	function get<?php echo $better_method_name ?>(<?php echo $params ?>) {
+		return $this->get<?php echo $method_name ?>(<?php echo $param_vars ?>);
+	}
+	
+<?php $used_functions[] = "set$better_method_name"; ?>
+	/**
+	 * Sets the value of the <?php echo $field->getName() ?> field
+	 * @return <?php echo $class_name ?>
 
+	 */
+	function set<?php echo $better_method_name ?>($value) {
+		return $this->set<?php echo $method_name ?>($value);
+	}
+
+<?php endif ?>
 <?php endforeach ?>
 	/**
 	 * @return DABLPDO
@@ -250,15 +272,17 @@ foreach ($fields as $key => &$field):
 		throw new Exception('This table does not have any primary keys.');
 <?php else: ?>
 <?php foreach ($PKs as $k => &$v): ?>
-		if (null === $<?php echo strtolower(str_replace('-', '_', $v)) ?>)
+		if (null === $<?php echo strtolower(str_replace('-', '_', $v)) ?>) {
 			return null;
+		}
 <?php endforeach ?>
 <?php if (1 !== count($PKs)): ?>
 		$args = func_get_args();
 <?php endif; ?>
 		$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if (1 == count($PKs)): ?>$<?php echo strtolower(str_replace('-', '_', $PK)) ?><?php else: ?>implode('-', $args)<?php endif ?>);
-		if (null !== $pool_instance)
+		if (null !== $pool_instance) {
 			return $pool_instance;
+		}
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = new Query;
 <?php foreach ($PKs as $k => &$v): ?>
@@ -272,7 +296,7 @@ foreach ($fields as $key => &$field):
 <?php
 	foreach ($this->getColumns($table_name) as $field) {
 ?>
-	static function retrieveBy<?php echo $field->getName() ?>($value) {
+	static function retrieveBy<?php echo StringFormat::titleCase($field->getName()) ?>($value) {
 <?php
 		if ($field->isPrimaryKey()) {
 ?>
@@ -518,39 +542,40 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		}
 	}
 ?>
-	protected $_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>;
+	protected $_<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>;
 	
 <?php
 	if ($namedID) {
 ?>
-<?php $used_functions[] = "set$from_column_clean"; ?>
+<?php $used_functions[] = 'set' . StringFormat::titleCase($from_column_clean); ?>
 	/**
 	 * @return <?php echo $class_name ?>
 
 	 */
-	function set<?php echo $from_column_clean ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
-		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $lc_to_class_name ?>);
+	function set<?php echo StringFormat::titleCase($from_column_clean) ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
+		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($<?php echo $lc_to_class_name ?>);
 		return $this;
 	}
 
 <?php
 	}
 ?>
-<?php $used_functions[] = "set$to_class_name" . "RelatedBy$from_column"; ?>
+<?php $used_functions[] = "set$to_class_name" . 'RelatedBy' . StringFormat::titleCase($from_column); ?>
 	/**
 	 * @return <?php echo $class_name ?>
 
 	 */
-	function set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
+	function set<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
 		if (null === $<?php echo $lc_to_class_name ?>) {
 			$this->set<?php echo $from_column ?>(null);
 		} else {
-			if (!$<?php echo $lc_to_class_name ?>->get<?php echo $to_column ?>())
+			if (!$<?php echo $lc_to_class_name ?>->get<?php echo $to_column ?>()) {
 				throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $to_column ?>');
+			}
 			$this->set<?echo $from_column ?>($<?php echo $lc_to_class_name ?>->get<?php echo $to_column ?>());
 		}
 		if ($this->getCacheResults()) {
-			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> = $<?php echo $lc_to_class_name ?>;
+			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?> = $<?php echo $lc_to_class_name ?>;
 		}
 		return $this;
 	}
@@ -565,9 +590,9 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	 * @return <?php echo $to_class_name ?>
 
 	 */
-<?php $used_functions[] = "get$from_column_clean"; ?>
-	function get<?php echo $from_column_clean ?>() {
-		return $this->get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>();
+<?php $used_functions[] = 'get' . StringFormat::titleCase($from_column_clean); ?>
+	function get<?php echo StringFormat::titleCase($from_column_clean) ?>() {
+		return $this->get<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>();
 	}
 <?php
 	}
@@ -580,13 +605,14 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	 * @return <?php echo $to_class_name ?>
 
 	 */
-<?php $used_functions[] = "get$to_class_name" . "RelatedBy$from_column"; ?>
-	function get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>() {
+<?php $used_functions[] = "get$to_class_name" . 'RelatedBy' . StringFormat::titleCase($from_column); ?>
+	function get<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>() {
 		if (null === $this->get<?echo $from_column ?>()) {
 			$result = null;
 		} else {
-			if ($this->getCacheResults() && null !== $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>)
-				return $this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>;
+			if ($this->getCacheResults() && null !== $this->_<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>) {
+				return $this->_<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>;
+			}
 <?php 
 	$foreign_column = $this->database->getTable($to_table)->getColumn($to_column);
 	if ($foreign_column->isPrimaryKey()) {
@@ -598,17 +624,18 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 			$result = <?php echo $to_class_name ?>::retrieveBy<?php echo $from_column ?>($this->get<?echo $from_column ?>());
 <?php } ?>
 		}
-		if ($this->getCacheResults())
-			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?> = $result;
+		if ($this->getCacheResults()) {
+			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?> = $result;
+		}
 		return $result;
 	}
 
 <?php
 	if ($namedID) {
 ?>
-<?php $used_functions[] = "doSelectJoin$from_column_clean"; ?>
-	static function doSelectJoin<?php echo $from_column_clean ?>(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
-		return <?php echo $class_name ?>::doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($q, $write_cache, $join_type);
+<?php $used_functions[] = 'doSelectJoin' . StringFormat::titleCase($from_column_clean); ?>
+	static function doSelectJoin<?php echo StringFormat::titleCase($from_column_clean) ?>(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
+		return <?php echo $class_name ?>::doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q, $write_cache, $join_type);
 	}
 
 <?php
@@ -625,7 +652,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	 */
 <?php $used_functions[] = "get$to_class_name"; ?>
 	function get<?php echo $to_class_name ?>() {
-		return $this->get<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>();
+		return $this->get<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>();
 	}
 
 <?
@@ -639,7 +666,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 
 	 */
 	function set<?php echo $to_class_name ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
-		return $this->set<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>($<?php echo $lc_to_class_name ?>);
+		return $this->set<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($<?php echo $lc_to_class_name ?>);
 	}
 
 <?
@@ -649,8 +676,8 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	/**
 	 * @return <?php echo $class_name ?>[]
 	 */
-<?php $used_functions[] = "doSelectJoin$to_class_name" . "RelatedBy$from_column"; ?>
-	static function doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo $from_column ?>(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
+<?php $used_functions[] = "doSelectJoin$to_class_name" . 'RelatedBy' . StringFormat::titleCase($from_column); ?>
+	static function doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>(Query $q, $write_cache = false, $join_type = Query::LEFT_JOIN) {
 		$columns = $q->getColumns();
 		$alias = $q->getAlias();
 		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
@@ -716,8 +743,8 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	 * with a <?php echo $from_column ?> that matches $this-><?php echo $to_column ?>.
 	 * @return Query
 	 */
-<?php $used_functions[] = "get$from_class_name" . "sRelatedBy$from_column" . 'Query'; ?>
-	function get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query(Query $q = null) {
+<?php $used_functions[] = 'get' . StringFormat::titleCase($from_class_name) . 'sRelatedBy' . StringFormat::titleCase($from_column) . 'Query'; ?>
+	function get<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>Query(Query $q = null) {
 		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>', '<?php echo $to_column ?>', $q);
 	}
 
@@ -726,11 +753,12 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	 * with a <?php echo $from_column ?> that matches $this-><?php echo $to_column ?>.
 	 * @return int
 	 */
-<?php $used_functions[] = "count$from_class_name" . "sRelatedBy$from_column"; ?>
-	function count<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>(Query $q = null) {
-		if (null === $this->get<?php echo $to_column ?>())
+<?php $used_functions[] = 'count' . StringFormat::titleCase($from_class_name) . 'sRelatedBy' . StringFormat::titleCase($from_column); ?>
+	function count<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>(Query $q = null) {
+		if (null === $this->get<?php echo $to_column ?>()) {
 			return 0;
-		return <?php echo $from_class_name ?>::doCount($this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query($q));
+		}
+		return <?php echo $from_class_name ?>::doCount($this->get<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>Query($q));
 	}
 
 	/**
@@ -738,14 +766,15 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	 * with a <?php echo $from_column ?> that matches $this-><?php echo $to_column ?>.
 	 * @return int
 	 */
-<?php $used_functions[] = "delete$from_class_name" . "sRelatedBy$from_column"; ?>
-	function delete<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>(Query $q = null) {
-		if (null === $this->get<?php echo $to_column ?>())
+<?php $used_functions[] = 'delete' . StringFormat::titleCase($from_class_name) . 'sRelatedBy' . StringFormat::titleCase($from_column); ?>
+	function delete<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>(Query $q = null) {
+		if (null === $this->get<?php echo $to_column ?>()) {
 			return 0;
-		return <?php echo $from_class_name ?>::doDelete($this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query($q));
+		}
+		return <?php echo $from_class_name ?>::doDelete($this->get<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>Query($q));
 	}
 
-	private $<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>_c = array();
+	private $<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>_c = array();
 
 	/**
 	 * Returns an array of <?php echo $from_class_name ?> objects with a <?php echo $from_column ?>
@@ -756,16 +785,19 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	 * a second time(for performance purposes).
 	 * @return <?php echo $from_class_name ?>[]
 	 */
-<?php $used_functions[] = "get$from_class_name" . "sRelatedBy$from_column"; ?>
-	function get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($extra = null) {
-		if (null === $this->get<?php echo $to_column ?>())
+<?php $used_functions[] = 'get' . StringFormat::titleCase($from_class_name) . 'sRelatedBy' . StringFormat::titleCase($from_column); ?>
+	function get<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($extra = null) {
+		if (null === $this->get<?php echo $to_column ?>()) {
 			return array();
+		}
 
-		if (!$extra || $extra instanceof Query)
-			return <?php echo $from_class_name ?>::doSelect($this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query($extra));
+		if (!$extra || $extra instanceof Query) {
+			return <?php echo $from_class_name ?>::doSelect($this->get<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>Query($extra));
+		}
 
-		if (!$extra && $this->getCacheResults() && @$this-><?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>_c && !$this->isColumnModified('<?php echo $to_column ?>'))
-			return $this-><?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>_c;
+		if (!$extra && $this->getCacheResults() && @$this-><?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>_c && !$this->isColumnModified('<?php echo $to_column ?>')) {
+			return $this-><?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>_c;
+		}
 
 		$conn = $this->getConnection();
 		$table_quoted = $conn->quoteIdentifier(<?php echo $from_class_name ?>::getTableName());
@@ -774,6 +806,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		if (null === $extra) $this-><?php echo $from_class_name ?>s_c = $<?php echo $from_table ?>s;
 		return $<?php echo $from_table ?>s;
 	}
+
 <?php endforeach ?>
 <?php
 	foreach ($this->getForeignKeysToTable($table_name) as $r){
@@ -784,58 +817,58 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		$to_column = array_shift($r->getForeignColumns());
 		$to_table = $r->getForeignTableName();
 		if ($from_table_list[$from_table] < 2) {
-			if (!in_array("get$from_class_name" . 's', $used_functions)) {
+			if (!in_array('get' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
 	/**
 	 * Convenience function for <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>
 	 * @return <?php echo $from_class_name ?>[]
-	 * @see <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
+	 * @see <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?> 
 	 */
-<?php $used_functions[] = "get$from_class_name" . 's'; ?>
-	function get<?php echo $from_class_name ?>s($extra = null) {
-		return $this->get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($extra);
+<?php $used_functions[] = 'get' . StringFormat::titleCase($from_class_name) . 's'; ?>
+	function get<?php echo StringFormat::titleCase($from_class_name) ?>s($extra = null) {
+		return $this->get<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($extra);
 	}
 
 <?
 			}
-			if (!in_array("get$from_class_name" . 'sQuery', $used_functions)) {
+			if (!in_array('get' . StringFormat::titleCase($from_class_name) . 'sQuery', $used_functions)) {
 ?>
 	/**
 	  * Convenience function for <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query
 	  * @return Query
 	  * @see <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query
 	  */
-<?php $used_functions[] = "get$from_class_name" . 'sQuery'; ?>
-	function get<?php echo $from_class_name ?>sQuery(Query $q = null) {
+<?php $used_functions[] = 'get' . StringFormat::titleCase($from_class_name) . 'sQuery'; ?>
+	function get<?php echo StringFormat::titleCase($from_class_name) ?>sQuery(Query $q = null) {
 		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>','<?php echo $to_column ?>', $q);
 	}
 
 <?
 			}
-			if (!in_array("delete$from_class_name" . 's', $used_functions)) {
+			if (!in_array('delete' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
 	/**
 	  * Convenience function for <?php echo $class_name ?>::delete<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
 	  * @return int
 	  * @see <?php echo $class_name ?>::delete<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
 	  */
-<?php $used_functions[] = "delete$from_class_name" . 's'; ?>
-	function delete<?php echo $from_class_name ?>s(Query $q = null) {
-		return $this->delete<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($q);
+<?php $used_functions[] = 'delete' . StringFormat::titleCase($from_class_name) . 's'; ?>
+	function delete<?php echo StringFormat::titleCase($from_class_name) ?>s(Query $q = null) {
+		return $this->delete<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q);
 	}
 
 <?
 			}
-			if (!in_array("count$from_class_name" . 's', $used_functions)) {
+			if (!in_array('count' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
 	/**
 	  * Convenience function for <?php echo $class_name ?>::count<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
 	  * @return int
-	  * @see <?php echo $class_name ?>::count<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?> 
+	  * @see <?php echo $class_name ?>::count<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?> 
 	  */
-<?php $used_functions[] = "count$from_class_name" . 's'; ?>
-	function count<?php echo $from_class_name ?>s(Query $q = null) {
-		return $this->count<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>($q);
+<?php $used_functions[] = 'count' . StringFormat::titleCase($from_class_name) . 's'; ?>
+	function count<?php echo StringFormat::titleCase($from_class_name) ?>s(Query $q = null) {
+		return $this->count<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q);
 	}
 
 <?
@@ -856,7 +889,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 			&& !$field->isAutoIncrement()
 			&& !$field->getDefaultValue()
 			&& !$field->isPrimaryKey()
-			&& !in_array($field->getName(), array('Created', 'Updated'))
+			&& !in_array(strtolower($field->getName()), array('created', 'updated'))
 		) {
 ?>
 		if (null === $this->get<?php echo $field->getName() ?>()) {

@@ -69,7 +69,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function titleCase($string, $separator = '') {
-		return ucwords(implode($separator, self::getWords($string)));
+		return implode($separator, array_map('ucfirst', self::getWords($string)));
 	}
 
 	/**
