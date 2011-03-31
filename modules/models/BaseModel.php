@@ -283,7 +283,7 @@ abstract class BaseModel {
 	 * @return array
 	 */
 	function getModifiedColumns() {
-		return $this->_modifiedColumns ? $this->_modifiedColumns : array();
+		return $this->_modifiedColumns ? array_unique($this->_modifiedColumns) : array();
 	}
 
 	/**
