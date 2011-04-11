@@ -94,7 +94,7 @@ class QueryJoin {
 	 */
 	function setOnClause($on_clause) {
 		if ($on_clause instanceof Condition) {
-			$this->_onClause = clone Condition;
+			$this->_onClause = clone $on_clause;
 		} else {
 			$this->_onClause = $on_clause;
 		}
@@ -141,8 +141,9 @@ class QueryJoin {
 			$on_clause_statement = $on_clause->getQueryStatement();
 			$on_clause = $on_clause_statement->getString();
 			$statement->addParams($on_clause_statement->getParams());
+			$statement->addIdentifiers($on_clause_statement->getIdentifiers());
 		}
-
+		
 		if ('' !== $on_clause) {
 			$on_clause = "ON ($on_clause)";
 		}

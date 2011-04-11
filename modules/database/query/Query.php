@@ -643,8 +643,10 @@ class Query {
 			$groups = $this->_groups;
 			foreach ($groups as &$group) {
 				$group_parts = explode(' ', $group);
-				$statement->addIdentifier($group_parts[0]);
-				$group_parts[0] = QueryStatement::IDENTIFIER;
+				if (count($group_parts) == 2) {
+					$statement->addIdentifier($group_parts[0]);
+					$group_parts[0] = QueryStatement::IDENTIFIER;
+				}
 				$group = implode(' ', $group_parts);
 			}
 			$query_s .= "\nGROUP BY " . implode(', ', $groups);
@@ -663,8 +665,10 @@ class Query {
 			$orders = $this->_orders;
 			foreach ($orders as &$order) {
 				$order_parts = explode(' ', $order);
-				$statement->addIdentifier($order_parts[0]);
-				$order_parts[0] = QueryStatement::IDENTIFIER;
+				if (count($order_parts) == 2) {
+					$statement->addIdentifier($order_parts[0]);
+					$order_parts[0] = QueryStatement::IDENTIFIER;
+				}
 				$order = implode(' ', $order_parts);
 			}
 			$query_s .= "\nORDER BY " . implode(', ', $orders);
