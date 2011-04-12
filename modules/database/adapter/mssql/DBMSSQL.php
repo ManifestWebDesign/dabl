@@ -281,13 +281,13 @@ class DBMSSQL extends DABLPDO {
 	 */
 	function getDatabaseSchema() {
 
-		ClassLoader::import('ROOT:libraries:propel');
-		ClassLoader::import('ROOT:libraries:propel:database');
-		ClassLoader::import('ROOT:libraries:propel:database:model');
-		ClassLoader::import('ROOT:libraries:propel:database:reverse');
-		ClassLoader::import('ROOT:libraries:propel:database:reverse:mssql');
-		ClassLoader::import('ROOT:libraries:propel:database:tranform');
-		ClassLoader::import('ROOT:libraries:propel:platform');
+		ClassLoader::import('DATABASE:propel');
+		ClassLoader::import('DATABASE:propel:database');
+		ClassLoader::import('DATABASE:propel:database:model');
+		ClassLoader::import('DATABASE:propel:database:reverse');
+		ClassLoader::import('DATABASE:propel:database:reverse:mssql');
+		ClassLoader::import('DATABASE:propel:database:tranform');
+		ClassLoader::import('DATABASE:propel:platform');
 
 		$parser = new MssqlSchemaParser();
 		$parser->setConnection($this);
