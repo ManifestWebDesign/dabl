@@ -113,6 +113,26 @@ abstract class BaseController extends ArrayObject {
 	}
 
 	/**
+	 * Redirect to another location, preserving the partial and
+	 * output format settings.
+	 *
+	 * @param string $url Path to redirect to
+	 * @param bool $die Whether or not to kill the script
+	 * @return void
+	 */
+	function redirect($url, $die = true) {
+		if ($this->renderPartial) {
+			$url = '/partial/' . ltrim($url, '/');
+		}
+
+		if ('html' !== $this->outputFormat) {
+			$url .= '.' . $this->outputFormat;
+		}
+
+		redirect($url, $die);
+	}
+
+	/**
 	 * @param string $action_name
 	 * @param array $params
 	 */
@@ -121,7 +141,7 @@ abstract class BaseController extends ArrayObject {
 		$action_name = $action_name ? $action_name : DEFAULT_CONTROLLER;
 		$method_name = str_replace(array('-', '_', ' '), '', $action_name);
 		$view = $this->getView($action_name);
-		
+
 		if (!is_array($params) && !($params instanceof ArrayObject)) {
 			$params = array($params);
 		}
