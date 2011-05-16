@@ -17,7 +17,10 @@ unset($actions['Show']);
 <?php
 foreach($this->getColumns($table_name) as $column){
 	$column_name = $column->getName();
-	if($column_name==$pk)continue;
+	if($column_name==$pk) {
+		continue;
+	}
+	$column_label = StringFormat::titleCase($column_name, ' ');
 	$method = "get$column_name";
 	switch($column->getType()){
 		case PropelTypes::TIMESTAMP:
@@ -32,7 +35,7 @@ foreach($this->getColumns($table_name) as $column){
 	}
 ?>
 	<p>
-		<strong><?php echo $column_name ?>:</strong>
+		<strong><?php echo $column_label ?>:</strong>
 		<?php echo '<?php echo htmlentities($' . $single . '->' . $method . '(' . $format . ')) ?>' ?>
 
 	</p>

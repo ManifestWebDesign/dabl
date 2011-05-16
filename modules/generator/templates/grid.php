@@ -4,15 +4,16 @@
 <?php
 		foreach($columns as $key => $column){
 			$column_name = $column->getName();
+			$column_label = StringFormat::titleCase($column_name, ' ');
 ?>
 			<th class="ui-widget-header <?php if($key==0)echo 'ui-corner-tl' ?>">
 				<a href="<?php echo "<?php echo" ?> '?SortBy=<?php echo $column_name ?>' . (!isset($_REQUEST['Dir']) && @$_REQUEST['SortBy'] == '<?php echo $column_name ?>' ? '&Dir=DESC' : '') <?php echo "?>" ?>">
-					<?php echo "<?" ?> if( @$_REQUEST['SortBy'] == '<?php echo $column_name ?>'):<?php echo "?>" ?>
+					<?php echo "<?php" ?> if( @$_REQUEST['SortBy'] == '<?php echo $column_name ?>'):<?php echo "?>" ?>
 
 						<span class="ui-icon ui-icon-carat-1-<?php echo "<?php" ?> echo isset($_REQUEST['Dir']) ? 's' : 'n' <?php echo "?>" ?>"></span>
-					<?php echo "<?" ?>endif <?php echo "?>"?>
+					<?php echo "<?php endif ?>"?>
 
-					<?php echo $column_name ?>
+					<?php echo $column_label ?>
 
 				</a>
 			</th>
