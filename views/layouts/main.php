@@ -5,6 +5,18 @@
 		<title><?php echo $title ?></title>
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/style.css', true) ?>" />
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/themes/redmond/jquery-ui-1.8.custom.css', true) ?>" />
+		<script language="Javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+		<script language="Javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js"></script>
+		<script>
+		$(function() {
+			$('li.ui-state-default, a.ui-state-default, input.ui-state-default, div.ui-state-default, span.ui-state-default').hover(function(){
+				$(this).addClass('ui-state-hover');
+			}, function(){
+				$(this).removeClass('ui-state-hover');
+			});
+			$('input.datepicker').datepicker();
+		});
+		</script>
 	</head>
 	<body>
 

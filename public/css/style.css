@@ -4,32 +4,72 @@ body, table, input, select, textarea {
 	font-size: 12px;
 }
 
-/* Object Grids */
-table.object-grid{
-	width:100%;
-	border-spacing: 2px;
+/** Forms **/
+form p label{
+	display:block;
+	float: left;
+	width: 160px;
+	text-align: right;
+	line-height: 24px;
+	font-weight: bold;
+	padding-right: 10px;
 }
 
-table.object-grid th.grid-action-column{
-	width:0px;
+form div.ui-widget-content p {
+	clear: both;
+	padding: 5px 0 5px 0;
+}
+
+input[type=text], input[type=password], textarea {
+	border: 1px solid #aaa;
+	padding: 2px;
+}
+
+textarea {
+	width: 200px;
+	height: 50px;
+}
+
+
+/** UI Grid **/
+table.object-grid{
+	width:100%;
+	border-spacing: 0px;
+	font-size: 12px;
+}
+
+table.object-grid thead th{
+	padding:6px 6px 4px 6px;
+	font-weight: normal;
+}
+
+table.object-grid thead th {
+	border-left: 0px;
+}
+
+table.object-grid thead th .ui-corner-tl{
+	border-left: 1px solid #051C2E;
 }
 
 table.object-grid th a {
 	display: block;
+	text-decoration: none;
 }
 
 table.object-grid th a span {
 	float: right;
 }
 
-/* Form */
-form p label{
-	display:block;
+table.object-grid tbody td{
+	padding: 4px 8px 4px 8px;
+	border-top: 1px solid #ddd;
 }
 
+
+/** UI Buttons **/
 .ui-button-link {
 	padding:0.3em .8em 0.3em 18px;
-	font-size: 14px;
+	font-size: 13px;
 	position:relative;
 	text-decoration:none;
 	cursor: pointer;
@@ -59,14 +99,34 @@ h1 .ui-button-link{
 	font:inherit;
 }
 
+table.object-grid .ui-button-link {
+	font-size: 10px;
+}
+
+
+/** UI Other **/
+
+div.ui-widget-content {
+	padding: 5px;
+}
+
+div.ui-widget-content div.ui-widget-content {
+	background: #f1f1f1;
+}
+
 .ui-message-icon{
 	float: left;
 	margin-right: 0.3em;
 }
 
-.ui-state-highlight, ui-state-error{
+div.ui-state-highlight, div.ui-state-error{
 	margin-top:5px;
 }
+
+.ui-tabs {
+	margin-bottom: 10px;
+}
+
 
 .float-right {
 	float: right;

@@ -60,9 +60,9 @@
 				   href="<?php echo $action_url ?>"<?php if(strtolower($action_label) == 'delete'): ?>
 
 				   onclick="return confirm('Are you sure?');"<?php endif ?>>
-<?php if(@$this->actionIcons[$action_label]): ?>
-					<span class="ui-icon ui-icon-<?php echo $this->actionIcons[$action_label]; ?>"><?php echo $action_label ?></span>
-<?php endif ?>
+
+					<span class="ui-icon ui-icon<?php if(@$this->actionIcons[$action_label]): ?>-<?php echo $this->actionIcons[$action_label]; ?><?php endif ?>"><?php echo $action_label ?></span>
+
 					<?php echo $action_label ?>
 
 				</a>
