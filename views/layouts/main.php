@@ -28,28 +28,9 @@
 				</li>
 			<?php endforeach ?>
 			</ul>
-
-			<?php if(@$errors): ?>
-				<div class="ui-state-error ui-corner-all" style="padding: 0pt 0.7em;">
-				<?php foreach($errors as $error): ?>
-					<p>
-						<span class="ui-message-icon ui-icon ui-icon-alert"></span>
-						<?= $error ?>
-					</p>
-				<?php endforeach ?>
-				</div>
-			<?php endif ?>
-
-			<?php if(@$messages): ?>
-				<div class="ui-state-highlight ui-corner-all" style="padding: 0pt 0.7em;">
-				<?php foreach($messages as $message): ?>
-					<p>
-						<span class="ui-message-icon ui-icon ui-icon-info"></span>
-						<?= $message ?>
-					</p>
-				<?php endforeach ?>
-				</div>
-			<?php endif ?>
+			
+			<? load_view('errors', $params) ?>
+			<? load_view('messages', $params) ?>
 
 			<?php echo $content ?>
 		</div>
