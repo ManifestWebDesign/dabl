@@ -29,7 +29,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 			if ($<?php echo $single ?>->validate()) {
 				$<?php echo $single ?>->save();
 				$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> saved';
-				<? if(@$pkMethod): ?>redirect('<?php echo $plural_url ?>/show/' . $<?php echo $single ?>-><?php echo $pkMethod ?>());<? else: ?>redirect('<?php echo $plural_url ?>');<? endif ?>
+				$this-><? if(@$pkMethod): ?>redirect('<?php echo $plural_url ?>/show/' . $<?php echo $single ?>-><?php echo $pkMethod ?>());<? else: ?>redirect('<?php echo $plural_url ?>');<? endif ?>
 
 			}
 			$this->persistant['errors'] = $<?php echo $single ?>->getValidationErrors();
@@ -38,7 +38,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		}
 		
 		$this->persistant['<?php echo $single ?>'] = $<?php echo $single ?>;
-		redirect('<?php echo $plural_url ?>/edit/'<? if(@$pkMethod): ?> . $<?php echo $single ?>-><?php echo $pkMethod ?>()<? endif ?>);
+		$this->redirect('<?php echo $plural_url ?>/edit/'<? if(@$pkMethod): ?> . $<?php echo $single ?>-><?php echo $pkMethod ?>()<? endif ?>);
 	}
 
 <? if(@$pkMethod): ?>	function delete($<?php echo $single ?>_id = null) {
@@ -52,7 +52,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 			$this->persistant['errors'][] = $e->getMessage();
 		}
 
-		redirect('<?php echo $plural_url ?>');
+		$this->redirect('<?php echo $plural_url ?>');
 	}
 
 	function show($<?php echo $single ?>_id = null) {

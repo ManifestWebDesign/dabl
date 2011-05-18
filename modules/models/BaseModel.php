@@ -74,6 +74,10 @@ abstract class BaseModel {
 		self::COLUMN_TYPE_REAL
 	);
 	
+	public function __toString() {
+		return get_class($this) . implode('-', $this->getPrimaryKeyValues());
+	}
+	
 	/**
 	 * Whether passed type is a temporal (date/time/timestamp) type.
 	 *

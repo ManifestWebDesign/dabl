@@ -8,6 +8,5 @@ define('CONTROLLERS_DIR', APP_DIR . 'controllers' . DIRECTORY_SEPARATOR);
 ClassLoader::addRepository('CONTROLLERS', CONTROLLERS_DIR);
 ClassLoader::import('CONTROLLERS');
 
-ModuleLoader::load('hooks');
 define('HOOK_LOAD_ROUTE', 'HOOK_LOAD_ROUTE');
 Hook::add(HOOK_LOAD_ROUTE, array('ControllerRoute', 'load'), 100);
