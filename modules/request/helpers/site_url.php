@@ -16,7 +16,11 @@ function site_url($url = '', $version = false) {
 		$url = implode('/', $url);
 	}
 
-	if (strpos($url, 'https://') === 0 || strpos($url, 'http://') === 0 || strpos($url, 'javascript:') === 0) {
+	if (
+		0 === strpos($url, '#') ||
+		0 === strpos($url, 'javascript:') ||
+		false !== strpos($url, '://')
+	) {
 		return $url;
 	}
 
