@@ -350,7 +350,7 @@ abstract class BaseModel {
 		}
 		
 		if ($this->$column_name !== $value) {
-			$this->_modifiedColumns[] = $column_name;
+			$this->_modifiedColumns[$column_name] = $column_name;
 			$this->$column_name = $value;
 		}
 		return $this;
