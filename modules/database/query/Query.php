@@ -56,57 +56,46 @@ class Query {
 	 * @var array
 	 */
 	private $_columns = array();
-	
 	/**
 	 * @var mixed
 	 */
 	private $_table;
-	
 	/**
 	 * @var string
 	 */
 	private $_tableAlias;
-	
 	/**
 	 * @var array
 	 */
 	private $_extraTables = array();
-	
 	/**
 	 * @var QueryJoin[]
 	 */
 	private $_joins = array();
-	
 	/**
 	 * @var Condition
 	 */
 	private $_where;
-	
 	/**
 	 * @var array
 	 */
 	private $_orders = array();
-	
 	/**
 	 * @var array
 	 */
 	private $_groups = array();
-	
 	/**
 	 * @var Condition
 	 */
 	private $_having;
-	
 	/**
 	 * @var int
 	 */
 	private $_limit;
-	
 	/**
 	 * @var int
 	 */
 	private $_offset = 0;
-	
 	/**
 	 * @var bool
 	 */
@@ -237,7 +226,7 @@ class Query {
 				throw new Exception('The nested query must have an alias.');
 			}
 			$table_name = clone $table_name;
-		} elseif(null === $alias) {
+		} elseif (null === $alias) {
 			$space = strrpos($table_name, ' ');
 			$as = strrpos(strtoupper($table_name), ' AS ');
 			if ($as != $space - 3) {
@@ -248,8 +237,8 @@ class Query {
 				$table_name = trim(substr($table_name, 0, $as === false ? $space : $as));
 			}
 		}
-		
-		if ($alias){
+
+		if ($alias) {
 			$this->setAlias($alias);
 		}
 
@@ -266,12 +255,12 @@ class Query {
 	function getTable() {
 		return $this->_table;
 	}
-	
+
 	function setAlias($alias) {
 		$this->_tableAlias = $alias;
 		return $this;
 	}
-	
+
 	/**
 	 * Returns a String of the alias of the table being queried,
 	 * if present.
@@ -285,7 +274,7 @@ class Query {
 	/**
 	 * @param type $table_name
 	 * @param type $alias
-	 * @return Query 
+	 * @return Query
 	 */
 	function addTable($table_name, $alias = null) {
 		if ($table_name instanceof Query) {
@@ -301,7 +290,7 @@ class Query {
 			}
 			$alias = $table_name;
 		}
-		
+
 		$this->_extraTables[$alias] = $table_name;
 		return $this;
 	}
@@ -349,7 +338,7 @@ class Query {
 			$this->_joins[] = clone $table;
 			return $this;
 		}
-		
+
 		if (null === $on_clause) {
 			if ($join_type == self::JOIN || $join_type == self::INNER_JOIN) {
 				$this->addTable($table);
@@ -357,7 +346,7 @@ class Query {
 			}
 			$on_clause = '1 = 1';
 		}
-		
+
 		$this->_joins[] = new QueryJoin($table, $on_clause, $join_type);
 		return $this;
 	}
@@ -375,7 +364,7 @@ class Query {
 	 * @return Query
 	 */
 	function add($column, $value=null, $operator=self::EQUAL, $quote = null) {
-		if (func_num_args () === 1) {
+		if (func_num_args() === 1) {
 			return $this->addAnd($column);
 		} else {
 			return $this->addAnd($column, $value, $operator, $quote);
@@ -391,7 +380,7 @@ class Query {
 	 * @param $quote Int[optional]
 	 */
 	function addAnd($column, $value=null, $operator=self::EQUAL, $quote = null) {
-		if (func_num_args () === 1) {
+		if (func_num_args() === 1) {
 			$this->_where->addAnd($column);
 		} else {
 			$this->_where->addAnd($column, $value, $operator, $quote);
@@ -408,7 +397,7 @@ class Query {
 	 * @param $quote Int[optional]
 	 */
 	function addOr($column, $value=null, $operator=self::EQUAL, $quote = null) {
-		if (func_num_args () === 1) {
+		if (func_num_args() === 1) {
 			$this->_where->addOr($column);
 		} else {
 			$this->_where->addOr($column, $value, $operator, $quote);
@@ -506,22 +495,105 @@ class Query {
 	 * @return QueryStatement
 	 */
 	function getQuery($conn = null) {
+		if (!$conn) {
+			$conn = DBManager::getConnection();
+		}
+
+		// the QueryStatement for the Query
+		$statement = new QueryStatement($conn);
+
+		// the string $statement will use
+		$query_s = '';
+
+		switch (strtoupper($this->getAction())) {
+			default:
+			case self::ACTION_COUNT:
+			case self::ACTION_SELECT:
+				$columns_statement = $this->getColumnsClause($conn);
+				$statement->addIdentifiers($columns_statement->getIdentifiers());
+				$statement->addParams($columns_statement->getParams());
+				$query_s .= 'SELECT ' . $columns_statement->getString();
+				break;
+			case self::ACTION_DELETE:
+				$query_s .= 'DELETE';
+				break;
+		}
+
+		$table_statement = $this->getTablesClause($conn);
+		$statement->addIdentifiers($table_statement->getIdentifiers());
+		$statement->addParams($table_statement->getParams());
+		$query_s .= "\nFROM " . $table_statement->getString();
+
+		if ($this->_joins) {
+			foreach ($this->_joins as $join) {
+				$join_statement = $join->getQueryStatement($conn);
+				$query_s .= "\n\t" . $join_statement->getString();
+				$statement->addParams($join_statement->getParams());
+				$statement->addIdentifiers($join_statement->getIdentifiers());
+			}
+		}
+
+		$where_statement = $this->getWhereClause();
+
+		if ($where_statement) {
+			$query_s .= "\nWHERE " . $where_statement->getString();
+			$statement->addParams($where_statement->getParams());
+			$statement->addIdentifiers($where_statement->getIdentifiers());
+		}
+
+		if ($this->_groups) {
+			$clause = $this->getGroupClause();
+			$statement->addIdentifiers($clause->getIdentifiers());
+			$statement->addParams($clause->getParams());
+			$query_s .= $clause->getString();
+		}
+
+		if (null !== $this->getHaving()) {
+			$having_statement = $this->getHaving()->getQueryStatement();
+			if ($having_statement) {
+				$query_s .= "\nHAVING " . $having_statement->getString();
+				$statement->addParams($having_statement->getParams());
+				$statement->addIdentifiers($having_statement->getIdentifiers());
+			}
+		}
+
+		if ($this->getAction() != self::ACTION_COUNT && $this->_orders) {
+			$clause = $this->getOrderClause();
+			$statement->addIdentifiers($clause->getIdentifiers());
+			$statement->addParams($clause->getParams());
+			$query_s .= $clause->getString();
+		}
+
+		if ($this->_limit) {
+			if ($conn) {
+				$conn->applyLimit($query_s, $this->_offset, $this->_limit);
+			} else {
+				$query_s .= "\nLIMIT " . ($this->_offset ? $this->_offset . ', ' : '') . $this->_limit;
+			}
+		}
+
+		if ($this->hasAggregates() && $this->getAction() == self::ACTION_COUNT) {
+			$query_s = "SELECT count(0) FROM ($query_s) a";
+		}
+
+		$statement->setString($query_s);
+		return $statement;
+	}
+
+	/**
+	 * Protected for now.  Likely to be public in the future.
+	 * @return QueryStatement
+	 */
+	protected function getTablesClause($conn) {
+
 		$table = $this->getTable();
 
 		if (!$table) {
 			throw new Exception('No table specified.');
 		}
-		
-		if (!$conn) {
-			$conn = DBManager::getConnection();
-		}
-		
-		// the QueryStatement for the Query
-		$statement = new QueryStatement($conn);
-		
-		// the string $statement will use
-		$query_s = '';
 
+		$statement = new QueryStatement($conn);
+		$alias = $this->getAlias();
 		// if $table is a Query, get its QueryStatement
 		if ($table instanceof Query) {
 			$table_statement = $table->getQuery($conn);
@@ -529,33 +601,10 @@ class Query {
 		} else {
 			$table_statement = null;
 		}
-		
-		$alias = $this->getAlias();
-		
+
 		switch (strtoupper($this->getAction())) {
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
-				// setup $columns_string
-				if ($this->_columns) {
-					$columns = $this->_columns;
-					foreach ($columns as &$column) {
-						$statement->addIdentifier($column);
-						$column = QueryStatement::IDENTIFIER;
-					}
-					$columns_string = implode(', ', $columns);
-				} elseif ($alias) {
-					// default to selecting only columns from the target table
-					$columns_string = "$alias.*";
-				} else {
-					// default to selecting only columns from the target table
-					$columns_string = QueryStatement::IDENTIFIER . '.*';
-					$statement->addIdentifier($table);
-				}
-
-				if ($this->_distinct) {
-					$columns_string = "DISTINCT $columns_string";
-				}
-				
 				// setup identifiers for $table_string
 				if (null !== $table_statement) {
 					$statement->addIdentifiers($table_statement->getIdentifiers());
@@ -569,12 +618,12 @@ class Query {
 						$table_string = $table;
 					}
 				}
-				
+
 				// append $alias, if it's not empty
 				if ($alias) {
 					$table_string .= " AS $alias";
 				}
-				
+
 				// setup identifiers for any additional tables
 				if ($this->_extraTables) {
 					foreach ($this->_extraTables as $alias => $extra_table) {
@@ -596,7 +645,7 @@ class Query {
 						$table_string .= ", $extra_table_string";
 					}
 				}
-				$query_s .="SELECT $columns_string\nFROM $table_string";
+				$statement->setString($table_string);
 				break;
 			case self::ACTION_DELETE:
 				if (null !== $table_statement) {
@@ -611,34 +660,129 @@ class Query {
 						$table_string = $table;
 					}
 				}
-				
+
 				// append $alias, if it's not empty
 				if ($alias) {
 					$table_string .= " AS $alias";
 				}
-				$query_s .="DELETE\nFROM $table_string";
+				$statement->setString($table_string);
 				break;
 			default:
 				break;
 		}
+		return $statement;
+	}
 
-		if ($this->_joins) {
-			foreach ($this->_joins as $join) {
-				$join_statement = $join->getQueryStatement($conn);
-				$query_s .= "\n\t" . $join_statement->getString();
-				$statement->addParams($join_statement->getParams());
-				$statement->addIdentifiers($join_statement->getIdentifiers());
+	protected function hasAggregates() {
+		if ($this->_groups) {
+			return $true;
+		}
+		foreach ($this->getColumns() AS $column) {
+			if (strpos($column, '(') !== false) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Protected for now.  Likely to be public in the future.
+	 * @return QueryStatement
+	 */
+	protected function getColumnsClause($conn) {
+		$table = $this->getTable();
+
+		if (!$table) {
+			throw new Exception('No table specified.');
+		}
+
+		$statement = new QueryStatement($conn);
+		$alias = $this->getAlias();
+		$action = strtoupper($this->getAction());
+
+		if ($action == self::ACTION_DELETE) {
+			return $statement;
+		}
+
+		if ($action == self::ACTION_COUNT) {
+			if (!$this->hasAggregates()) {
+				$statement->setString('count(0)');
+				return $statement;
+			}
+
+			if ($this->_groups) {
+				$groups = $this->_groups;
+				foreach ($groups as &$group) {
+					$group_parts = explode(' ', $group);
+					if (count($group_parts) == 2) {
+						$statement->addIdentifier($group_parts[0]);
+						$group_parts[0] = QueryStatement::IDENTIFIER;
+					}
+					$group = implode(' ', $group_parts);
+				}
+				$statement->setString(implode(', ', $groups));
+				return $statement;
 			}
 		}
 
-		$where_statement = $this->getWhere()->getQueryStatement();
-		
-		if ($where_statement) {
-			$query_s .= "\nWHERE " . $where_statement->getString();
-			$statement->addParams($where_statement->getParams());
-			$statement->addIdentifiers($where_statement->getIdentifiers());
+		// setup $columns_string
+		if ($this->_columns) {
+			$columns = $this->_columns;
+			foreach ($columns as &$column) {
+				$statement->addIdentifier($column);
+				$column = QueryStatement::IDENTIFIER;
+			}
+			$columns_string = implode(', ', $columns);
+		} elseif ($alias) {
+			// default to selecting only columns from the target table
+			$columns_string = "$alias.*";
+		} else {
+			// default to selecting only columns from the target table
+			$columns_string = QueryStatement::IDENTIFIER . '.*';
+			$statement->addIdentifier($table);
 		}
-		
+
+		if ($this->_distinct) {
+			$columns_string = "DISTINCT $columns_string";
+		}
+
+		$statement->setString($columns_string);
+		return $statement;
+	}
+
+	/**
+	 * Protected for now.  Likely to be public in the future.
+	 * @return QueryStatement
+	 */
+	protected function getWhereClause($conn = null) {
+		return $this->getWhere()->getQueryStatement();
+	}
+
+	/**
+	 * Protected for now.  Likely to be public in the future.
+	 * @return QueryStatement
+	 */
+	protected function getOrderClause($conn = null) {
+		$statement = new QueryStatement($conn);
+		$orders = $this->_orders;
+		foreach ($orders as &$order) {
+			$order_parts = explode(' ', $order);
+			if (count($order_parts) == 2) {
+				$statement->addIdentifier($order_parts[0]);
+				$order_parts[0] = QueryStatement::IDENTIFIER;
+			}
+			$order = implode(' ', $order_parts);
+		}
+		$statement->setString("\nORDER BY " . implode(', ', $orders));
+		return $statement;
+	}
+
+	/**
+	 * Protected for now.  Likely to be public in the future.
+	 * @return QueryStatement
+	 */
+	protected function getGroupClause($conn = null) {
+		$statement = new QueryStatement($conn);
 		if ($this->_groups) {
 			$groups = $this->_groups;
 			foreach ($groups as &$group) {
@@ -649,44 +793,8 @@ class Query {
 				}
 				$group = implode(' ', $group_parts);
 			}
-			$query_s .= "\nGROUP BY " . implode(', ', $groups);
+			$statement->setString("\nGROUP BY " . implode(', ', $groups));
 		}
-
-		if ($this->getHaving()) {
-			$having_statement = $this->getHaving()->getQueryStatement();
-			if ($having_statement) {
-				$query_s .= "\nHAVING " . $having_statement->getString();
-				$statement->addParams($having_statement->getParams());
-				$statement->addIdentifiers($having_statement->getIdentifiers());
-			}
-		}
-
-		if ($this->getAction() != self::ACTION_COUNT && $this->_orders) {
-			$orders = $this->_orders;
-			foreach ($orders as &$order) {
-				$order_parts = explode(' ', $order);
-				if (count($order_parts) == 2) {
-					$statement->addIdentifier($order_parts[0]);
-					$order_parts[0] = QueryStatement::IDENTIFIER;
-				}
-				$order = implode(' ', $order_parts);
-			}
-			$query_s .= "\nORDER BY " . implode(', ', $orders);
-		}
-
-		if ($this->_limit) {
-			if ($conn) {
-				$conn->applyLimit($query_s, $this->_offset, $this->_limit);
-			} else {
-				$query_s .= "\nLIMIT " . ($this->_offset ? $this->_offset . ', ' : '') . $this->_limit;
-			}
-		}
-
-		if ($this->getAction() == self::ACTION_COUNT) {
-			$query_s = "SELECT count(0) FROM ($query_s) a";
-		}
-
-		$statement->setString($query_s);
 		return $statement;
 	}
 
