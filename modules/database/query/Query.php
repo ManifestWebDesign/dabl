@@ -572,8 +572,8 @@ class Query {
 			}
 		}
 
-		if ($this->hasAggregates() && $this->getAction() == self::ACTION_COUNT) {
-			$query_s = "SELECT count(0) FROM ($query_s) a";
+		if ($this->needsComplexCount() && $this->getAction() == self::ACTION_COUNT) {
+			$query_s = "SELECT count(0)\nFROM ($query_s) a";
 		}
 
 		$statement->setString($query_s);
@@ -675,14 +675,20 @@ class Query {
 
 	protected function hasAggregates() {
 		if ($this->_groups) {
-			return $true;
+			return true;
 		}
-		foreach ($this->getColumns() AS $column) {
+		foreach ($this->_columns as $column) {
 			if (strpos($column, '(') !== false) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	protected function needsComplexCount() {
+		return $this->hasAggregates()
+			|| null !== $this->_having
+			|| $this->_distinct;
 	}
 
 	/**
@@ -705,7 +711,7 @@ class Query {
 		}
 
 		if ($action == self::ACTION_COUNT) {
-			if (!$this->hasAggregates()) {
+			if (!$this->needsComplexCount()) {
 				$statement->setString('count(0)');
 				return $statement;
 			}
@@ -713,15 +719,26 @@ class Query {
 			if ($this->_groups) {
 				$groups = $this->_groups;
 				foreach ($groups as &$group) {
-					$group_parts = explode(' ', $group);
-					if (count($group_parts) == 2) {
-						$statement->addIdentifier($group_parts[0]);
-						$group_parts[0] = QueryStatement::IDENTIFIER;
-					}
-					$group = implode(' ', $group_parts);
+					$statement->addIdentifier($group);
+					$group = QueryStatement::IDENTIFIER;
 				}
 				$statement->setString(implode(', ', $groups));
 				return $statement;
+			}
+
+			if (!$this->_distinct && null === $this->getHaving() && $this->_columns) {
+				$columns_to_use = array();
+				foreach ($this->_columns as $column) {
+					if (strpos($column, '(') === false) {
+						continue;
+					}
+					$statement->addIdentifier($column);
+					$columns_to_use[] = QueryStatement::IDENTIFIER;
+				}
+				if ($columns_to_use) {
+					$statement->setString(implode(', ', $columns_to_use));
+					return $statement;
+				}
 			}
 		}
 
@@ -767,9 +784,9 @@ class Query {
 		$orders = $this->_orders;
 		foreach ($orders as &$order) {
 			$order_parts = explode(' ', $order);
-			if (count($order_parts) == 2) {
-				$statement->addIdentifier($order_parts[0]);
-				$order_parts[0] = QueryStatement::IDENTIFIER;
+			foreach ($order_parts as &$order) {
+				$statement->addIdentifier($order);
+				$group = QueryStatement::IDENTIFIER;
 			}
 			$order = implode(' ', $order_parts);
 		}
@@ -786,12 +803,8 @@ class Query {
 		if ($this->_groups) {
 			$groups = $this->_groups;
 			foreach ($groups as &$group) {
-				$group_parts = explode(' ', $group);
-				if (count($group_parts) == 2) {
-					$statement->addIdentifier($group_parts[0]);
-					$group_parts[0] = QueryStatement::IDENTIFIER;
-				}
-				$group = implode(' ', $group_parts);
+				$statement->addIdentifier($group);
+				$group = QueryStatement::IDENTIFIER;
 			}
 			$statement->setString("\nGROUP BY " . implode(', ', $groups));
 		}
