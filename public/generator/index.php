@@ -21,7 +21,7 @@
 		<h1>DABL Generator</h1>
 		<div>
 			Please choose which tables to generate for.  Only the base models
-			can be overwritten.  Models, views and controllers will not be overwritten if
+			can be overwritten.  Models<? if (defined('IS_MVC') && IS_MVC): ?>, views and controllers<? endif ?> will not be overwritten if
 			they already exist.  Generating a view or controller without generating the model is not recommended.
 		</div>
 
@@ -41,18 +41,20 @@
 					</tr>
 					<tr>
 						<th>&nbsp;</th>
-						<th>
+						<th align="left">
 							<input type="checkbox" checked="checked" onclick="checkAll('Models', '<?php echo $connection_name ?>', this.checked)" />
 							Models
 						</th>
-						<th>
+						<? if (defined('IS_MVC') && IS_MVC): ?>
+						<th align="left">
 							<input type="checkbox" onclick="checkAll('Views', '<?php echo $connection_name ?>', this.checked)" />
 							Views
 						</th>
-						<th>
+						<th align="left">
 							<input type="checkbox" onclick="checkAll('Controllers', '<?php echo $connection_name ?>', this.checked)" />
 							Controllers
 						</th>
+						<? endif ?>
 					</tr>
 
 					<?php foreach ($generator->getTableNames() as $tableName): ?>
@@ -62,12 +64,14 @@
 							<td>
 								<input type="checkbox" value="<?php echo $tableName ?>" name="Models[<?php echo $connection_name ?>][]" checked="checked" />
 							</td>
+							<? if (defined('IS_MVC') && IS_MVC): ?>
 							<td>
 								<input type="checkbox" value="<?php echo $tableName ?>" name="Views[<?php echo $connection_name ?>][]" />
 							</td>
 							<td>
 								<input type="checkbox" value="<?php echo $tableName ?>" name="Controllers[<?php echo $connection_name ?>][]" />
 							</td>
+							<? endif ?>
 						</tr>
 					<?php endforeach ?>
 

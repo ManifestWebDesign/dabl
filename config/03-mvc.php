@@ -3,6 +3,9 @@
 ClassLoader::addRepository('MVC', LIBRARIES_DIR . 'dabl/mvc');
 
 
+define('IS_MVC', true);
+
+
 /** Session **/
 
 // start the session
