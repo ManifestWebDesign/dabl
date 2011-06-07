@@ -1,7 +1,7 @@
 <?php
 
 require_once 'PHPUnit/Framework.php';
-require_once dirname(__FILE__) . '/../../../../config.php';
+require_once dirname(__FILE__) . '/../../../../../config.php';
 
 class SiteURLTest extends PHPUnit_Framework_TestCase {
 
