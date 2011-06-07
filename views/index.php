@@ -1,17 +1,17 @@
 <h1>Congratulations, you have DABL</h1>
 
 <p>
-	To generate your models, views or controllers, point your browser to the 
+	To generate your models, views or controllers, point your browser to the
 	<a href="<?php echo site_url('generator') ?>/">generator</a>.
 </p>
 
 <p>
-	For security reasons, we recommend password protecting or removing the generator scripts on 
+	For security reasons, we recommend password protecting or removing the generator scripts on
 	your production website.
 </p>
 
 <p>
-	To disable and remove the Model-View-Controller framework, delete the following files and 
+	To disable and remove the Model-View-Controller framework, delete the following files and
 	directories:
 </p>
 
@@ -19,16 +19,20 @@
 	<li>controllers/</li>
 	<li>views/</li>
 	<li>.htaccess</li>
-	
-	<li>config/controllers.php</li>
-	<li>config/session.php</li>
-	<li>config/views.php</li>
-	
-	<li>modules/controllers/</li>
-	<li>modules/hooks/</li>
-	<li>modules/session/</li>
-	<li>modules/views/</li>
-	
+
+	<li>config/10-session.php</li>
+	<li>config/20-hooks.php</li>
+	<li>config/20-request.php</li>
+	<li>config/30-controllers.php</li>
+	<li>config/30-views.php</li>
+
+	<li>libraries/dabl/session/</li>
+	<li>libraries/dabl/hooks/</li>
+	<li>libraries/dabl/request/</li>
+	<li>libraries/dabl/controllers/</li>
+	<li>libraries/dabl/views/</li>
+	<li>libraries/dabl/format/</li>
+
 	<li>public/css/</li>
 	<li>public/.htaccess</li>
 	<li>public/index.php</li>
