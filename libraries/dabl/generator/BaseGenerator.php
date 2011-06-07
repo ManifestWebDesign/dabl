@@ -1,13 +1,40 @@
 <?php
 
-require_once MODULES_DIR . 'database/propel/platform/Platform.php';
+require_once LIBRARIES_DIR . 'dabl/database/propel/platform/Platform.php';
 
 abstract class BaseGenerator {
 
 	/**
 	 * @var array
 	 */
-	private $options;
+	private $options = array(
+		//convert table and column names to title case
+		'title_case' => true,
+
+		//enforce an upper case first letter of classes
+		'cap_model_names' => true,
+
+		//enforce an upper case first letter of get and set methods
+		'cap_method_names' => true,
+
+		//prepend this to class name
+		'model_prefix' => '',
+
+		//append this to class name
+		'model_suffix' => '',
+
+		//target directory for generated table classes
+		'model_path' => null,
+
+		//target directory for generated base table classes
+		'base_model_path' => null,
+
+		//set to true to generate views
+		'view_path' => null,
+
+		//directory to save controller files in
+		'controller_path' => null
+	);
 
 	/**
 	 * @var string
@@ -49,35 +76,6 @@ abstract class BaseGenerator {
 		$this->database->appendXml($dom);
 		$dom->formatOutput = true;
 		$this->setSchema($dom);
-
-		$this->options = array(
-			//convert table and column names to title case
-			'title_case' => true,
-
-			//enforce an upper case first letter of classes
-			'cap_model_names' => true,
-
-			//enforce an upper case first letter of get and set methods
-			'cap_method_names' => true,
-
-			//prepend this to class name
-			'model_prefix' => '',
-
-			//append this to class name
-			'model_suffix' => '',
-
-			//target directory for generated table classes
-			'model_path' => defined('MODELS_DIR') ? MODELS_DIR : null,
-
-			//target directory for generated base table classes
-			'base_model_path' => defined('MODELS_BASE_DIR') ? MODELS_BASE_DIR : null,
-
-			//set to true to generate views
-			'view_path' => defined('VIEWS_DIR') ? VIEWS_DIR : null,
-
-			//directory to save controller files in
-			'controller_path' => defined('CONTROLLERS_DIR') ? CONTROLLERS_DIR : null,
-		);
 	}
 
 	/**
