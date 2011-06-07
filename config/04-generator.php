@@ -12,10 +12,10 @@ $options = array(
 	'base_model_path' => MODELS_BASE_DIR,
 
 	//set to true to generate views
-	'view_path' => VIEWS_DIR,
+	'view_path' => defined('VIEWS_DIR') ? VIEWS_DIR : null,
 
 	//directory to save controller files in
-	'controller_path' => CONTROLLERS_DIR
+	'controller_path' => defined('CONTROLLERS_DIR') ? CONTROLLERS_DIR : null
 );
 
 foreach (DBManager::getConnectionNames() as $connection_name) {
