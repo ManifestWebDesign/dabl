@@ -1,10 +1,10 @@
 <?php
 
+require_once '../config.php';
+
 ClassLoader::import('LIBRARIES:dabl:generator');
 
-$generators = array();
-
-$options = array(
+$generator_options = array(
 	//target directory for generated table classes
 	'model_path' => MODELS_DIR,
 
@@ -18,8 +18,10 @@ $options = array(
 	'controller_path' => defined('CONTROLLERS_DIR') ? CONTROLLERS_DIR : null
 );
 
+$generators = array();
+
 foreach (DBManager::getConnectionNames() as $connection_name) {
 	$generator = new DefaultGenerator($connection_name);
-	$generator->setOptions($options);
+	$generator->setOptions($generator_options);
 	$generators[$connection_name] = $generator;
 }

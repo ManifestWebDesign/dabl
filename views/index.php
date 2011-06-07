@@ -17,7 +17,7 @@
 
 <ul>
 	<li>.htaccess</li>
-	<li>config/30-mvc.php</li>
+	<li>config/mvc.php</li>
 	<li>controllers/</li>
 	<li>views/</li>
 	<li>libraries/dabl/mvc/</li>

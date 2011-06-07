@@ -33,21 +33,14 @@ ini_set('error_log', LOGS_DIR . 'error_log');
 require_once(LIBRARIES_DIR . 'dabl/ClassLoader.php');
 require_once(LIBRARIES_DIR . 'dabl/print_r2.php');
 
-ClassLoader::addRepository('LIBRARIES', LIBRARIES_DIR);
-
-ClassLoader::import('LIBRARIES:dabl');
-
-function stripslashes_array($array) {
-	return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
-}
-
 // Strip added slashes if needed
 if (get_magic_quotes_gpc()) {
-    $_COOKIE = stripslashes_array($_COOKIE);
-    $_GET = stripslashes_array($_GET);
-    $_POST = stripslashes_array($_POST);
-    $_REQUEST = stripslashes_array($_REQUEST);
+	require_once(LIBRARIES_DIR . 'dabl/strip_request_slashes.php');
+	strip_request_slashes();
 }
+
+ClassLoader::addRepository('LIBRARIES', LIBRARIES_DIR);
+ClassLoader::import('LIBRARIES:dabl');
 
 // load all config files
 $config_files = glob(CONFIG_DIR . '*.php');
