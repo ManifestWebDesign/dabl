@@ -33,7 +33,7 @@ foreach ($this->getColumns($table_name) as $column) {
 		$foreign_method = 'get' . $foreign_table_name . 's';
 		$foreign_column_name = reset($fk->getForeignColumns());
 		$foreign_column_method = 'get' . $foreign_column_name;
-		$foreign_open_foreach = '<?php foreach(' . $this->getModelName($foreign_table_name) . '::getAll() as $' . $fk_single . '): ?>';
+		$foreign_open_foreach = '<?php foreach(' . $this->getModelName($foreign_table_name) . '::doSelect() as $' . $fk_single . '): ?>';
 		$foreign_option = '<option <?php if($' . $single . '->get' . $column_name . '() === $' . $fk_single . '->' . $foreign_column_method . '()) echo \'selected="selected"\' ?> value="<?php echo $' . $fk_single . '->' . $foreign_column_method . '() ?>"><?php echo $' . $fk_single . '?></option>';
 		$foreign_close_foreach = '<?php endforeach ?>';
 	}
