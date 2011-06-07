@@ -4,13 +4,13 @@
  * Handles all of your paginating needs.
  *
  * Example without className:
- * 
- * {@example libraries/dabl/query/QueryPager_description_1.php}
- * 
+ *
+ * {@example libraries/dabl/database/query/QueryPager_description_1.php}
+ *
  * Example with className:
- * 
- * {@example libraries/dabl/query/QueryPager_description_2.php}
- * 
+ *
+ * {@example libraries/dabl/database/query/QueryPager_description_2.php}
+ *
  */
 class QueryPager {
 
