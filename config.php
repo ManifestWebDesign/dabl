@@ -31,6 +31,7 @@ ini_set('log_errors', true);
 ini_set('error_log', LOGS_DIR . 'error_log');
 
 require_once(LIBRARIES_DIR . 'dabl/ClassLoader.php');
+require_once(LIBRARIES_DIR . 'dabl/print_r2.php');
 
 ClassLoader::addRepository('LIBRARIES', LIBRARIES_DIR);
 
