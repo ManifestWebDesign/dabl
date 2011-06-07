@@ -2,6 +2,8 @@
 	RewriteEngine On
 #	uncomment the following line if using a VirtualDocumentRoot
 #	RewriteBase /
+
+	RewriteRule ^generator/ - [L]
 	RewriteRule ^$ public/    [L]
 	RewriteRule (.*) public/$1 [L]
 </IfModule>
