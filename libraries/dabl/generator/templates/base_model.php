@@ -288,7 +288,6 @@ foreach ($fields as $key => &$field):
 <?php foreach ($PKs as $k => &$v): ?>
 		$q->add('<?php echo $v ?>', $<?php echo strtolower(str_replace('-', '_', $v)) ?>);
 <?php endforeach ?>
-		$q->setLimit(1);
 		return array_shift(<?php echo $class_name ?>::doSelect($q, true));
 <?php endif ?>
 	}
@@ -296,6 +295,12 @@ foreach ($fields as $key => &$field):
 <?php
 	foreach ($this->getColumns($table_name) as $field) {
 ?>
+	/**
+	 * Searches the database for a row with a <?php echo $field->getName() ?>
+	 * value that matches the one provided
+	 * @return <?php echo $class_name ?>
+
+	 */
 	static function retrieveBy<?php echo StringFormat::titleCase($field->getName()) ?>($value) {
 <?php
 		if ($field->isPrimaryKey()) {
