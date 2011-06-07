@@ -16,15 +16,10 @@
 </p>
 
 <ul>
+	<li>.htaccess</li>
+	<li>config/30-mvc.php</li>
 	<li>controllers/</li>
 	<li>views/</li>
-	<li>.htaccess</li>
-
-	<li>config/30-mvc.php</li>
-
 	<li>libraries/dabl/mvc/</li>
-
-	<li>public/css/</li>
-	<li>public/.htaccess</li>
-	<li>public/index.php</li>
+	<li>public/</li>
 </ul>
