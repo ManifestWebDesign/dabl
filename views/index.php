@@ -20,18 +20,9 @@
 	<li>views/</li>
 	<li>.htaccess</li>
 
-	<li>config/10-session.php</li>
-	<li>config/20-hooks.php</li>
-	<li>config/20-request.php</li>
-	<li>config/30-controllers.php</li>
-	<li>config/30-views.php</li>
+	<li>config/30-mvc.php</li>
 
-	<li>libraries/dabl/session/</li>
-	<li>libraries/dabl/hooks/</li>
-	<li>libraries/dabl/request/</li>
-	<li>libraries/dabl/controllers/</li>
-	<li>libraries/dabl/views/</li>
-	<li>libraries/dabl/format/</li>
+	<li>libraries/dabl/mvc/</li>
 
 	<li>public/css/</li>
 	<li>public/.htaccess</li>
