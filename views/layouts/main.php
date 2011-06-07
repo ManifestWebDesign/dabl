@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title><?php echo $title ?></title>
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/style.css', true) ?>" />
-		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/themes/redmond/jquery-ui-1.8.custom.css', true) ?>" />
+		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/themes/blue-tie/jquery-ui-1.8.custom.css', true) ?>" />
 		<script language="Javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
 		<script language="Javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js"></script>
 		<script>
