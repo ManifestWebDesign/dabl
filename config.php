@@ -4,19 +4,19 @@
 define('CONFIG_LOADED', true);
 
 // directory where this file lives.  Borderline deprecated, so use APP_DIR
-define('ROOT', dirname(__FILE__) . DIRECTORY_SEPARATOR);
+define('ROOT', dirname(__FILE__) . '/');
 
 // directory where application lives, usually the same as ROOT
 define('APP_DIR', ROOT);
 
 // directory of configurations files
-define('CONFIG_DIR', APP_DIR . 'config' . DIRECTORY_SEPARATOR);
+define('CONFIG_DIR', APP_DIR . 'config/');
 
-// directory where modules are located
-define('MODULES_DIR', APP_DIR . 'modules' . DIRECTORY_SEPARATOR);
+// directory where libraries are located
+define('LIBRARIES_DIR', APP_DIR . 'libraries/');
 
 // directory for logs
-define('LOGS_DIR', APP_DIR . 'logs' . DIRECTORY_SEPARATOR);
+define('LOGS_DIR', APP_DIR . 'logs/');
 
 // output errors to brower
 ini_set('display_errors', true);
@@ -30,14 +30,11 @@ ini_set('log_errors', true);
 // file for error logging
 ini_set('error_log', LOGS_DIR . 'error_log');
 
-// load helper classes for loading modules and classes
-$MODULE_DIR = MODULES_DIR . 'loaders/';
-$MODULE_INIT_SCRIPT = $MODULE_DIR . 'init.php';
-require_once $MODULE_INIT_SCRIPT;
+require_once(LIBRARIES_DIR . 'dabl/ClassLoader.php');
 
-// load all modules
-ModuleLoader::setModulesDir(MODULES_DIR);
-ModuleLoader::loadAll();
+ClassLoader::addRepository('LIBRARIES', LIBRARIES_DIR);
+
+ClassLoader::import('LIBRARIES:dabl');
 
 // load all config files
 $config_files = glob(CONFIG_DIR . '*.php');

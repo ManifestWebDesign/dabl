@@ -48,10 +48,9 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 			$_['orig_view'] = $_['view'];
 			$_['view'] = str_replace('\\', '/', $_['view']);
 			$_['view'] = trim($view, '/');
-			$_['view'] = str_replace('/', DIRECTORY_SEPARATOR, $_['view']);
 
 			if (is_dir(VIEWS_DIR . $_['view']))
-				$_['view'] = $_['view'] . DIRECTORY_SEPARATOR . "index";
+				$_['view'] = $_['view'] . '/index';
 
 			$_['view'] = VIEWS_DIR . "{$_['view']}.php";
 

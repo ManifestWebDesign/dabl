@@ -8,28 +8,28 @@ abstract class BaseGenerator {
 	 * @var array
 	 */
 	private $options;
-	
+
 	/**
 	 * @var string
 	 */
 	private $connectionName;
-	
+
 	/**
 	 * @var DOMDocument
 	 */
 	private $dbSchema;
-	
+
 	/**
 	 *
 	 * @var Database
 	 */
 	private $database;
-	
+
 	/**
 	 * @var string
 	 */
 	protected $baseModelTemplate = '/templates/base_model.php';
-	
+
 	/**
 	 * @var string
 	 */
@@ -53,28 +53,28 @@ abstract class BaseGenerator {
 		$this->options = array(
 			//convert table and column names to title case
 			'title_case' => true,
-			
+
 			//enforce an upper case first letter of classes
 			'cap_model_names' => true,
-			
+
 			//enforce an upper case first letter of get and set methods
 			'cap_method_names' => true,
-			
+
 			//prepend this to class name
 			'model_prefix' => '',
-			
+
 			//append this to class name
 			'model_suffix' => '',
-			
+
 			//target directory for generated table classes
 			'model_path' => defined('MODELS_DIR') ? MODELS_DIR : null,
-			
+
 			//target directory for generated base table classes
 			'base_model_path' => defined('MODELS_BASE_DIR') ? MODELS_BASE_DIR : null,
-			
+
 			//set to true to generate views
 			'view_path' => defined('VIEWS_DIR') ? VIEWS_DIR : null,
-			
+
 			//directory to save controller files in
 			'controller_path' => defined('CONTROLLERS_DIR') ? CONTROLLERS_DIR : null,
 		);
@@ -258,7 +258,7 @@ abstract class BaseGenerator {
 		$fields = $this->getColumns($table_name);
 		$conn = DBManager::getConnection($this->getConnectionName());
 		$auto_increment = false;
-		
+
 		foreach ($fields as $field) {
 			if ($field->isPrimaryKey()) {
 				$PKs[] = $field->getName();
@@ -267,7 +267,7 @@ abstract class BaseGenerator {
 				}
 			}
 		}
-		
+
 		if (count($PKs) == 1) {
 			$PK = $PKs[0];
 		} else {
@@ -376,7 +376,7 @@ abstract class BaseGenerator {
 			if (!is_dir($options['view_path']))
 				throw new Exception($options['view_path'] . " is not a directory.");
 
-			$target_dir = $options['view_path'] . $this->getViewDirName($table_name) . DIRECTORY_SEPARATOR;
+			$target_dir = $options['view_path'] . $this->getViewDirName($table_name) . '/';
 
 			if (!is_dir($target_dir))
 				mkdir($target_dir, 0755);

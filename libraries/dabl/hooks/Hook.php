@@ -45,7 +45,7 @@ class Hook {
 		if (!isset(self::$hooks[$hook_name]))
 			return;
 
-		if(!is_array($arguments) && !($arguments instanceof ArrayObject)){
+		if (!is_array($arguments) && !($arguments instanceof ArrayObject)) {
 			$arguments = array($arguments);
 		}
 

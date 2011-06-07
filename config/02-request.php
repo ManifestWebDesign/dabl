@@ -6,9 +6,15 @@
 define('BASE_URL', '/');
 
 // directory for public html files that are directly exposed to the web server
-define('PUBLIC_DIR', APP_DIR . 'public' . DIRECTORY_SEPARATOR);
+define('PUBLIC_DIR', APP_DIR . 'public/');
 
 // Strip added slashes if needed
 if (get_magic_quotes_gpc()) {
 	strip_request_slashes();
+}
+
+$helpers = glob(LIBRARIES_DIR . 'dabl/request/*.php');
+sort($helpers);
+foreach ($helpers as $helper) {
+	require_once $helper;
 }

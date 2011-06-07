@@ -1,10 +1,15 @@
 /* Global */
 
 body, table, input, select, textarea {
-	font-size: 12px;
+	font: 12px tahoma, arial;
 }
 
-/** Forms **/
+
+/* Forms */
+form p, form, h2 {
+	clear: both;
+}
+
 form p label{
 	display:block;
 	float: left;
@@ -16,8 +21,15 @@ form p label{
 }
 
 form div.ui-widget-content p {
+	text-align: left;
+	line-height: 24px;
 	clear: both;
 	padding: 5px 0 5px 0;
+}
+
+form h2 {
+	margin-left: 10px;
+	margin-right: 20px;
 }
 
 input[type=text], input[type=password], textarea {
@@ -26,8 +38,8 @@ input[type=text], input[type=password], textarea {
 }
 
 textarea {
-	width: 200px;
-	height: 50px;
+	width: 400px;
+	height: 100px;
 }
 
 
@@ -39,8 +51,9 @@ table.object-grid{
 }
 
 table.object-grid thead th{
-	padding:6px 6px 4px 6px;
+	padding:6px 6px 4px 8px;
 	font-weight: normal;
+	text-align: left;
 }
 
 table.object-grid thead th {
@@ -70,14 +83,21 @@ table.object-grid tbody td{
 .ui-button-link {
 	padding:0.3em .8em 0.3em 18px;
 	font-size: 13px;
+	line-height: 16px;
 	position:relative;
 	text-decoration:none;
 	cursor: pointer;
 	display:inline-block;
+	white-space: nowrap;
+}
+
+.ui-button-link, .ui-button link a, .ui-button-link input {
+	font-weight: bold;
 }
 
 h1 .ui-button-link{
 	float:right;
+	margin-left: 10px;
 }
 
 .ui-button-link .ui-icon {
@@ -100,14 +120,29 @@ h1 .ui-button-link{
 }
 
 table.object-grid .ui-button-link {
+	line-height: 14px;
 	font-size: 10px;
 }
 
 
-/** UI Other **/
+/** UI Tabs **/
+.ui-tabs {
+	margin-bottom: 10px;
+}
 
+div.ui-tabs .ui-tabs-nav li.ui-tabs-selected a,
+div.ui-tabs .ui-tabs-nav li.ui-state-disabled a,
+div.ui-tabs .ui-tabs-nav li.ui-state-processing a {
+	cursor: default;
+}
+
+
+/** UI Other **/
 div.ui-widget-content {
 	padding: 5px;
+	background: #efefef;
+	border: 1px solid #bbb;
+	margin-bottom: 5px;
 }
 
 div.ui-widget-content div.ui-widget-content {
@@ -121,13 +156,5 @@ div.ui-widget-content div.ui-widget-content {
 
 div.ui-state-highlight, div.ui-state-error{
 	margin-top:5px;
-}
-
-.ui-tabs {
-	margin-bottom: 10px;
-}
-
-
-.float-right {
-	float: right;
+	margin-bottom: 5px;
 }

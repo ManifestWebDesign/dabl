@@ -9,42 +9,42 @@ class ControllerRoute {
 	 * @var string
 	 */
 	protected $route;
-	
+
 	/**
 	 * @var array
 	 */
 	protected $segments = array();
-	
+
 	/**
 	 * @var string
 	 */
 	protected $controllerDir;
-	
+
 	/**
 	 * @var string
 	 */
 	protected $controllerClass;
-	
+
 	/**
 	 * @var string
 	 */
 	protected $action;
-	
+
 	/**
 	 * @var array
 	 */
 	protected $params = array();
-	
+
 	/**
 	 * @var string
 	 */
 	protected $extension;
-	
+
 	/**
 	 * @var bool
 	 */
 	protected $partial = false;
-	
+
 	/**
 	 * @var string
 	 */
@@ -61,7 +61,7 @@ class ControllerRoute {
 		$route = trim($route, '/');
 
 		if (is_array($route)) {
-			$this->route = implode(DIRECTORY_SEPARATOR, $route);
+			$this->route = implode('/', $route);
 			$segments = $route;
 		} else {
 			$this->route = $route;
@@ -110,11 +110,11 @@ class ControllerRoute {
 			}
 
 			// check if the segment matches directory name
-			$t_dir = $c_dir . $segment . DIRECTORY_SEPARATOR;
+			$t_dir = $c_dir . $segment . '/';
 			if (is_dir($t_dir)) {
 				unset($segments[$key]);
 				$c_dir = $t_dir;
-				$view_prefix .= $segment . DIRECTORY_SEPARATOR;
+				$view_prefix .= $segment . '/';
 				continue;
 			}
 			break;
@@ -137,7 +137,7 @@ class ControllerRoute {
 			}
 		}
 
-		$this->viewDir = $view_dir ? $view_prefix . $view_dir . DIRECTORY_SEPARATOR : $view_prefix;
+		$this->viewDir = $view_dir ? $view_prefix . $view_dir . '/' : $view_prefix;
 		$this->action = array_shift($segments);
 		$this->params = $segments;
 	}
@@ -153,7 +153,7 @@ class ControllerRoute {
 
 		$controller->doAction($controller_route->getAction(), $controller_route->getParams());
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -193,7 +193,7 @@ class ControllerRoute {
 	}
 
 	/**
-	 * @param bool $bool 
+	 * @param bool $bool
 	 */
 	function setPartial($bool) {
 		$this->partial = (bool) $bool;
@@ -228,7 +228,7 @@ class ControllerRoute {
 			return null;
 		}
 
-		require_once $this->controllerDir . DIRECTORY_SEPARATOR . $this->controllerClass . '.php';
+		require_once $this->controllerDir . '/' . $this->controllerClass . '.php';
 		$instance = new $this->controllerClass;
 
 		if (!$instance->viewDir) {

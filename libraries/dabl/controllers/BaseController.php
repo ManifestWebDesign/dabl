@@ -73,7 +73,7 @@ abstract class BaseController extends ArrayObject {
 
 		$view .= '/';
 
-		return str_replace('/', DIRECTORY_SEPARATOR, $view);
+		return $view;
 	}
 
 	/**
