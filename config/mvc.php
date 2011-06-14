@@ -6,8 +6,7 @@ ClassLoader::addRepository('MVC', LIBRARIES_DIR . 'dabl/mvc');
 define('IS_MVC', true);
 
 
-/** Session **/
-
+/** Session * */
 // start the session
 session_start();
 
@@ -15,13 +14,12 @@ require_once LIBRARIES_DIR . 'dabl/mvc/session/persist.php';
 
 
 
-/** Hooks **/
+/** Hooks * */
 ClassLoader::import('MVC:hooks');
 
 
 
-/** Request **/
-
+/** Request * */
 // the browser path to this application.  it should be:
 // a full url with http:// and a trailing slash OR
 // a subdirectory with leading and trailing slashes
@@ -37,8 +35,7 @@ foreach ($helpers as $helper) {
 
 
 
-/** Controllers **/
-
+/** Controllers * */
 // default controller, action, and view
 define('DEFAULT_CONTROLLER', 'index');
 define('CONTROLLERS_DIR', APP_DIR . 'controllers/');
@@ -52,8 +49,7 @@ Hook::add(HOOK_LOAD_ROUTE, array('ControllerRoute', 'load'), 100);
 
 
 
-/** Views **/
-
+/** Views * */
 require_once LIBRARIES_DIR . 'dabl/mvc/views/load_view.php';
 
 $helpers = glob(LIBRARIES_DIR . 'dabl/mvc/format/*.php');
