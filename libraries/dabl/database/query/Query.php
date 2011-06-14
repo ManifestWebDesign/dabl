@@ -833,7 +833,7 @@ class Query {
 			throw new Exception('No table specified.');
 
 		$q->setAction(self::ACTION_COUNT);
-		return $q->getQuery($conn)->bindAndExecute()->fetchColumn();
+		return (int) $q->getQuery($conn)->bindAndExecute()->fetchColumn();
 	}
 
 	/**
