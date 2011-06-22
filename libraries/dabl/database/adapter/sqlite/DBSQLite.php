@@ -79,7 +79,7 @@ class DBSQLite extends DABLPDO {
 		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
-		
+
 		return '[' . implode('].[', explode('.', $text)) . ']';
 	}
 
@@ -103,12 +103,10 @@ class DBSQLite extends DABLPDO {
 	 */
 	function getDatabaseSchema(){
 
-		ClassLoader::import('DATABASE:propel');
-		ClassLoader::import('DATABASE:propel:database');
-		ClassLoader::import('DATABASE:propel:database:model');
-		ClassLoader::import('DATABASE:propel:database:reverse');
-		ClassLoader::import('DATABASE:propel:database:reverse:sqlite');
-		ClassLoader::import('DATABASE:propel:database:tranform');
+		ClassLoader::import('DATABASE:propel:');
+		ClassLoader::import('DATABASE:propel:model');
+		ClassLoader::import('DATABASE:propel:reverse');
+		ClassLoader::import('DATABASE:propel:reverse:sqlite');
 		ClassLoader::import('DATABASE:propel:platform');
 
 		$parser = new SqliteSchemaParser();

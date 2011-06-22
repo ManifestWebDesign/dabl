@@ -1,7 +1,5 @@
 <?php
 
-require_once LIBRARIES_DIR . 'dabl/database/propel/platform/Platform.php';
-
 abstract class BaseGenerator {
 
 	/**
