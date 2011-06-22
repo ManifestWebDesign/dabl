@@ -16,14 +16,13 @@ class <?php echo $controller_name ?> extends ApplicationController {
 
 		$qp = new QueryPager($q, 25, $page, '<?php echo $model_name ?>');
 		$this['<?php echo $plural ?>'] = $qp->fetchPage();
-		$this['page'] = '<?php echo StringFormat::titleCase($plural, ' ') ?>';
 		$this['page_string'] = $page_string;
 		$this['pager'] = $qp;
 	}
 
 	function save(<? if(@$pkMethod): ?>$<?php echo $single ?>_id = null<? endif ?>) {
 		$<?php echo $single ?> = $this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id<? endif ?>);
-		
+
 		try {
 			$<?php echo $single ?>->fromArray($_REQUEST);
 			if ($<?php echo $single ?>->validate()) {
@@ -36,7 +35,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		} catch (Exception $e) {
 			$this->persistant['errors'][] = $e->getMessage();
 		}
-		
+
 		$this->persistant['<?php echo $single ?>'] = $<?php echo $single ?>;
 		$this->redirect('<?php echo $plural_url ?>/edit/'<? if(@$pkMethod): ?> . $<?php echo $single ?>-><?php echo $pkMethod ?>()<? endif ?>);
 	}
@@ -93,13 +92,13 @@ class <?php echo $controller_name ?> extends ApplicationController {
 			// if <?php echo $single ?> has already been set manually, don't mess with it
 			return $this['<?php echo $single ?>'];
 		}
-		
+
 <? if(@$pkMethod): ?>
 		// look for id in param or in $_REQUEST array
 		if (null === $<?php echo $single ?>_id && isset($_REQUEST[<?php echo $model_name ?>::getPrimaryKey()])) {
 			$<?php echo $single ?>_id = $_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
 		}
-		
+
 		if ('' === $<?php echo $single ?>_id || null === $<?php echo $single ?>_id) {
 			// if no primary key found, create new <?php echo $model_name ?>
 
@@ -112,5 +111,5 @@ class <?php echo $controller_name ?> extends ApplicationController {
 <? endif ?>
 		return $this['<?php echo $single ?>'];
 	}
-	
+
 }
