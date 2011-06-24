@@ -353,8 +353,14 @@ abstract class BaseGenerator {
 				unset($class);
 			}
 		}
-		//save xml to file
+
+		$sql = $this->database->getPlatform()->getAddTablesDDL($this->database);
+
+		// save XML to file
 		file_put_contents($options['model_path'] . $this->getConnectionName() . "-schema.xml", $this->getSchema()->saveXML());
+
+		// save SQL to file
+		file_put_contents($options['model_path'] . $this->getConnectionName() . "-schema.sql", $sql);
 	}
 
 	/**
