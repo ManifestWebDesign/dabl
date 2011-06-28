@@ -28,15 +28,15 @@
 		<div class="ui-tabs ui-widget">
 			<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
 			<?php foreach($actions as $label => $url): ?>
-				<li class="ui-state-default ui-corner-top <? if (@$current_page == $label) echo "ui-tabs-selected ui-state-active ui-state-hover"?>">
+				<li class="ui-state-default ui-corner-top <?php if (@$current_page == $label) echo "ui-tabs-selected ui-state-active ui-state-hover"?>">
 					<a href="<?php echo $url ?>"><?php echo $label ?></a>
 				</li>
 			<?php endforeach ?>
 			</ul>
 		</div>
 
-		<? load_view('errors', $params) ?>
-		<? load_view('messages', $params) ?>
+		<?php load_view('errors', $params) ?>
+		<?php load_view('messages', $params) ?>
 
 		<?php echo $content ?>
 
