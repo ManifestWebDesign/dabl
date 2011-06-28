@@ -234,7 +234,9 @@ class DBMySQL extends DABLPDO {
 		$parser = new MysqlSchemaParser();
 		$parser->setConnection($this);
 		$database = new Database($this->getDBName());
-		$database->setPlatform(new MysqlPlatform());
+		$platform = new MysqlPlatform();
+		$platform->setDefaultTableEngine('InnoDB');
+		$database->setPlatform($platform);
 		$parser->parse($database);
 		$database->doFinalInitialization();
 		return $database;
