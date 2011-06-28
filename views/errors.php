@@ -3,7 +3,7 @@
 				<?php foreach($errors as $error): ?>
 					<p>
 						<span class="ui-message-icon ui-icon ui-icon-alert"></span>
-						<?= $error ?>
+						<?php echo $error ?>
 					</p>
 				<?php endforeach ?>
 				</div>

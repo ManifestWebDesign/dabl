@@ -84,7 +84,7 @@ foreach ($fields as $key => &$field) {
 	 * @var <?php echo $field->getPhpType() ?>
 
 	 */
-<?
+<?php
 	if (($field->isNumericType()) && (!ctype_digit($default)) && (!$default)) $default = null;
 ?>
 	protected $<?php echo $field->getName() ?><?php
@@ -267,7 +267,7 @@ foreach ($fields as $key => &$field):
 
 	 */
 <?php $used_functions[] = 'retrieveByPKs'; ?>
-	static function retrieveByPKs(<?php foreach ($PKs as $k => &$v): ?><?php if ($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><? endforeach ?>) {
+	static function retrieveByPKs(<?php foreach ($PKs as $k => &$v): ?><?php if ($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><?php endforeach ?>) {
 <?php if (0 === count($PKs)): ?>
 		throw new Exception('This table does not have any primary keys.');
 <?php else: ?>
@@ -577,7 +577,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 			if (!$<?php echo $lc_to_class_name ?>->get<?php echo $to_column ?>()) {
 				throw new Exception('Cannot connect a <?php echo $to_class_name ?> without a <?php echo $to_column ?>');
 			}
-			$this->set<?echo $from_column ?>($<?php echo $lc_to_class_name ?>->get<?php echo $to_column ?>());
+			$this->set<?php echo $from_column ?>($<?php echo $lc_to_class_name ?>->get<?php echo $to_column ?>());
 		}
 		if ($this->getCacheResults()) {
 			$this->_<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?> = $<?php echo $lc_to_class_name ?>;
@@ -612,7 +612,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	 */
 <?php $used_functions[] = "get$to_class_name" . 'RelatedBy' . StringFormat::titleCase($from_column); ?>
 	function get<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>() {
-		if (null === $this->get<?echo $from_column ?>()) {
+		if (null === $this->get<?php echo $from_column ?>()) {
 			$result = null;
 		} else {
 			if ($this->getCacheResults() && null !== $this->_<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>) {
@@ -622,11 +622,11 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	$foreign_column = $this->database->getTable($to_table)->getColumn($to_column);
 	if ($foreign_column->isPrimaryKey()) {
 ?>
-			$result = <?php echo $to_class_name ?>::retrieveByPK($this->get<?echo $from_column ?>());
+			$result = <?php echo $to_class_name ?>::retrieveByPK($this->get<?php echo $from_column ?>());
 <?php
 		} else {
 ?>
-			$result = <?php echo $to_class_name ?>::retrieveBy<?php echo $from_column ?>($this->get<?echo $from_column ?>());
+			$result = <?php echo $to_class_name ?>::retrieveBy<?php echo $from_column ?>($this->get<?php echo $from_column ?>());
 <?php } ?>
 		}
 		if ($this->getCacheResults()) {
@@ -660,7 +660,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		return $this->get<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>();
 	}
 
-<?
+<?php
 		}
 		if (!in_array("set$to_class_name", $used_functions)) {
 
@@ -674,7 +674,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		return $this->set<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($<?php echo $lc_to_class_name ?>);
 	}
 
-<?
+<?php
 		}
 	}
 ?>
@@ -836,7 +836,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return $this->get<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($extra);
 	}
 
-<?
+<?php
 			}
 			if (!in_array('get' . StringFormat::titleCase($from_class_name) . 'sQuery', $used_functions)) {
 ?>
@@ -850,7 +850,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>','<?php echo $to_column ?>', $q);
 	}
 
-<?
+<?php
 			}
 			if (!in_array('delete' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
@@ -864,7 +864,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return $this->delete<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q);
 	}
 
-<?
+<?php
 			}
 			if (!in_array('count' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
@@ -878,7 +878,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return $this->count<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q);
 	}
 
-<?
+<?php
 			}
 		}
 	}
