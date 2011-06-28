@@ -1,4 +1,4 @@
-<?php echo "<?php \n"; ?>
+<?php echo "<?php\n"; ?>
 
 class <?php echo $controller_name ?> extends ApplicationController {
 

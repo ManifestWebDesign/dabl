@@ -1,4 +1,4 @@
-<?php echo '<?php ' ?>
+<?php echo '<?php' ?>
 
 /**
  *		Created by Dan Blaisdell's DABL
