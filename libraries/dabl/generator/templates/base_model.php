@@ -84,7 +84,7 @@ foreach ($fields as $key => &$field) {
 	 * @var <?php echo $field->getPhpType() ?>
 
 	 */
-<?
+<?php
 	if (($field->isNumericType()) && (!ctype_digit($default)) && (!$default)) $default = null;
 ?>
 	protected $<?php echo $field->getName() ?><?php
@@ -660,7 +660,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		return $this->get<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>();
 	}
 
-<?
+<?php
 		}
 		if (!in_array("set$to_class_name", $used_functions)) {
 
@@ -674,7 +674,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		return $this->set<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($<?php echo $lc_to_class_name ?>);
 	}
 
-<?
+<?php
 		}
 	}
 ?>
@@ -836,7 +836,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return $this->get<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($extra);
 	}
 
-<?
+<?php
 			}
 			if (!in_array('get' . StringFormat::titleCase($from_class_name) . 'sQuery', $used_functions)) {
 ?>
@@ -850,7 +850,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return $this->getForeignObjectsQuery('<?php echo $from_table ?>', '<?php echo $from_column ?>','<?php echo $to_column ?>', $q);
 	}
 
-<?
+<?php
 			}
 			if (!in_array('delete' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
@@ -864,7 +864,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return $this->delete<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q);
 	}
 
-<?
+<?php
 			}
 			if (!in_array('count' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
@@ -878,7 +878,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return $this->count<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q);
 	}
 
-<?
+<?php
 			}
 		}
 	}

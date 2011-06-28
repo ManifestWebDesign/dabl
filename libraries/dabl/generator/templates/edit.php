@@ -52,7 +52,7 @@ foreach ($this->getColumns($table_name) as $column) {
 		case PropelTypes::DATE:
 ?>
 			<input id="<?php echo $input_id ?>" class="datepicker" type="text" name="<?php echo $column_name ?>" value="<?php echo $output ?>" />
-<?
+<?php
 			break;
 		default:
 			if($column->isForeignKey()){
