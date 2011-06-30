@@ -4,7 +4,6 @@
  * @package dabl
  */
 abstract class BaseModel {
-	
 	const COLUMN_TYPE_CHAR = "CHAR";
 	const COLUMN_TYPE_VARCHAR = "VARCHAR";
 	const COLUMN_TYPE_LONGVARCHAR = "LONGVARCHAR";
@@ -40,20 +39,20 @@ abstract class BaseModel {
 		self::COLUMN_TYPE_BU_DATE,
 		self::COLUMN_TYPE_BU_TIMESTAMP
 	);
-	
+
 	private static $INTEGER_TYPES = array(
 		self::COLUMN_TYPE_SMALLINT,
 		self::COLUMN_TYPE_TINYINT,
 		self::COLUMN_TYPE_INTEGER,
 		self::COLUMN_TYPE_BIGINT
 	);
-	
+
 	private static $LOB_TYPES = array(
 		self::COLUMN_TYPE_VARBINARY,
 		self::COLUMN_TYPE_LONGVARBINARY,
 		self::COLUMN_TYPE_BLOB
 	);
-	
+
 	private static $TEMPORAL_TYPES = array(
 		self::COLUMN_TYPE_DATE,
 		self::COLUMN_TYPE_TIME,
@@ -61,7 +60,7 @@ abstract class BaseModel {
 		self::COLUMN_TYPE_BU_DATE,
 		self::COLUMN_TYPE_BU_TIMESTAMP
 	);
-	
+
 	private static $NUMERIC_TYPES = array(
 		self::COLUMN_TYPE_SMALLINT,
 		self::COLUMN_TYPE_TINYINT,
@@ -73,11 +72,25 @@ abstract class BaseModel {
 		self::COLUMN_TYPE_DECIMAL,
 		self::COLUMN_TYPE_REAL
 	);
-	
+
 	public function __toString() {
 		return get_class($this) . implode('-', $this->getPrimaryKeyValues());
 	}
-	
+
+	/**
+	 * Magic get
+	 */
+	function __get($name) {
+		return $this->{'get' . $name}();
+	}
+
+	/**
+	 * Magic set
+	 */
+	function __set($name, $value) {
+		$this->{'set' . $name}($value);
+	}
+
 	/**
 	 * Whether passed type is a temporal (date/time/timestamp) type.
 	 *
@@ -107,17 +120,17 @@ abstract class BaseModel {
 	static function isNumericType($type) {
 		return in_array($type, self::$NUMERIC_TYPES);
 	}
-	
+
 	/**
 	 * Returns true if values for the type are integer.
-	 * 
+	 *
 	 * @param string $type
-	 * @return boolean 
+	 * @return boolean
 	 */
 	static function isIntegerType($type) {
 		return in_array($type, self::$INTEGER_TYPES);
 	}
-	
+
 	/**
 	 * Returns true if type is a LOB type (i.e. would be handled by Blob/Clob class).
 	 * @param string $type Propel type to check.
@@ -126,7 +139,7 @@ abstract class BaseModel {
 	static function isLobType($type) {
 		return in_array($type, self::$LOB_TYPES);
 	}
-	
+
 	const MAX_INSTANCE_POOL_SIZE = 100;
 
 	/**
@@ -250,7 +263,8 @@ abstract class BaseModel {
 	}
 
 	/**
-	 * Creates new instance of $this and
+	 * Creates new instance of self and with the same values as $this, except
+	 * the primary key value is cleared
 	 * @return BaseModel
 	 */
 	function copy() {
@@ -258,10 +272,8 @@ abstract class BaseModel {
 		$new_object = new $class;
 		$new_object->fromArray($this->toArray());
 
-		if ($this->getPrimaryKey()) {
-			$pk = $this->getPrimaryKey();
-			$set_pk_method = "set$pk";
-			$new_object->$set_pk_method(null);
+		foreach($this->getPrimaryKeys() as $pk){
+			$new_object->{'set' . $pk}(null);
 		}
 		return $new_object;
 	}
@@ -301,10 +313,10 @@ abstract class BaseModel {
 		if (null === $column_type) {
 			$column_type = $this->getColumnType($column_name);
 		}
-		
+
 		$temporal = self::isTemporalType($column_type);
 		$numeric = self::isNumericType($column_type);
-		
+
 		if ($numeric || $temporal) {
 			if ('' === $value) {
 				$value = null;
@@ -348,14 +360,14 @@ abstract class BaseModel {
 				}
 			}
 		}
-		
+
 		if ($this->$column_name !== $value) {
 			$this->_modifiedColumns[$column_name] = $column_name;
 			$this->$column_name = $value;
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * Clears the array of modified column names
 	 * @return BaseModel
@@ -384,7 +396,7 @@ abstract class BaseModel {
 	/**
 	 * Returns an associative Array with the values of $this.
 	 * Array keys match column names.
-	 * @return array of BaseTable Objects
+	 * @return array
 	 */
 	function toArray() {
 		$array = array();

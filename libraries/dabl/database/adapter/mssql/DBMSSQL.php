@@ -69,7 +69,7 @@ class DBMSSQL extends DABLPDO {
 		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
-		
+
 		return '[' . implode('].[', explode('.', $text)) . ']';
 	}
 
@@ -281,12 +281,10 @@ class DBMSSQL extends DABLPDO {
 	 */
 	function getDatabaseSchema() {
 
-		ClassLoader::import('DATABASE:propel');
-		ClassLoader::import('DATABASE:propel:database');
-		ClassLoader::import('DATABASE:propel:database:model');
-		ClassLoader::import('DATABASE:propel:database:reverse');
-		ClassLoader::import('DATABASE:propel:database:reverse:mssql');
-		ClassLoader::import('DATABASE:propel:database:tranform');
+		ClassLoader::import('DATABASE:propel:');
+		ClassLoader::import('DATABASE:propel:model');
+		ClassLoader::import('DATABASE:propel:reverse');
+		ClassLoader::import('DATABASE:propel:reverse:mssql');
 		ClassLoader::import('DATABASE:propel:platform');
 
 		$parser = new MssqlSchemaParser();

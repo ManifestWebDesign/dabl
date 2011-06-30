@@ -52,7 +52,7 @@ foreach ($this->getColumns($table_name) as $column) {
 		case PropelTypes::DATE:
 ?>
 			<input id="<?php echo $input_id ?>" class="datepicker" type="text" name="<?php echo $column_name ?>" value="<?php echo $output ?>" />
-<?
+<?php
 			break;
 		default:
 			if($column->isForeignKey()){
@@ -87,11 +87,11 @@ foreach ($this->getColumns($table_name) as $column) {
 		</span>
 		<?php echo '<?php if (isset($_SERVER[\'HTTP_REFERER\'])): ?>' ?>
 
-		<a class="ui-state-default ui-corner-all ui-button-link" href="<?php echo '<?= $_SERVER[\'HTTP_REFERER\'] ?>' ?>">
+		<a class="ui-state-default ui-corner-all ui-button-link" href="<?php echo '<?php echo $_SERVER[\'HTTP_REFERER\'] ?>' ?>">
 			<span class="ui-icon ui-icon-cancel"></span>
 			Cancel
 		</a>
-		<? echo '<?php endif ?>' ?>
+		<?php echo '<?php endif ?>' ?>
 
 	</p>
 </form>

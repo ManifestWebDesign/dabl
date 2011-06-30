@@ -20,15 +20,15 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		$this['pager'] = $qp;
 	}
 
-	function save(<? if(@$pkMethod): ?>$<?php echo $single ?>_id = null<? endif ?>) {
-		$<?php echo $single ?> = $this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id<? endif ?>);
+	function save(<?php if(@$pkMethod): ?>$<?php echo $single ?>_id = null<?php endif ?>) {
+		$<?php echo $single ?> = $this->_get<?php echo $model_name ?>(<?php if(@$pkMethod): ?>$<?php echo $single ?>_id<?php endif ?>);
 
 		try {
 			$<?php echo $single ?>->fromArray($_REQUEST);
 			if ($<?php echo $single ?>->validate()) {
 				$<?php echo $single ?>->save();
 				$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> saved';
-				$this-><? if(@$pkMethod): ?>redirect('<?php echo $plural_url ?>/show/' . $<?php echo $single ?>-><?php echo $pkMethod ?>());<? else: ?>redirect('<?php echo $plural_url ?>');<? endif ?>
+				$this-><?php if(@$pkMethod): ?>redirect('<?php echo $plural_url ?>/show/' . $<?php echo $single ?>-><?php echo $pkMethod ?>());<?php else: ?>redirect('<?php echo $plural_url ?>');<?php endif ?>
 
 			}
 			$this->persistant['errors'] = $<?php echo $single ?>->getValidationErrors();
@@ -37,12 +37,12 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		}
 
 		$this->persistant['<?php echo $single ?>'] = $<?php echo $single ?>;
-		$this->redirect('<?php echo $plural_url ?>/edit/'<? if(@$pkMethod): ?> . $<?php echo $single ?>-><?php echo $pkMethod ?>()<? endif ?>);
+		$this->redirect('<?php echo $plural_url ?>/edit/'<?php if(@$pkMethod): ?> . $<?php echo $single ?>-><?php echo $pkMethod ?>()<?php endif ?>);
 	}
 
-<? if(@$pkMethod): ?>	function delete($<?php echo $single ?>_id = null) {
+<?php if(@$pkMethod): ?>	function delete($<?php echo $single ?>_id = null) {
 		try {
-			if (null !== $this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id<? endif ?>) && $this['<?php echo $single ?>']->delete()) {
+			if (null !== $this->_get<?php echo $model_name ?>(<?php if(@$pkMethod): ?>$<?php echo $single ?>_id<?php endif ?>) && $this['<?php echo $single ?>']->delete()) {
 				$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> deleted';
 			} else {
 				$this->persistant['errors'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> could not be deleted';
@@ -55,11 +55,11 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	}
 
 	function show($<?php echo $single ?>_id = null) {
-		$this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id<? endif ?>);
+		$this->_get<?php echo $model_name ?>(<?php if(@$pkMethod): ?>$<?php echo $single ?>_id<?php endif ?>);
 	}
 
-<? endif ?>	function edit(<? if(@$pkMethod): ?>$<?php echo $single ?>_id = null<? endif ?>) {
-		$this->_get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id<? endif ?>)->fromArray(@$_REQUEST);
+<?php endif ?>	function edit(<?php if(@$pkMethod): ?>$<?php echo $single ?>_id = null<?php endif ?>) {
+		$this->_get<?php echo $model_name ?>(<?php if(@$pkMethod): ?>$<?php echo $single ?>_id<?php endif ?>)->fromArray(@$_REQUEST);
 	}
 
 <?php
@@ -87,13 +87,13 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	 * @return <?php echo $model_name ?>
 
 	 */
-	private function _get<?php echo $model_name ?>(<? if(@$pkMethod): ?>$<?php echo $single ?>_id = null<? endif ?>) {
+	private function _get<?php echo $model_name ?>(<?php if(@$pkMethod): ?>$<?php echo $single ?>_id = null<?php endif ?>) {
 		if (isset($this['<?php echo $single ?>'])) {
 			// if <?php echo $single ?> has already been set manually, don't mess with it
 			return $this['<?php echo $single ?>'];
 		}
 
-<? if(@$pkMethod): ?>
+<?php if(@$pkMethod): ?>
 		// look for id in param or in $_REQUEST array
 		if (null === $<?php echo $single ?>_id && isset($_REQUEST[<?php echo $model_name ?>::getPrimaryKey()])) {
 			$<?php echo $single ?>_id = $_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
@@ -107,8 +107,8 @@ class <?php echo $controller_name ?> extends ApplicationController {
 			// if primary key found, retrieve the record from the db
 			$this['<?php echo $single ?>'] = <?php echo $model_name ?>::retrieveByPK($<?php echo $single ?>_id);
 		}
-<? else: ?>		$this['<?php echo $single ?>'] = new <?php echo $model_name ?>;
-<? endif ?>
+<?php else: ?>		$this['<?php echo $single ?>'] = new <?php echo $model_name ?>;
+<?php endif ?>
 		return $this['<?php echo $single ?>'];
 	}
 

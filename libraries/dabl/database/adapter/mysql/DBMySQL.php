@@ -89,7 +89,7 @@ class DBMySQL extends DABLPDO {
 	 */
 	function quoteIdentifier($text) {
 		$quote = '`';
-		
+
 		if (is_array($text)) {
 			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
@@ -97,7 +97,7 @@ class DBMySQL extends DABLPDO {
 		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
-		
+
 		return $quote . implode("$quote.$quote", explode('.', $text)) . $quote;
 	}
 
@@ -224,19 +224,19 @@ class DBMySQL extends DABLPDO {
 	 * @return Database
 	 */
 	function getDatabaseSchema(){
-		
+
 		ClassLoader::import('DATABASE:propel:');
-		ClassLoader::import('DATABASE:propel:database');
-		ClassLoader::import('DATABASE:propel:database:model');
-		ClassLoader::import('DATABASE:propel:database:reverse');
-		ClassLoader::import('DATABASE:propel:database:reverse:mysql');
-		ClassLoader::import('DATABASE:propel:database:tranform');
+		ClassLoader::import('DATABASE:propel:model');
+		ClassLoader::import('DATABASE:propel:reverse');
+		ClassLoader::import('DATABASE:propel:reverse:mysql');
 		ClassLoader::import('DATABASE:propel:platform');
 
 		$parser = new MysqlSchemaParser();
 		$parser->setConnection($this);
 		$database = new Database($this->getDBName());
-		$database->setPlatform(new MysqlPlatform());
+		$platform = new MysqlPlatform();
+		$platform->setDefaultTableEngine('InnoDB');
+		$database->setPlatform($platform);
 		$parser->parse($database);
 		$database->doFinalInitialization();
 		return $database;
