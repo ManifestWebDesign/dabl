@@ -10,6 +10,10 @@
 <?php $used_functions = array(); ?>
 abstract class base<?php echo $class_name ?> extends ApplicationModel {
 
+<?php foreach ($fields as $key => &$field): ?>
+	const <?php echo strtoupper(StringFormat::variable($field->getName())) ?> = '<?php echo $table_name ?>.<?php echo $field->getName() ?>';
+<?php endforeach ?>
+
 	/**
 	 * Name of the table
 	 * @var string
