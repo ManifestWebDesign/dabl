@@ -519,13 +519,15 @@ abstract class BaseModel {
 		if ($this->isNew() && $this->hasColumn('Created') && !$this->isColumnModified('Created')) {
 			$this->setCreated(CURRENT_TIMESTAMP);
 		}
-		if ($this->hasColumn('Updated') && !$this->isColumnModified('Updated')) {
+
+		if (($this->isNew() || $this->isModified()) && $this->hasColumn('Updated') && !$this->isColumnModified('Updated')) {
 			$this->setUpdated(CURRENT_TIMESTAMP);
 		}
 
 		if ($this->getPrimaryKeys()) {
-			if ($this->isNew())
+			if ($this->isNew()) {
 				return $this->insert();
+			}
 			return $this->update();
 		}
 		return $this->replace();
