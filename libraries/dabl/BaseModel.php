@@ -263,7 +263,8 @@ abstract class BaseModel {
 	}
 
 	/**
-	 * Creates new instance of $this and
+	 * Creates new instance of self and with the same values as $this, except
+	 * the primary key value is cleared
 	 * @return BaseModel
 	 */
 	function copy() {
@@ -271,10 +272,8 @@ abstract class BaseModel {
 		$new_object = new $class;
 		$new_object->fromArray($this->toArray());
 
-		if ($this->getPrimaryKey()) {
-			$pk = $this->getPrimaryKey();
-			$set_pk_method = "set$pk";
-			$new_object->$set_pk_method(null);
+		foreach($this->getPrimaryKeys() as $pk){
+			$new_object->{'set' . $pk}(null);
 		}
 		return $new_object;
 	}
@@ -397,7 +396,7 @@ abstract class BaseModel {
 	/**
 	 * Returns an associative Array with the values of $this.
 	 * Array keys match column names.
-	 * @return array of BaseTable Objects
+	 * @return array
 	 */
 	function toArray() {
 		$array = array();
