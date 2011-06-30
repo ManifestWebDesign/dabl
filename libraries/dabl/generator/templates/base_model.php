@@ -11,7 +11,7 @@
 abstract class base<?php echo $class_name ?> extends ApplicationModel {
 
 <?php foreach ($fields as $key => &$field): ?>
-	const <?php echo strtoupper(StringFormat::variable($field->getName())) ?> = '<?php echo $table_name ?>.<?php echo $field->getName() ?>';
+	const <?php echo StringFormat::constant($field->getName()) ?> = '<?php echo $table_name ?>.<?php echo $field->getName() ?>';
 <?php endforeach ?>
 
 	/**
