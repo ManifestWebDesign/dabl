@@ -11,9 +11,9 @@
  * @author Dan
  */
 require_once 'PHPUnit/Framework.php';
-require_once dirname(__FILE__) . '/../../config.php';
+require_once dirname(__FILE__) . '/../../../config.php';
 
-class UserTest extends PHPUnit_Framework_TestCase {
+class BaseModelTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * @group count
