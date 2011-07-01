@@ -53,7 +53,7 @@ abstract class BaseGenerator {
 	/**
 	 * @var string
 	 */
-	protected $baseModelTemplate = '/templates/base_model.php';
+	protected $baseModelTemplate = '/templates/base-model.php';
 
 	/**
 	 * @var string
