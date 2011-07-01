@@ -28,3 +28,7 @@ define('MODELS_BASE_QUERY_DIR', MODELS_DIR . 'query/base/');
 ClassLoader::addRepository('MODELS', MODELS_DIR);
 ClassLoader::import('MODELS');
 ClassLoader::import('MODELS:base');
+
+ClassLoader::addRepository('MODEL_QUERIES', MODELS_QUERY_DIR);
+ClassLoader::import('MODEL_QUERIES');
+ClassLoader::import('MODEL_QUERIES:base');
