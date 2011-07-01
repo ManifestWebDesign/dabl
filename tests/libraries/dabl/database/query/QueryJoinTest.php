@@ -22,6 +22,4 @@ class QueryJoinTest extends PHPUnit_Framework_TestCase {
 		);
 	}
 
-
-
 }
