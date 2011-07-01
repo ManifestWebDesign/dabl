@@ -6,25 +6,62 @@ class QueryJoin {
 	 * @var mixed
 	 */
 	private $_table;
-	
+
 	/**
 	 * @var string
 	 */
 	private $_alias;
-	
+
 	/**
 	 * @var mixed
 	 */
 	private $_onClause;
-	
+
+	/**
+	 * @var bool
+	 */
+	private $_isLikePropel = false;
+
+	/**
+	 * @var string
+	 */
+	private $_leftColumn;
+
+	/**
+	 * @var string
+	 */
+	private $_rightColumn;
+
 	/**
 	 * @var string
 	 */
 	private $_joinType = Query::JOIN;
 
-	function __construct($table_name, $on_clause=null, $join_type=Query::JOIN) {
-		$this->setTable($table_name)
-			->setOnClause($on_clause)
+	function __construct($table_or_column, $on_clause_or_column=null, $join_type=Query::JOIN) {
+
+		// check for Propel type join: table.column, table.column
+		if (
+				!($table_or_column instanceof Query)
+				&& !($on_clause_or_column instanceof Condition)
+				&& strpos($on_clause_or_column, '=') === false
+				&& strpos($on_clause_or_column, ' ') === false
+				&& strpos($on_clause_or_column, '(') === false
+				&& substr_count($on_clause_or_column, '.') === 1
+				&& strpos($table_or_column, ' ') === false
+				&& strpos($table_or_column, '=') === false
+				&& strpos($table_or_column, '(') === false
+				&& substr_count($table_or_column, '.') === 1
+		) {
+			$this->_isLikePropel = true;
+			$this->_leftColumn = $table_or_column;
+			$this->_rightColumn = $on_clause_or_column;
+			$this->setTable(array_shift(explode('.', $this->_rightColumn)));
+			$this->setJoinType($join_type);
+			return;
+		}
+
+		$this->setTable($table_or_column)
+			->setOnClause($on_clause_or_column)
 			->setJoinType($join_type);
 	}
 
@@ -46,17 +83,17 @@ class QueryJoin {
 			$j->setTable('{UNSPECIFIED-TABLE}');
 		return (string) $j->getQueryStatement();
 	}
-	
+
 	/**
-	 * @param type $table_name
-	 * @param type $on_clause
+	 * @param type $table_or_column
+	 * @param type $on_clause_or_column
 	 * @param type $join_type
 	 * @return QueryJoin
 	 */
-	static function create($table_name, $on_clause=null, $join_type=Query::JOIN) {
-		return new self($table_name, $on_clause, $join_type);
+	static function create($table_or_column, $on_clause_or_column=null, $join_type=Query::JOIN) {
+		return new self($table_or_column, $on_clause_or_column, $join_type);
 	}
-	
+
 	/**
 	 * @param mixed $table_name
 	 * @return QueryJoin
@@ -78,21 +115,22 @@ class QueryJoin {
 		$this->_table = $table_name;
 		return $this;
 	}
-	
+
 	/**
 	 * @param string $alias
-	 * @return QueryJoin 
+	 * @return QueryJoin
 	 */
 	function setAlias($alias) {
 		$this->_alias = $alias;
 		return $this;
 	}
-	
+
 	/**
 	 * @param Condition $on_clause
 	 * @return QueryJoin
 	 */
 	function setOnClause($on_clause) {
+		$this->_isLikePropel = false;
 		if ($on_clause instanceof Condition) {
 			$this->_onClause = clone $on_clause;
 		} else {
@@ -100,22 +138,22 @@ class QueryJoin {
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * @param string $join_type
-	 * @return QueryJoin 
+	 * @return QueryJoin
 	 */
 	function setJoinType($join_type) {
 		$this->_joinType = $join_type;
 		return $this;
 	}
-	
+
 	/**
 	 * @param DABLPDO $conn
 	 * @return QueryStatement
 	 */
 	function getQueryStatement(DABLPDO $conn = null) {
-		$statement = new QueryStatement;
+		$statement = new QueryStatement($conn);
 		$table = $this->_table;
 		$on_clause = $this->_onClause;
 		$join_type = $this->_joinType;
@@ -135,7 +173,10 @@ class QueryJoin {
 			$table .= " AS $alias";
 		}
 
-		if (null === $on_clause) {
+		if ($this->_isLikePropel) {
+			$statement->addIdentifiers(array($this->_leftColumn, $this->_rightColumn));
+			$on_clause = QueryStatement::IDENTIFIER . ' = ' . QueryStatement::IDENTIFIER;
+		} elseif (null === $on_clause) {
 			$on_clause = '1 = 1';
 		} elseif ($on_clause instanceof Condition) {
 			$on_clause_statement = $on_clause->getQueryStatement();
@@ -143,7 +184,7 @@ class QueryJoin {
 			$statement->addParams($on_clause_statement->getParams());
 			$statement->addIdentifiers($on_clause_statement->getIdentifiers());
 		}
-		
+
 		if ('' !== $on_clause) {
 			$on_clause = "ON ($on_clause)";
 		}
@@ -170,9 +211,12 @@ class QueryJoin {
 	 * @return mixed
 	 */
 	function getOnClause() {
+		if ($this->_isLikePropel) {
+			return $this->_leftColumn . ' = ' . $this->_rightColumn;
+		}
 		return $this->_onClause;
 	}
-	
+
 	/**
 	 * @return string
 	 */
