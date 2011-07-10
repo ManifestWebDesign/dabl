@@ -80,6 +80,14 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals("SELECT `test_table`.*\nFROM `test_table`\nGROUP BY functiontastic(), `columntastic`, `table`.`columntastic`", $q_string);
 	}
 
+	function testOrderBy() {
+		$q = Query::create('test_table')
+			->addOrder('fun ASC')
+			->addOrder('good', Query::DESC);
+		$order_clause = $q->__toString();
+		$this->assertEquals("SELECT `test_table`.*\nFROM `test_table`\nORDER BY `fun` ASC, `good` DESC", $order_clause);
+	}
+
 	/**
 	 * @group subquery
 	 * @covers Query::getTable

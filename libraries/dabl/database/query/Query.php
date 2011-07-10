@@ -567,12 +567,15 @@ class Query {
 	 * @return Query
 	 * @param $column String
 	 */
-	final function addOrder($column, $dir=null) {
-		$dir = strtoupper($dir);
-		if (null != $dir && $dir !== self::ASC && $dir !== self::DESC) {
-			throw new Exception("$dir is not a valid sorting direction.");
+	final function addOrder($column, $dir = null) {
+		if (null !== $dir) {
+			$dir = strtoupper($dir);
+			if ($dir !== self::ASC && $dir !== self::DESC) {
+				throw new Exception("$dir is not a valid sorting direction.");
+			}
+			$column .= ' ' . $dir;
 		}
-		$this->_orders[] = "$column $dir";
+		$this->_orders[] = trim($column);
 		return $this;
 	}
 
@@ -910,9 +913,9 @@ class Query {
 		$orders = $this->_orders;
 		foreach ($orders as &$order) {
 			$order_parts = explode(' ', $order);
-			foreach ($order_parts as &$order) {
-				$statement->addIdentifier($order);
-				$group = QueryStatement::IDENTIFIER;
+			if (count($order_parts) == 1 || count($order_parts) == 2) {
+				$statement->addIdentifier($order_parts[0]);
+				$order_parts[0] = QueryStatement::IDENTIFIER;
 			}
 			$order = implode(' ', $order_parts);
 		}
