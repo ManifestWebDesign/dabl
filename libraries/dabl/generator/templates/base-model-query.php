@@ -88,7 +88,7 @@ foreach ($columns as $key => &$column):
 	 * @return <?php echo $model_name ?>Query
 	 */
 	function <?php echo $verb ?><?php echo $php_name ?>(<?php echo $value_param ?>) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, null, null, <?php echo $column_type ?>);
+		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, self::EQUAL, null, <?php echo $column_type ?>);
 	}
 
 	/**
@@ -143,7 +143,7 @@ foreach ($columns as $key => &$column):
 	/**
 	 * @return <?php echo $model_name ?>Query
 	 */
-	function <?php echo $verb ?><?php echo $php_name ?>Between($column, $min, $max) {
+	function <?php echo $verb ?><?php echo $php_name ?>Between($min, $max) {
 		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, array($min, $max), self::BETWEEN, null, <?php echo $column_type ?>);
 	}
 
