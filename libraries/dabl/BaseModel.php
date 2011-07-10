@@ -491,7 +491,6 @@ abstract class BaseModel {
 	 * @return int number of records deleted
 	 */
 	function delete() {
-		$conn = $this->getConnection();
 		$pks = $this->getPrimaryKeys();
 		if (!$pks) {
 			throw new Exception('This table has no primary keys');
