@@ -593,7 +593,7 @@ class Query {
 			}
 		}
 
-		if ($this->needsComplexCount() && $this->getAction() == self::ACTION_COUNT) {
+		if (self::ACTION_COUNT == $this->getAction() && $this->needsComplexCount()) {
 			$query_s = "SELECT count(0)\nFROM ($query_s) a";
 		}
 
