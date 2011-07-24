@@ -88,17 +88,15 @@ class DBMySQL extends DABLPDO {
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
 	function quoteIdentifier($text) {
-		$quote = '`';
-
 		if (is_array($text)) {
 			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
-		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
+		if (strpos($text, '`') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
 
-		return $quote . implode("$quote.$quote", explode('.', $text)) . $quote;
+		return '`' . str_replace('.', '`.`', $text) . '`';
 	}
 
 	/**

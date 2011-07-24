@@ -662,7 +662,7 @@ class Query {
 		}
 
 		if ($this->_groups) {
-			$clause = $this->getGroupClause();
+			$clause = $this->getGroupByClause();
 			$statement->addIdentifiers($clause->getIdentifiers());
 			$statement->addParams($clause->getParams());
 			$query_s .= $clause->getString();
@@ -678,7 +678,7 @@ class Query {
 		}
 
 		if ($this->getAction() != self::ACTION_COUNT && $this->_orders) {
-			$clause = $this->getOrderClause();
+			$clause = $this->getOrderByClause();
 			$statement->addIdentifiers($clause->getIdentifiers());
 			$statement->addParams($clause->getParams());
 			$query_s .= $clause->getString();
@@ -746,10 +746,10 @@ class Query {
 
 				// setup identifiers for any additional tables
 				if ($this->_extraTables) {
-					foreach ($this->_extraTables as $alias => $extra_table) {
+					foreach ($this->_extraTables as $tAlias => $extra_table) {
 						if ($extra_table instanceof Query) {
 							$extra_table_statement = $extra_table->getQuery($conn);
-							$extra_table_string = '(' . $extra_table_statement->getString() . ') AS ' . $alias;
+							$extra_table_string = '(' . $extra_table_statement->getString() . ') AS ' . $tAlias;
 							$statement->addParams($extra_table_statement->getParams());
 							$statement->addIdentifiers($extra_table_statement->getIdentifiers());
 						} else {
@@ -758,8 +758,8 @@ class Query {
 								$extra_table_string = QueryStatement::IDENTIFIER;
 								$statement->addIdentifier($extra_table);
 							}
-							if ($alias != $extra_table) {
-								$extra_table_string .= " AS $alias";
+							if ($tAlias != $extra_table) {
+								$extra_table_string .= " AS $tAlias";
 							}
 						}
 						$table_string .= ", $extra_table_string";
@@ -908,7 +908,7 @@ class Query {
 	 * Protected for now.  Likely to be public in the future.
 	 * @return QueryStatement
 	 */
-	protected function getOrderClause($conn = null) {
+	protected function getOrderByClause($conn = null) {
 		$statement = new QueryStatement($conn);
 		$orders = $this->_orders;
 		foreach ($orders as &$order) {
@@ -927,7 +927,7 @@ class Query {
 	 * Protected for now.  Likely to be public in the future.
 	 * @return QueryStatement
 	 */
-	protected function getGroupClause($conn = null) {
+	protected function getGroupByClause($conn = null) {
 		$statement = new QueryStatement($conn);
 		if ($this->_groups) {
 			$groups = $this->_groups;
