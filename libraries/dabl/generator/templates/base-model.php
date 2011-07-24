@@ -302,7 +302,7 @@ foreach ($fields as $key => &$field):
 <?php foreach ($PKs as $k => &$v): ?>
 		$q->add('<?php echo $v ?>', $<?php echo strtolower(str_replace('-', '_', $v)) ?>);
 <?php endforeach ?>
-		return array_shift(<?php echo $class_name ?>::doSelect($q, true));
+		return array_shift(<?php echo $class_name ?>::doSelect($q));
 <?php endif ?>
 	}
 
@@ -346,8 +346,8 @@ foreach ($fields as $key => &$field):
 
 	 */
 <?php $used_functions[] = 'fetchSingle'; ?>
-	static function fetchSingle($query_string, $write_cache = true) {
-		return array_shift(<?php echo $class_name ?>::fetch($query_string, $write_cache));
+	static function fetchSingle($query_string) {
+		return array_shift(<?php echo $class_name ?>::fetch($query_string));
 	}
 
 	/**
@@ -357,10 +357,10 @@ foreach ($fields as $key => &$field):
 	 * @return <?php echo $class_name ?>[]
 	 */
 <?php $used_functions[] = 'fetch'; ?>
-	static function fetch($query_string, $write_cache = false) {
+	static function fetch($query_string) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$result = $conn->query($query_string);
-		return <?php echo $class_name ?>::fromResult($result, '<?php echo $class_name ?>', $write_cache);
+		return <?php echo $class_name ?>::fromResult($result, '<?php echo $class_name ?>');
 	}
 
 	/**
@@ -370,8 +370,8 @@ foreach ($fields as $key => &$field):
 	 * @see BaseModel::fromResult
 	 */
 <?php $used_functions[] = 'fromResult'; ?>
-	static function fromResult(PDOStatement $result, $class = '<?php echo $class_name ?>', $write_cache = false) {
-		return baseModel::fromResult($result, $class, $write_cache);
+	static function fromResult(PDOStatement $result, $class = '<?php echo $class_name ?>') {
+		return baseModel::fromResult($result, $class);
 	}
 
 <?php $used_functions[] = 'castInts'; ?>
@@ -405,7 +405,7 @@ foreach ($fields as $key => &$field):
 			return;
 		}
 
-		<?php echo $class_name ?>::$_instancePool[implode('-', $object->getPrimaryKeyValues())] = clone $object;
+		<?php echo $class_name ?>::$_instancePool[implode('-', $object->getPrimaryKeyValues())] = $object;
 		++<?php echo $class_name ?>::$_instancePoolCount;
 	}
 
@@ -422,7 +422,7 @@ foreach ($fields as $key => &$field):
 			return null;
 		}
 		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool)) {
-			return clone <?php echo $class_name ?>::$_instancePool[$pk];
+			return <?php echo $class_name ?>::$_instancePool[$pk];
 		}
 
 		return null;
@@ -462,10 +462,10 @@ foreach ($fields as $key => &$field):
 	 * @return <?php echo $class_name ?>[]
 	 */
 <?php $used_functions[] = 'getAll'; ?>
-	static function getAll($extra = null, $write_cache = false) {
+	static function getAll($extra = null) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$table_quoted = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
-		return <?php echo $class_name ?>::fetch("SELECT * FROM $table_quoted $extra ", $write_cache);
+		return <?php echo $class_name ?>::fetch("SELECT * FROM $table_quoted $extra ");
 	}
 
 	/**
@@ -504,12 +504,11 @@ foreach ($fields as $key => &$field):
 
 	/**
 	 * @param Query $q The Query object that creates the SELECT query string
-	 * @param bool $write_cache Whether or not to store results in instance pool
 	 * @param array $additional_classes Array of additional classes for fromResult to instantiate as properties
 	 * @return <?php echo $class_name ?>[]
 	 */
 <?php $used_functions[] = 'doSelect'; ?>
-	static function doSelect(Query $q = null, $write_cache = false, $additional_classes = null) {
+	static function doSelect(Query $q = null, $additional_classes = null) {
 		if (is_array($additional_classes)) {
 			array_unshift($additional_classes, '<?php echo $class_name ?>');
 			$class = $additional_classes;
@@ -517,7 +516,7 @@ foreach ($fields as $key => &$field):
 			$class = '<?php echo $class_name ?>';
 		}
 
-		return <?php echo $class_name ?>::fromResult(self::doSelectRS($q), $class, $write_cache);
+		return <?php echo $class_name ?>::fromResult(self::doSelectRS($q), $class);
 	}
 
 	/**
@@ -654,8 +653,8 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	if ($namedID) {
 ?>
 <?php $used_functions[] = 'doSelectJoin' . StringFormat::titleCase($from_column_clean); ?>
-	static function doSelectJoin<?php echo StringFormat::titleCase($from_column_clean) ?>(Query $q = null, $write_cache = false, $join_type = Query::LEFT_JOIN) {
-		return <?php echo $class_name ?>::doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q, $write_cache, $join_type);
+	static function doSelectJoin<?php echo StringFormat::titleCase($from_column_clean) ?>(Query $q = null, $join_type = Query::LEFT_JOIN) {
+		return <?php echo $class_name ?>::doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q $join_type);
 	}
 
 <?php
@@ -697,7 +696,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	 * @return <?php echo $class_name ?>[]
 	 */
 <?php $used_functions[] = "doSelectJoin$to_class_name" . 'RelatedBy' . StringFormat::titleCase($from_column); ?>
-	static function doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>(Query $q = null, $write_cache = false, $join_type = Query::LEFT_JOIN) {
+	static function doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>(Query $q = null, $join_type = Query::LEFT_JOIN) {
 		$q = $q ? clone $q : new Query;
 		$columns = $q->getColumns();
 		$alias = $q->getAlias();
@@ -711,7 +710,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		$columns[] = $to_table . '.*';
 		$q->setColumns($columns);
 
-		return <?php echo $class_name ?>::doSelect($q, $write_cache, array('<?php echo $to_class_name ?>'));
+		return <?php echo $class_name ?>::doSelect($q, array('<?php echo $to_class_name ?>'));
 	}
 
 <?php endforeach ?>
@@ -719,7 +718,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	 * @return <?php echo $class_name ?>[]
 	 */
 <?php $used_functions[] = 'doSelectJoinAll'; ?>
-	static function doSelectJoinAll(Query $q = null, $write_cache = false, $join_type = Query::LEFT_JOIN) {
+	static function doSelectJoinAll(Query $q = null, $join_type = Query::LEFT_JOIN) {
 		$q = $q ? clone $q : new Query;
 		$columns = $q->getColumns();
 		$classes = array();
@@ -743,7 +742,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	<?php endforeach ?>
 
 		$q->setColumns($columns);
-		return <?php echo $class_name ?>::doSelect($q, $write_cache, $classes);
+		return <?php echo $class_name ?>::doSelect($q, $classes);
 	}
 
 <?php
