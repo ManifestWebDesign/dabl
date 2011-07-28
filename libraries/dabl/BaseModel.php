@@ -81,14 +81,18 @@ abstract class BaseModel {
 	 * Magic get
 	 */
 	function __get($name) {
-		return $this->{'get' . $name}();
+		if ($this->hasColumn($name)) {
+			return $this->{'get' . $name}();
+		}
 	}
 
 	/**
 	 * Magic set
 	 */
 	function __set($name, $value) {
-		$this->{'set' . $name}($value);
+		if ($this->hasColumn($name)) {
+			$this->{'set' . $name}($value);
+		}
 	}
 
 	/**
