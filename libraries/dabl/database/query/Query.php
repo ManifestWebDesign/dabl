@@ -170,7 +170,10 @@ class Query {
 	 * @param String $column_name
 	 * @return Query
 	 */
-	function addColumn($column_name) {
+	function addColumn($column_name, $alias = null) {
+		if ($alias) {
+			$column_name .= 'AS ' . $alias;
+		}
 		$this->_columns[$column_name] = $column_name;
 		return $this;
 	}
