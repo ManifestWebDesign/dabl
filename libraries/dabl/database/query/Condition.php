@@ -68,10 +68,6 @@ class Condition {
 	 * @return string
 	 */
 	private static function processCondition($left = null, $right = null, $operator = Query::EQUAL, $quote = null) {
-		if ($left === null) {
-			return null;
-		}
-
 		if (1 === func_num_args() && $left instanceof QueryStatement) {
 			return $left;
 		}
@@ -88,7 +84,7 @@ class Condition {
 			return $clause_statement;
 		}
 
-		if ($quote === null) {
+		if (null === $quote) {
 			// You can skip $operator and specify $quote with parameter 3
 			if (is_int($operator)) {
 				$quote = $operator;
@@ -102,7 +98,7 @@ class Condition {
 		$operator = trim($operator);
 
 		// Escape $left
-		if ($quote == self::QUOTE_LEFT || $quote == self::QUOTE_BOTH) {
+		if ($quote === self::QUOTE_LEFT || $quote === self::QUOTE_BOTH) {
 			$statement->addParam($left);
 			$left = QueryStatement::PARAM;
 		} else {
@@ -137,7 +133,7 @@ class Condition {
 		// $right can be an array
 		if ($is_array) {
 			// BETWEEN
-			if (is_array($right) && count($right) == 2 && $operator == Query::BETWEEN) {
+			if (is_array($right) && count($right) === 2 && $operator === Query::BETWEEN) {
 				$statement->setString("$left $operator " . QueryStatement::PARAM . ' AND ' . QueryStatement::PARAM);
 				$statement->addParams($right);
 				return $statement;
@@ -174,7 +170,7 @@ class Condition {
 			}
 
 			// IN or NOT_IN
-			if ($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
+			if ($quote === self::QUOTE_RIGHT || $quote === self::QUOTE_BOTH) {
 				$statement->addParams($right);
 				$placeholders = array();
 				foreach ($right as &$r) {
@@ -184,18 +180,18 @@ class Condition {
 			}
 		} else {
 			// IS NOT NULL
-			if ($right === null && ($operator == Query::NOT_EQUAL || $operator == Query::ALT_NOT_EQUAL)) {
+			if ($right === null && ($operator === Query::NOT_EQUAL || $operator === Query::ALT_NOT_EQUAL)) {
 				$operator = Query::IS_NOT_NULL;
 			}
 
 			// IS NULL
-			elseif ($right === null && $operator == Query::EQUAL) {
+			elseif ($right === null && $operator === Query::EQUAL) {
 				$operator = Query::IS_NULL;
 			}
 
-			if ($operator == Query::IS_NULL || $operator == Query::IS_NOT_NULL) {
+			if ($operator === Query::IS_NULL || $operator === Query::IS_NOT_NULL) {
 				$right = null;
-			} elseif ($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
+			} elseif ($quote === self::QUOTE_RIGHT || $quote === self::QUOTE_BOTH) {
 				$statement->addParam($right);
 				$right = QueryStatement::PARAM;
 			}
@@ -225,6 +221,10 @@ class Condition {
 	 * @return Condition
 	 */
 	function addAnd($left, $right = null, $operator = Query::EQUAL, $quote = null) {
+		if (null === $left) {
+			return $this;
+		}
+
 		if (is_array($left)) {
 			foreach ($left as $key => &$value) {
 				$this->addAnd($key, $value);
@@ -259,6 +259,10 @@ class Condition {
 	 * @return Condition
 	 */
 	function addOr($left, $right = null, $operator = Query::EQUAL, $quote = null) {
+		if (null === $left) {
+			return $this;
+		}
+
 		if (is_array($left)) {
 			foreach ($left as $key => &$value) {
 				$this->addOr($key, $value);
@@ -296,13 +300,14 @@ class Condition {
 		$statement = new QueryStatement;
 		$string = '';
 
-		foreach ($this->conds as $num => $cond){
-			$string .= "\n\t";
+		foreach ($this->conds as $num => $cond) {
 			if (0 !== $num) {
-				$string .= ((1 === $num && 'OR' === $this->conds[0][0]) ? 'OR' : $cond[0]) . ' ';
+				$sep = ((1 === $num && 'OR' === $this->conds[0][0]) ? 'OR' : $cond[0]) . ' ';
+			} else {
+				$sep = '';
 			}
 			$cond = call_user_func_array(array('self', 'processCondition'), $cond[1]);
-			$string .= $cond->getString();
+			$string .= "\n\t$sep" . $cond->getString();
 			$statement->addParams($cond->getParams());
 			$statement->addIdentifiers($cond->getIdentifiers());
 		}

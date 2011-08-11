@@ -20,6 +20,9 @@ class ConditionTest extends PHPUnit_Framework_TestCase {
 		$c2->addOr('empty', null);
 		$c->addOr($c2);
 
+		// shouldn't do anything
+		$c->add(null);
+
 		$stmnt = $c->getQueryStatement();
 		$stmnt->setConnection(DBManager::getConnection());
 
