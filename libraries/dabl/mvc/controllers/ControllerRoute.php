@@ -174,7 +174,7 @@ class ControllerRoute {
 	/**
 	 * @return string
 	 */
-	function getExtention() {
+	function getExtension() {
 		return $this->extension;
 	}
 
