@@ -116,6 +116,18 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * @group subquery
+	 * @covers Query::leftJoin
+	 */
+	function testLeftJoinPropelStyle() {
+		$q = new Query('table');
+		$q->leftJoin('table.bar_id', 'foo.bar_id');
+		$this->assertEquals(
+			"SELECT `table`.*\nFROM `table`\n\tLEFT JOIN `foo` ON (`table`.`bar_id` = `foo`.`bar_id`)",
+			(string) $q->getQuery());
+	}
+
+	/**
+	 * @group subquery
 	 * @covers Query::getTable
 	 */
 	function testGetTableTwoWordsWithAlias() {

@@ -28,27 +28,26 @@ class Condition {
 	 * escape only the first parameter
 	 */
 	const QUOTE_LEFT = 1;
-	
+
 	/**
 	 * escape only the second param
 	 */
 	const QUOTE_RIGHT = 2;
-	
+
 	/**
 	 * escape both params
 	 */
 	const QUOTE_BOTH = 3;
-	
+
 	/**
 	 * escape no params
 	 */
 	const QUOTE_NONE = 4;
 
-	private $ands = array();
-	private $ors = array();
+	private $conds = array();
 
-	function __construct($left = null, $right=null, $operator=Query::EQUAL, $quote = null) {
-		if ($left !== null) {
+	function __construct($left = null, $right = null, $operator = Query::EQUAL, $quote = null) {
+		if (func_num_args() > 0) {
 			$this->add($left, $right, $operator, $quote);
 		}
 	}
@@ -61,18 +60,14 @@ class Condition {
 	 * @param $quote int[optional]
 	 * @return Condition
 	 */
-	static function create($left = null, $right=null, $operator=Query::EQUAL, $quote = null) {
+	static function create($left = null, $right = null, $operator=Query::EQUAL, $quote = null) {
 		return new self($left, $right, $operator, $quote);
 	}
 
 	/**
 	 * @return string
 	 */
-	private function processCondition($left = null, $right=null, $operator=Query::EQUAL, $quote = null) {
-		if ($left === null) {
-			return null;
-		}
-
+	private static function processCondition($left = null, $right = null, $operator = Query::EQUAL, $quote = null) {
 		if (1 === func_num_args() && $left instanceof QueryStatement) {
 			return $left;
 		}
@@ -89,7 +84,7 @@ class Condition {
 			return $clause_statement;
 		}
 
-		if ($quote === null) {
+		if (null === $quote) {
 			// You can skip $operator and specify $quote with parameter 3
 			if (is_int($operator)) {
 				$quote = $operator;
@@ -103,7 +98,7 @@ class Condition {
 		$operator = trim($operator);
 
 		// Escape $left
-		if ($quote == self::QUOTE_LEFT || $quote == self::QUOTE_BOTH) {
+		if ($quote === self::QUOTE_LEFT || $quote === self::QUOTE_BOTH) {
 			$statement->addParam($left);
 			$left = QueryStatement::PARAM;
 		} else {
@@ -121,7 +116,7 @@ class Condition {
 			if (!$right->getTable()) {
 				throw new Exception("$right does not have a table, so it cannot be nested.");
 			}
-				
+
 			$clause_statement = $right->getQuery();
 			if (!$clause_statement) {
 				return null;
@@ -138,7 +133,7 @@ class Condition {
 		// $right can be an array
 		if ($is_array) {
 			// BETWEEN
-			if (is_array($right) && count($right) == 2 && $operator == Query::BETWEEN) {
+			if (is_array($right) && count($right) === 2 && $operator === Query::BETWEEN) {
 				$statement->setString("$left $operator " . QueryStatement::PARAM . ' AND ' . QueryStatement::PARAM);
 				$statement->addParams($right);
 				return $statement;
@@ -175,7 +170,7 @@ class Condition {
 			}
 
 			// IN or NOT_IN
-			if ($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
+			if ($quote === self::QUOTE_RIGHT || $quote === self::QUOTE_BOTH) {
 				$statement->addParams($right);
 				$placeholders = array();
 				foreach ($right as &$r) {
@@ -185,18 +180,18 @@ class Condition {
 			}
 		} else {
 			// IS NOT NULL
-			if ($right === null && ($operator == Query::NOT_EQUAL || $operator == Query::ALT_NOT_EQUAL)) {
+			if ($right === null && ($operator === Query::NOT_EQUAL || $operator === Query::ALT_NOT_EQUAL)) {
 				$operator = Query::IS_NOT_NULL;
 			}
 
 			// IS NULL
-			elseif ($right === null && $operator == Query::EQUAL) {
+			elseif ($right === null && $operator === Query::EQUAL) {
 				$operator = Query::IS_NULL;
 			}
 
-			if ($operator == Query::IS_NULL || $operator == Query::IS_NOT_NULL) {
+			if ($operator === Query::IS_NULL || $operator === Query::IS_NOT_NULL) {
 				$right = null;
-			} elseif ($quote == self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
+			} elseif ($quote === self::QUOTE_RIGHT || $quote === self::QUOTE_BOTH) {
 				$statement->addParam($right);
 				$right = QueryStatement::PARAM;
 			}
@@ -210,7 +205,7 @@ class Condition {
 	 * Alias of addAnd
 	 * @return Condition
 	 */
-	function add($left, $right=null, $operator=Query::EQUAL, $quote = null) {
+	function add($left, $right = null, $operator = Query::EQUAL, $quote = null) {
 		if (func_num_args() === 1) {
 			return $this->addAnd($left);
 		}
@@ -225,7 +220,11 @@ class Condition {
 	 * @param $quote int[optional]
 	 * @return Condition
 	 */
-	function addAnd($left, $right=null, $operator=Query::EQUAL, $quote = null) {
+	function addAnd($left, $right = null, $operator = Query::EQUAL, $quote = null) {
+		if (null === $left) {
+			return $this;
+		}
+
 		if (is_array($left)) {
 			foreach ($left as $key => &$value) {
 				$this->addAnd($key, $value);
@@ -233,16 +232,7 @@ class Condition {
 			return $this;
 		}
 
-		if (func_num_args() === 1) {
-			$condition = $this->processCondition($left);
-		} else {
-			$condition = $this->processCondition($left, $right, $operator, $quote);
-		}
-
-		if ($condition) {
-			$this->ands[] = $condition;
-		}
-
+		$this->conds[] = array('AND', func_get_args());
 		return $this;
 	}
 
@@ -250,7 +240,14 @@ class Condition {
 	 * @return QueryStatement[]
 	 */
 	function getAnds() {
-		return $this->ands;
+		throw new Exception("Condition::getAnds() can't do what you want anymore...");
+//		$ors = array();
+//		foreach ($this->conds as $cond) {
+//			if ('AND' === $cond[0]) {
+//				$ors[] = call_user_func_array(array('self', 'processCondition'), $cond[1]);
+//			}
+//		}
+//		return $ors;
 	}
 
 	/**
@@ -261,7 +258,11 @@ class Condition {
 	 * @param $quote int[optional]
 	 * @return Condition
 	 */
-	function addOr($left, $right=null, $operator=Query::EQUAL, $quote = null) {
+	function addOr($left, $right = null, $operator = Query::EQUAL, $quote = null) {
+		if (null === $left) {
+			return $this;
+		}
+
 		if (is_array($left)) {
 			foreach ($left as $key => &$value) {
 				$this->addOr($key, $value);
@@ -269,14 +270,7 @@ class Condition {
 			return $this;
 		}
 
-		if (func_num_args() === 1) {
-			$condition = $this->processCondition($left);
-		} else {
-			$condition = $this->processCondition($left, $right, $operator, $quote);
-		}
-		if ($condition) {
-			$this->ors[] = $condition;
-		}
+		$this->conds[] = array('OR', func_get_args());
 		return $this;
 	}
 
@@ -284,7 +278,14 @@ class Condition {
 	 * @return QueryStatement[]
 	 */
 	function getOrs() {
-		return $this->ors;
+		throw new Exception("Condition::getOrs() can't do what you want anymore...");
+//		$ands = array();
+//		foreach ($this->conds as $cond) {
+//			if ('AND' === $cond[0]) {
+//				$ands[] = call_user_func_array(array('self', 'processCondition'), $cond[1]);
+//			}
+//		}
+//		return $ands;
 	}
 
 	/**
@@ -292,43 +293,28 @@ class Condition {
 	 * @return QueryStatement
 	 */
 	function getQueryStatement() {
+		if (0 === count($this->conds)) {
+			return null;
+		}
+
 		$statement = new QueryStatement;
 		$string = '';
 
-		$and_strings = array();
-		foreach ($this->ands as $and_statement) {
-			$and_strings[] = $and_statement->getString();
-			$statement->addParams($and_statement->getParams());
-			$statement->addIdentifiers($and_statement->getIdentifiers());
-		}
-		if ($and_strings) {
-			$AND = implode("\n\tAND ", $and_strings);
-		}
-
-		$or_strings = array();
-		foreach ($this->ors as $or_statement) {
-			$or_strings[] = $or_statement->getString();
-			$statement->addParams($or_statement->getParams());
-			$statement->addIdentifiers($or_statement->getIdentifiers());
-		}
-		if ($or_strings) {
-			$OR = implode("\n\tOR ", $or_strings);
-		}
-
-		if ($and_strings || $or_strings) {
-			if ($and_strings && $or_strings) {
-				$string .= "\n\t$AND\n\tOR $OR";
-			} elseif ($and_strings) {
-				$string .= "\n\t$AND";
-			} elseif ($or_strings) {
-				$string .= "\n\t$OR";
+		foreach ($this->conds as $num => $cond) {
+			if (0 !== $num) {
+				$sep = ((1 === $num && 'OR' === $this->conds[0][0]) ? 'OR' : $cond[0]) . ' ';
+			} else {
+				$sep = '';
 			}
-			$statement->setString($string);
-			return $statement;
+			$cond = call_user_func_array(array('self', 'processCondition'), $cond[1]);
+			$string .= "\n\t$sep" . $cond->getString();
+			$statement->addParams($cond->getParams());
+			$statement->addIdentifiers($cond->getIdentifiers());
 		}
-		return null;
+		$statement->setString($string);
+		return $statement;
 	}
-	
+
 	/**
 	 * Builds and returns a string representation of $this Condition
 	 * @return string

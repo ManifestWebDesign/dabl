@@ -11,6 +11,11 @@ foreach ($this->getColumns($table_name) as $column) {
 	$column_name = $column->getName();
 	if ($column_name == $pk)
 		continue;
+
+	if ($column->isTemporalType() && in_array(strtolower($column_name), array('created', 'updated'))) {
+		continue;
+	}
+
 	$method = "get$column_name";
 	switch($column->getType()){
 		case PropelTypes::TIMESTAMP:

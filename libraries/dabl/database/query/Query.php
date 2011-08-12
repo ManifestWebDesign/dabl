@@ -8,7 +8,7 @@ class Query {
 	const ACTION_DELETE = 'DELETE';
 	const ACTION_SELECT = 'SELECT';
 
-	//Comparison types
+	// Comparison types
 	const EQUAL = '=';
 	const NOT_EQUAL = '<>';
 	const ALT_NOT_EQUAL = '!=';
@@ -27,27 +27,27 @@ class Query {
 	const IS_NOT_NULL = 'IS NOT NULL';
 	const BETWEEN = 'BETWEEN';
 
-	//Comparison type for update
+	// Comparison type for update
 	const CUSTOM_EQUAL = 'CUSTOM_EQUAL';
 
-	//PostgreSQL comparison types
+	// PostgreSQL comparison types
 	const ILIKE = 'ILIKE';
 	const NOT_ILIKE = 'NOT ILIKE';
 
-	//JOIN TYPES
+	// JOIN TYPES
 	const JOIN = 'JOIN';
 	const LEFT_JOIN = 'LEFT JOIN';
 	const RIGHT_JOIN = 'RIGHT JOIN';
 	const INNER_JOIN = 'INNER JOIN';
 	const OUTER_JOIN = 'OUTER JOIN';
 
-	//Binary AND
+	// Binary AND
 	const BINARY_AND = '&';
 
-	//Binary OR
+	// Binary OR
 	const BINARY_OR = '|';
 
-	//'Order by' qualifiers
+	// 'Order by' qualifiers
 	const ASC = 'ASC';
 	const DESC = 'DESC';
 
@@ -140,7 +140,7 @@ class Query {
 	 * Specify whether to select only distinct rows
 	 * @param Bool $bool
 	 */
-	function setDistinct($bool) {
+	function setDistinct($bool = true) {
 		$this->_distinct = (bool) $bool;
 	}
 
@@ -170,7 +170,10 @@ class Query {
 	 * @param String $column_name
 	 * @return Query
 	 */
-	function addColumn($column_name) {
+	function addColumn($column_name, $alias = null) {
+		if ($alias) {
+			$column_name .= 'AS ' . $alias;
+		}
 		$this->_columns[$column_name] = $column_name;
 		return $this;
 	}
@@ -283,6 +286,7 @@ class Query {
 			}
 			$table_name = clone $table_name;
 		} elseif (null === $alias) {
+			// find the last space in the string
 			$space = strrpos($table_name, ' ');
 			if ($space) {
 				$table_name = substr($table_name, 0, $space + 1);
@@ -318,37 +322,53 @@ class Query {
 	}
 
 	/**
-	 * Alias of {@link addJoin()}.
-	 */
-	function join($table, $on_clause=null, $join_type=self::JOIN) {
-		return $this->addJoin($table, $on_clause, $join_type);
-	}
-
-	/**
 	 * Add a JOIN to the query.
 	 *
 	 * @todo Support the ON clause being NULL correctly
-	 * @param string|Query $table Table to join on
-	 * @param string|Condition $on_clause ON clause to join with
+	 * @param string|Query $table_or_column Table to join on
+	 * @param string|Condition $on_clause_or_column ON clause to join with
 	 * @param string $join_type Type of JOIN to perform
 	 * @return Query
 	 */
-	function addJoin($table, $on_clause=null, $join_type=self::JOIN) {
-		if ($table instanceof QueryJoin) {
-			$this->_joins[] = clone $table;
+	function addJoin($table_or_column, $on_clause_or_column=null, $join_type=self::JOIN) {
+		if ($table_or_column instanceof QueryJoin) {
+			$this->_joins[] = clone $table_or_column;
 			return $this;
 		}
 
-		if (null === $on_clause) {
+		if (null === $on_clause_or_column) {
 			if ($join_type == self::JOIN || $join_type == self::INNER_JOIN) {
-				$this->addTable($table);
-				return this;
+				$this->addTable($table_or_column);
+				return $this;
 			}
-			$on_clause = '1 = 1';
+			$on_clause_or_column = '1 = 1';
 		}
 
-		$this->_joins[] = new QueryJoin($table, $on_clause, $join_type);
+		$this->_joins[] = new QueryJoin($table_or_column, $on_clause_or_column, $join_type);
 		return $this;
+	}
+
+	/**
+	 * Alias of {@link addJoin()}.
+	 */
+	function join($table_or_column, $on_clause_or_column=null, $join_type=self::JOIN) {
+		return $this->addJoin($table_or_column, $on_clause_or_column, $join_type);
+	}
+
+	function innerJoin($table_or_column, $on_clause_or_column=null) {
+		return $this->addJoin($table_or_column, $on_clause_or_column, self::INNER_JOIN);
+	}
+
+	function leftJoin($table_or_column, $on_clause_or_column=null) {
+		return $this->addJoin($table_or_column, $on_clause_or_column, self::LEFT_JOIN);
+	}
+
+	function rightJoin($table_or_column, $on_clause_or_column=null) {
+		return $this->addJoin($table_or_column, $on_clause_or_column, self::RIGHT_JOIN);
+	}
+
+	function outerJoin($table_or_column, $on_clause_or_column=null) {
+		return $this->addJoin($table_or_column, $on_clause_or_column, self::OUTER_JOIN);
 	}
 
 	function getJoins() {
@@ -473,6 +493,10 @@ class Query {
 		return $this;
 	}
 
+	/**
+	 * Returns the LIMIT integer for this Query, if it has one
+	 * @return int
+	 */
 	function getLimit() {
 		return $this->_limit;
 	}
@@ -572,7 +596,7 @@ class Query {
 			}
 		}
 
-		if ($this->needsComplexCount() && $this->getAction() == self::ACTION_COUNT) {
+		if (self::ACTION_COUNT == $this->getAction() && $this->needsComplexCount()) {
 			$query_s = "SELECT count(0)\nFROM ($query_s) a";
 		}
 
@@ -673,6 +697,11 @@ class Query {
 		return $statement;
 	}
 
+	/**
+	 * Returns true if this Query uses aggregate functions in either a GROUP BY clause or in the
+	 * select columns
+	 * @return bool
+	 */
 	protected function hasAggregates() {
 		if ($this->_groups) {
 			return true;
@@ -685,10 +714,14 @@ class Query {
 		return false;
 	}
 
+	/**
+	 * Returns true if this Query requires a complex count
+	 * @return bool
+	 */
 	protected function needsComplexCount() {
 		return $this->hasAggregates()
-			|| null !== $this->_having
-			|| $this->_distinct;
+		|| null !== $this->_having
+		|| $this->_distinct;
 	}
 
 	/**
@@ -829,8 +862,9 @@ class Query {
 	function doCount(PDO $conn = null) {
 		$q = clone $this;
 
-		if (!$q->getTable())
+		if (!$q->getTable()) {
 			throw new Exception('No table specified.');
+		}
 
 		$q->setAction(self::ACTION_COUNT);
 		return (int) $q->getQuery($conn)->bindAndExecute()->fetchColumn();
@@ -845,8 +879,9 @@ class Query {
 	function doDelete(PDO $conn = null) {
 		$q = clone $this;
 
-		if (!$q->getTable())
+		if (!$q->getTable()) {
 			throw new Exception('No table specified.');
+		}
 
 		$q->setAction(self::ACTION_DELETE);
 		return $q->getQuery($conn)->bindAndExecute()->rowCount();
@@ -859,8 +894,10 @@ class Query {
 	 */
 	function doSelect(PDO $conn = null) {
 		$q = clone $this;
-		if (!$q->getTable())
+
+		if (!$q->getTable()) {
 			throw new Exception('No table specified.');
+		}
 
 		$q->setAction(self::ACTION_SELECT);
 		return $q->getQuery($conn)->bindAndExecute();
