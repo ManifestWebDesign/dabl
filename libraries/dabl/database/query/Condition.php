@@ -97,6 +97,17 @@ class Condition {
 		// Get rid of white-space on sides of $operator
 		$operator = trim($operator);
 
+		if (Query::BEGINS_WITH === $operator) {
+			$right .= '%';
+			$operator = Query::LIKE;
+		} elseif (Query::ENDS_WITH === $operator) {
+			$right = '%' . $right;
+			$operator = Query::LIKE;
+		} elseif (Query::CONTAINS === $operator) {
+			$right = '%' . $right . '%';
+			$operator = Query::LIKE;
+		}
+
 		// Escape $left
 		if ($quote === self::QUOTE_LEFT || $quote === self::QUOTE_BOTH) {
 			$statement->addParam($left);
@@ -306,7 +317,21 @@ class Condition {
 			} else {
 				$sep = '';
 			}
-			$cond = call_user_func_array(array('self', 'processCondition'), $cond[1]);
+			// avoid call_user_func_array for better stack traces
+			switch (count($cond[1])) {
+				case 1:
+					$cond = self::processCondition($cond[1][0]);
+					break;
+				case 2:
+					$cond = self::processCondition($cond[1][0], $cond[1][1]);
+					break;
+				case 3:
+					$cond = self::processCondition($cond[1][0], $cond[1][1], $cond[1][2]);
+					break;
+				case 4:
+					$cond = self::processCondition($cond[1][0], $cond[1][1], $cond[1][2], $cond[1][3]);
+					break;
+			}
 			$string .= "\n\t$sep" . $cond->getString();
 			$statement->addParams($cond->getParams());
 			$statement->addIdentifiers($cond->getIdentifiers());

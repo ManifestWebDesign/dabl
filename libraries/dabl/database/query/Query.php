@@ -17,6 +17,9 @@ class Query {
 	const GREATER_EQUAL = '>=';
 	const LESS_EQUAL = '<=';
 	const LIKE = 'LIKE';
+	const BEGINS_WITH = 'BEGINS_WITH';
+	const ENDS_WITH = 'ENDS_WITH';
+	const CONTAINS = 'CONTAINS';
 	const NOT_LIKE = 'NOT LIKE';
 	const CUSTOM = 'CUSTOM';
 	const DISTINCT = 'DISTINCT';
@@ -448,6 +451,18 @@ class Query {
 		return $this->addAnd($column, array($from, $to), self::BETWEEN);
 	}
 
+	function andBeginsWith($column, $value) {
+		return $this->addAnd($column, $value, self::BEGINS_WITH);
+	}
+
+	function andEndsWith($column, $value) {
+		return $this->addAnd($column, $value, self::ENDS_WITH);
+	}
+
+	function andContains($column, $value) {
+		return $this->addAnd($column, $value, self::CONTAINS);
+	}
+
 	/**
 	 * Shortcut to adding an OR statement to the Query's WHERE Condition.
 	 * @return Query
@@ -503,6 +518,18 @@ class Query {
 
 	function orBetween($column, $from, $to) {
 		return $this->addOr($column, array($from, $to), self::BETWEEN);
+	}
+
+	function orBeginsWith($column, $value) {
+		return $this->addOr($column, $value, self::BEGINS_WITH);
+	}
+
+	function orEndsWith($column, $value) {
+		return $this->addOr($column, $value, self::ENDS_WITH);
+	}
+
+	function orContains($column, $value) {
+		return $this->addOr($column, $value, self::CONTAINS);
 	}
 
 	/**

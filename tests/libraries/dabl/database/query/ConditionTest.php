@@ -37,4 +37,37 @@ class ConditionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($q, $stmnt->__toString());
 	}
 
+	function testBeginsWith() {
+		$c = new Condition;
+		$c->add('my_column', 'value', Query::BEGINS_WITH);
+		$stmnt = $c->getQueryStatement();
+		$stmnt->setConnection(DBManager::getConnection());
+
+		$q = "
+	`my_column` LIKE 'value%'";
+		$this->assertEquals($q, $stmnt->__toString());
+	}
+
+	function testEndsWith() {
+		$c = new Condition;
+		$c->add('my_column', 'value', Query::ENDS_WITH);
+		$stmnt = $c->getQueryStatement();
+		$stmnt->setConnection(DBManager::getConnection());
+
+		$q = "
+	`my_column` LIKE '%value'";
+		$this->assertEquals($q, $stmnt->__toString());
+	}
+
+	function testContains() {
+		$c = new Condition;
+		$c->add('my_column', 'value', Query::CONTAINS);
+		$stmnt = $c->getQueryStatement();
+		$stmnt->setConnection(DBManager::getConnection());
+
+		$q = "
+	`my_column` LIKE '%value%'";
+		$this->assertEquals($q, $stmnt->__toString());
+	}
+
 }
