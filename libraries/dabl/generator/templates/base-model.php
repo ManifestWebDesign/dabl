@@ -519,6 +519,10 @@ foreach ($fields as $key => &$field):
 		return <?php echo $class_name ?>::fromResult(self::doSelectRS($q), $class);
 	}
 
+	static function coerceTemporalValue($value, $column_type) {
+		return parent::coerceTemporalValue($value, $column_type, <?php echo $class_name ?>::getConnection());
+	}
+
 	/**
 	 * Executes a select query and returns the PDO result
 	 * @return PDOStatement

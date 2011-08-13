@@ -80,7 +80,7 @@ class DBSQLite extends DABLPDO {
 			return $text;
 		}
 
-		return '[' . implode('].[', explode('.', $text)) . ']';
+		return '[' . str_replace('.', '].[', $text) . ']';
 	}
 
 	/**

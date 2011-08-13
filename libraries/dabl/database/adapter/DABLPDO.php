@@ -45,7 +45,7 @@ abstract class DABLPDO extends PDO {
 		$dsn = '';
 		$user = null;
 		$password = null;
-		
+
 		if (@$connection_params['user']) {
 			$user = $connection_params['user'];
 		}
@@ -53,7 +53,7 @@ abstract class DABLPDO extends PDO {
 		if (@$connection_params['password']) {
 			$password = $connection_params['password'];
 		}
-		
+
 		$options = array(
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 		);
@@ -372,17 +372,15 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string The quoted identifier.
 	 */
 	function quoteIdentifier($text) {
-		$quote = '"';
-		
 		if (is_array($text)) {
 			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
-		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
+		if (strpos($text, '"') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
-		
-		return $quote . implode("$quote.$quote", explode('.', $text)) . $quote;
+
+		return '"' . str_replace('.', '"."', $text) . '"';
 	}
 
 	/**

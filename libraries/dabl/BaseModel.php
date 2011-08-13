@@ -359,23 +359,7 @@ abstract class BaseModel {
 					}
 				}
 				if ($this->_formatDates && $temporal) {
-					$conn = $this->getConnection();
-					switch ($column_type) {
-						case BaseModel::COLUMN_TYPE_TIMESTAMP:
-							$formatter = $conn->getTimestampFormatter();
-							break;
-						case BaseModel::COLUMN_TYPE_DATE:
-							$formatter = $conn->getDateFormatter();
-							break;
-						case BaseModel::COLUMN_TYPE_TIME:
-							$formatter = $conn->getTimeFormatter();
-							break;
-					}
-					$timestamp = is_int($value) ? $value : strtotime($value);
-					if (false === $timestamp) {
-						throw new Exception('Unable to parse date: ' . $value);
-					}
-					$value = date($formatter, $timestamp);
+					$value = self::coerceTemporalValue($value, $column_type, $this->getConnection());
 				}
 			}
 		}
@@ -385,6 +369,31 @@ abstract class BaseModel {
 			$this->$column_name = $value;
 		}
 		return $this;
+	}
+
+	static function coerceTemporalValue($value, $column_type, DABLPDO $conn) {
+		if (is_array($value)) {
+			foreach ($value as &$v) {
+				$v = self::coerceTemporalValue($v, $column_type, $conn);
+			}
+			return $value;
+		}
+		switch ($column_type) {
+			case BaseModel::COLUMN_TYPE_TIMESTAMP:
+				$formatter = $conn->getTimestampFormatter();
+				break;
+			case BaseModel::COLUMN_TYPE_DATE:
+				$formatter = $conn->getDateFormatter();
+				break;
+			case BaseModel::COLUMN_TYPE_TIME:
+				$formatter = $conn->getTimeFormatter();
+				break;
+		}
+		$timestamp = is_int($value) ? $value : strtotime($value);
+		if (false === $timestamp) {
+			throw new Exception('Unable to parse date: ' . $value);
+		}
+		return date($formatter, $timestamp);
 	}
 
 	/**
@@ -501,7 +510,6 @@ abstract class BaseModel {
 	 * @return int number of records deleted
 	 */
 	function delete() {
-		$conn = $this->getConnection();
 		$pks = $this->getPrimaryKeys();
 		if (!$pks) {
 			throw new Exception('This table has no primary keys');

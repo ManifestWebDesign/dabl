@@ -22,7 +22,13 @@ foreach ($db_connections as $connection_name => $db_params) {
 define('CURRENT_TIMESTAMP', time());
 define('MODELS_DIR', APP_DIR . 'models/');
 define('MODELS_BASE_DIR', MODELS_DIR . 'base/');
+define('MODELS_QUERY_DIR', MODELS_DIR . 'query/');
+define('MODELS_BASE_QUERY_DIR', MODELS_DIR . 'query/base/');
 
 ClassLoader::addRepository('MODELS', MODELS_DIR);
 ClassLoader::import('MODELS');
 ClassLoader::import('MODELS:base');
+
+ClassLoader::addRepository('MODEL_QUERIES', MODELS_QUERY_DIR);
+ClassLoader::import('MODEL_QUERIES');
+ClassLoader::import('MODEL_QUERIES:base');
