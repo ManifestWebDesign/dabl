@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('America/Los_Angeles');
+
 // lets other scripts know that this file has been included
 define('CONFIG_LOADED', true);
 
