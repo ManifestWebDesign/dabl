@@ -132,6 +132,11 @@ abstract class BaseGenerator {
 		return $table->getColumns();
 	}
 
+	function getPrimaryKeys($table_name) {
+		$table = $this->database->getTable($table_name);
+		return $table->getPrimaryKey();
+	}
+
 	/**
 	 * @param string $table_name
 	 * @return array
@@ -174,6 +179,7 @@ abstract class BaseGenerator {
 		$column_names = $PKs = array();
 		$auto_increment = false;
 		$columns = $this->getColumns($table_name);
+		$pks = $this->getPrimaryKeys($table_name);
 		$pk = null;
 
 		foreach ($columns as &$column) {
@@ -203,6 +209,7 @@ abstract class BaseGenerator {
 			'single' => StringFormat::variable($table_name),
 			'single_url' => StringFormat::url($table_name),
 			'pk' => $pk,
+			'primary_keys' => $pks,
 			'pkMethod' => $pk ? "get$pk" : null,
 			'actions' => $this->getActions($table_name),
 			'columns' => $columns
