@@ -9,11 +9,12 @@
 	<body>
 		<script>
 			function checkAll(name, connection, checked){
-				var boxes = document.getElementsByTagName('input');
-				var length = boxes.length;
-				for(var x=0;x<length;x++){
+				var boxes = document.getElementsByTagName('input'),
+					length = boxes.length,
+					x;
+				for(x = 0; x < length; ++x){
 					var checkbox = boxes[x];
-					if(checkbox.type=='checkbox' && checkbox.name.toString().indexOf(connection)!==-1 && checkbox.name.toString().indexOf(name)!==-1)
+					if(checkbox.type == 'checkbox' && checkbox.name.toString().indexOf(connection) !== -1 && checkbox.name.toString().indexOf(name) !== -1)
 						checkbox.checked = checked;
 				}
 			}
