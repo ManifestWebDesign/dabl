@@ -97,6 +97,17 @@ class Condition {
 		// Get rid of white-space on sides of $operator
 		$operator = trim($operator);
 
+		if (Query::BEGINS_WITH === $operator) {
+			$right .= '%';
+			$operator = Query::LIKE;
+		} elseif (Query::ENDS_WITH === $operator) {
+			$right = '%' . $right;
+			$operator = Query::LIKE;
+		} elseif (Query::CONTAINS === $operator) {
+			$right = '%' . $right . '%';
+			$operator = Query::LIKE;
+		}
+
 		// Escape $left
 		if ($quote === self::QUOTE_LEFT || $quote === self::QUOTE_BOTH) {
 			$statement->addParam($left);
@@ -288,6 +299,110 @@ class Condition {
 //		return $ands;
 	}
 
+	function andNot($column, $value) {
+		return $this->addAnd($column, $value, self::NOT_EQUAL);
+	}
+
+	function andLike($column, $value) {
+		return $this->addAnd($column, $value, self::LIKE);
+	}
+
+	function andNotLike($column, $value) {
+		return $this->addAnd($column, $value, self::NOT_LIKE);
+	}
+
+	function andGreater($column, $value) {
+		return $this->addAnd($column, $value, self::GREATER_THAN);
+	}
+
+	function andGreaterEqual($column, $value) {
+		return $this->addAnd($column, $value, self::GREATER_EQUAL);
+	}
+
+	function andLess($column, $value) {
+		return $this->addAnd($column, $value, self::LESS_THAN);
+	}
+
+	function andLessEqual($column, $value) {
+		return $this->addAnd($column, $value, self::LESS_EQUAL);
+	}
+
+	function andNull($column) {
+		return $this->addAnd($column, null);
+	}
+
+	function andNotNull($column) {
+		return $this->addAnd($column, null, self::NOT_EQUAL);
+	}
+
+	function andBetween($column, $from, $to) {
+		return $this->addAnd($column, array($from, $to), self::BETWEEN);
+	}
+
+	function andBeginsWith($column, $value) {
+		return $this->addAnd($column, $value, self::BEGINS_WITH);
+	}
+
+	function andEndsWith($column, $value) {
+		return $this->addAnd($column, $value, self::ENDS_WITH);
+	}
+
+	function andContains($column, $value) {
+		return $this->addAnd($column, $value, self::CONTAINS);
+	}
+
+	function orNot($column, $value) {
+		return $this->addOr($column, $value, self::NOT_EQUAL);
+	}
+
+	function orLike($column, $value) {
+		return $this->addOr($column, $value, self::LIKE);
+	}
+
+	function orNotLike($column, $value) {
+		return $this->addOr($column, $value, self::NOT_LIKE);
+	}
+
+	function orGreater($column, $value) {
+		return $this->addOr($column, $value, self::GREATER_THAN);
+	}
+
+	function orGreaterEqual($column, $value) {
+		return $this->addOr($column, $value, self::GREATER_EQUAL);
+	}
+
+	function orLess($column, $value) {
+		return $this->addOr($column, $value, self::LESS_THAN);
+	}
+
+	function orLessEqual($column, $value) {
+		return $this->addOr($column, $value, self::LESS_EQUAL);
+	}
+
+	function orNull($column) {
+		return $this->addOr($column, null);
+	}
+
+	function orNotNull($column) {
+		return $this->addOr($column, null, self::NOT_EQUAL);
+	}
+
+	function orBetween($column, $from, $to) {
+		return $this->addOr($column, array($from, $to), self::BETWEEN);
+	}
+
+	function orBeginsWith($column, $value) {
+		return $this->addOr($column, $value, self::BEGINS_WITH);
+	}
+
+	function orEndsWith($column, $value) {
+		return $this->addOr($column, $value, self::ENDS_WITH);
+	}
+
+	function orContains($column, $value) {
+		return $this->addOr($column, $value, self::CONTAINS);
+	}
+
 	/**
 	 * Builds and returns a string representation of $this Condition
 	 * @return QueryStatement
@@ -306,7 +421,21 @@ class Condition {
 			} else {
 				$sep = '';
 			}
-			$cond = call_user_func_array(array('self', 'processCondition'), $cond[1]);
+			// avoid call_user_func_array for better stack traces
+			switch (count($cond[1])) {
+				case 1:
+					$cond = self::processCondition($cond[1][0]);
+					break;
+				case 2:
+					$cond = self::processCondition($cond[1][0], $cond[1][1]);
+					break;
+				case 3:
+					$cond = self::processCondition($cond[1][0], $cond[1][1], $cond[1][2]);
+					break;
+				case 4:
+					$cond = self::processCondition($cond[1][0], $cond[1][1], $cond[1][2], $cond[1][3]);
+					break;
+			}
 			$string .= "\n\t$sep" . $cond->getString();
 			$statement->addParams($cond->getParams());
 			$statement->addIdentifiers($cond->getIdentifiers());

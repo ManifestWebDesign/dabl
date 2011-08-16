@@ -81,87 +81,28 @@ foreach ($columns as $key => &$column):
 	$column_type = $model_name . '::COLUMN_TYPE_' . $column->getType();
 	$value_param = '$' . StringFormat::variable($column->getType());
 	foreach(array('and', 'or') as $verb):
-		$verb_method = 'add' . ucFirst($verb);
+		foreach (array('', 'Not', 'Like', 'NotLike', 'Greater', 'GreaterEqual', 'Less', 'LessEqual', 'Null', 'NotNull', 'Between', 'BeginsWith', 'EndsWith', 'Contains') as $oper):
+			switch($oper) {
+				case 'Null':
+				case 'NotNull':
+					$params = '';
+					break;
+				case 'Between':
+					$params = $value_param . ', $from, $to';
+					break;
+				default:
+					$params = $value_param;
+					break;
+			}
 ?>
 	/**
-	 * Alias of {@link <?php echo $verb_method ?>()}
 	 * @return <?php echo $model_name ?>Query
 	 */
-	function <?php echo $verb ?><?php echo $php_name ?>(<?php echo $value_param ?>) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, self::EQUAL, null, <?php echo $column_type ?>);
+	function <?php echo $verb ?><?php echo $php_name ?><?php echo $oper ?>(<?php echo $params ?>) {
+		return $this-><?php echo $verb ?><?php echo $oper ?>(<?php echo $constant ?><?php if ($params) echo ', ' . $params ?>);
 	}
 
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>Not(<?php echo $value_param ?>) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, self::NOT_EQUAL, null, <?php echo $column_type ?>);
-	}
-
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>Like(<?php echo $value_param ?>) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, self::LIKE);
-	}
-
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>NotLike(<?php echo $value_param ?>) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, self::NOT_LIKE);
-	}
-
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>Greater(<?php echo $value_param ?>) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, self::GREATER_THAN, null, <?php echo $column_type ?>);
-	}
-
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>GreaterEqual(<?php echo $value_param ?>) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, self::GREATER_EQUAL, null, <?php echo $column_type ?>);
-	}
-
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>Less(<?php echo $value_param ?>) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, self::LESS_THAN, null, <?php echo $column_type ?>);
-	}
-
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>LessEqual(<?php echo $value_param ?>) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, <?php echo $value_param ?>, self::LESS_EQUAL, null, <?php echo $column_type ?>);
-	}
-
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>Between($min, $max) {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, array($min, $max), self::BETWEEN, null, <?php echo $column_type ?>);
-	}
-
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>Null() {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, null);
-	}
-
-	/**
-	 * @return <?php echo $model_name ?>Query
-	 */
-	function <?php echo $verb ?><?php echo $php_name ?>NotNull() {
-		return $this-><?php echo $verb_method ?>(<?php echo $constant ?>, null, self::NOT_EQUAL);
-	}
-
-<?php endforeach ?>
+<?php endforeach;endforeach; ?>
 
 	/**
 	 * @return <?php echo $model_name ?>Query

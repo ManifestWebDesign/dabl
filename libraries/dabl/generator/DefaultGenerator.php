@@ -32,7 +32,14 @@ class DefaultGenerator extends BaseGenerator {
 		$class_name = $this->getModelName($table_name);
 		$plural = StringFormat::pluralVariable($table_name);
 		$single = StringFormat::variable($table_name);
-		$pk = call_user_func(array($class_name, 'getPrimaryKey'));
+		$pks = $this->getPrimaryKeys($table_name);
+
+
+		if (count($pks) === 1) {
+			$pk = $pks[0];
+		} else {
+			$pk = null;
+		}
 		$pkMethod = "get$pk";
 		$actions = array();
 		if (!$pk) {

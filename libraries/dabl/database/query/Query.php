@@ -17,6 +17,9 @@ class Query {
 	const GREATER_EQUAL = '>=';
 	const LESS_EQUAL = '<=';
 	const LIKE = 'LIKE';
+	const BEGINS_WITH = 'BEGINS_WITH';
+	const ENDS_WITH = 'ENDS_WITH';
+	const CONTAINS = 'CONTAINS';
 	const NOT_LIKE = 'NOT LIKE';
 	const CUSTOM = 'CUSTOM';
 	const DISTINCT = 'DISTINCT';
@@ -224,7 +227,7 @@ class Query {
 	 * @param String[optional] $alias Alias for the table
 	 * @return Query
 	 */
-	function setTable($table_name, $alias=null) {
+	function setTable($table_name, $alias = null) {
 		if ($table_name instanceof Query) {
 			if (!$alias) {
 				throw new Exception('The nested query must have an alias.');
@@ -331,7 +334,7 @@ class Query {
 	 * @param string $join_type Type of JOIN to perform
 	 * @return Query
 	 */
-	function addJoin($table_or_column, $on_clause_or_column=null, $join_type=self::JOIN) {
+	function addJoin($table_or_column, $on_clause_or_column = null, $join_type = self::JOIN) {
 		if ($table_or_column instanceof QueryJoin) {
 			$this->_joins[] = clone $table_or_column;
 			return $this;
@@ -352,23 +355,23 @@ class Query {
 	/**
 	 * Alias of {@link addJoin()}.
 	 */
-	function join($table_or_column, $on_clause_or_column=null, $join_type=self::JOIN) {
+	function join($table_or_column, $on_clause_or_column = null, $join_type = self::JOIN) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, $join_type);
 	}
 
-	function innerJoin($table_or_column, $on_clause_or_column=null) {
+	function innerJoin($table_or_column, $on_clause_or_column = null) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, self::INNER_JOIN);
 	}
 
-	function leftJoin($table_or_column, $on_clause_or_column=null) {
+	function leftJoin($table_or_column, $on_clause_or_column = null) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, self::LEFT_JOIN);
 	}
 
-	function rightJoin($table_or_column, $on_clause_or_column=null) {
+	function rightJoin($table_or_column, $on_clause_or_column = null) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, self::RIGHT_JOIN);
 	}
 
-	function outerJoin($table_or_column, $on_clause_or_column=null) {
+	function outerJoin($table_or_column, $on_clause_or_column = null) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, self::OUTER_JOIN);
 	}
 
@@ -388,7 +391,7 @@ class Query {
 	 * @param $operator String[optional]
 	 * @param $quote Int[optional]
 	 */
-	function addAnd($column, $value=null, $operator=self::EQUAL, $quote = null) {
+	function addAnd($column, $value = null, $operator = self::EQUAL, $quote = null) {
 		if (func_num_args() === 1) {
 			$this->_where->addAnd($column);
 		} else {
@@ -401,7 +404,7 @@ class Query {
 	 * Alias of {@link addAnd()}
 	 * @return Query
 	 */
-	function add($column, $value=null, $operator=self::EQUAL, $quote = null) {
+	function add($column, $value = null, $operator = self::EQUAL, $quote = null) {
 		if (func_num_args() === 1) {
 			return $this->addAnd($column);
 		} else {
@@ -410,43 +413,55 @@ class Query {
 	}
 
 	function andNot($column, $value) {
-		return $this->addAnd($column, $value, self::NOT_EQUAL);
+		return $this->_where->andNot($column, $value);
 	}
 
 	function andLike($column, $value) {
-		return $this->addAnd($column, $value, self::LIKE);
+		return $this->_where->andLike($column, $value);
 	}
 
 	function andNotLike($column, $value) {
-		return $this->addAnd($column, $value, self::NOT_LIKE);
+		return $this->_where->andNotLike($column, $value);
 	}
 
 	function andGreater($column, $value) {
-		return $this->addAnd($column, $value, self::GREATER_THAN);
+		return $this->_where->andGreater($column, $value);
 	}
 
 	function andGreaterEqual($column, $value) {
-		return $this->addAnd($column, $value, self::GREATER_EQUAL);
+		return $this->_where->andGreaterEqual($column, $value);
 	}
 
 	function andLess($column, $value) {
-		return $this->addAnd($column, $value, self::LESS_THAN);
+		return $this->_where->andLess($column, $value);
 	}
 
 	function andLessEqual($column, $value) {
-		return $this->addAnd($column, $value, self::LESS_EQUAL);
+		return $this->_where->andLessEqual($column, $value);
 	}
 
 	function andNull($column) {
-		return $this->addAnd($column, null);
+		return $this->_where->andNull($column);
 	}
 
 	function andNotNull($column) {
-		return $this->addAnd($column, null, self::NOT_EQUAL);
+		return $this->_where->andNotNull($column);
 	}
 
 	function andBetween($column, $from, $to) {
-		return $this->addAnd($column, array($from, $to), self::BETWEEN);
+		return $this->_where->andBetween($column, $from, $to);
+	}
+
+	function andBeginsWith($column, $value) {
+		return $this->_where->andBeginsWith($column, $value);
+	}
+
+	function andEndsWith($column, $value) {
+		return $this->_where->andEndsWith($column, $value);
+	}
+
+	function andContains($column, $value) {
+		return $this->_where->andContains($column, $value);
 	}
 
 	/**
@@ -457,7 +472,7 @@ class Query {
 	 * @param $operator String[optional]
 	 * @param $quote Int[optional]
 	 */
-	function addOr($column, $value=null, $operator=self::EQUAL, $quote = null) {
+	function addOr($column, $value = null, $operator = self::EQUAL, $quote = null) {
 		if (func_num_args() === 1) {
 			$this->_where->addOr($column);
 		} else {
@@ -467,43 +482,55 @@ class Query {
 	}
 
 	function orNot($column, $value) {
-		return $this->addOr($column, $value, self::NOT_EQUAL);
+		return $this->_where->orNot($column, $value);
 	}
 
 	function orLike($column, $value) {
-		return $this->addOr($column, $value, self::LIKE);
+		return $this->_where->orLike($column, $value);
 	}
 
 	function orNotLike($column, $value) {
-		return $this->addOr($column, $value, self::NOT_LIKE);
+		return $this->_where->orNotLike($column, $value);
 	}
 
 	function orGreater($column, $value) {
-		return $this->addOr($column, $value, self::GREATER_THAN);
+		return $this->_where->orGreater($column, $value);
 	}
 
 	function orGreaterEqual($column, $value) {
-		return $this->addOr($column, $value, self::GREATER_EQUAL);
+		return $this->_where->orGreaterEqual($column, $value);
 	}
 
 	function orLess($column, $value) {
-		return $this->addOr($column, $value, self::LESS_THAN);
+		return $this->_where->orLess($column, $value);
 	}
 
 	function orLessEqual($column, $value) {
-		return $this->addOr($column, $value, self::LESS_EQUAL);
+		return $this->_where->orLessEqual($column, $value);
 	}
 
 	function orNull($column) {
-		return $this->addOr($column, null);
+		return $this->_where->orNull($column);
 	}
 
 	function orNotNull($column) {
-		return $this->addOr($column, null, self::NOT_EQUAL);
+		return $this->_where->orNotNull($column);
 	}
 
 	function orBetween($column, $from, $to) {
-		return $this->addOr($column, array($from, $to), self::BETWEEN);
+		return $this->_where->orBetween($column, $from, $to);
+	}
+
+	function orBeginsWith($column, $value) {
+		return $this->_where->orBeginsWith($column, $value);
+	}
+
+	function orEndsWith($column, $value) {
+		return $this->_where->orEndsWith($column, $value);
+	}
+
+	function orContains($column, $value) {
+		return $this->_where->orContains($column, $value);
 	}
 
 	/**
@@ -554,7 +581,7 @@ class Query {
 	 * Shortcut for addOrder()
 	 * @return Query
 	 */
-	final function order($column, $dir=null) {
+	final function order($column, $dir = null) {
 		return $this->addOrder($column, $dir);
 	}
 
@@ -562,7 +589,7 @@ class Query {
 	 * Shortcut for addOrder()
 	 * @return Query
 	 */
-	function orderBy($column, $dir=null) {
+	function orderBy($column, $dir = null) {
 		return $this->addOrder($column, $dir);
 	}
 
