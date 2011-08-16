@@ -142,6 +142,7 @@ class Query {
 	 */
 	function setDistinct($bool = true) {
 		$this->_distinct = (bool) $bool;
+		return $this;
 	}
 
 	/**
