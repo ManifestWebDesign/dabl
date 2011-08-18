@@ -300,31 +300,31 @@ class Condition {
 	}
 
 	function andNot($column, $value) {
-		return $this->addAnd($column, $value, Query::NOT_EQUAL);
+		return $this->addAnd($column, $value, self::NOT_EQUAL);
 	}
 
 	function andLike($column, $value) {
-		return $this->addAnd($column, $value, Query::LIKE);
+		return $this->addAnd($column, $value, self::LIKE);
 	}
 
 	function andNotLike($column, $value) {
-		return $this->addAnd($column, $value, Query::NOT_LIKE);
+		return $this->addAnd($column, $value, self::NOT_LIKE);
 	}
 
 	function andGreater($column, $value) {
-		return $this->addAnd($column, $value, Query::GREATER_THAN);
+		return $this->addAnd($column, $value, self::GREATER_THAN);
 	}
 
 	function andGreaterEqual($column, $value) {
-		return $this->addAnd($column, $value, Query::GREATER_EQUAL);
+		return $this->addAnd($column, $value, self::GREATER_EQUAL);
 	}
 
 	function andLess($column, $value) {
-		return $this->addAnd($column, $value, Query::LESS_THAN);
+		return $this->addAnd($column, $value, self::LESS_THAN);
 	}
 
 	function andLessEqual($column, $value) {
-		return $this->addAnd($column, $value, Query::LESS_EQUAL);
+		return $this->addAnd($column, $value, self::LESS_EQUAL);
 	}
 
 	function andNull($column) {
@@ -332,51 +332,51 @@ class Condition {
 	}
 
 	function andNotNull($column) {
-		return $this->addAnd($column, null, Query::NOT_EQUAL);
+		return $this->addAnd($column, null, self::NOT_EQUAL);
 	}
 
 	function andBetween($column, $from, $to) {
-		return $this->addAnd($column, array($from, $to), Query::BETWEEN);
+		return $this->addAnd($column, array($from, $to), self::BETWEEN);
 	}
 
 	function andBeginsWith($column, $value) {
-		return $this->addAnd($column, $value, Query::BEGINS_WITH);
+		return $this->addAnd($column, $value, self::BEGINS_WITH);
 	}
 
 	function andEndsWith($column, $value) {
-		return $this->addAnd($column, $value, Query::ENDS_WITH);
+		return $this->addAnd($column, $value, self::ENDS_WITH);
 	}
 
 	function andContains($column, $value) {
-		return $this->addAnd($column, $value, Query::CONTAINS);
+		return $this->addAnd($column, $value, self::CONTAINS);
 	}
 
 	function orNot($column, $value) {
-		return $this->addOr($column, $value, Query::NOT_EQUAL);
+		return $this->addOr($column, $value, self::NOT_EQUAL);
 	}
 
 	function orLike($column, $value) {
-		return $this->addOr($column, $value, Query::LIKE);
+		return $this->addOr($column, $value, self::LIKE);
 	}
 
 	function orNotLike($column, $value) {
-		return $this->addOr($column, $value, Query::NOT_LIKE);
+		return $this->addOr($column, $value, self::NOT_LIKE);
 	}
 
 	function orGreater($column, $value) {
-		return $this->addOr($column, $value, Query::GREATER_THAN);
+		return $this->addOr($column, $value, self::GREATER_THAN);
 	}
 
 	function orGreaterEqual($column, $value) {
-		return $this->addOr($column, $value, Query::GREATER_EQUAL);
+		return $this->addOr($column, $value, self::GREATER_EQUAL);
 	}
 
 	function orLess($column, $value) {
-		return $this->addOr($column, $value, Query::LESS_THAN);
+		return $this->addOr($column, $value, self::LESS_THAN);
 	}
 
 	function orLessEqual($column, $value) {
-		return $this->addOr($column, $value, Query::LESS_EQUAL);
+		return $this->addOr($column, $value, self::LESS_EQUAL);
 	}
 
 	function orNull($column) {
@@ -384,23 +384,23 @@ class Condition {
 	}
 
 	function orNotNull($column) {
-		return $this->addOr($column, null, Query::NOT_EQUAL);
+		return $this->addOr($column, null, self::NOT_EQUAL);
 	}
 
 	function orBetween($column, $from, $to) {
-		return $this->addOr($column, array($from, $to), Query::BETWEEN);
+		return $this->addOr($column, array($from, $to), self::BETWEEN);
 	}
 
 	function orBeginsWith($column, $value) {
-		return $this->addOr($column, $value, Query::BEGINS_WITH);
+		return $this->addOr($column, $value, self::BEGINS_WITH);
 	}
 
 	function orEndsWith($column, $value) {
-		return $this->addOr($column, $value, Query::ENDS_WITH);
+		return $this->addOr($column, $value, self::ENDS_WITH);
 	}
 
 	function orContains($column, $value) {
-		return $this->addOr($column, $value, Query::CONTAINS);
+		return $this->addOr($column, $value, self::CONTAINS);
 	}
 
 	/**
