@@ -5,12 +5,20 @@ class DefaultGenerator extends BaseGenerator {
 	/**
 	 * @var array
 	 */
-	protected $actionIcons = array('Edit' => 'pencil', 'Show' => 'search', 'Delete' => 'trash');
+	protected $actionIcons = array(
+		'Edit' => 'pencil',
+		'Show' => 'search',
+		'Delete' => 'trash'
+	);
 
 	/**
 	 * @var array
 	 */
-	protected $standardActions = array('Show', 'Edit', 'Delete');
+	protected $standardActions = array(
+		'Show',
+		'Edit',
+		'Delete'
+	);
 
 	/**
 	 * @var array
