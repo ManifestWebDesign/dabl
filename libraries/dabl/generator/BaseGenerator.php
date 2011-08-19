@@ -220,9 +220,9 @@ abstract class BaseGenerator {
 	 * @param string $template Path to file relative to dirname(__FILE__) with leading /
 	 * @return string
 	 */
-	function renderTemplate($table_name, $template, $extraparams = array()) {
+	function renderTemplate($table_name, $template, $extra_params = array()) {
 		$params = $this->getTemplateParams($table_name);
-		$params = array_merge($params, $extraparams);
+		$params = array_merge($params, $extra_params);
 		foreach ($params as $key => &$value)
 			$$key = $value;
 
@@ -381,35 +381,26 @@ abstract class BaseGenerator {
 	 * Generates Table classes
 	 * @return void
 	 */
-	function generateModels($table_names = false) {
-		if ($table_names === false)
+	function generateModelQueries($table_names = false) {
+		if ($table_names === false) {
 			$table_names = $this->getTableNames();
-		elseif (empty($table_names))
+		} elseif (empty($table_names)) {
 			return;
+		}
 
 		$options = $this->options;
 
-		if (!is_dir($options['model_path']) && !mkdir($options['model_path'])) {
-			die('The directory ' . $options['model_path'] . ' does not exist.');
+		if (!is_dir($options['base_model_query_path']) && !mkdir($options['base_model_query_path'])) {
+			throw new Exception('The directory ' . $options['base_model_query_path'] . ' does not exist.');
 		}
 
-		if (!is_dir($options['base_model_path']) && !mkdir($options['base_model_path'])) {
-			die('The directory ' . $options['base_model_path'] . ' does not exist.');
+		if (!is_dir($options['model_query_path']) && !mkdir($options['model_query_path'])) {
+			throw new Exception('The directory ' . $options['model_query_path'] . ' does not exist.');
 		}
 
 		//Write php files for classes
 		foreach ($table_names as &$table_name) {
 			$class_name = $this->getModelName($table_name);
-			$lower_case_table = strtolower($table_name);
-
-			$base_class = $this->getBaseModel($table_name);
-			$base_file = "base{$class_name}.php";
-			$base_file = $options['base_model_path'] . $base_file;
-
-			if (!file_exists($base_file) || file_get_contents($base_file) != $base_class) {
-				file_put_contents($base_file, $base_class);
-			}
-
 
 			$base_query = $this->getBaseModelQuery($table_name);
 			$base_query_file = "base{$class_name}Query.php";
@@ -419,18 +410,49 @@ abstract class BaseGenerator {
 				file_put_contents($base_query_file, $base_query);
 			}
 
-
-			$query = $this->getModelQuery($table_name);
 			$query_file = "{$class_name}Query.php";
 			$query_file = $options['model_query_path'] . $query_file;
-
-			if (!file_exists($query_file) || file_get_contents($query_file) != $query) {
+			if (!file_exists($query_file)) {
+				$query = $this->getModelQuery($table_name);
 				file_put_contents($query_file, $query);
 			}
+		}
+	}
 
+	/**
+	 * Generates Table classes
+	 * @return void
+	 */
+	function generateModels($table_names = false) {
+		if ($table_names === false) {
+			$table_names = $this->getTableNames();
+		} elseif (empty($table_names)) {
+			return;
+		}
+
+		$options = $this->options;
+
+		if (!is_dir($options['model_path']) && !mkdir($options['model_path'])) {
+			throw new Exception('The directory ' . $options['model_path'] . ' does not exist.');
+		}
+
+		if (!is_dir($options['base_model_path']) && !mkdir($options['base_model_path'])) {
+			throw new Exception('The directory ' . $options['base_model_path'] . ' does not exist.');
+		}
+
+		//Write php files for classes
+		foreach ($table_names as &$table_name) {
+			$class_name = $this->getModelName($table_name);
+
+			$base_class = $this->getBaseModel($table_name);
+			$base_file = "base{$class_name}.php";
+			$base_file = $options['base_model_path'] . $base_file;
+
+			if (!file_exists($base_file) || file_get_contents($base_file) != $base_class) {
+				file_put_contents($base_file, $base_class);
+			}
 
 			$file = $options['model_path'] . $class_name . ".php";
-
 			if (!file_exists($file)) {
 				$class = $this->getModel($table_name);
 				file_put_contents($file, $class);

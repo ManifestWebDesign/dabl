@@ -4,14 +4,12 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title>DABL Generator</title>
-		<link type="text/css" rel="stylesheet" href="../css/style.css" />
-	</head>
-	<body>
+		<link type="text/css" rel="stylesheet" href="style.css" />
 		<script>
 			function checkAll(name, connection, checked){
 				var boxes = document.getElementsByTagName('input'),
-					length = boxes.length,
-					x;
+				length = boxes.length,
+				x;
 				for(x = 0; x < length; ++x){
 					var checkbox = boxes[x];
 					if(checkbox.type == 'checkbox' && checkbox.name.toString().indexOf(connection) !== -1 && checkbox.name.toString().indexOf(name) !== -1)
@@ -19,70 +17,81 @@
 				}
 			}
 		</script>
-		<h1>DABL Generator</h1>
-		<div>
-			Please choose which tables to generate for.  Only the base models
-			can be overwritten.  Models<?php if (defined('IS_MVC') && IS_MVC): ?>, views and controllers<?php endif ?> will not be overwritten if
-			they already exist.  Generating a view or controller without generating the model is not recommended.
-		</div>
+	</head>
+	<body>
+		<div class="main-wrapper">
+			<h1>DABL Generator</h1>
 
-		<br />
+			<p>
+				Please choose which tables to generate for.  Only the base models
+				can be overwritten.  Models<?php if (defined('IS_MVC') && IS_MVC): ?>, views and controllers<?php endif ?> will not be overwritten if
+				they already exist.  Generating a view or controller without generating the model is not recommended.
+			</p>
 
-		<form action="generate.php" method="POST">
-			<input type="hidden" name="action" value="generate" />
-			<table>
-				<tbody>
-
+			<form action="generate.php" method="POST">
+				<input type="hidden" name="action" value="generate" />
 				<?php foreach ($generators as $connection_name => $generator): ?>
+					<h2>Database: <?php echo $generator->getDBName() ?> (<?php echo $connection_name ?>)</h2>
+					<div class="ui-widget-content">
+						<table class="object-grid">
+							<thead>
+								<tr>
+									<th>&nbsp;</th>
+									<th align="left">
+										<label>
+											<input type="checkbox" checked="checked" onclick="checkAll('Models', '<?php echo $connection_name ?>', this.checked)" />
+											Models
+										</label>
+									</th>
+									<th align="left">
+										<label>
+											<input type="checkbox" checked="checked" onclick="checkAll('ModelQueries', '<?php echo $connection_name ?>', this.checked)" />
+											Model Queries
+										</label>
+									</th>
+									<?php if (defined('IS_MVC') && IS_MVC): ?>
+										<th align="left">
+											<label>
+												<input type="checkbox" onclick="checkAll('Views', '<?php echo $connection_name ?>', this.checked)" />
+												Views
+											</label>
+										</th>
+										<th align="left">
+											<label>
+												<input type="checkbox" onclick="checkAll('Controllers', '<?php echo $connection_name ?>', this.checked)" />
+												Controllers
+											</label>
+										</th>
+									<?php endif ?>
+								</tr>
+							</thead>
+							<tbody>
+								<?php foreach ($generator->getTableNames() as $table_name): ?>
 
-					<tr>
-						<th colspan="100">
-							<h3>Database: <?php echo $generator->getDBName() ?> (<?php echo $connection_name ?>)</h3>
-						</th>
-					</tr>
-					<tr>
-						<th>&nbsp;</th>
-						<th align="left">
-							<input type="checkbox" checked="checked" onclick="checkAll('Models', '<?php echo $connection_name ?>', this.checked)" />
-							Models
-						</th>
-						<?php if (defined('IS_MVC') && IS_MVC): ?>
-						<th align="left">
-							<input type="checkbox" onclick="checkAll('Views', '<?php echo $connection_name ?>', this.checked)" />
-							Views
-						</th>
-						<th align="left">
-							<input type="checkbox" onclick="checkAll('Controllers', '<?php echo $connection_name ?>', this.checked)" />
-							Controllers
-						</th>
-						<?php endif ?>
-					</tr>
-
-					<?php foreach ($generator->getTableNames() as $tableName): ?>
-
-						<tr>
-							<td><?php echo $tableName ?></td>
-							<td>
-								<input type="checkbox" value="<?php echo $tableName ?>" name="Models[<?php echo $connection_name ?>][]" checked="checked" />
-							</td>
-							<?php if (defined('IS_MVC') && IS_MVC): ?>
-							<td>
-								<input type="checkbox" value="<?php echo $tableName ?>" name="Views[<?php echo $connection_name ?>][]" />
-							</td>
-							<td>
-								<input type="checkbox" value="<?php echo $tableName ?>" name="Controllers[<?php echo $connection_name ?>][]" />
-							</td>
-							<?php endif ?>
-						</tr>
-					<?php endforeach ?>
-
-					<tr><td>&nbsp;</td></tr>
-
+									<tr>
+										<td><strong><?php echo $table_name ?></strong></td>
+										<td>
+											<input type="checkbox" value="<?php echo $table_name ?>" name="Models[<?php echo $connection_name ?>][]" checked="checked" />
+										</td>
+										<td>
+											<input type="checkbox" value="<?php echo $table_name ?>" name="ModelQueries[<?php echo $connection_name ?>][]" checked="checked" />
+										</td>
+										<?php if (defined('IS_MVC') && IS_MVC): ?>
+											<td>
+												<input type="checkbox" value="<?php echo $table_name ?>" name="Views[<?php echo $connection_name ?>][]" />
+											</td>
+											<td>
+												<input type="checkbox" value="<?php echo $table_name ?>" name="Controllers[<?php echo $connection_name ?>][]" />
+											</td>
+										<?php endif ?>
+									</tr>
+								<?php endforeach ?>
+							</tbody>
+						</table>
+					</div>
 				<?php endforeach ?>
-
-				</tbody>
-			</table>
-			<input type="submit" value="Generate" />
-		</form>
+				<input type="submit" value="Generate" />
+			</form>
+		</div>
 	</body>
 </html>
