@@ -34,13 +34,12 @@ class DefaultGenerator extends BaseGenerator {
 		$single = StringFormat::variable($table_name);
 		$pks = $this->getPrimaryKeys($table_name);
 
-
 		if (count($pks) === 1) {
 			$pk = $pks[0];
 		} else {
 			$pk = null;
 		}
-		$pkMethod = "get$pk";
+		$pkMethod = "get{$pk->getName()}";
 		$actions = array();
 		if (!$pk) {
 			return $actions;
