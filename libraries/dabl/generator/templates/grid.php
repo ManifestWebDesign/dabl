@@ -5,6 +5,10 @@
 foreach($columns as $key => $column){
 	$column_name = $column->getName();
 	$column_label = StringFormat::titleCase($column_name, ' ');
+	if ($column->isForeignKey() && strrpos(strtolower($column_label), 'id') === strlen($column_label) - 2) {
+		$column_label = str_replace(array('id', 'Id', 'ID', 'iD'), '', $column_label);
+		$column_label = trim($column_label);
+	}
 ?>
 			<th class="ui-widget-header <?php if ($key == 0) echo 'ui-corner-tl' ?>">
 				<a href="<?php echo "<?php echo" ?> '?SortBy=<?php echo $column_name ?>' . (!isset($_REQUEST['Dir']) && @$_REQUEST['SortBy'] == '<?php echo $column_name ?>' ? '&Dir=DESC' : '') <?php echo "?>" ?>">
@@ -45,7 +49,15 @@ foreach($columns as $column){
 			$format = null;
 			break;
 	}
-	$output = '<?php echo htmlentities($'.$single.'->'."get$column_name".'('.$format.')) ?>';
+	if ($column->isForeignKey()) {
+		$fk = array_shift($column->getForeignKeys());
+		$foreign_table = $fk->getForeignTableName();
+		$local_column = $fk->getLocalColumnName();
+		$long_method = 'get' . StringFormat::titleCase("{$foreign_table}_related_by_{$local_column}", '');
+		$output = '<?php echo htmlentities($'.$single.'->'."$long_method".'()) ?>';
+	} else {
+		$output = '<?php echo htmlentities($'.$single.'->'."get$column_name".'('.$format.')) ?>';
+	}
 ?>
 			<td><?php echo $output ?>&nbsp;</td>
 <?php
@@ -65,9 +77,7 @@ if ($actions) {
 					href="<?php echo $action_url ?>"<?php if(strtolower($action_label) == 'delete'): ?>
 
 					onclick="return confirm('Are you sure?');"<?php endif ?>>
-
 					<span class="ui-icon ui-icon<?php if(@$this->actionIcons[$action_label]): ?>-<?php echo $this->actionIcons[$action_label]; ?><?php endif ?>"><?php echo $action_label ?></span>
-
 					<?php echo $action_label ?>
 
 				</a>
