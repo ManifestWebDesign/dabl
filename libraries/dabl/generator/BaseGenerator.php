@@ -288,9 +288,20 @@ abstract class BaseGenerator {
 		return StringFormat::pluralURL($table_name);
 	}
 
-	abstract function getControllerName($table_name);
+	/**
+	 * @param string $table_name
+	 * @return string
+	 */
+	function getControllerName($table_name) {
+		$controller_name = str_replace(' ', '', ucwords(str_replace('_', ' ', $table_name)));
+		$controller_name = StringFormat::plural($controller_name);
+		$controller_name = $controller_name . 'Controller';
+		return $controller_name;
+	}
 
-	abstract function getControllerFileName($table_name);
+	function getControllerFileName($table_name) {
+		return $this->getControllerName($table_name) . '.php';
+	}
 
 	/**
 	 * Generates a string with the contents of the Base class
@@ -360,10 +371,13 @@ abstract class BaseGenerator {
 	 */
 	function getViews($table_name) {
 		$rendered_views = array();
-		foreach ($this->getViewTemplates() as $file_name => $view_template)
+
+		foreach ($this->getViewTemplates() as $file_name => $view_template) {
 			$rendered_views[$file_name] = $this->renderTemplate($table_name, $view_template);
+		}
+
 		foreach ($this->database->getTable($table_name)->getForeignKeys() as $fk) {
-			$rendered_views[$fk->getForeignTableName() . '.php'] = $this->renderTemplate($table_name, '/templates/fkgrid.php', array('foreign_key' => $fk));
+			$rendered_views[StringFormat::url($fk->getForeignTableName()) . '.php'] = $this->renderTemplate($table_name, '/templates/fkgrid.php', array('foreign_key' => $fk));
 		}
 		return $rendered_views;
 	}
@@ -473,27 +487,31 @@ abstract class BaseGenerator {
 	 * Generate views
 	 */
 	function generateViews($table_names = false) {
-		if ($table_names === false)
+		if ($table_names === false) {
 			$table_names = $this->getTableNames();
+		}
 
 		$options = $this->getOptions();
 
 		foreach ((array) $table_names as $table_name) {
 			$lower_case_table = strtolower($table_name);
 
-			if (!is_dir($options['view_path']))
+			if (!is_dir($options['view_path'])) {
 				throw new Exception($options['view_path'] . " is not a directory.");
+			}
 
 			$target_dir = $options['view_path'] . $this->getViewDirName($table_name) . '/';
 
-			if (!is_dir($target_dir))
+			if (!is_dir($target_dir)) {
 				mkdir($target_dir, 0755);
+			}
 
 			foreach ($this->getViews($table_name) as $file_name => $contents) {
 				$file_name = $target_dir . $file_name;
 
-				if (!file_exists($file_name))
+				if (!file_exists($file_name)) {
 					file_put_contents($file_name, $contents);
+				}
 			}
 		}
 	}

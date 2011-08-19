@@ -68,25 +68,10 @@ class DefaultGenerator extends BaseGenerator {
 				continue;
 			}
 			$used_to[$from_table] = $from_column;
-			$actions[ucwords(StringFormat::titleCase(StringFormat::plural($from_table), ' '))] = "<?php echo site_url('" . StringFormat::pluralURL($from_table) . '/' . $single . "/' . $" . $single . '->' . $pkMethod . '()) ?>';
+			$actions[ucwords(StringFormat::titleCase(StringFormat::plural($from_table), ' '))] = "<?php echo site_url('" . StringFormat::pluralURL($from_table) . '/' . StringFormat::url($single) . "/' . $" . $single . '->' . $pkMethod . '()) ?>';
 		}
 
 		return $actions;
-	}
-
-	/**
-	 * @param string $table_name
-	 * @return string
-	 */
-	function getControllerName($table_name) {
-		$controller_name = str_replace(' ', '', ucwords(str_replace('_', ' ', $table_name)));
-		$controller_name = StringFormat::plural($controller_name);
-		$controller_name = $controller_name . 'Controller';
-		return $controller_name;
-	}
-
-	function getControllerFileName($table_name) {
-		return $this->getControllerName($table_name) . '.php';
 	}
 
 }
