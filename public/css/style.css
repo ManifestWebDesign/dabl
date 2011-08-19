@@ -10,7 +10,12 @@ form p, form, h2 {
 	clear: both;
 }
 
-form p label{
+form h2 {
+	margin-left: 10px;
+	margin-right: 20px;
+}
+
+.input-label {
 	display:block;
 	float: left;
 	width: 160px;
@@ -20,16 +25,11 @@ form p label{
 	padding-right: 10px;
 }
 
-form div.ui-widget-content p {
+.input-wrapper {
 	text-align: left;
 	line-height: 24px;
 	clear: both;
 	padding: 5px 0 5px 0;
-}
-
-form h2 {
-	margin-left: 10px;
-	margin-right: 20px;
 }
 
 input[type=text], input[type=password], textarea {

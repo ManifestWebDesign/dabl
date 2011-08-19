@@ -45,8 +45,8 @@ foreach ($this->getColumns($table_name) as $column) {
 	$label = StringFormat::titleCase($label, ' ');
 	$input_id = strtolower($single . '_' . $column_name);
 ?>
-		<p>
-			<label for="<?php echo $input_id ?>"><?php echo $label ?></label>
+		<div class="input-wrapper">
+			<label class="input-label" for="<?php echo $input_id ?>"><?php echo $label ?></label>
 <?php
 	switch($column->getType()){
 		case PropelTypes::LONGVARCHAR:
@@ -80,12 +80,12 @@ foreach ($this->getColumns($table_name) as $column) {
 			break;
 	}
 ?>
-		</p>
+		</div>
 <?php
 }
 ?>
 	</div>
-	<p>
+	<div class="input-wrapper">
 		<span class="ui-state-default ui-corner-all ui-button-link">
 			<span class="ui-icon ui-icon-disk"></span>
 			<input type="submit" value="<?php echo '<?php echo $'.$single.'->isNew() ? "Save" : "Save Changes" ?>' ?>" />
@@ -98,5 +98,5 @@ foreach ($this->getColumns($table_name) as $column) {
 		</a>
 		<?php echo '<?php endif ?>' ?>
 
-	</p>
+	</div>
 </form>
