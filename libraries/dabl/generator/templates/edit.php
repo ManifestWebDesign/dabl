@@ -1,6 +1,6 @@
 <h1><?php echo '<?php echo $'.$single.'->isNew() ? "New" : "Edit" ?>' ?> <?php echo StringFormat::titleCase($table_name, ' ') ?></h1>
 <form method="post" action="<?php echo "<?php echo site_url('".$plural_url."/save') ?>" ?>">
-	<div class="ui-widget-content ui-corner-all">
+	<div class="ui-widget-content ui-corner-all ui-helper-clearfix">
 <?php
 if($pk){
 ?>
@@ -45,8 +45,8 @@ foreach ($this->getColumns($table_name) as $column) {
 	$label = StringFormat::titleCase($label, ' ');
 	$input_id = strtolower($single . '_' . $column_name);
 ?>
-		<div class="input-wrapper">
-			<label class="input-label" for="<?php echo $input_id ?>"><?php echo $label ?></label>
+		<div class="form-field-wrapper">
+			<label class="form-field-label" for="<?php echo $input_id ?>"><?php echo $label ?></label>
 <?php
 	switch($column->getType()){
 		case PropelTypes::LONGVARCHAR:
@@ -85,7 +85,7 @@ foreach ($this->getColumns($table_name) as $column) {
 }
 ?>
 	</div>
-	<div class="input-wrapper">
+	<div class="form-action-buttons ui-helper-clearfix">
 		<span class="ui-state-default ui-corner-all ui-button-link">
 			<span class="ui-icon ui-icon-disk"></span>
 			<input type="submit" value="<?php echo '<?php echo $'.$single.'->isNew() ? "Save" : "Save Changes" ?>' ?>" />

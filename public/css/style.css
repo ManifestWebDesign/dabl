@@ -15,8 +15,13 @@ form h2 {
 	margin-right: 20px;
 }
 
-.input-label {
-	display:block;
+.form-action-buttons, .action-buttons {
+	margin: 5px 0;
+	padding: 0;
+}
+
+.form-field-label, .field-label {
+	display: block;
 	float: left;
 	width: 160px;
 	text-align: right;
@@ -25,7 +30,7 @@ form h2 {
 	padding-right: 10px;
 }
 
-.input-wrapper {
+.form-field-wrapper, .field-wrapper {
 	text-align: left;
 	line-height: 24px;
 	clear: both;

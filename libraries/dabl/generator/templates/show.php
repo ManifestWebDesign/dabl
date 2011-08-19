@@ -2,7 +2,7 @@
 unset($actions['Show']);
 ?>
 <h1>View <?php echo StringFormat::titleCase($table_name, ' ') ?></h1>
-<p>
+<div class="action-buttons ui-helper-clearfix">
 <?php foreach($actions as $action_label => $action_url): ?>
 	<a href="<?php echo $action_url ?>"
 	   class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php if(strtolower($action_label) == 'delete'): ?>
@@ -12,8 +12,8 @@ unset($actions['Show']);
 
 	</a>
 <?php endforeach ?>
-</p>
-<div class="ui-widget-content ui-corner-all">
+</div>
+<div class="ui-widget-content ui-corner-all ui-helper-clearfix">
 <?php
 foreach($this->getColumns($table_name) as $column){
 	$column_name = $column->getName();
@@ -47,11 +47,11 @@ foreach($this->getColumns($table_name) as $column){
 		$output = '<?php echo htmlentities($'.$single.'->'."get$column_name".'('.$format.')) ?>';
 	}
 ?>
-	<p>
-		<strong><?php echo $column_label ?>:</strong>
+	<div class="field-wrapper">
+		<span class="field-label"><?php echo $column_label ?></span>
 		<?php echo $output ?>
 
-	</p>
+	</div>
 <?php
 }
 ?>
