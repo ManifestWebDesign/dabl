@@ -29,7 +29,7 @@ class QueryPager {
 	 * @param int $page
 	 * @param string $class_name
 	 */
-	function __construct(Query $q, $limit=null, $page=null, $class_name = null) {
+	function __construct(Query $q, $limit = null, $page = null, $class_name = null) {
 		$this->setQuery($q);
 		if ($class_name)
 			$this->setClass($class_name);
@@ -194,7 +194,7 @@ class QueryPager {
 			return $q->doSelect();
 	}
 
-	function getPagerLinks($url_format, $limit = 20, $css_class='', $css_class_current='', $link_text=array()) {
+	function getPagerLinks($url_format, $limit = 20, $css_class = '', $css_class_current = '', $link_text = array()) {
 		throw new Exception(__METHOD__ . ' is deprectated');
 	}
 
@@ -205,7 +205,7 @@ class QueryPager {
 	 * @param array $labels ie: array("first" => "go to first page", "prev" => "previous", "next" => "next", "first" => "go to last page")
 	 * @return string Html paging content
 	 */
-	function getLinks($url_format, $page_limit = null, $labels=array()) {
+	function getLinks($url_format, $page_limit = null, $labels = array()) {
 		$default_labels = array(
 			'first' => '&laquo;',
 			'prev' => '&lsaquo;',

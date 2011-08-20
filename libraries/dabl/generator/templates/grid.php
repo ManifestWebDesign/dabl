@@ -1,3 +1,16 @@
+<?php echo '<?php' ?>
+
+$_get_args = (array) @$_GET;
+unset($_get_args['_url']);
+http_build_query($_get_args);
+
+if (isset($_REQUEST['Dir'])) {
+	unset($_get_args['Dir']);
+} else if (isset($_REQUEST['SortBy'])) {
+	$_get_args['Dir'] = 'DESC';
+}
+<?php echo '?>' ?>
+
 <table class="object-grid <?php echo $single ?>-grid" cellspacing="0">
 	<thead>
 		<tr>
@@ -9,12 +22,14 @@ foreach($columns as $key => $column){
 		$column_label = str_replace(array('id', 'Id', 'ID', 'iD'), '', $column_label);
 		$column_label = trim($column_label);
 	}
+	$column_constant = $model_name . '::' . StringFormat::constant($column->getName());
+	$sort_href = "<?php echo http_build_query(array_merge(\$_get_args, array('SortBy' => $column_constant))) ?>";
 ?>
 			<th class="ui-widget-header <?php if ($key == 0) echo 'ui-corner-tl' ?>">
-				<a href="<?php echo "<?php echo" ?> '?SortBy=<?php echo $column_name ?>' . (!isset($_REQUEST['Dir']) && @$_REQUEST['SortBy'] == '<?php echo $column_name ?>' ? '&Dir=DESC' : '') <?php echo "?>" ?>">
-					<?php echo "<?php" ?> if( @$_REQUEST['SortBy'] == '<?php echo $column_name ?>'):<?php echo "?>" ?>
+				<a href="?<?php echo $sort_href ?>">
+					<?php echo "<?php if( @\$_REQUEST['SortBy'] == $column_constant): ?>" ?>
 
-						<span class="ui-icon ui-icon-carat-1-<?php echo "<?php" ?> echo isset($_REQUEST['Dir']) ? 's' : 'n' <?php echo "?>" ?>"></span>
+						<span class="ui-icon ui-icon-carat-1-<?php echo "<?php echo isset(\$_REQUEST['Dir']) ? 's' : 'n' ?>" ?>"></span>
 					<?php echo "<?php endif ?>"?>
 
 					<?php echo $column_label ?>

@@ -13,6 +13,8 @@ $fk_single = str_replace(array('_', '-'), '', strtolower($foreign_key->getForeig
 	</a>
 </h1>
 
+<?php echo "<?php load_view('pager', compact('pager')) ?>" ?>
+
 <div class="ui-widget-content ui-corner-all">
 	<?php echo "<?php load_view('" . $plural_url . "/grid', \$params) ?>" ?>
 

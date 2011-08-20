@@ -2,21 +2,14 @@
 
 class <?php echo $controller_name ?> extends ApplicationController {
 
-	function index($page = 1) {
-		$page_string = site_url('<?php echo $plural_url ?>/index/$page_num');
-
+	function index() {
 		$q = new Query(<?php echo $model_name ?>::getTableName());
 		if (isset($_REQUEST['SortBy'])) {
 			$q->order($_REQUEST['SortBy'], isset($_REQUEST['Dir']) ? Query::DESC : Query::ASC);
-			$page_string .= '?SortBy=' . $_REQUEST['SortBy'];
-			if (isset($_REQUEST['Dir'])) {
-				$page_string .= '&Dir=' . $_REQUEST['Dir'];
-			}
 		}
 
-		$qp = new QueryPager($q, 25, $page, '<?php echo $model_name ?>');
+		$qp = new QueryPager($q, 25, @$_GET['page'], '<?php echo $model_name ?>');
 		$this['<?php echo $plural ?>'] = $qp->fetchPage();
-		$this['page_string'] = $page_string;
 		$this['pager'] = $qp;
 	}
 
@@ -67,17 +60,17 @@ class <?php echo $controller_name ?> extends ApplicationController {
 			$to_table = $r->getForeignTableName();
 			$to_class_name = $this->getModelName($to_table);
 			$from_column = array_shift($r->getLocalColumns());
-			$fk_single = str_replace(array('_', '-'), '', strtolower($to_table));
+			$fk_single = StringFormat::variable($to_table);
 			if(@$used_from[$to_table]) continue;
 			$used_from[$to_table] = $from_column;
 ?>
-	function <?php echo $fk_single ?>($<?php echo $fk_single ?>_id = null) {
+	function <?php echo StringFormat::classMethod($to_table) ?>($<?php echo $fk_single ?>_id = null) {
 		$<?php echo $fk_single ?>_id = $<?php echo $fk_single ?>_id ? $<?php echo $fk_single ?>_id : @$_REQUEST[<?php echo $to_class_name ?>::getPrimaryKey()];
 		$<?php echo $fk_single ?> = $<?php echo $fk_single ?>_id ? <?php echo $to_class_name ?>::retrieveByPK($<?php echo $fk_single ?>_id) : new <?php echo $to_class_name ?>;
 
 		$this['<?php echo $plural ?>'] = $<?php echo $fk_single ?>->get<?php echo $model_name ?>s();
 		$this['<?php echo $fk_single ?>'] = $<?php echo $fk_single ?>;
-		$this['page'] = '<?php echo StringFormat::titleCase($plural, ' ') ?> for <?php echo $fk_single ?>';
+		$this['page'] = '<?php echo StringFormat::titleCase($plural, ' ') ?> for <?php echo StringFormat::titleCase($to_table, ' ') ?>';
 	}
 
 <?php
