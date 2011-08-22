@@ -45,7 +45,7 @@
 									</th>
 									<th align="left">
 										<label>
-											<input type="checkbox" checked="checked" onclick="checkAll('ModelQueries', '<?php echo $connection_name ?>', this.checked)" />
+											<input type="checkbox" onclick="checkAll('ModelQueries', '<?php echo $connection_name ?>', this.checked)" />
 											Model Queries
 										</label>
 									</th>
