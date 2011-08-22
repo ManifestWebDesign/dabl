@@ -28,6 +28,8 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 
 	protected static $_instancePoolCount = 0;
 
+	protected static $_poolEnabled = true;
+
 	/**
 	 * Array of all primary keys
 	 * @var string[]
@@ -293,9 +295,11 @@ foreach ($fields as $key => &$field):
 <?php if (1 !== count($PKs)): ?>
 		$args = func_get_args();
 <?php endif; ?>
-		$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if (1 == count($PKs)): ?>$<?php echo strtolower(str_replace('-', '_', $PK)) ?><?php else: ?>implode('-', $args)<?php endif ?>);
-		if (null !== $pool_instance) {
-			return $pool_instance;
+		if (<?php echo $class_name ?>::$_poolEnabled) {
+			$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if (1 == count($PKs)): ?>$<?php echo strtolower(str_replace('-', '_', $PK)) ?><?php else: ?>implode('-', $args)<?php endif ?>);
+			if (null !== $pool_instance) {
+				return $pool_instance;
+			}
 		}
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = new Query;
@@ -371,7 +375,7 @@ foreach ($fields as $key => &$field):
 	 */
 <?php $used_functions[] = 'fromResult'; ?>
 	static function fromResult(PDOStatement $result, $class = '<?php echo $class_name ?>') {
-		return baseModel::fromResult($result, $class);
+		return baseModel::fromResult($result, $class, <?php echo $class_name ?>::$_poolEnabled);
 	}
 
 <?php $used_functions[] = 'castInts'; ?>
@@ -397,6 +401,9 @@ foreach ($fields as $key => &$field):
 	 */
 <?php $used_functions[] = 'insertIntoPool'; ?>
 	static function insertIntoPool(<?php echo $class_name ?> $object) {
+		if (!<?php echo $class_name ?>::$_poolEnabled) {
+			return;
+		}
 <?php if (!$PKs): ?>
 		// This table doesn't have primary keys, so there's no way to key the instance pool array
 		return;
@@ -418,7 +425,7 @@ foreach ($fields as $key => &$field):
 	 */
 <?php $used_functions[] = 'retrieveFromPool'; ?>
 	static function retrieveFromPool($pk) {
-		if (null === $pk) {
+		if (!<?php echo $class_name ?>::$_poolEnabled || null === $pk) {
 			return null;
 		}
 		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool)) {
@@ -454,6 +461,16 @@ foreach ($fields as $key => &$field):
 		<?php echo $class_name ?>::$_instancePool = array();
 	}
 
+<?php $used_functions[] = 'enablePool'; ?>
+	static function enablePool() {
+		<?php echo $class_name ?>::$_poolEnabled = true;
+	}
+
+<?php $used_functions[] = 'disablePool'; ?>
+	static function disablePool() {
+		<?php echo $class_name ?>::$_poolEnabled = false;
+	}
+
 	/**
 	 * Returns an array of all <?php echo $class_name ?> objects in the database.
 	 * $extra SQL can be appended to the query to LIMIT, SORT, and/or GROUP results.
@@ -483,11 +500,11 @@ foreach ($fields as $key => &$field):
 
 	/**
 	 * @param Query $q
-	 * @param bool $dump_cache
+	 * @param bool $flush_pool
 	 * @return int
 	 */
 <?php $used_functions[] = 'doDelete'; ?>
-	static function doDelete(Query $q, $dump_cache = true) {
+	static function doDelete(Query $q, $flush_pool = true) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
 		if (!$q->getTable() || <?php echo $class_name ?>::getTableName() != $q->getTable()) {
@@ -495,8 +512,8 @@ foreach ($fields as $key => &$field):
 		}
 		$result = $q->doDelete($conn);
 
-		if ($dump_cache) {
-			<?php echo $class_name ?>::$_instancePool = array();
+		if ($flush_pool) {
+			<?php echo $class_name ?>::flushPool();
 		}
 
 		return $result;

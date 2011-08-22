@@ -144,7 +144,7 @@ abstract class BaseModel {
 		return in_array($type, self::$LOB_TYPES);
 	}
 
-	const MAX_INSTANCE_POOL_SIZE = 200;
+	const MAX_INSTANCE_POOL_SIZE = 400;
 
 	/**
 	 * Array to contain names of modified columns
@@ -179,7 +179,7 @@ abstract class BaseModel {
 	 * @param string $class_name name of class to create
 	 * @return BaseModel[]
 	 */
-	static function fromResult(PDOStatement $result, $class_name, $write_cache = true) {
+	static function fromResult(PDOStatement $result, $class_name, $use_pool = true) {
 		if (!$class_name)
 			throw new Exception('No class name given');
 
@@ -198,13 +198,14 @@ abstract class BaseModel {
 					}
 
 					if (
-						($pk = $object->getPrimaryKey())
+						$use_pool
+						&& ($pk = $object->getPrimaryKey())
 						&& ($pool_object = $object->retrieveFromPool($object->{'get' . $pk}()))
 					) {
 						$object = $pool_object;
 					}
 
-					if ($write_cache) {
+					if ($use_pool) {
 						$object->insertIntoPool($object);
 					}
 
@@ -228,7 +229,8 @@ abstract class BaseModel {
 			$result->setFetchMode($flags, $class_name);
 			while ($object = $result->fetch()) {
 				if (
-					($pk = $object->getPrimaryKey())
+					$use_pool
+					&& ($pk = $object->getPrimaryKey())
 					&& ($pool_object = $object->retrieveFromPool($object->{'get' . $pk}()))
 				) {
 					$object = $pool_object;
@@ -239,8 +241,9 @@ abstract class BaseModel {
 				}
 
 				$objects[] = $object;
-				if ($write_cache)
+				if ($use_pool) {
 					$object->insertIntoPool($object);
+				}
 			}
 		}
 		return $objects;
