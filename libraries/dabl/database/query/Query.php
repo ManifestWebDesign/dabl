@@ -537,16 +537,17 @@ class Query {
 	 * Shortcut to addGroup() method
 	 * @return Query
 	 */
-	final function group($column) {
-		return $this->addGroup($column);
+	function groupBy($column) {
+		$this->_groups[] = $column;
+		return $this;
 	}
 
 	/**
 	 * Shortcut to addGroup() method
 	 * @return Query
 	 */
-	function groupBy($column) {
-		return $this->addGroup($column);
+	final function group($column) {
+		return $this->groupBy($column);
 	}
 
 	/**
@@ -555,8 +556,7 @@ class Query {
 	 * @param $column String
 	 */
 	final function addGroup($column) {
-		$this->_groups[] = $column;
-		return $this;
+		return $this->groupBy($column);
 	}
 
 	/**
@@ -581,24 +581,7 @@ class Query {
 	 * Shortcut for addOrder()
 	 * @return Query
 	 */
-	final function order($column, $dir = null) {
-		return $this->addOrder($column, $dir);
-	}
-
-	/**
-	 * Shortcut for addOrder()
-	 * @return Query
-	 */
 	function orderBy($column, $dir = null) {
-		return $this->addOrder($column, $dir);
-	}
-
-	/**
-	 * Adds a column to ORDER BY in the form of "COLUMN DIRECTION"
-	 * @return Query
-	 * @param $column String
-	 */
-	final function addOrder($column, $dir = null) {
 		if (null !== $dir) {
 			$dir = strtoupper($dir);
 			if ($dir !== self::ASC && $dir !== self::DESC) {
@@ -608,6 +591,23 @@ class Query {
 		}
 		$this->_orders[] = trim($column);
 		return $this;
+	}
+
+	/**
+	 * Shortcut for addOrder()
+	 * @return Query
+	 */
+	final function order($column, $dir = null) {
+		return $this->orderBy($column, $dir);
+	}
+
+	/**
+	 * Adds a column to ORDER BY in the form of "COLUMN DIRECTION"
+	 * @return Query
+	 * @param $column String
+	 */
+	final function addOrder($column, $dir = null) {
+		return $this->orderBy($column, $dir);
 	}
 
 	/**
