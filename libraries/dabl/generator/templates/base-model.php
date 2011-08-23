@@ -675,7 +675,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 ?>
 <?php $used_functions[] = 'doSelectJoin' . StringFormat::titleCase($from_column_clean); ?>
 	static function doSelectJoin<?php echo StringFormat::titleCase($from_column_clean) ?>(Query $q = null, $join_type = Query::LEFT_JOIN) {
-		return <?php echo $class_name ?>::doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q $join_type);
+		return <?php echo $class_name ?>::doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q, $join_type);
 	}
 
 <?php
