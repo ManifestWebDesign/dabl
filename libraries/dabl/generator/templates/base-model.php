@@ -106,11 +106,11 @@ elseif ($default !== null && strtolower($default) !== 'null')
 // GETTERS AND SETTERS
 foreach ($fields as $key => &$field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
-	$method_name = $options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName();
+	$method_name = StringFormat::titleCase($field->getName());
 	$params = $field->isTemporalType() ? '$format = null' : '';
 	$param_vars = $field->isTemporalType() ? '$format' : '';
 	$used_functions[] = "get$method_name";
-	$better_method_name = StringFormat::titleCase($field->getName());
+	$raw_method_name = $options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName();
 ?>
 	/**
 	 * Gets the value of the <?php echo $field->getName() ?> field
@@ -139,8 +139,8 @@ foreach ($fields as $key => &$field):
 		return $this->setColumnValue('<?php echo $field->getName() ?>', $value, BaseModel::COLUMN_TYPE_<?php echo $field->getType() ?>);
 	}
 
-<?php if(strtolower($better_method_name) != strtolower($method_name)): ?>
-<?php $used_functions[] = "get$better_method_name"; ?>
+<?php if(strtolower($raw_method_name) != strtolower($method_name)): ?>
+<?php $used_functions[] = "get$raw_method_name"; ?>
 	/**
 	 * Convenience function for <?php echo $class_name ?>::get<?php echo $method_name ?>
 
@@ -149,11 +149,11 @@ foreach ($fields as $key => &$field):
 	 * @see <?php echo $class_name ?>::get<?php echo $method_name ?>
 
 	 */
-	final function get<?php echo $better_method_name ?>(<?php echo $params ?>) {
+	final function get<?php echo $raw_method_name ?>(<?php echo $params ?>) {
 		return $this->get<?php echo $method_name ?>(<?php echo $param_vars ?>);
 	}
 
-<?php $used_functions[] = "set$better_method_name"; ?>
+<?php $used_functions[] = "set$raw_method_name"; ?>
 	/**
 	 * Convenience function for <?php echo $class_name ?>::set<?php echo $method_name ?>
 
@@ -164,7 +164,7 @@ foreach ($fields as $key => &$field):
 	 * @return <?php echo $class_name ?>
 
 	 */
-	final function set<?php echo $better_method_name ?>($value) {
+	final function set<?php echo $raw_method_name ?>($value) {
 		return $this->set<?php echo $method_name ?>($value);
 	}
 
