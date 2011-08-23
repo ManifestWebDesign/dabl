@@ -461,14 +461,14 @@ foreach ($fields as $key => &$field):
 		<?php echo $class_name ?>::$_instancePool = array();
 	}
 
-<?php $used_functions[] = 'enablePool'; ?>
-	static function enablePool() {
-		<?php echo $class_name ?>::$_poolEnabled = true;
+<?php $used_functions[] = 'setPoolEnabled'; ?>
+	static function setPoolEnabled($bool = true) {
+		<?php echo $class_name ?>::$_poolEnabled = $bool;
 	}
 
-<?php $used_functions[] = 'disablePool'; ?>
-	static function disablePool() {
-		<?php echo $class_name ?>::$_poolEnabled = false;
+<?php $used_functions[] = 'getPoolEnabled'; ?>
+	static function getPoolEnabled() {
+		return <?php echo $class_name ?>::$_poolEnabled;
 	}
 
 	/**
