@@ -52,7 +52,7 @@ if ($actions){
 		<tr class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?> ui-widget-content">
 <?php
 foreach($columns as $column){
-	$column_name = $column->getName();
+	$column_name = StringFormat::titleCase($column->getName());
 	switch($column->getType()){
 		case PropelTypes::TIMESTAMP:
 			$format = 'VIEW_TIMESTAMP_FORMAT';
