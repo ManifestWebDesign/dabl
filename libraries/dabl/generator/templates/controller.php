@@ -68,8 +68,16 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		$<?php echo $fk_single ?>_id = $<?php echo $fk_single ?>_id ? $<?php echo $fk_single ?>_id : @$_REQUEST[<?php echo $to_class_name ?>::getPrimaryKey()];
 		$<?php echo $fk_single ?> = $<?php echo $fk_single ?>_id ? <?php echo $to_class_name ?>::retrieveByPK($<?php echo $fk_single ?>_id) : new <?php echo $to_class_name ?>;
 
-		$this['<?php echo $plural ?>'] = $<?php echo $fk_single ?>->get<?php echo $model_name ?>s();
 		$this['<?php echo $fk_single ?>'] = $<?php echo $fk_single ?>;
+		$q = $<?php echo $fk_single ?>->get<?php echo $model_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>Query();
+		
+		if (isset($_REQUEST['SortBy'])) {
+			$q->order($_REQUEST['SortBy'], isset($_REQUEST['Dir']) ? Query::DESC : Query::ASC);
+		}
+		
+		$qp = new QueryPager($q, 25, @$_GET['page'], '<?php echo $model_name ?>');
+		$this['<?php echo $plural ?>'] = $qp->fetchPage();
+		$this['pager'] = $qp;
 		$this['page'] = '<?php echo StringFormat::titleCase($plural, ' ') ?> for <?php echo StringFormat::titleCase($to_table, ' ') ?>';
 	}
 
