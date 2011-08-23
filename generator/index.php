@@ -74,7 +74,7 @@
 											<input type="checkbox" value="<?php echo $table_name ?>" name="Models[<?php echo $connection_name ?>][]" checked="checked" />
 										</td>
 										<td>
-											<input type="checkbox" value="<?php echo $table_name ?>" name="ModelQueries[<?php echo $connection_name ?>][]" checked="checked" />
+											<input type="checkbox" value="<?php echo $table_name ?>" name="ModelQueries[<?php echo $connection_name ?>][]" />
 										</td>
 										<?php if (defined('IS_MVC') && IS_MVC): ?>
 											<td>
