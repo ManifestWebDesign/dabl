@@ -49,13 +49,15 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 			$_['view'] = str_replace('\\', '/', $_['view']);
 			$_['view'] = trim($view, '/');
 
-			if (is_dir(VIEWS_DIR . $_['view']))
+			if (!is_file(VIEWS_DIR . $_['view'] . '.php') && is_dir(VIEWS_DIR . $_['view'])) {
 				$_['view'] = $_['view'] . '/index';
+			}
 
 			$_['view'] = VIEWS_DIR . "{$_['view']}.php";
 
-			if (!is_file($_['view']))
-				file_not_found($_['orig_view']);
+			if (!is_file($_['view'])) {
+				file_not_found($_['view']);
+			}
 
 			require $_['view'];
 			break;
