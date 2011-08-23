@@ -47,7 +47,7 @@ class DefaultGenerator extends BaseGenerator {
 		} else {
 			$pk = null;
 		}
-		$pkMethod = "get{$pk->getName()}";
+		$pkMethod = 'get' . StringFormat::titleCase($pk->getName());
 		$actions = array();
 		if (!$pk) {
 			return $actions;

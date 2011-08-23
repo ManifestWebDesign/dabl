@@ -18,18 +18,18 @@ foreach($actions as $action_label => $action_url):
 </div>
 <div class="ui-widget-content ui-corner-all ui-helper-clearfix">
 <?php
-foreach($this->getColumns($table_name) as $column){
+foreach ($this->getColumns($table_name) as $column) {
 	$column_name = $column->getName();
-	if($column_name==$pk) {
+	if ($column_name == $pk) {
 		continue;
 	}
+	$column_name = StringFormat::titleCase($column_name);
 	$column_label = StringFormat::titleCase($column_name, ' ');
 	if ($column->isForeignKey() && strrpos(strtolower($column_label), 'id') === strlen($column_label) - 2) {
 		$column_label = str_replace(array('id', 'Id', 'ID', 'iD'), '', $column_label);
 		$column_label = trim($column_label);
 	}
-	$method = "get$column_name";
-	switch($column->getType()){
+	switch ($column->getType()) {
 		case PropelTypes::TIMESTAMP:
 			$format = 'VIEW_TIMESTAMP_FORMAT';
 			break;
@@ -45,9 +45,9 @@ foreach($this->getColumns($table_name) as $column){
 		$foreign_table = $fk->getForeignTableName();
 		$local_column = $fk->getLocalColumnName();
 		$long_method = 'get' . StringFormat::titleCase("{$foreign_table}_related_by_{$local_column}", '');
-		$output = '<?php echo htmlentities($'.$single.'->'."$long_method".'()) ?>';
+		$output = '<?php echo htmlentities($' . $single . '->' . "$long_method" . '()) ?>';
 	} else {
-		$output = '<?php echo htmlentities($'.$single.'->'."get$column_name".'('.$format.')) ?>';
+		$output = '<?php echo htmlentities($' . $single . '->' . "get$column_name" . '(' . $format . ')) ?>';
 	}
 ?>
 	<div class="field-wrapper">

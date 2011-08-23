@@ -2,9 +2,9 @@
 <form method="post" action="<?php echo "<?php echo site_url('".$plural_url."/save') ?>" ?>">
 	<div class="ui-widget-content ui-corner-all ui-helper-clearfix">
 <?php
-if($pk){
+if ($pk) {
 ?>
-		<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo htmlentities($'.$single.'->'."get$pk".'()) ?>' ?>" />
+		<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo htmlentities($' . $single . '->' . "get" . StringFormat::titleCase($pk) . '()) ?>' ?>" />
 <?php
 }
 foreach ($this->getColumns($table_name) as $column) {
@@ -16,7 +16,7 @@ foreach ($this->getColumns($table_name) as $column) {
 		continue;
 	}
 
-	$method = "get$column_name";
+	$method = 'get' . StringFormat::titleCase($column_name);
 	switch($column->getType()){
 		case PropelTypes::TIMESTAMP:
 			$format = 'VIEW_TIMESTAMP_FORMAT';
@@ -37,9 +37,9 @@ foreach ($this->getColumns($table_name) as $column) {
 		$fk_single = strtolower($foreign_table_name);
 		$foreign_method = 'get' . $foreign_table_name . 's';
 		$foreign_column_name = reset($fk->getForeignColumns());
-		$foreign_column_method = 'get' . $foreign_column_name;
+		$foreign_column_method = 'get' . StringFormat::titleCase($foreign_column_name);
 		$foreign_open_foreach = '<?php foreach(' . $this->getModelName($foreign_table_name) . '::doSelect() as $' . $fk_single . '): ?>';
-		$foreign_option = '<option <?php if($' . $single . '->get' . $column_name . '() === $' . $fk_single . '->' . $foreign_column_method . '()) echo \'selected="selected"\' ?> value="<?php echo $' . $fk_single . '->' . $foreign_column_method . '() ?>"><?php echo $' . $fk_single . '?></option>';
+		$foreign_option = '<option <?php if($' . $single . '->get' . StringFormat::titleCase($column_name) . '() === $' . $fk_single . '->' . $foreign_column_method . '()) echo \'selected="selected"\' ?> value="<?php echo $' . $fk_single . '->' . $foreign_column_method . '() ?>"><?php echo $' . $fk_single . '?></option>';
 		$foreign_close_foreach = '<?php endforeach ?>';
 	}
 	$label = StringFormat::titleCase($label, ' ');
