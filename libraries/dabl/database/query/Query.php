@@ -413,55 +413,68 @@ class Query {
 	}
 
 	function andNot($column, $value) {
-		return $this->_where->andNot($column, $value);
+		$this->_where->andNot($column, $value);
+		return $this;
 	}
 
 	function andLike($column, $value) {
-		return $this->_where->andLike($column, $value);
+		$this->_where->andLike($column, $value);
+		return $this;
 	}
 
 	function andNotLike($column, $value) {
-		return $this->_where->andNotLike($column, $value);
+		$this->_where->andNotLike($column, $value);
+		return $this;
 	}
 
 	function andGreater($column, $value) {
-		return $this->_where->andGreater($column, $value);
+		$this->_where->andGreater($column, $value);
+		return $this;
 	}
 
 	function andGreaterEqual($column, $value) {
-		return $this->_where->andGreaterEqual($column, $value);
+		$this->_where->andGreaterEqual($column, $value);
+		return $this;
 	}
 
 	function andLess($column, $value) {
-		return $this->_where->andLess($column, $value);
+		$this->_where->andLess($column, $value);
+		return $this;
 	}
 
 	function andLessEqual($column, $value) {
-		return $this->_where->andLessEqual($column, $value);
+		$this->_where->andLessEqual($column, $value);
+		return $this;
 	}
 
 	function andNull($column) {
-		return $this->_where->andNull($column);
+		$this->_where->andNull($column);
+		return $this;
 	}
 
 	function andNotNull($column) {
-		return $this->_where->andNotNull($column);
+		$this->_where->andNotNull($column);
+		return $this;
 	}
 
 	function andBetween($column, $from, $to) {
-		return $this->_where->andBetween($column, $from, $to);
+		$this->_where->andBetween($column, $from, $to);
+		return $this;
 	}
 
 	function andBeginsWith($column, $value) {
-		return $this->_where->andBeginsWith($column, $value);
+		$this->_where->andBeginsWith($column, $value);
+		return $this;
 	}
 
 	function andEndsWith($column, $value) {
-		return $this->_where->andEndsWith($column, $value);
+		$this->_where->andEndsWith($column, $value);
+		return $this;
 	}
 
 	function andContains($column, $value) {
-		return $this->_where->andContains($column, $value);
+		$this->_where->andContains($column, $value);
+		return $this;
 	}
 
 	/**
@@ -482,55 +495,68 @@ class Query {
 	}
 
 	function orNot($column, $value) {
-		return $this->_where->orNot($column, $value);
+		$this->_where->orNot($column, $value);
+		return $this;
 	}
 
 	function orLike($column, $value) {
-		return $this->_where->orLike($column, $value);
+		$this->_where->orLike($column, $value);
+		return $this;
 	}
 
 	function orNotLike($column, $value) {
-		return $this->_where->orNotLike($column, $value);
+		$this->_where->orNotLike($column, $value);
+		return $this;
 	}
 
 	function orGreater($column, $value) {
-		return $this->_where->orGreater($column, $value);
+		$this->_where->orGreater($column, $value);
+		return $this;
 	}
 
 	function orGreaterEqual($column, $value) {
-		return $this->_where->orGreaterEqual($column, $value);
+		$this->_where->orGreaterEqual($column, $value);
+		return $this;
 	}
 
 	function orLess($column, $value) {
-		return $this->_where->orLess($column, $value);
+		$this->_where->orLess($column, $value);
+		return $this;
 	}
 
 	function orLessEqual($column, $value) {
-		return $this->_where->orLessEqual($column, $value);
+		$this->_where->orLessEqual($column, $value);
+		return $this;
 	}
 
 	function orNull($column) {
-		return $this->_where->orNull($column);
+		$this->_where->orNull($column);
+		return $this;
 	}
 
 	function orNotNull($column) {
-		return $this->_where->orNotNull($column);
+		$this->_where->orNotNull($column);
+		return $this;
 	}
 
 	function orBetween($column, $from, $to) {
-		return $this->_where->orBetween($column, $from, $to);
+		$this->_where->orBetween($column, $from, $to);
+		return $this;
 	}
 
 	function orBeginsWith($column, $value) {
-		return $this->_where->orBeginsWith($column, $value);
+		$this->_where->orBeginsWith($column, $value);
+		return $this;
 	}
 
 	function orEndsWith($column, $value) {
-		return $this->_where->orEndsWith($column, $value);
+		$this->_where->orEndsWith($column, $value);
+		return $this;
 	}
 
 	function orContains($column, $value) {
-		return $this->_where->orContains($column, $value);
+		$this->_where->orContains($column, $value);
+		return $this;
 	}
 
 	/**
