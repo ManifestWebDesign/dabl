@@ -6,11 +6,6 @@ abstract class BaseGenerator {
 	 * @var array
 	 */
 	private $options = array(
-		// convert table and column names to title case
-		'title_case' => true,
-
-		// enforce an upper case first letter of classes
-		'cap_model_names' => true,
 
 		// enforce an upper case first letter of get and set methods
 		'cap_method_names' => true,
@@ -268,15 +263,14 @@ abstract class BaseGenerator {
 	 */
 	function getModelName($table_name) {
 		$options = $this->options;
-		$class_name = StringFormat::removeAccents($table_name);
-		if (@$options['title_case'])
-			$class_name = StringFormat::titleCase($class_name);
-		if (@$options['cap_model_names'])
-			$class_name = ucfirst($class_name);
-		if (@$options['model_prefix'])
+		$class_name = StringFormat::className($table_name);
+
+		if (@$options['model_prefix']) {
 			$class_name = $options['model_prefix'] . $class_name;
-		if (@$options['model_suffix'])
+		}
+		if (@$options['model_suffix']) {
 			$class_name = $class_name . $options['model_suffix'];
+		}
 		return $class_name;
 	}
 
@@ -293,10 +287,8 @@ abstract class BaseGenerator {
 	 * @return string
 	 */
 	function getControllerName($table_name) {
-		$controller_name = str_replace(' ', '', ucwords(str_replace('_', ' ', $table_name)));
-		$controller_name = StringFormat::plural($controller_name);
-		$controller_name = $controller_name . 'Controller';
-		return $controller_name;
+		$controller_name = StringFormat::plural($table_name);
+		return StringFormat::className($controller_name) . 'Controller';
 	}
 
 	function getControllerFileName($table_name) {
