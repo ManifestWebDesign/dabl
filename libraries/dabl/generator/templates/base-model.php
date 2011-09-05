@@ -572,20 +572,40 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	$lc_to_class_name = strtolower($to_class_name);
 	$to_column = array_shift($r->getForeignColumns());
 	$from_column = array_shift($r->getLocalColumns());
-	$namedID = false;
-	if (strpos($from_column, 'ID') === strlen($from_column) - 2) {
-		$from_column_clean = rtrim($from_column, 'ID');
-		if (!in_array($from_column_clean, $fields)) {
-			$namedID = true;
-		} else {
+	$named_id = false;
+
+	$id_pos = strrpos(strtolower($from_column), '_id');
+	if ($id_pos !== strlen($from_column) - 3) {
+		$id_pos = strrpos($from_column, 'Id');
+		if ($id_pos !== strlen($from_column) - 2) {
+			$id_pos = strrpos($from_column, 'ID');
+			if ($id_pos !== strlen($from_column) - 2) {
+				$id_pos = false;
+			}
+		}
+	}
+
+	if (false !== $id_pos) {
+		$from_column_clean = substr($from_column, 0, $id_pos);
+		$is_field = false;
+		foreach ($fields as $field) {
+			if ($field->getName() == $from_column_clean) {
+				$is_field = true;
+				break;
+			}
+		}
+
+		if ($is_field) {
 			$this->warnings[] = "Can't create convenience functions for column $from_column: get$from_column_clean() and set$from_column_clean(), consider renaming column $from_column_clean";
+		} else {
+			$named_id = true;
 		}
 	}
 ?>
 	protected $_<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>;
 
 <?php
-	if ($namedID) {
+	if ($named_id) {
 ?>
 <?php $used_functions[] = 'set' . StringFormat::titleCase($from_column_clean); ?>
 	/**
@@ -620,7 +640,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		return $this;
 	}
 <?php
-	if ($namedID) {
+	if ($named_id) {
 ?>
 
 	/**
@@ -671,7 +691,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	}
 
 <?php
-	if ($namedID) {
+	if ($named_id) {
 ?>
 <?php $used_functions[] = 'doSelectJoin' . StringFormat::titleCase($from_column_clean); ?>
 	static function doSelectJoin<?php echo StringFormat::titleCase($from_column_clean) ?>(Query $q = null, $join_type = Query::LEFT_JOIN) {
@@ -771,10 +791,13 @@ $from_table_list = array();
 
 foreach ($this->getForeignKeysToTable($table_name) as $r):
 	$from_table = $r->getTableName();
-	if (isset($from_table_list[$from_table]))
+
+	if (isset($from_table_list[$from_table])) {
 		$from_table_list[$from_table] += 1;
-	else
+	} else {
 		$from_table_list[$from_table] = 1;
+	}
+
 	$from_class_name = $this->getModelName($from_table);
 	$from_column = array_shift($r->getLocalColumns());
 	$to_column = array_shift($r->getForeignColumns());
@@ -852,15 +875,19 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 
 <?php endforeach ?>
 <?php
-	foreach ($this->getForeignKeysToTable($table_name) as $r){
+	foreach ($this->getForeignKeysToTable($table_name) as $r) {
 		$from_table = $r->getTableName();
+
+		if (@$from_table_list[$from_table] > 1) {
+			continue;
+		}
 
 		$from_class_name = $this->getModelName($from_table);
 		$from_column = array_shift($r->getLocalColumns());
 		$to_column = array_shift($r->getForeignColumns());
 		$to_table = $r->getForeignTableName();
-		if ($from_table_list[$from_table] < 2) {
-			if (!in_array('get' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
+
+		if (!in_array('get' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
 	/**
 	 * Convenience function for <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>
@@ -875,8 +902,9 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	}
 
 <?php
-			}
-			if (!in_array('get' . StringFormat::titleCase($from_class_name) . 'sQuery', $used_functions)) {
+		}
+
+		if (!in_array('get' . StringFormat::titleCase($from_class_name) . 'sQuery', $used_functions)) {
 ?>
 	/**
 	  * Convenience function for <?php echo $class_name ?>::get<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>Query
@@ -889,8 +917,9 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	}
 
 <?php
-			}
-			if (!in_array('delete' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
+		}
+
+		if (!in_array('delete' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
 	/**
 	  * Convenience function for <?php echo $class_name ?>::delete<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>
@@ -905,8 +934,9 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	}
 
 <?php
-			}
-			if (!in_array('count' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
+		}
+
+		if (!in_array('count' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {
 ?>
 	/**
 	  * Convenience function for <?php echo $class_name ?>::count<?php echo $from_class_name ?>sRelatedBy<?php echo $from_column ?>
@@ -921,7 +951,6 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	}
 
 <?php
-			}
 		}
 	}
 ?>
