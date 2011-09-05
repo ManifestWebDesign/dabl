@@ -1,7 +1,7 @@
 <?php
 $foreign_column = array_shift($foreign_key->getForeignColumns());
 $local_column = array_shift($foreign_key->getLocalColumns());
-$fk_single = str_replace(array('_', '-'), '', strtolower($foreign_key->getForeignTableName()));
+$fk_single = StringFormat::variable($foreign_key->getForeignTableName());
 ?>
 <h1>
 	<?php echo '<?php echo $page ?>' ?>
