@@ -681,8 +681,10 @@ class Query {
 
 		// the string $statement will use
 		$query_s = '';
+		
+		$action = strtoupper($this->getAction());
 
-		switch (strtoupper($this->getAction())) {
+		switch ($action) {
 			default:
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
@@ -712,7 +714,7 @@ class Query {
 
 		$where_statement = $this->getWhereClause();
 
-		if ($where_statement) {
+		if (null !== $where_statement && $where_statement->getString() !== '') {
 			$query_s .= "\nWHERE " . $where_statement->getString();
 			$statement->addParams($where_statement->getParams());
 			$statement->addIdentifiers($where_statement->getIdentifiers());
@@ -727,21 +729,21 @@ class Query {
 
 		if (null !== $this->getHaving()) {
 			$having_statement = $this->getHaving()->getQueryStatement();
-			if ($having_statement) {
+			if (null !== $having_statement) {
 				$query_s .= "\nHAVING " . $having_statement->getString();
 				$statement->addParams($having_statement->getParams());
 				$statement->addIdentifiers($having_statement->getIdentifiers());
 			}
 		}
 
-		if ($this->getAction() != self::ACTION_COUNT && $this->_orders) {
+		if ($action !== self::ACTION_COUNT && $this->_orders) {
 			$clause = $this->getOrderByClause();
 			$statement->addIdentifiers($clause->getIdentifiers());
 			$statement->addParams($clause->getParams());
 			$query_s .= $clause->getString();
 		}
 
-		if ($this->_limit) {
+		if (null !== $this->_limit) {
 			if ($conn) {
 				$conn->applyLimit($query_s, $this->_offset, $this->_limit);
 			} else {
@@ -749,7 +751,7 @@ class Query {
 			}
 		}
 
-		if (self::ACTION_COUNT == $this->getAction() && $this->needsComplexCount()) {
+		if (self::ACTION_COUNT === $action && $this->needsComplexCount()) {
 			$query_s = "SELECT count(0)\nFROM ($query_s) a";
 		}
 
