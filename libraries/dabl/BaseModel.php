@@ -344,12 +344,14 @@ abstract class BaseModel {
 				$value = null;
 			} elseif (null !== $value) {
 				if ($numeric) {
-					if (self::isIntegerType($column_type)) {
+					if (is_bool($value)) {
+						$value = $value ? 1 : 0;
+					} elseif (self::isIntegerType($column_type)) {
 						// validate and cast
 						if (!is_int($value)) {
 							$int_val = intval($value);
 							if ((string) $int_val != (string) $value) {
-								throw new Exception($value . ' is not a valid integer or it is too large');
+								throw new InvalidArgumentException($value . ' is not a valid integer or it is too large');
 							}
 							$value = $int_val;
 						}
@@ -357,7 +359,7 @@ abstract class BaseModel {
 						// only validates, doesn't cast...yet
 						$float_val = floatval($value);
 						if ((string) $float_val != (string) $value) {
-							throw new Exception($value . ' is not a valid float or it is too large');
+							throw new InvalidArgumentException($value . ' is not a valid float or it is too large');
 						}
 					}
 				}
@@ -394,7 +396,7 @@ abstract class BaseModel {
 		}
 		$timestamp = is_int($value) ? $value : strtotime($value);
 		if (false === $timestamp) {
-			throw new Exception('Unable to parse date: ' . $value);
+			throw new InvalidArgumentException('Unable to parse date: ' . $value);
 		}
 		return date($formatter, $timestamp);
 	}

@@ -10,7 +10,7 @@
 <?php $used_functions = array(); ?>
 abstract class base<?php echo $class_name ?> extends ApplicationModel {
 
-<?php foreach ($fields as $key => &$field): ?>
+<?php foreach ($fields as $key => $field): ?>
 	const <?php echo StringFormat::constant($field->getName()) ?> = '<?php echo $table_name ?>.<?php echo $field->getName() ?>';
 <?php endforeach ?>
 
@@ -59,7 +59,7 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 	 * @var string[]
 	 */
 	protected static $_columnNames = array(
-<?php foreach ($fields as $key => &$field): ?>
+<?php foreach ($fields as $key => $field): ?>
 		'<?php echo $field->getName() ?>',
 <?php endforeach ?>
 	);
@@ -69,13 +69,13 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 	 * @var string[]
 	 */
 	protected static $_columnTypes = array(
-<?php foreach ($fields as $key => &$field): ?>
+<?php foreach ($fields as $key => $field): ?>
 		'<?php echo $field->getName() ?>' => BaseModel::COLUMN_TYPE_<?php echo $field->getType() ?>,
 <?php endforeach ?>
 	);
 
 <?php
-foreach ($fields as $key => &$field) {
+foreach ($fields as $key => $field) {
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 	// fix for MSSQL default value weirdness
 	if ($field->isNumericType()) {
@@ -104,7 +104,7 @@ elseif ($default !== null && strtolower($default) !== 'null')
 }
 
 // GETTERS AND SETTERS
-foreach ($fields as $key => &$field):
+foreach ($fields as $key => $field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 	$method_name = StringFormat::titleCase($field->getName());
 	$params = $field->isTemporalType() ? '$format = null' : '';
@@ -385,7 +385,7 @@ foreach ($fields as $key => &$field):
 
 	 */
 	function castInts() {
-<?php foreach ($fields as $key => &$field): ?>
+<?php foreach ($fields as $key => $field): ?>
 <?php if (BaseModel::isIntegerType($field->getType())): ?>
 		$this-><?php echo $field->getName() ?> = (null === $this-><?php echo $field->getName() ?>) ? null : (int) $this-><?php echo $field->getName() ?>;
 <?php endif ?>
@@ -961,7 +961,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	function validate() {
 		$this->_validationErrors = array();
 <?php
-	foreach ($fields as $key => &$field){
+	foreach ($fields as $key => $field){
 		if (
 			$field->isNotNull()
 			&& !$field->isAutoIncrement()
