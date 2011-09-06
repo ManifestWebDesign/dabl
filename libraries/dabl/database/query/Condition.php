@@ -77,7 +77,7 @@ class Condition {
 		// Left can be a Condition
 		if ($left instanceof self) {
 			$clause_statement = $left->getQueryStatement();
-			if (!$clause_statement) {
+			if (null === $clause_statement) {
 				return null;
 			}
 			$clause_statement->setString('(' . $clause_statement->getString() . ')');
@@ -93,9 +93,6 @@ class Condition {
 				$quote = self::QUOTE_RIGHT;
 			}
 		}
-
-		// Get rid of white-space on sides of $operator
-		$operator = trim($operator);
 
 		if (Query::BEGINS_WITH === $operator) {
 			$right .= '%';
@@ -117,97 +114,94 @@ class Condition {
 			$left = QueryStatement::IDENTIFIER;
 		}
 
-		$is_array = false;
-		if (is_array($right) || ($right instanceof Query && $right->getLimit() !== 1)) {
-			$is_array = true;
-		}
-
-		// Right can be a Query, if you're trying to nest queries, like "WHERE MyColumn = (SELECT OtherColumn From MyTable LIMIT 1)"
-		if ($right instanceof Query) {
-			if (!$right->getTable()) {
-				throw new Exception("$right does not have a table, so it cannot be nested.");
+		$is_query = $right instanceof Query;
+		$is_array = is_array($right);
+		
+		if ($is_array || $is_query) {
+			if (false === $is_query || 1 !== $right->getLimit()) {
+				// Convert any sort of equality operator to something suitable for arrays
+				switch ($operator) {
+					// Various forms of equal
+					case Query::IN:
+					case Query::EQUAL:
+						$operator = Query::IN;
+						break;
+					case Query::BETWEEN:
+						break;
+					// Various forms of not equal
+					case Query::NOT_IN:
+					case Query::NOT_EQUAL:
+					case Query::ALT_NOT_EQUAL:
+						$operator = Query.NOT_IN;
+						break;
+					default:
+						throw new Exception($operator . ' unknown for comparing an array.');
+				}
 			}
+			
+			// Right can be a Query, if you're trying to nest queries, like "WHERE MyColumn = (SELECT OtherColumn From MyTable LIMIT 1)"
+			if ($is_query) {
+				if (!$right->getTable()) {
+					throw new Exception('right does not have a table, so it cannot be nested.');
+				}
 
-			$clause_statement = $right->getQuery();
-			if (!$clause_statement) {
-				return null;
-			}
-
-			$right = '(' . $clause_statement->getString() . ')';
-			$statement->addParams($clause_statement->getParams());
-			$statement->addIdentifiers($clause_statement->getIdentifiers());
-			if ($quote != self::QUOTE_LEFT) {
-				$quote = self::QUOTE_NONE;
-			}
-		}
-
-		// $right can be an array
-		if ($is_array) {
-			// BETWEEN
-			if (is_array($right) && count($right) === 2 && $operator === Query::BETWEEN) {
-				$statement->setString("$left $operator " . QueryStatement::PARAM . ' AND ' . QueryStatement::PARAM);
-				$statement->addParams($right);
-				return $statement;
-			}
-
-			// Convert any sort of equal operator to something suitable
-			// for arrays
-			switch ($operator) {
-				//Various forms of equal
-				case Query::IN:
-				case Query::EQUAL:
-					$operator = Query::IN;
-					break;
-				//Various forms of not equal
-				case Query::NOT_IN:
-				case Query::NOT_EQUAL:
-				case Query::ALT_NOT_EQUAL:
-					$operator = Query::NOT_IN;
-					break;
-				default:
-					throw new Exception("$operator unknown for comparing an array.");
-			}
-
-			// Handle empty arrays
-			if (is_array($right) && !$right) {
-				if ($operator == Query::IN) {
-					$statement->setString('(0=1)');
-					$statement->setParams(array());
-					$statement->setIdentifiers(array());
-					return $statement;
-				} elseif ($operator == Query::NOT_IN) {
+				$clause_statement = $right->getQuery();
+				if (null === $clause_statement) {
 					return null;
 				}
-			}
 
-			// IN or NOT_IN
-			if ($quote === self::QUOTE_RIGHT || $quote === self::QUOTE_BOTH) {
-				$statement->addParams($right);
-				$placeholders = array();
-				foreach ($right as &$r) {
-					$placeholders[] = QueryStatement::PARAM;
+				$right = '(' . $clause_statement->getString() . ')';
+				$statement->addParams($clause_statement->getParams());
+				$statement->addIdentifiers($clause_statement->getIdentifiers());
+				if ($quote !== self::QUOTE_LEFT) {
+					$quote = self::QUOTE_NONE;
 				}
-				$right = '(' . implode(',', $placeholders) . ')';
+			} elseif ($is_array) {
+				$array_len = count($right);
+				// BETWEEN
+				if (2 === $array_len && $operator === Query::BETWEEN) {
+					$statement->setString($left . ' ' . $operator . ' ' . QueryStatement::PARAM . ' AND ' . QueryStatement::PARAM);
+					$statement->addParams($right);
+					return $statement;
+				} elseif (0 === $array_len) {
+					// Handle empty arrays
+					if ($operator === Query::IN) {
+						$statement->setString('(0 = 1)');
+						return $statement;
+					} elseif ($operator === Query::NOT_IN) {
+						return null;
+					}
+				} elseif ($quote === self::QUOTE_RIGHT || $quote === self::QUOTE_BOTH) {
+					$statement->addParams($right);
+					$r_string = '(';
+					for ($x = 0; $x < $array_len; ++$x) {
+						if (0 < $x) {
+							$r_string .= ',';
+						}
+						$r_string .= QueryStatement::PARAM;
+					}
+					$right = $r_string . ')';
+				}
 			}
 		} else {
-			// IS NOT NULL
-			if ($right === null && ($operator === Query::NOT_EQUAL || $operator === Query::ALT_NOT_EQUAL)) {
-				$operator = Query::IS_NOT_NULL;
-			}
-
-			// IS NULL
-			elseif ($right === null && $operator === Query::EQUAL) {
-				$operator = Query::IS_NULL;
+			if (null === $right) {
+				if ($operator === Query::NOT_EQUAL || $operator === Query::ALT_NOT_EQUAL) {
+					// IS NOT NULL
+					$operator = Query::IS_NOT_NULL;
+				} elseif ($operator === Query::EQUAL) {
+					// IS NULL
+					$operator = Query::IS_NULL;
+				}
 			}
 
 			if ($operator === Query::IS_NULL || $operator === Query::IS_NOT_NULL) {
 				$right = null;
-			} elseif ($quote === self::QUOTE_RIGHT || $quote === self::QUOTE_BOTH) {
+			} elseif ($quote === self::QUOTE_RIGHT || $quote == self::QUOTE_BOTH) {
 				$statement->addParam($right);
 				$right = QueryStatement::PARAM;
 			}
 		}
-		$statement->setString("$left $operator $right");
+		$statement->setString($left . ' ' . $operator . ' ' . $right);
 
 		return $statement;
 	}
@@ -251,7 +245,7 @@ class Condition {
 	 * @return QueryStatement[]
 	 */
 	function getAnds() {
-		throw new Exception("Condition::getAnds() can't do what you want anymore...");
+		throw new Exception("self::getAnds() can't do what you want anymore...");
 //		$ors = array();
 //		foreach ($this->conds as $cond) {
 //			if ('AND' === $cond[0]) {
@@ -289,7 +283,7 @@ class Condition {
 	 * @return QueryStatement[]
 	 */
 	function getOrs() {
-		throw new Exception("Condition::getOrs() can't do what you want anymore...");
+		throw new Exception("self::getOrs() can't do what you want anymore...");
 //		$ands = array();
 //		foreach ($this->conds as $cond) {
 //			if ('AND' === $cond[0]) {
