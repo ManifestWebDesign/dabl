@@ -1,0 +1,18 @@
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+		 bootstrap="../config.php"
+         processIsolation="false"
+         stopOnFailure="false"
+         syntaxCheck="true"
+         verbose="true"
+         strict="true">
+		 <!-- backupStaticAttributes must be false or DB tests are broken due to serialization -->
+	<php>
+		<includepath>../libraries/dabl/</includepath>
+		<server name='HTTP_HOST' value='test'/>
+	</php>
+</phpunit>

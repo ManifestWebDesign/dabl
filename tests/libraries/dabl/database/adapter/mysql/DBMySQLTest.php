@@ -1,8 +1,5 @@
 <?php
 
-require_once 'PHPUnit/Framework.php';
-require_once dirname(__FILE__) . '/../../../../../../config.php';
-
 class DBMySQLTest extends PHPUnit_Framework_TestCase {
 
 	const CONNECTION_NAME = 'default_connection';

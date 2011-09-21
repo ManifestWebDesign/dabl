@@ -1,24 +1,7 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * Description of UserTest
- *
- * @author Dan
- */
-require_once 'PHPUnit/Framework.php';
-require_once dirname(__FILE__) . '/../../../config.php';
-
 class BaseModelTest extends PHPUnit_Framework_TestCase {
 
-	/**
-	 * @group count
-	 * @covers BaseModel::__get, BaseModel::__set
-	 */
 	function testMagicGettersAndSetters() {
 		$model_files = glob(MODELS_DIR . '*.php');
 		foreach ($model_files as $model_file) {
