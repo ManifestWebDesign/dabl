@@ -116,7 +116,7 @@ class Condition {
 
 		$is_query = $right instanceof Query;
 		$is_array = is_array($right);
-		
+
 		if ($is_array || $is_query) {
 			if (false === $is_query || 1 !== $right->getLimit()) {
 				// Convert any sort of equality operator to something suitable for arrays
@@ -132,13 +132,13 @@ class Condition {
 					case Query::NOT_IN:
 					case Query::NOT_EQUAL:
 					case Query::ALT_NOT_EQUAL:
-						$operator = Query.NOT_IN;
+						$operator = Query::NOT_IN;
 						break;
 					default:
 						throw new Exception($operator . ' unknown for comparing an array.');
 				}
 			}
-			
+
 			// Right can be a Query, if you're trying to nest queries, like "WHERE MyColumn = (SELECT OtherColumn From MyTable LIMIT 1)"
 			if ($is_query) {
 				if (!$right->getTable()) {
