@@ -547,7 +547,8 @@ foreach ($fields as $key => $field):
 	static function doSelectRS(Query $q = null) {
 		$q = $q ? clone $q : new Query;
 		$conn = <?php echo $class_name ?>::getConnection();
-		if (!$q->getTable() || <?php echo $class_name ?>::getTableName() != $q->getTable()) {
+
+		if (!$q->getTable() || false === strrpos($q->getTable(), <?php echo $class_name ?>::getTableName())) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
 		}
 
