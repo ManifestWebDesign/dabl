@@ -430,6 +430,11 @@ class Condition {
 					$cond = self::processCondition($cond[1][0], $cond[1][1], $cond[1][2], $cond[1][3]);
 					break;
 			}
+
+			if (null === $cond) {
+				continue;
+			}
+
 			$string .= "\n\t$sep" . $cond->getString();
 			$statement->addParams($cond->getParams());
 			$statement->addIdentifiers($cond->getIdentifiers());
