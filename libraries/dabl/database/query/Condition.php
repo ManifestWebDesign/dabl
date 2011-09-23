@@ -293,106 +293,234 @@ class Condition {
 //		return $ands;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andNot($column, $value) {
 		return $this->addAnd($column, $value, Query::NOT_EQUAL);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andLike($column, $value) {
 		return $this->addAnd($column, $value, Query::LIKE);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andNotLike($column, $value) {
 		return $this->addAnd($column, $value, Query::NOT_LIKE);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andGreater($column, $value) {
 		return $this->addAnd($column, $value, Query::GREATER_THAN);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andGreaterEqual($column, $value) {
 		return $this->addAnd($column, $value, Query::GREATER_EQUAL);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andLess($column, $value) {
 		return $this->addAnd($column, $value, Query::LESS_THAN);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andLessEqual($column, $value) {
 		return $this->addAnd($column, $value, Query::LESS_EQUAL);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @return Condition
+	 */
 	function andNull($column) {
 		return $this->addAnd($column, null);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @return Condition
+	 */
 	function andNotNull($column) {
 		return $this->addAnd($column, null, Query::NOT_EQUAL);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $from
+	 * @param mixed $to
+	 * @return Condition
+	 */
 	function andBetween($column, $from, $to) {
 		return $this->addAnd($column, array($from, $to), Query::BETWEEN);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andBeginsWith($column, $value) {
 		return $this->addAnd($column, $value, Query::BEGINS_WITH);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andEndsWith($column, $value) {
 		return $this->addAnd($column, $value, Query::ENDS_WITH);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function andContains($column, $value) {
 		return $this->addAnd($column, $value, Query::CONTAINS);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orNot($column, $value) {
 		return $this->addOr($column, $value, Query::NOT_EQUAL);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orLike($column, $value) {
 		return $this->addOr($column, $value, Query::LIKE);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orNotLike($column, $value) {
 		return $this->addOr($column, $value, Query::NOT_LIKE);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orGreater($column, $value) {
 		return $this->addOr($column, $value, Query::GREATER_THAN);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orGreaterEqual($column, $value) {
 		return $this->addOr($column, $value, Query::GREATER_EQUAL);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orLess($column, $value) {
 		return $this->addOr($column, $value, Query::LESS_THAN);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orLessEqual($column, $value) {
 		return $this->addOr($column, $value, Query::LESS_EQUAL);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @return Condition '
+	 */
 	function orNull($column) {
 		return $this->addOr($column, null);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @return Condition
+	 */
 	function orNotNull($column) {
 		return $this->addOr($column, null, Query::NOT_EQUAL);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $from
+	 * @param mixed $to
+	 * @return Condition
+	 */
 	function orBetween($column, $from, $to) {
 		return $this->addOr($column, array($from, $to), Query::BETWEEN);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orBeginsWith($column, $value) {
 		return $this->addOr($column, $value, Query::BEGINS_WITH);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orEndsWith($column, $value) {
 		return $this->addOr($column, $value, Query::ENDS_WITH);
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Condition
+	 */
 	function orContains($column, $value) {
 		return $this->addOr($column, $value, Query::CONTAINS);
 	}

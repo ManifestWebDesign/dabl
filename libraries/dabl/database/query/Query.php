@@ -354,33 +354,62 @@ class Query {
 
 	/**
 	 * Alias of {@link addJoin()}.
+	 * @return Query
 	 */
 	function join($table_or_column, $on_clause_or_column = null, $join_type = self::JOIN) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, $join_type);
 	}
 
+	/**
+	 * @param mixed $table_or_column
+	 * @param mixed $on_clause_or_column
+	 * @return Query
+	 */
 	function innerJoin($table_or_column, $on_clause_or_column = null) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, self::INNER_JOIN);
 	}
 
+	/**
+	 * @param mixed $table_or_column
+	 * @param mixed $on_clause_or_column
+	 * @return Query
+	 */
 	function leftJoin($table_or_column, $on_clause_or_column = null) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, self::LEFT_JOIN);
 	}
 
+	/**
+	 * @param mixed $table_or_column
+	 * @param mixed $on_clause_or_column
+	 * @return Query
+	 */
 	function rightJoin($table_or_column, $on_clause_or_column = null) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, self::RIGHT_JOIN);
 	}
 
+	/**
+	 * @param mixed $table_or_column
+	 * @param mixed $on_clause_or_column
+	 * @return Query
+	 */
 	function outerJoin($table_or_column, $on_clause_or_column = null) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, self::OUTER_JOIN);
 	}
 
+	/**
+	 * @return QueryJoin[]
+	 */
 	function getJoins() {
 		return $this->_joins;
 	}
 
+	/**
+	 * @param type $joins
+	 * @return Query
+	 */
 	function setJoins($joins) {
 		$this->_joins = $joins;
+		return $this;
 	}
 
 	/**
@@ -412,66 +441,130 @@ class Query {
 		}
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andNot($column, $value) {
 		$this->_where->andNot($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andLike($column, $value) {
 		$this->_where->andLike($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andNotLike($column, $value) {
 		$this->_where->andNotLike($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andGreater($column, $value) {
 		$this->_where->andGreater($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andGreaterEqual($column, $value) {
 		$this->_where->andGreaterEqual($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andLess($column, $value) {
 		$this->_where->andLess($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andLessEqual($column, $value) {
 		$this->_where->andLessEqual($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @return Query
+	 */
 	function andNull($column) {
 		$this->_where->andNull($column);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @return Query
+	 */
 	function andNotNull($column) {
 		$this->_where->andNotNull($column);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $from
+	 * @param mixed $to
+	 * @return Query
+	 */
 	function andBetween($column, $from, $to) {
 		$this->_where->andBetween($column, $from, $to);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andBeginsWith($column, $value) {
 		$this->_where->andBeginsWith($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andEndsWith($column, $value) {
 		$this->_where->andEndsWith($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function andContains($column, $value) {
 		$this->_where->andContains($column, $value);
 		return $this;
@@ -494,66 +587,130 @@ class Query {
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orNot($column, $value) {
 		$this->_where->orNot($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orLike($column, $value) {
 		$this->_where->orLike($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orNotLike($column, $value) {
 		$this->_where->orNotLike($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orGreater($column, $value) {
 		$this->_where->orGreater($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orGreaterEqual($column, $value) {
 		$this->_where->orGreaterEqual($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orLess($column, $value) {
 		$this->_where->orLess($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orLessEqual($column, $value) {
 		$this->_where->orLessEqual($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @return Query
+	 */
 	function orNull($column) {
 		$this->_where->orNull($column);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @return Query
+	 */
 	function orNotNull($column) {
 		$this->_where->orNotNull($column);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $from
+	 * @param mixed $to
+	 * @return Query
+	 */
 	function orBetween($column, $from, $to) {
 		$this->_where->orBetween($column, $from, $to);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orBeginsWith($column, $value) {
 		$this->_where->orBeginsWith($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orEndsWith($column, $value) {
 		$this->_where->orEndsWith($column, $value);
 		return $this;
 	}
 
+	/**
+	 * @param mixed $column
+	 * @param mixed $value
+	 * @return Query
+	 */
 	function orContains($column, $value) {
 		$this->_where->orContains($column, $value);
 		return $this;
@@ -681,7 +838,7 @@ class Query {
 
 		// the string $statement will use
 		$query_s = '';
-		
+
 		$action = strtoupper($this->getAction());
 
 		switch ($action) {
