@@ -55,7 +55,7 @@ class QueryJoin {
 			$this->_isLikePropel = true;
 			$this->_leftColumn = $table_or_column;
 			$this->_rightColumn = $on_clause_or_column;
-			$this->setTable(array_shift(explode('.', $this->_rightColumn)));
+			$this->setTable(substr($this->_rightColumn, 0, strpos($this->_rightColumn, '.')));
 			$this->setJoinType($join_type);
 			return;
 		}

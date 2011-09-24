@@ -68,7 +68,7 @@ class Condition {
 	 * @return string
 	 */
 	private static function processCondition($left = null, $right = null, $operator = Query::EQUAL, $quote = null) {
-		if (1 === func_num_args() && $left instanceof QueryStatement) {
+		if ($left instanceof QueryStatement && 1 === func_num_args()) {
 			return $left;
 		}
 
@@ -80,7 +80,7 @@ class Condition {
 			if (null === $clause_statement) {
 				return null;
 			}
-			$clause_statement->setString('(' . $clause_statement->getString() . ')');
+			$clause_statement->string = '(' . $clause_statement->string . ')';
 			return $clause_statement;
 		}
 
@@ -115,7 +115,7 @@ class Condition {
 		}
 
 		$is_query = $right instanceof Query;
-		$is_array = is_array($right);
+		$is_array = false === $is_query && is_array($right);
 
 		if ($is_array || $is_query) {
 			if (false === $is_query || 1 !== $right->getLimit()) {
@@ -123,6 +123,7 @@ class Condition {
 				switch ($operator) {
 					// Various forms of equal
 					case Query::IN:
+						break;
 					case Query::EQUAL:
 						$operator = Query::IN;
 						break;
@@ -130,6 +131,7 @@ class Condition {
 						break;
 					// Various forms of not equal
 					case Query::NOT_IN:
+						break;
 					case Query::NOT_EQUAL:
 					case Query::ALT_NOT_EQUAL:
 						$operator = Query::NOT_IN;
@@ -150,9 +152,9 @@ class Condition {
 					return null;
 				}
 
-				$right = '(' . $clause_statement->getString() . ')';
-				$statement->addParams($clause_statement->getParams());
-				$statement->addIdentifiers($clause_statement->getIdentifiers());
+				$right = '(' . $clause_statement->string . ')';
+				$statement->addParams($clause_statement->params);
+				$statement->addIdentifiers($clause_statement->identifiers);
 				if ($quote !== self::QUOTE_LEFT) {
 					$quote = self::QUOTE_NONE;
 				}
@@ -160,13 +162,13 @@ class Condition {
 				$array_len = count($right);
 				// BETWEEN
 				if (2 === $array_len && $operator === Query::BETWEEN) {
-					$statement->setString($left . ' ' . $operator . ' ' . QueryStatement::PARAM . ' AND ' . QueryStatement::PARAM);
+					$statement->string = $left . ' ' . $operator . ' ' . QueryStatement::PARAM . ' AND ' . QueryStatement::PARAM;
 					$statement->addParams($right);
 					return $statement;
 				} elseif (0 === $array_len) {
 					// Handle empty arrays
 					if ($operator === Query::IN) {
-						$statement->setString('(0 = 1)');
+						$statement->string = '(0 = 1)';
 						return $statement;
 					} elseif ($operator === Query::NOT_IN) {
 						return null;
@@ -201,7 +203,7 @@ class Condition {
 				$right = QueryStatement::PARAM;
 			}
 		}
-		$statement->setString($left . ' ' . $operator . ' ' . $right);
+		$statement->string = $left . ' ' . $operator . ' ' . $right;
 
 		return $statement;
 	}
@@ -534,41 +536,42 @@ class Condition {
 			return null;
 		}
 
-		$statement = new QueryStatement;
-		$string = '';
+		$stmnt = new QueryStatement;
 
-		foreach ($this->conds as $num => $cond) {
-			if (0 !== $num) {
-				$sep = ((1 === $num && 'OR' === $this->conds[0][0]) ? 'OR' : $cond[0]) . ' ';
-			} else {
+		foreach ($this->conds as $num => &$cond) {
+			if (0 === $num) {
 				$sep = '';
+			} else {
+				$sep = ((1 === $num && 'OR' === $this->conds[0][0]) ? 'OR' : $cond[0]) . ' ';
 			}
+
+			$cond_stmnt = null;
+
 			// avoid call_user_func_array for better stack traces
 			switch (count($cond[1])) {
 				case 1:
-					$cond = self::processCondition($cond[1][0]);
+					$cond_stmnt = self::processCondition($cond[1][0]);
 					break;
 				case 2:
-					$cond = self::processCondition($cond[1][0], $cond[1][1]);
+					$cond_stmnt = self::processCondition($cond[1][0], $cond[1][1]);
 					break;
 				case 3:
-					$cond = self::processCondition($cond[1][0], $cond[1][1], $cond[1][2]);
+					$cond_stmnt = self::processCondition($cond[1][0], $cond[1][1], $cond[1][2]);
 					break;
 				case 4:
-					$cond = self::processCondition($cond[1][0], $cond[1][1], $cond[1][2], $cond[1][3]);
+					$cond_stmnt = self::processCondition($cond[1][0], $cond[1][1], $cond[1][2], $cond[1][3]);
 					break;
 			}
 
-			if (null === $cond) {
+			if (null === $cond_stmnt) {
 				continue;
 			}
 
-			$string .= "\n\t$sep" . $cond->getString();
-			$statement->addParams($cond->getParams());
-			$statement->addIdentifiers($cond->getIdentifiers());
+			$stmnt->string .= "\n\t$sep" . $cond_stmnt->string;
+			$stmnt->addParams($cond_stmnt->params);
+			$stmnt->addIdentifiers($cond_stmnt->identifiers);
 		}
-		$statement->setString($string);
-		return $statement;
+		return $stmnt;
 	}
 
 	/**

@@ -154,7 +154,7 @@ class Query {
 	 * @param $action String
 	 */
 	function setAction($action) {
-		$this->_action = $action;
+		$this->_action = strtoupper($action);
 		return $this;
 	}
 
@@ -829,91 +829,91 @@ class Query {
 	 * @return QueryStatement
 	 */
 	function getQuery($conn = null) {
-		if (!$conn) {
+		if (null === $conn) {
 			$conn = DBManager::getConnection();
 		}
 
 		// the QueryStatement for the Query
-		$statement = new QueryStatement($conn);
+		$stmnt = new QueryStatement($conn);
 
 		// the string $statement will use
-		$query_s = '';
+		$qry_s = '';
 
-		$action = strtoupper($this->getAction());
+		$action = $this->_action;
 
 		switch ($action) {
 			default:
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
-				$columns_statement = $this->getColumnsClause($conn);
-				$statement->addIdentifiers($columns_statement->getIdentifiers());
-				$statement->addParams($columns_statement->getParams());
-				$query_s .= 'SELECT ' . $columns_statement->getString();
+				$columns_stmnt = $this->getColumnsClause($conn);
+				$stmnt->addIdentifiers($columns_stmnt->identifiers);
+				$stmnt->addParams($columns_stmnt->params);
+				$qry_s .= 'SELECT ' . $columns_stmnt->string;
 				break;
 			case self::ACTION_DELETE:
-				$query_s .= 'DELETE';
+				$qry_s .= 'DELETE';
 				break;
 		}
 
-		$table_statement = $this->getTablesClause($conn);
-		$statement->addIdentifiers($table_statement->getIdentifiers());
-		$statement->addParams($table_statement->getParams());
-		$query_s .= "\nFROM " . $table_statement->getString();
+		$table_stmnt = $this->getTablesClause($conn);
+		$stmnt->addIdentifiers($table_stmnt->identifiers);
+		$stmnt->addParams($table_stmnt->params);
+		$qry_s .= "\nFROM " . $table_stmnt->string;
 
 		if ($this->_joins) {
 			foreach ($this->_joins as $join) {
-				$join_statement = $join->getQueryStatement($conn);
-				$query_s .= "\n\t" . $join_statement->getString();
-				$statement->addParams($join_statement->getParams());
-				$statement->addIdentifiers($join_statement->getIdentifiers());
+				$join_stmnt = $join->getQueryStatement($conn);
+				$qry_s .= "\n\t" . $join_stmnt->string;
+				$stmnt->addParams($join_stmnt->params);
+				$stmnt->addIdentifiers($join_stmnt->identifiers);
 			}
 		}
 
-		$where_statement = $this->getWhereClause();
+		$where_stmnt = $this->getWhereClause();
 
-		if (null !== $where_statement && $where_statement->getString() !== '') {
-			$query_s .= "\nWHERE " . $where_statement->getString();
-			$statement->addParams($where_statement->getParams());
-			$statement->addIdentifiers($where_statement->getIdentifiers());
+		if (null !== $where_stmnt && $where_stmnt->string !== '') {
+			$qry_s .= "\nWHERE " . $where_stmnt->string;
+			$stmnt->addParams($where_stmnt->params);
+			$stmnt->addIdentifiers($where_stmnt->identifiers);
 		}
 
 		if ($this->_groups) {
 			$clause = $this->getGroupByClause();
-			$statement->addIdentifiers($clause->getIdentifiers());
-			$statement->addParams($clause->getParams());
-			$query_s .= $clause->getString();
+			$stmnt->addIdentifiers($clause->identifiers);
+			$stmnt->addParams($clause->params);
+			$qry_s .= $clause->string;
 		}
 
 		if (null !== $this->getHaving()) {
-			$having_statement = $this->getHaving()->getQueryStatement();
-			if (null !== $having_statement) {
-				$query_s .= "\nHAVING " . $having_statement->getString();
-				$statement->addParams($having_statement->getParams());
-				$statement->addIdentifiers($having_statement->getIdentifiers());
+			$having_stmnt = $this->getHaving()->getQueryStatement();
+			if (null !== $having_stmnt) {
+				$qry_s .= "\nHAVING " . $having_stmnt->string;
+				$stmnt->addParams($having_stmnt->params);
+				$stmnt->addIdentifiers($having_stmnt->identifiers);
 			}
 		}
 
 		if ($action !== self::ACTION_COUNT && $this->_orders) {
 			$clause = $this->getOrderByClause();
-			$statement->addIdentifiers($clause->getIdentifiers());
-			$statement->addParams($clause->getParams());
-			$query_s .= $clause->getString();
+			$stmnt->addIdentifiers($clause->identifiers);
+			$stmnt->addParams($clause->params);
+			$qry_s .= $clause->string;
 		}
 
 		if (null !== $this->_limit) {
 			if ($conn) {
-				$conn->applyLimit($query_s, $this->_offset, $this->_limit);
+				$conn->applyLimit($qry_s, $this->_offset, $this->_limit);
 			} else {
-				$query_s .= "\nLIMIT " . ($this->_offset ? $this->_offset . ', ' : '') . $this->_limit;
+				$qry_s .= "\nLIMIT " . ($this->_offset ? $this->_offset . ', ' : '') . $this->_limit;
 			}
 		}
 
 		if (self::ACTION_COUNT === $action && $this->needsComplexCount()) {
-			$query_s = "SELECT count(0)\nFROM ($query_s) a";
+			$qry_s = "SELECT count(0)\nFROM ($qry_s) a";
 		}
 
-		$statement->setString($query_s);
-		return $statement;
+		$stmnt->string = $qry_s;
+		return $stmnt;
 	}
 
 	/**
@@ -933,18 +933,18 @@ class Query {
 		// if $table is a Query, get its QueryStatement
 		if ($table instanceof Query) {
 			$table_statement = $table->getQuery($conn);
-			$table_string = '(' . $table_statement->getString() . ')';
+			$table_string = '(' . $table_statement->string . ')';
 		} else {
 			$table_statement = null;
 		}
 
-		switch (strtoupper($this->getAction())) {
+		switch ($this->_action) {
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
 				// setup identifiers for $table_string
 				if (null !== $table_statement) {
-					$statement->addIdentifiers($table_statement->getIdentifiers());
-					$statement->addParams($table_statement->getParams());
+					$statement->addIdentifiers($table_statement->identifiers);
+					$statement->addParams($table_statement->params);
 				} else {
 					// if $table has no spaces, assume it is an identifier
 					if (strpos($table, ' ') === false) {
@@ -965,9 +965,9 @@ class Query {
 					foreach ($this->_extraTables as $tAlias => $extra_table) {
 						if ($extra_table instanceof Query) {
 							$extra_table_statement = $extra_table->getQuery($conn);
-							$extra_table_string = '(' . $extra_table_statement->getString() . ') AS ' . $tAlias;
-							$statement->addParams($extra_table_statement->getParams());
-							$statement->addIdentifiers($extra_table_statement->getIdentifiers());
+							$extra_table_string = '(' . $extra_table_statement->string . ') AS ' . $tAlias;
+							$statement->addParams($extra_table_statement->params);
+							$statement->addIdentifiers($extra_table_statement->identifiers);
 						} else {
 							$extra_table_string = $extra_table;
 							if (strpos($extra_table_string, ' ') === false) {
@@ -981,12 +981,12 @@ class Query {
 						$table_string .= ", $extra_table_string";
 					}
 				}
-				$statement->setString($table_string);
+				$statement->string = $table_string;
 				break;
 			case self::ACTION_DELETE:
 				if (null !== $table_statement) {
-					$statement->addIdentifiers($table_statement->getIdentifiers());
-					$statement->addParams($table_statement->getParams());
+					$statement->addIdentifiers($table_statement->identifiers);
+					$statement->addParams($table_statement->params);
 				} else {
 					// if $table has no spaces, assume it is an identifier
 					if (strpos($table, ' ') === false) {
@@ -1001,7 +1001,7 @@ class Query {
 				if ($alias) {
 					$table_string .= " AS $alias";
 				}
-				$statement->setString($table_string);
+				$statement->string = $table_string;
 				break;
 			default:
 				break;
@@ -1049,7 +1049,7 @@ class Query {
 
 		$statement = new QueryStatement($conn);
 		$alias = $this->getAlias();
-		$action = strtoupper($this->getAction());
+		$action = $this->_action;
 
 		if ($action == self::ACTION_DELETE) {
 			return $statement;
@@ -1057,7 +1057,7 @@ class Query {
 
 		if ($action == self::ACTION_COUNT) {
 			if (!$this->needsComplexCount()) {
-				$statement->setString('count(0)');
+				$statement->string = 'count(0)';
 				return $statement;
 			}
 
@@ -1067,7 +1067,7 @@ class Query {
 					$statement->addIdentifier($group);
 					$group = QueryStatement::IDENTIFIER;
 				}
-				$statement->setString(implode(', ', $groups));
+				$statement->string = implode(', ', $groups);
 				return $statement;
 			}
 
@@ -1081,7 +1081,7 @@ class Query {
 					$columns_to_use[] = QueryStatement::IDENTIFIER;
 				}
 				if ($columns_to_use) {
-					$statement->setString(implode(', ', $columns_to_use));
+					$statement->string = implode(', ', $columns_to_use);
 					return $statement;
 				}
 			}
@@ -1108,7 +1108,7 @@ class Query {
 			$columns_string = "DISTINCT $columns_string";
 		}
 
-		$statement->setString($columns_string);
+		$statement->string = $columns_string;
 		return $statement;
 	}
 
@@ -1135,7 +1135,7 @@ class Query {
 			}
 			$order = implode(' ', $order_parts);
 		}
-		$statement->setString("\nORDER BY " . implode(', ', $orders));
+		$statement->string = "\nORDER BY " . implode(', ', $orders);
 		return $statement;
 	}
 
@@ -1151,7 +1151,7 @@ class Query {
 				$statement->addIdentifier($group);
 				$group = QueryStatement::IDENTIFIER;
 			}
-			$statement->setString("\nGROUP BY " . implode(', ', $groups));
+			$statement->string = "\nGROUP BY " . implode(', ', $groups);
 		}
 		return $statement;
 	}

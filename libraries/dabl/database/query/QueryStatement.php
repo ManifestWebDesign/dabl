@@ -6,20 +6,20 @@ class QueryStatement {
 	 * character to use as a placeholder for a quoted identifier
 	 */
 	const IDENTIFIER = '[?]';
-	
+
 	/**
 	 * character to use as a placeholder for an escaped parameter
 	 */
 	const PARAM = '?';
-	
+
 	/**
 	 * @var string
 	 */
-	private $query_string = '';
+	public $string = '';
 	/**
 	 * @var array
 	 */
-	private $params = array();
+	public $params = array();
 	/**
 	 * @var DABLPDO
 	 */
@@ -27,13 +27,13 @@ class QueryStatement {
 	/**
 	 * @var array
 	 */
-	private $identifiers = array();
+	public $identifiers = array();
 
 	/**
 	 * @param DABLPDO $conn
 	 */
 	function __construct(DABLPDO $conn = null) {
-		if ($conn !== null) {
+		if (null !== $conn) {
 			$this->setConnection($conn);
 		}
 	}
@@ -59,14 +59,14 @@ class QueryStatement {
 	 * @param string $string
 	 */
 	function setString($string) {
-		$this->query_string = $string;
+		$this->string = $string;
 	}
 
 	/**
 	 * @return string
 	 */
 	function getString() {
-		return $this->query_string;
+		return $this->string;
 	}
 
 	/**
@@ -74,7 +74,9 @@ class QueryStatement {
 	 * @param array $params
 	 */
 	function addParams($params) {
-		$this->params = array_merge($this->params, $params);
+		foreach ($params as &$v) {
+			$this->params[] = $v;
+		}
 	}
 
 	/**
@@ -105,7 +107,9 @@ class QueryStatement {
 	 * @param array $identifiers
 	 */
 	function addIdentifiers($identifiers) {
-		$this->identifiers = array_merge($this->identifiers, $identifiers);
+		foreach ($identifiers as &$v) {
+			$this->identifiers[] = $v;
+		}
 	}
 
 	/**
@@ -130,23 +134,23 @@ class QueryStatement {
 	function getIdentifiers() {
 		return $this->identifiers;
 	}
-	
+
 	/**
 	 * @return string
 	 */
 	function __toString() {
-		$string = $this->query_string;
+		$string = $this->string;
 		$conn = $this->connection;
-		
+
 		$string = self::embedIdentifiers($string, array_values($this->identifiers), $conn);
 		return self::embedParams($string, array_values($this->params), $conn);
 	}
-	
+
 	static function embedIdentifiers($string, $identifiers, DABLPDO $conn = null) {
 		if (null != $conn) {
 			$identifiers = $conn->quoteIdentifier($identifiers);
 		}
-		
+
 		// escape % by making it %%
 		$string = str_replace('%', '%%', $string);
 
@@ -161,7 +165,7 @@ class QueryStatement {
 		}
 		return $string;
 	}
-	
+
 	/**
 	 * Emulates a prepared statement.  Should only be used as a last resort.
 	 * @param string $string
@@ -197,7 +201,7 @@ class QueryStatement {
 	function bindAndExecute() {
 		$conn = $this->getConnection();
 		$string = self::embedIdentifiers($this->getString(), array_values($this->identifiers), $conn);
-		
+
 		$result = $conn->prepare($string);
 		foreach ($this->getParams() as $key => $value) {
 			$pdo_type = PDO::PARAM_STR;
