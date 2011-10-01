@@ -561,7 +561,10 @@ $to_table_list = array();
 foreach ($this->getForeignKeysFromTable($table_name) as $r){
 	$to_table = $r->getForeignTableName();
 	if (isset($to_table_list[$to_table])) {
-		$to_table_list[$to_table] += 1;
+		if ($to_table_list[$to_table] == 1) {
+			$this->warnings[] = "$table_name has more than one foreign key to $to_table.  $to_table::get{$table_name}s will not be created.";
+		}
+		++$to_table_list[$to_table];
 	} else {
 		$to_table_list[$to_table] = 1;
 	}
@@ -597,7 +600,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		}
 
 		if ($is_field) {
-			$this->warnings[] = "Can't create convenience functions for column $from_column: get$from_column_clean() and set$from_column_clean(), consider renaming column $from_column_clean";
+			$this->warnings[] = "Can't create convenience functions for column $from_column: get$from_column_clean() and set$from_column_clean(), consider renaming column $from_column_clean.";
 		} else {
 			$named_id = true;
 		}
