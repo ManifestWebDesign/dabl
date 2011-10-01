@@ -340,6 +340,9 @@ abstract class BaseModel {
 		$numeric = self::isNumericType($column_type);
 
 		if ($numeric || $temporal) {
+			if (is_string($value)) {
+				$value = trim($value);
+			}
 			if ('' === $value) {
 				$value = null;
 			} elseif (null !== $value) {
