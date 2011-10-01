@@ -9,4 +9,10 @@ $requested_route = @$_GET['_url'];
 
 // handle the request with whatever Hooks have been set for that purpose
 // @see config/controllers.php
-Hook::call(HOOK_LOAD_ROUTE, $requested_route);
+try {
+	Hook::call(HOOK_LOAD_ROUTE, $requested_route);
+} catch (FileNotFoundException $e) {
+	error_log($e->getMessage());
+	echo '<h1>File Not Found</h1>';
+	die($e->getMessage());
+}
