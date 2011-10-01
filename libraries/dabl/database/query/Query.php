@@ -765,7 +765,7 @@ class Query {
 	 * @return Query
 	 */
 	function orderBy($column, $dir = null) {
-		if (null !== $dir) {
+		if (null !== $dir && '' !== $dir) {
 			$dir = strtoupper($dir);
 			if ($dir !== self::ASC && $dir !== self::DESC) {
 				throw new Exception("$dir is not a valid sorting direction.");
