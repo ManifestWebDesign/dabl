@@ -1,7 +1,7 @@
 <?php echo '<?php' ?>
 
 
-abstract class Base<?php echo $model_name ?>Query extends Query {
+abstract class base<?php echo $model_name ?>Query extends Query {
 
 	function __construct($table_name = null, $alias = null) {
 		if (null === $table_name) {
@@ -99,7 +99,7 @@ foreach ($columns as $key => &$column):
 	 * @return <?php echo $model_name ?>Query
 	 */
 	function <?php echo $verb ?><?php echo $php_name ?><?php echo $oper ?>(<?php echo $params ?>) {
-		return $this-><?php echo $verb ?><?php echo $oper ?>(<?php echo $constant ?><?php if ($params) echo ', ' . $params ?>);
+		return $this-><?php if($verb == 'and' && $oper == '') echo 'addAnd'; else echo $verb; ?><?php echo $oper ?>(<?php echo $constant ?><?php if ($params) echo ', ' . $params ?>);
 	}
 
 <?php endforeach;endforeach; ?>
