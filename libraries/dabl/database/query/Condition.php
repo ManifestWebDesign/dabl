@@ -65,7 +65,7 @@ class Condition {
 	}
 
 	/**
-	 * @return string
+	 * @return QueryStatement
 	 */
 	private static function processCondition($left = null, $right = null, $operator = Query::EQUAL, $quote = null) {
 		if ($left instanceof QueryStatement && 1 === func_num_args()) {

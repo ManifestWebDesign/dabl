@@ -106,8 +106,13 @@ class DBManager {
 	 * @throws PDOException If the connection fails
 	 */
 	private static function connect($key) {
-		if (array_key_exists($key, self::$connections))
+		if (array_key_exists($key, self::$connections)) {
 			return self::$connections[$key];
+		}
+
+		if (!array_key_exists($key, self::$parameters)) {
+			throw new RuntimeException('Connection "' . $key . '" has not been set');
+		}
 
 		$conn = DABLPDO::factory(self::$parameters[$key]);
 		return (self::$connections[$key] = $conn);
