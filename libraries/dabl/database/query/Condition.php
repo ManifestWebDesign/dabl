@@ -247,14 +247,13 @@ class Condition {
 	 * @return QueryStatement[]
 	 */
 	function getAnds() {
-		throw new Exception("self::getAnds() can't do what you want anymore...");
-//		$ors = array();
-//		foreach ($this->conds as $cond) {
-//			if ('AND' === $cond[0]) {
-//				$ors[] = call_user_func_array(array('self', 'processCondition'), $cond[1]);
-//			}
-//		}
-//		return $ors;
+		$ors = array();
+		foreach ($this->conds as $cond) {
+			if ('AND' === $cond[0]) {
+				$ors[] = call_user_func_array(array('self', 'processCondition'), $cond[1]);
+			}
+		}
+		return $ors;
 	}
 
 	/**
@@ -285,14 +284,13 @@ class Condition {
 	 * @return QueryStatement[]
 	 */
 	function getOrs() {
-		throw new Exception("self::getOrs() can't do what you want anymore...");
-//		$ands = array();
-//		foreach ($this->conds as $cond) {
-//			if ('AND' === $cond[0]) {
-//				$ands[] = call_user_func_array(array('self', 'processCondition'), $cond[1]);
-//			}
-//		}
-//		return $ands;
+		$ors = array();
+		foreach ($this->conds as $cond) {
+			if ('OR' === $cond[0]) {
+				$ors[] = call_user_func_array(array('self', 'processCondition'), $cond[1]);
+			}
+		}
+		return $ors;
 	}
 
 	/**

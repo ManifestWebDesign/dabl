@@ -73,6 +73,7 @@ abstract class DABLPDO extends PDO {
 			case 'sqlite':
 				$dsn = 'sqlite:' . $connection_params['dbname'];
 				$class = 'DBSQLite';
+				$class_dir = 'sqlite';
 				break;
 
 			case 'mysql':
@@ -90,6 +91,7 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = 'mysql:' . implode(';', $parts);
 				$class = 'DBMySQL';
+				$class_dir = 'mysql';
 				break;
 
 			case 'oracle':
@@ -104,6 +106,7 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = 'oci:' . implode(';', $parts);
 				$class = 'DBOracle';
+				$class_dir = 'oracle';
 				break;
 
 			case 'pgsql':
@@ -125,8 +128,26 @@ abstract class DABLPDO extends PDO {
 				$user = null;
 				$password = null;
 				$class = 'DBPostgres';
+				$class_dir = 'pgsql';
 				break;
 
+			case 'sqlsrv':
+				if (@$connection_params['host'])
+					$parts[] = 'server=' . $connection_params['host'];
+				if (@$connection_params['dbname'])
+					$parts[] = 'database=' . $connection_params['dbname'];
+				if (@$connection_params['charset'])
+					$parts[] = 'charset=' . $connection_params['charset'];
+				if (@$connection_params['appname'])
+					$parts[] = 'appname=' . $connection_params['appname'];
+
+				foreach ($parts as &$v) {
+					$v = str_replace(';', '\;', $v);
+				}
+				$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
+				$class = 'DBMSSQL';
+				$class_dir = 'mssql';
+				break;
 			case 'mssql':
 			case 'sybase':
 			case 'dblib':
@@ -144,6 +165,7 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
 				$class = 'DBMSSQL';
+				$class_dir = 'mssql';
 				break;
 
 			default:
@@ -152,6 +174,9 @@ abstract class DABLPDO extends PDO {
 		}
 
 		try {
+			if (!class_exists($class)) {
+				ClassLoader::import('DATABASE:adapter:' . $class_dir);
+			}
 			$conn = new $class($dsn, $user, $password, $options);
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
@@ -467,4 +492,3 @@ abstract class DABLPDO extends PDO {
 
 	abstract function getDatabaseSchema();
 }
-
