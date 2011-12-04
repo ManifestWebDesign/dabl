@@ -36,9 +36,6 @@ class DefaultGenerator extends BaseGenerator {
 	protected $controllerTemplate = '/templates/controller.php';
 
 	function getActions($table_name) {
-		$controller_name = $this->getControllerName($table_name);
-		$class_name = $this->getModelName($table_name);
-		$plural = StringFormat::pluralVariable($table_name);
 		$single = StringFormat::variable($table_name);
 		$pks = $this->getPrimaryKeys($table_name);
 
@@ -47,11 +44,13 @@ class DefaultGenerator extends BaseGenerator {
 		} else {
 			$pk = null;
 		}
-		$pkMethod = 'get' . StringFormat::titleCase($pk->getName());
+
 		$actions = array();
 		if (!$pk) {
 			return $actions;
 		}
+
+		$pkMethod = 'get' . StringFormat::titleCase($pk->getName());
 
 		foreach ($this->standardActions as &$staction) {
 			$actions[$staction] = "<?php echo site_url('" . StringFormat::pluralURL($table_name) . '/' . strtolower($staction) . "/' . $" . $single . '->' . $pkMethod . '()) ?>';
@@ -60,9 +59,7 @@ class DefaultGenerator extends BaseGenerator {
 		$fkeys_to = $this->getForeignKeysToTable($table_name);
 		foreach ($fkeys_to as $k => &$r) {
 			$from_table = $r->getTableName();
-			$from_class_name = $this->getModelName($from_table);
 			$from_column = array_shift($r->getLocalColumns());
-			$to_column = array_shift($r->getForeignColumns());
 			if (@$used_to[$from_table]) {
 				unset($fkeys_to[$k]);
 				continue;
