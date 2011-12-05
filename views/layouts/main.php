@@ -5,8 +5,8 @@
 		<title><?php echo $title ?></title>
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/style.css', true) ?>" />
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/themes/blue-tie/jquery-ui-1.8.custom.css', true) ?>" />
-		<script language="Javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
-		<script language="Javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js"></script>
+		<script language="Javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+		<script language="Javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 		<script>
 		$(function() {
 			$('li.ui-state-default, a.ui-state-default, input.ui-state-default, div.ui-state-default, span.ui-state-default').hover(function(){
