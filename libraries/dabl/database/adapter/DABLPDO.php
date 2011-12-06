@@ -58,15 +58,17 @@ abstract class DABLPDO extends PDO {
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 		);
 
-		if (isset($connection_params['persistant'])) {
-			if (
-				true === @$connection_params['persistant']
-				|| 1 === @$connection_params['persistant']
-				|| 'true' === @$connection_params['persistant']
-				|| '1' === @$connection_params['persistant']
-			) {
-				$options[PDO::ATTR_PERSISTENT] = true;
-			}
+		if (
+			isset($connection_params['persistant']) &&
+			(
+				true === $connection_params['persistant']
+				|| 1 === $connection_params['persistant']
+				|| 'true' === $connection_params['persistant']
+				|| '1' === $connection_params['persistant']
+				|| 'on' === strtolower($connection_params['persistant'])
+			)
+		) {
+			$options[PDO::ATTR_PERSISTENT] = true;
 		}
 
 		switch ($connection_params['driver']) {
