@@ -11,10 +11,10 @@
 function load_view($view = null, $params = array(), $return_output = false, $output_format = 'html') {
 
 	$_ = array(
-		'view' => $view,
-		'params' => $params,
-		'return_output' => $return_output,
-		'output_format' => $output_format
+		'view' => &$view,
+		'params' => &$params,
+		'return_output' => &$return_output,
+		'output_format' => &$output_format
 	);
 
 	if ($_['return_output']) {
@@ -38,11 +38,11 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 
 		case '':
 		case 'html':
-			foreach ($_['params'] as $_var => $_value) {
+			foreach ($_['params'] as $_var => &$_value) {
 				if ('_' === $_var) {
 					throw new Exception('Attempting to overwrite $_ with view parameter');
 				}
-				$$_var = $_value;
+				$$_var = &$_value;
 			}
 
 			$_['orig_view'] = $_['view'];
