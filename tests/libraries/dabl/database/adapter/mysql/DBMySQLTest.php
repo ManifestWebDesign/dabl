@@ -21,7 +21,7 @@ class DBMySQLTest extends PHPUnit_Framework_TestCase {
 	 * @group NestedTransaction
 	 * @group bug1355
 	 * @covers DBMySQL::rollback
-	 * @expectedException Exception
+	 * @expectedException ErrorException
 	 */
 	function testRollbackOutsideTransaction() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
@@ -32,7 +32,7 @@ class DBMySQLTest extends PHPUnit_Framework_TestCase {
 	 * @group NestedTransaction
 	 * @group bug1355
 	 * @covers DBMySQL::commit
-	 * @expectedException Exception
+	 * @expectedException ErrorException
 	 */
 	function testCommitOutsideTransaction() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);
@@ -85,7 +85,7 @@ class DBMySQLTest extends PHPUnit_Framework_TestCase {
 	 * @group NestedTransaction
 	 * @group bug1355
 	 * @covers DBMySQL::commit
-	 * @expectedException Exception
+	 * @expectedException ErrorException
 	 */
 	function testRollbackBeforeCommit() {
 		$pdo = DBManager::getConnection(self::CONNECTION_NAME);

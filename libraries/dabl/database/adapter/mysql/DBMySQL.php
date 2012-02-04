@@ -156,22 +156,22 @@ class DBMySQL extends DABLPDO {
 
 	/**
 	 * Commit a (possibly nested) transaction.
-	 * FIXME: Make this throw an Exception of a DABL class
+	 * FIXME: Make this throw an ErrorException of a DABL class
 	 *
 	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
 	 * @see PDO::commit()
-	 * @throws Exception
+	 * @throws ErrorException
 	 */
 	function commit() {
 		if ($this->_transaction_count<=0)
-			throw new Exception('DABL: Attempting to commit outside of a transaction');
+			throw new ErrorException('DABL: Attempting to commit outside of a transaction');
 
 		--$this->_transaction_count;
 
 		if ($this->_transaction_count==0) {
 			if ($this->_rollback_connection) {
 				parent::rollback();
-				throw new Exception('DABL: attempting to commit a rolled back transaction');
+				throw new ErrorException('DABL: attempting to commit a rolled back transaction');
 			} else {
 				return parent::commit();
 			}
@@ -180,15 +180,15 @@ class DBMySQL extends DABLPDO {
 
 	/**
 	 * Rollback, and prevent all further commits in this transaction.
-	 * FIXME: Make this throw an Exception of a DABL class
+	 * FIXME: Make this throw an ErrorException of a DABL class
 	 *
 	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
 	 * @see PDO::rollback()
-	 * @throws Exception
+	 * @throws ErrorException
 	 */
 	function rollback() {
 		if ($this->_transaction_count<=0)
-			throw new Exception('DABL: Attempting to rollback outside of a transaction');
+			throw new ErrorException('DABL: Attempting to rollback outside of a transaction');
 
 		--$this->_transaction_count;
 
