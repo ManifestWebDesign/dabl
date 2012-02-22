@@ -29,7 +29,9 @@ if ($count < 2){
 }
 ?>
 <div class="pager ui-helper-clearfix">
+<span class="pager-label">
 Page
+</span>
 <?php
 if ($page > 1):
 	$link = site_url(str_replace('page_num', 1, $url_format));
