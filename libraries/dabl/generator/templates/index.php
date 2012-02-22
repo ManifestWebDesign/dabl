@@ -15,3 +15,5 @@
 	<?php echo "<?php load_view('" . $plural_url . "/grid', \$params) ?>" ?>
 
 </div>
+
+<?php echo "<?php load_view('pager', compact('pager')) ?>" ?>
