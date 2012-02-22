@@ -28,17 +28,17 @@ if ($count < 2){
 	return;
 }
 ?>
-
-Page:
+<div class="pager ui-helper-clearfix">
+Page
 <?php
 if ($page > 1):
 	$link = site_url(str_replace('page_num', 1, $url_format));
 ?>
-	<a href="<?php echo $link ?>">&laquo;</a>
+	<a href="<?php echo $link ?>">&laquo; First</a>
 
 <?php $link = site_url(str_replace('page_num', $page - 1, $url_format)) ?>
 
-	<a href="<?php echo $link ?>">&lsaquo;</a>
+	<a href="<?php echo $link ?>">&lsaquo; Previous</a>
 
 <?php endif; ?>
 
@@ -58,9 +58,10 @@ if ($page > 1):
 <?php if ($page < $count): ?>
 	<?php $link = site_url(str_replace('page_num', $page + 1, $url_format)); ?>
 
-	<a href="<?php echo $link ?>">&rsaquo;</a>
+	<a href="<?php echo $link ?>">Next &rsaquo;</a>
 
 	<?php $link = site_url(str_replace('page_num', $count, $url_format)); ?>
-	<a href="<?php echo $link ?>">&raquo;</a>
+	<a href="<?php echo $link ?>">Last &raquo;</a>
 
 <?php endif ?>
+</div>
