@@ -83,6 +83,15 @@ table.object-grid tbody td{
 	border-top: 1px solid #ddd;
 }
 
+.pager a, .pager span {
+	display: block;
+	float: left;
+	padding: 5px;
+}
+
+.pager a {
+	font-size: 90%;
+}
 
 /** UI Buttons **/
 .ui-button-link {
