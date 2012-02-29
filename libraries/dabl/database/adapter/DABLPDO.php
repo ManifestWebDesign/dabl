@@ -447,7 +447,7 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string
 	 */
 	function getTimestampFormatter() {
-		return "Y-m-d H:i:s";
+		return 'Y-m-d H:i:s';
 	}
 
 	/**
@@ -455,7 +455,7 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string
 	 */
 	function getDateFormatter() {
-		return "Y-m-d";
+		return 'Y-m-d';
 	}
 
 	/**
@@ -463,7 +463,7 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string
 	 */
 	function getTimeFormatter() {
-		return "H:i:s";
+		return 'H:i:s';
 	}
 
 	/**
