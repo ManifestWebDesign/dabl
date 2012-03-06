@@ -371,10 +371,6 @@ abstract class BaseGenerator {
 		foreach ($this->getViewTemplates() as $file_name => $view_template) {
 			$rendered_views[$file_name] = $this->renderTemplate($table_name, $view_template);
 		}
-
-		foreach ($this->database->getTable($table_name)->getForeignKeys() as $fk) {
-			$rendered_views[StringFormat::url($fk->getForeignTableName()) . '.php'] = $this->renderTemplate($table_name, '/templates/fkgrid.php', array('foreign_key' => $fk));
-		}
 		return $rendered_views;
 	}
 

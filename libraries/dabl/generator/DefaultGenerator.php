@@ -65,7 +65,7 @@ class DefaultGenerator extends BaseGenerator {
 				continue;
 			}
 			$used_to[$from_table] = $from_column;
-			$actions[ucwords(StringFormat::titleCase(StringFormat::plural($from_table), ' '))] = "<?php echo site_url('" . StringFormat::pluralURL($from_table) . '/' . StringFormat::url($single) . "/' . $" . $single . '->' . $pkMethod . '()) ?>';
+			$actions[ucwords(StringFormat::titleCase(StringFormat::plural($from_table), ' '))] = "<?php echo site_url('" . StringFormat::pluralURL($from_table) . "?$from_column=' . $" . $single . '->' . $pkMethod . '()) ?>';
 		}
 
 		return $actions;
