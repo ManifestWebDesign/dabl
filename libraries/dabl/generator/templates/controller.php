@@ -3,9 +3,18 @@
 class <?php echo $controller_name ?> extends ApplicationController {
 
 	function index() {
-		$q = new Query(<?php echo $model_name ?>::getTableName());
+		$table_name = <?php echo $model_name ?>::getTableName();
+		$q = new Query($table_name);
 		if (isset($_REQUEST['SortBy'])) {
 			$q->order($_REQUEST['SortBy'], isset($_REQUEST['Dir']) ? Query::DESC : Query::ASC);
+		}
+		foreach (<?php echo $model_name ?>::getColumnNames() as $column_name) {
+			$full_column_name = $table_name . '.' . $column_name;
+			if (!empty($_REQUEST[$column_name])) {
+				$q->add($full_column_name, $_REQUEST[$column_name]);
+			} elseif (!empty($_REQUEST[$full_column_name])) {
+				$q->add($full_column_name, $_REQUEST[$full_column_name]);
+			}
 		}
 
 		$qp = new QueryPager($q, 25, @$_GET['page'], '<?php echo $model_name ?>');
@@ -55,35 +64,6 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		$this->_get<?php echo $model_name ?>(<?php if(@$pkMethod): ?>$<?php echo $single ?>_id<?php endif ?>)->fromArray(@$_REQUEST);
 	}
 
-<?php
-		foreach($this->getForeignKeysFromTable($table_name) as $r){
-			$to_table = $r->getForeignTableName();
-			$to_class_name = $this->getModelName($to_table);
-			$from_column = array_shift($r->getLocalColumns());
-			$fk_single = StringFormat::variable($to_table);
-			if(@$used_from[$to_table]) continue;
-			$used_from[$to_table] = $from_column;
-?>
-	function <?php echo StringFormat::classMethod($to_table) ?>($<?php echo $fk_single ?>_id = null) {
-		$<?php echo $fk_single ?>_id = $<?php echo $fk_single ?>_id ? $<?php echo $fk_single ?>_id : @$_REQUEST[<?php echo $to_class_name ?>::getPrimaryKey()];
-		$<?php echo $fk_single ?> = $<?php echo $fk_single ?>_id ? <?php echo $to_class_name ?>::retrieveByPK($<?php echo $fk_single ?>_id) : new <?php echo $to_class_name ?>;
-
-		$this['<?php echo $fk_single ?>'] = $<?php echo $fk_single ?>;
-		$q = $<?php echo $fk_single ?>->get<?php echo $model_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>Query();
-		
-		if (isset($_REQUEST['SortBy'])) {
-			$q->order($_REQUEST['SortBy'], isset($_REQUEST['Dir']) ? Query::DESC : Query::ASC);
-		}
-		
-		$qp = new QueryPager($q, 25, @$_GET['page'], '<?php echo $model_name ?>');
-		$this['<?php echo $plural ?>'] = $qp->fetchPage();
-		$this['pager'] = $qp;
-		$this['page'] = '<?php echo StringFormat::titleCase($plural, ' ') ?> for <?php echo StringFormat::titleCase($to_table, ' ') ?>';
-	}
-
-<?php
-		}
-?>
 	/**
 	 * @return <?php echo $model_name ?>
 
