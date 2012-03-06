@@ -220,12 +220,20 @@ class MssqlSchemaParser extends BaseSchemaParser
 	 */
 	protected function addPrimaryKey(Table $table)
 	{
-		$stmt = $this->dbh->query("SELECT COLUMN_NAME
+		$q = "SELECT COLUMN_NAME
 						FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
 								INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ON
 						INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME = INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.constraint_name
 						WHERE     (INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE = 'PRIMARY KEY') AND
-						(INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME = '".$table->getName()."')");
+						(INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME = '".$table->getName()."')
+UNION ALL
+SELECT COLUMN_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE
+(TABLE_NAME = '".$table->getName()."')
+AND columnproperty(object_id(TABLE_SCHEMA + '.' + TABLE_NAME), COLUMN_NAME, 'IsIdentity') = 1
+";
+		$stmt = $this->dbh->query($q);
 
 		// Loop through the returned results, grouping the same key_name together
 		// adding each column for that key.

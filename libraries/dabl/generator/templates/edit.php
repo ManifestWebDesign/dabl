@@ -48,8 +48,21 @@ foreach ($this->getColumns($table_name) as $column) {
 		<div class="form-field-wrapper">
 			<label class="form-field-label" for="<?php echo $input_id ?>"><?php echo $label ?></label>
 <?php
-	switch($column->getType()){
-		case PropelTypes::LONGVARCHAR:
+	switch ($column->getType()) {
+		case BaseModel::COLUMN_TYPE_BOOLEAN:
+?>
+			<label>
+				<input <?php echo '<?php if ($' . $single . '->' . $method . '() === 1) echo \'checked="checked"\' ?>' ?> name="<?php echo $column_name ?>" type="radio" value="1" />
+				True
+			</label>
+
+			<label>
+				<input <?php echo '<?php if ($' . $single . '->' . $method . '() === 0) echo \'checked="checked"\' ?>' ?> name="<?php echo $column_name ?>" type="radio" value="0" />
+				False
+			</label>
+<?
+			break;
+		case BaseModel::COLUMN_TYPE_LONGVARCHAR:
 ?>
 			<textarea id="<?php echo $input_id ?>" name="<?php echo $column_name ?>"><?php echo $output ?></textarea>
 <?php

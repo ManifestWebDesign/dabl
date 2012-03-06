@@ -44,7 +44,8 @@ abstract class BaseModel {
 		self::COLUMN_TYPE_SMALLINT,
 		self::COLUMN_TYPE_TINYINT,
 		self::COLUMN_TYPE_INTEGER,
-		self::COLUMN_TYPE_BIGINT
+		self::COLUMN_TYPE_BIGINT,
+		self::COLUMN_TYPE_BOOLEAN
 	);
 
 	private static $LOB_TYPES = array(
@@ -336,38 +337,50 @@ abstract class BaseModel {
 			$column_type = $this->getColumnType($column_name);
 		}
 
-		$temporal = self::isTemporalType($column_type);
-		$numeric = self::isNumericType($column_type);
-
-		if ($numeric || $temporal) {
-			if (is_string($value)) {
-				$value = trim($value);
-			}
-			if ('' === $value) {
+		if ($column_type == self::COLUMN_TYPE_BOOLEAN) {
+			if ($value === true || $value === 1 || $value === '1' || strtolower($value) === 'on' || strtolower($value) === 'true') {
+				$value = 1;
+			} elseif ($value === false || $value === 0 || $value === '0' || strtolower($value) === 'off' || strtolower($value) === 'false') {
+				$value = 0;
+			} elseif ($value === '' || $value === null) {
 				$value = null;
-			} elseif (null !== $value) {
-				if ($numeric) {
-					if (is_bool($value)) {
-						$value = $value ? 1 : 0;
-					} elseif (self::isIntegerType($column_type)) {
-						// validate and cast
-						if (!is_int($value)) {
-							$int_val = intval($value);
-							if ((string) $int_val != (string) $value) {
-								throw new InvalidArgumentException($value . ' is not a valid integer or it is too large');
+			} else {
+				throw new InvalidArgumentException($value . ' is not a valid boolean value');
+			}
+		} else {
+			$temporal = self::isTemporalType($column_type);
+			$numeric = self::isNumericType($column_type);
+
+			if ($numeric || $temporal) {
+				if (is_string($value)) {
+					$value = trim($value);
+				}
+				if ('' === $value) {
+					$value = null;
+				} elseif (null !== $value) {
+					if ($numeric) {
+						if (is_bool($value)) {
+							$value = $value ? 1 : 0;
+						} elseif (self::isIntegerType($column_type)) {
+							// validate and cast
+							if (!is_int($value)) {
+								$int_val = intval($value);
+								if ((string) $int_val != (string) $value) {
+									throw new InvalidArgumentException($value . ' is not a valid integer or it is too large');
+								}
+								$value = $int_val;
 							}
-							$value = $int_val;
-						}
-					} else {
-						// only validates, doesn't cast...yet
-						$float_val = floatval($value);
-						if ((string) $float_val != (string) $value) {
-							throw new InvalidArgumentException($value . ' is not a valid float or it is too large');
+						} else {
+							// only validates, doesn't cast...yet
+							$float_val = floatval($value);
+							if ((string) $float_val != (string) $value) {
+								throw new InvalidArgumentException($value . ' is not a valid float or it is too large');
+							}
 						}
 					}
-				}
-				if ($this->_formatDates && $temporal) {
-					$value = self::coerceTemporalValue($value, $column_type, $this->getConnection());
+					if ($this->_formatDates && $temporal) {
+						$value = self::coerceTemporalValue($value, $column_type, $this->getConnection());
+					}
 				}
 			}
 		}

@@ -120,13 +120,17 @@ abstract class BaseGenerator {
 
 	/**
 	 * Returns an array of Column objects for a given table in the XML schema
-	 * @return Column[]
+	 * @return array Column[]
 	 */
 	function getColumns($table_name) {
 		$table = $this->database->getTable($table_name);
 		return $table->getColumns();
 	}
 
+	/**
+	 * @param type $table_name
+	 * @return array Column[]
+	 */
 	function getPrimaryKeys($table_name) {
 		$table = $this->database->getTable($table_name);
 		return $table->getPrimaryKey();
