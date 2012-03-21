@@ -176,7 +176,7 @@ class Query {
 	 */
 	function addColumn($column_name, $alias = null) {
 		if ($alias) {
-			$column_name .= ' AS ' . $alias;
+			$column_name .= ' AS "' . $alias . '"';
 		}
 		$this->_columns[$column_name] = $column_name;
 		return $this;
@@ -902,6 +902,10 @@ class Query {
 
 		if (null !== $this->_limit) {
 			if ($conn) {
+				if (class_exists('DBMSSQL') && $conn instanceof DBMSSQL) {
+					$qry_s = QueryStatement::embedIdentifiers($qry_s, $stmnt->getIdentifiers(), $conn);
+					$stmnt->setIdentifiers(array());
+				}
 				$conn->applyLimit($qry_s, $this->_offset, $this->_limit);
 			} else {
 				$qry_s .= "\nLIMIT " . ($this->_offset ? $this->_offset . ', ' : '') . $this->_limit;
@@ -1116,7 +1120,7 @@ class Query {
 	 * Protected for now.  Likely to be public in the future.
 	 * @return QueryStatement
 	 */
-	protected function getWhereClause($conn = null) {
+	protected function getWhereClause() {
 		return $this->getWhere()->getQueryStatement();
 	}
 
