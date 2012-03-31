@@ -4,6 +4,9 @@ body, table, input, select, textarea {
 	font: 12px tahoma, arial;
 }
 
+a img {
+	border: none;
+}
 
 /* Forms */
 form p, form, h2 {
@@ -37,9 +40,13 @@ form h2 {
 	padding: 5px 0 5px 0;
 }
 
-input[type=text], input[type=password], textarea {
+input[type=text], input[type=password], textarea, select {
 	border: 1px solid #aaa;
 	padding: 2px;
+}
+
+select {
+	padding: 1px;
 }
 
 textarea {
@@ -78,8 +85,8 @@ table.object-grid th a span {
 	float: right;
 }
 
-table.object-grid tbody td{
-	padding: 4px 8px 4px 8px;
+table.object-grid tbody td {
+	padding: 2px 8px;
 	border-top: 1px solid #ddd;
 }
 
@@ -91,6 +98,7 @@ table.object-grid tbody td{
 
 .pager a {
 	font-size: 90%;
+	color: #f5822b;
 }
 
 /** UI Buttons **/
