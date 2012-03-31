@@ -209,7 +209,7 @@ abstract class BaseGenerator {
 			'single_url' => StringFormat::url($table_name),
 			'pk' => $pk,
 			'primary_keys' => $pks,
-			'pkMethod' => $pk ? "get$pk" : null,
+			'pkMethod' => $pk ? StringFormat::classMethod('get' . StringFormat::titleCase($pk)) : null,
 			'actions' => $this->getActions($table_name),
 			'columns' => $columns
 		);

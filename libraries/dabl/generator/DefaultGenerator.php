@@ -50,7 +50,7 @@ class DefaultGenerator extends BaseGenerator {
 			return $actions;
 		}
 
-		$pkMethod = 'get' . StringFormat::titleCase($pk->getName());
+		$pkMethod = StringFormat::classMethod('get' . StringFormat::titleCase($pk->getName()));
 
 		foreach ($this->standardActions as &$staction) {
 			$actions[$staction] = "<?php echo site_url('" . StringFormat::pluralURL($table_name) . '/' . strtolower($staction) . "/' . $" . $single . '->' . $pkMethod . '()) ?>';

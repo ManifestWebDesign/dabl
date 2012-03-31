@@ -32,8 +32,8 @@
 				<div style="float:left;width:50%">
 					<strong>Base<br /></strong>
 <?php
-foreach (glob($options['base_model_path'] . "*.php") as $filename) {
-	echo basename($filename) . "<br />";
+foreach (glob($options['base_model_path'] . '*.php') as $filename) {
+	echo basename($filename) . '<br />';
 	require_once($filename);
 }
 ?>
@@ -41,8 +41,8 @@ foreach (glob($options['base_model_path'] . "*.php") as $filename) {
 				<div style="float:left;width:50%">
 					<strong>Extended<br /></strong>
 <?php
-foreach (glob($options['model_path'] . "*.php") as $filename) {
-	echo basename($filename) . "<br />";
+foreach (glob($options['model_path'] . '*.php') as $filename) {
+	echo basename($filename) . '<br />';
 	require_once($filename);
 }
 ?>
