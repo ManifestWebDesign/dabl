@@ -50,10 +50,10 @@ class DefaultGenerator extends BaseGenerator {
 			return $actions;
 		}
 
-		$pkMethod = StringFormat::classMethod('get' . StringFormat::titleCase($pk->getName()));
+		$pk_method = StringFormat::classMethod('get' . StringFormat::titleCase($pk->getName()));
 
 		foreach ($this->standardActions as &$staction) {
-			$actions[$staction] = "<?php echo site_url('" . StringFormat::pluralURL($table_name) . '/' . strtolower($staction) . "/' . $" . $single . '->' . $pkMethod . '()) ?>';
+			$actions[$staction] = "<?php echo site_url('" . StringFormat::pluralURL($table_name) . '/' . strtolower($staction) . "/' . $" . $single . '->' . $pk_method . '()) ?>';
 		}
 
 		$fkeys_to = $this->getForeignKeysToTable($table_name);
@@ -65,7 +65,7 @@ class DefaultGenerator extends BaseGenerator {
 				continue;
 			}
 			$used_to[$from_table] = $from_column;
-			$actions[ucwords(StringFormat::titleCase(StringFormat::plural($from_table), ' '))] = "<?php echo site_url('" . StringFormat::pluralURL($from_table) . "?$from_column=' . $" . $single . '->' . $pkMethod . '()) ?>';
+			$actions[ucwords(StringFormat::titleCase(StringFormat::plural($from_table), ' '))] = "<?php echo site_url('" . StringFormat::pluralURL($from_table) . "?$from_column=' . $" . $single . '->' . $pk_method . '()) ?>';
 		}
 
 		return $actions;
