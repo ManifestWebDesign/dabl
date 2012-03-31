@@ -51,9 +51,9 @@ if ($actions){
 
 		<tr class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?> ui-widget-content">
 <?php
-foreach($columns as $column){
+foreach ($columns as $column){
 	$column_name = StringFormat::titleCase($column->getName());
-	switch($column->getType()){
+	switch ($column->getType()){
 		case PropelTypes::TIMESTAMP:
 			$format = 'VIEW_TIMESTAMP_FORMAT';
 			break;
@@ -84,7 +84,7 @@ if ($actions) {
 			<td>
 <?php
 	foreach ($actions as $action_label => $action_url) {
-		if($action_label == 'Index') continue;
+		if ($action_label == 'Index') continue;
 			$icon_class = @$this->actionIcons[$action_label] ? 'ui-icon-' . $this->actionIcons[$action_label] : 'ui-icon-carat-1-e';
 			$on_click = '';
 			if (strtolower($action_label) === 'delete') {
@@ -94,10 +94,10 @@ if ($actions) {
 ?>
 				<a
 					class="ui-widget ui-state-default ui-corner-all ui-button-link"
-<?php if(in_array($action_label, $this->standardActions)) : ?>
+<?php if (in_array($action_label, $this->standardActions)) : ?>
 					title="<?php echo $action_label . ' ' . ucfirst($single) ?>"
 <?php endif ?>
-					href="<?php echo $action_url ?>"<?php if('' !== $on_click): ?>
+					href="<?php echo $action_url ?>"<?php if ('' !== $on_click): ?>
 
 					onclick="<?php echo $on_click ?>"<?php endif ?>>
 					<span class="ui-icon <?php echo $icon_class ?>"><?php echo $action_label ?></span>
@@ -106,9 +106,11 @@ if ($actions) {
 				</a>
 <?php
 	}
-}
 ?>
 			</td>
+<?
+}
+?>
 		</tr>
 <?php echo '<?php endforeach ?>' ?>
 

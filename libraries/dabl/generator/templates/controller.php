@@ -47,11 +47,11 @@ class <?php echo $controller_name ?> extends ApplicationController {
 			$this->persistant['errors'][] = $e->getMessage();
 		}
 
-		$this->persistant['<?php echo $single ?>'] = $<?php echo $single ?>;
-		$this->redirect('<?php echo $plural_url ?>/edit/'<?php if(@$pk_method): ?> . $<?php echo $single ?>-><?php echo $pk_method ?>()<?php endif ?>);
+		unset($_REQUEST['_url']);
+		$this->redirect('<?php echo $plural_url ?>/edit/'<?php if(@$pk_method): ?> . $<?php echo $single ?>-><?php echo $pk_method ?>()<?php endif ?> . '?' . http_build_query($_REQUEST));
 	}
 
-<?php if(@$pk_method): ?>	function delete($<?php echo $single ?>_id = null) {
+<?php if (@$pk_method): ?>	function delete($<?php echo $single ?>_id = null) {
 		try {
 			if (null !== $this->_get<?php echo $model_name ?>(<?php if(@$pk_method): ?>$<?php echo $single ?>_id<?php endif ?>) && $this['<?php echo $single ?>']->delete()) {
 				$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> deleted';
@@ -78,11 +78,6 @@ class <?php echo $controller_name ?> extends ApplicationController {
 
 	 */
 	private function _get<?php echo $model_name ?>(<?php if(@$pk_method): ?>$<?php echo $single ?>_id = null<?php endif ?>) {
-		if (isset($this['<?php echo $single ?>'])) {
-			// if <?php echo $single ?> has already been set manually, don't mess with it
-			return $this['<?php echo $single ?>'];
-		}
-
 <?php if (@$pk_method): ?>
 		// look for id in param or in $_REQUEST array
 		if (null === $<?php echo $single ?>_id && isset($_REQUEST[<?php echo $model_name ?>::getPrimaryKey()])) {
