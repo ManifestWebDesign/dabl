@@ -47,7 +47,6 @@ class <?php echo $controller_name ?> extends ApplicationController {
 			$this->persistant['errors'][] = $e->getMessage();
 		}
 
-		unset($_REQUEST['_url']);
 		$this->redirect('<?php echo $plural_url ?>/edit/'<?php if(@$pk_method): ?> . $<?php echo $single ?>-><?php echo $pk_method ?>()<?php endif ?> . '?' . http_build_query($_REQUEST));
 	}
 

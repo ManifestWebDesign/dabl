@@ -7,7 +7,6 @@
 
 if (!isset($url_format)) {
 	$args = (array) @$_GET;
-	unset($args['_url']);
 	$args['page'] = 'page_num';
 	$url_format = @$_GET['_url'] . '?' . http_build_query($args);
 }

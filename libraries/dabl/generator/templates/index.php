@@ -7,6 +7,7 @@
 
 	</a>
 	<?php echo StringFormat::titleCase($plural, ' ') ?>
+
 </h1>
 
 <?php echo "<?php load_view('pager', compact('pager')) ?>" ?>

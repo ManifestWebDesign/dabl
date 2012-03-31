@@ -7,6 +7,8 @@ require_once '../config.php';
 // @see public/.htaccess
 $requested_route = @$_GET['_url'];
 
+unset($_GET['_url'], $_REQUEST['_url']);
+
 // handle the request with whatever Hooks have been set for that purpose
 // @see config/controllers.php
 try {

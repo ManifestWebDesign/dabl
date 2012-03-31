@@ -1,12 +1,10 @@
 <?php echo '<?php' ?>
 
 $_get_args = (array) @$_GET;
-unset($_get_args['_url']);
-http_build_query($_get_args);
 
 if (isset($_REQUEST['Dir'])) {
 	unset($_get_args['Dir']);
-} else if (isset($_REQUEST['SortBy'])) {
+} elseif (isset($_REQUEST['SortBy'])) {
 	$_get_args['Dir'] = 'DESC';
 }
 <?php echo '?>' ?>
