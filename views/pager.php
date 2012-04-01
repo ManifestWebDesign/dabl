@@ -8,7 +8,7 @@
 if (!isset($url_format)) {
 	$args = (array) @$_GET;
 	$args['page'] = 'page_num';
-	$url_format = @$_GET['_url'] . '?' . http_build_query($args);
+	$url_format = '?' . http_build_query($args);
 }
 
 if (!isset($page_limit)) {
@@ -22,22 +22,21 @@ $page = $pager->getPageNum();
 $count = $pager->getPageCount();
 $start = max(1, min($count - $page_limit, $page - $mid_page_limit));
 $end = min($count, max($page_limit, $page + $mid_page_limit));
-
-if ($count < 2){
-	return;
-}
 ?>
 <div class="pager ui-helper-clearfix">
-<span class="pager-label">
-Page
-</span>
+	<span>
+		Records
+		<?php echo number_format($pager->getStart()) ?>-<?php echo number_format($pager->getEnd()) ?>/<?php echo number_format($pager->getTotal()) ?>
+	</span>
+<?php if ($count > 1): ?>
+	<span class="pager-label">Page</span>
 <?php
 if ($page > 1):
-	$link = site_url(str_replace('page_num', 1, $url_format));
+	$link = str_replace('page_num', 1, $url_format);
 ?>
 	<a href="<?php echo $link ?>">&laquo; First</a>
 
-<?php $link = site_url(str_replace('page_num', $page - 1, $url_format)) ?>
+<?php $link = str_replace('page_num', $page - 1, $url_format) ?>
 
 	<a href="<?php echo $link ?>">&lsaquo; Previous</a>
 
@@ -49,7 +48,7 @@ if ($page > 1):
 	<span><?php echo $i ?></span>
 
 	<?php else: ?>
-		<?php $link = site_url(str_replace('page_num', $i, $url_format)); ?>
+		<?php $link = str_replace('page_num', $i, $url_format); ?>
 
 	<a href="<?php echo $link ?>"><?php echo $i ?></a>
 
@@ -57,12 +56,13 @@ if ($page > 1):
 <?php endfor; ?>
 
 <?php if ($page < $count): ?>
-	<?php $link = site_url(str_replace('page_num', $page + 1, $url_format)); ?>
+	<?php $link = str_replace('page_num', $page + 1, $url_format); ?>
 
 	<a href="<?php echo $link ?>">Next &rsaquo;</a>
 
-	<?php $link = site_url(str_replace('page_num', $count, $url_format)); ?>
+	<?php $link = str_replace('page_num', $count, $url_format); ?>
 	<a href="<?php echo $link ?>">Last &raquo;</a>
 
 <?php endif ?>
+<?php endif?>
 </div>
