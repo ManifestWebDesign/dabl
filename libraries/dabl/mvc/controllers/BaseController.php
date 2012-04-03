@@ -126,7 +126,15 @@ abstract class BaseController extends ArrayObject {
 		}
 
 		if ('html' !== $this->outputFormat) {
-			$url .= '.' . $this->outputFormat;
+			if (strpos($url, '?') !== false) {
+				$parts = explode('?', $url, 2);
+				$url = array_shift($parts);
+				$url .= '.' . $this->outputFormat;
+				array_unshift($parts, $url);
+				$url = implode('?', $parts);
+			} else {
+				$url .= '.' . $this->outputFormat;
+			}
 		}
 
 		redirect($url, $die);
