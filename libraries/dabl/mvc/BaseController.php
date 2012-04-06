@@ -17,6 +17,27 @@ abstract class BaseController extends ArrayObject {
 	 */
 	public $outputFormat = 'html';
 
+	public $allowedFormats = array(
+		'html',
+		'xml',
+		'json'
+	);
+
+	public $formatHandlers = array(
+		'html' => array(
+			'content-type' => 'text/html',
+			'callback' => 'load_view'
+		),
+		'xml' => array(
+			'content-type' => 'application/json',
+			'callback' => 'xml_encode_all'
+		),
+		'json' => array(
+			'content-type' => 'application/xml',
+			'callback' => 'json_encode_all'
+		)
+	);
+
 	/**
 	 * @var bool Whether or not to automatically load the view after the action has been called
 	 */
@@ -80,7 +101,7 @@ abstract class BaseController extends ArrayObject {
 	 * Appends the given $action_name to the viewDir and appends the resulting string
 	 * @param string $action_name
 	 */
-	function getView($action_name) {
+	private function getView($action_name) {
 		return $this->getViewDir() . $action_name;
 	}
 

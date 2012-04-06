@@ -22,7 +22,7 @@ function object_to_array($var) {
 	}
 
 	// loop over elements/properties
-	foreach ($var as $key => &$value) {
+	foreach ($var as &$value) {
 		// recursively convert objects
 		if (is_object($value) || is_array($value)) {
 			// but prevent cycles

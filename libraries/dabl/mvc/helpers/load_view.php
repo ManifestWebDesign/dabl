@@ -40,7 +40,7 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 		case 'html':
 			foreach ($_['params'] as $_var => &$_value) {
 				if ('_' === $_var) {
-					throw new Exception('Attempting to overwrite $_ with view parameter');
+					throw new RuntimeException('Attempting to overwrite $_ with view parameter');
 				}
 				$$_var = &$_value;
 			}
@@ -63,7 +63,7 @@ function load_view($view = null, $params = array(), $return_output = false, $out
 			break;
 
 		default:
-			throw new exception("The extension {$_['output_format']} is not yet supported.");
+			throw new RuntimeException("The extension {$_['output_format']} is not yet supported.");
 			file_not_found($_['view']);
 			break;
 	}

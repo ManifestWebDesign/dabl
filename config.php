@@ -1,5 +1,9 @@
 <?php
 
+if (defined('CONFIG_LOADED') && CONFIG_LOADED === true) {
+	return;
+}
+
 date_default_timezone_set(@date_default_timezone_get());
 
 // lets other scripts know that this file has been included
