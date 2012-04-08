@@ -114,15 +114,13 @@ abstract class BaseController extends ArrayObject {
 			throw new RuntimeException("The extension '{$this->outputFormat}' is not supported.");
 		}
 
-		$params = $this->getParams();
-
 		switch ($this->outputFormat) {
 			case 'html':
 				if ($this->layout && $this->renderPartial === false) {
-					$params['content'] = load_view($view, $params, true);
-					load_view($this->layout, $params, false);
+					$this['content'] = load_view($view, $this, true);
+					load_view($this->layout, $this, false);
 				} else {
-					load_view($view, $params, false);
+					load_view($view, $this, false);
 				}
 				break;
 
@@ -130,14 +128,14 @@ abstract class BaseController extends ArrayObject {
 				if (!headers_sent()) {
 					header('Content-type: application/json');
 				}
-				echo json_encode_all($params);
+				echo json_encode_all($this);
 				break;
 
 			case 'xml':
 				if (!headers_sent()) {
 					header('Content-type: application/xml');
 				}
-				echo xml_encode_all($params);
+				echo xml_encode_all($this);
 				break;
 
 			default:

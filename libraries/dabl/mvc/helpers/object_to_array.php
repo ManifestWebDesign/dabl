@@ -9,27 +9,36 @@
  *
  * @return array
  */
-function object_to_array($var) {
-	$references = array();
-
-	//use toArray() if it exists so object can control array conversion if it wants to
+function object_to_array($var, $loop_exclude = array()) {
 	if (is_object($var)) {
-		if (method_exists($var, 'toArray')) {
+		if (in_array($var, $loop_exclude, true)) {
+			return '*RECURSION*';
+		}
+		$loop_exclude[] = $var;
+
+		if ($var instanceof ArrayObject) {
+			$var = $var->getArrayCopy();
+		} elseif (method_exists($var, 'toArray')) {
+			// use toArray() if it exists so object can control array conversion if it wants to
 			$var = $var->toArray();
+		} elseif ($var instanceof Traversable) {
+			$_var = array();
+			foreach ($var as $key => $val) {
+				$_var[$key] = $val;
+			}
+			$var = $_var;
 		} else {
 			$var = get_object_vars($var);
 		}
+	} elseif (!is_array($var)) {
+		throw new InvalidArgumentException('object_to_array can only convert arrays and objects');
 	}
 
 	// loop over elements/properties
 	foreach ($var as &$value) {
 		// recursively convert objects
 		if (is_object($value) || is_array($value)) {
-			// but prevent cycles
-			if (!in_array($value, $references)) {
-				$value = object_to_array($value);
-				$references[] = &$value;
-			}
+			$value = object_to_array($value, $loop_exclude);
 		}
 	}
 	return $var;

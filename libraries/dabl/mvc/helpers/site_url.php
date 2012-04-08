@@ -26,8 +26,9 @@ function site_url($url = '', $version = false) {
 
 	if ($version) {
 		$path = PUBLIC_DIR . $url;
-		if (!is_file($path))
-			throw new Exception('File ' . $url . ' not found.');
+		if (!is_file($path)) {
+			file_not_found($url);
+		}
 		$char = (strpos($url, '?') === false) ? '?' : '&';
 		$url .= $char . 'v=' . filemtime($path);
 	}
