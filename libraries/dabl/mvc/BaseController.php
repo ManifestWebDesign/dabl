@@ -17,25 +17,14 @@ abstract class BaseController extends ArrayObject {
 	 */
 	public $outputFormat = 'html';
 
+	/**
+	 * XML and JSON must be explicitly enabled
+	 * @var array Allowed output formats(extensions)
+	 */
 	public $allowedFormats = array(
 		'html',
 		'xml',
 		'json'
-	);
-
-	public $formatHandlers = array(
-		'html' => array(
-			'content-type' => 'text/html',
-			'callback' => 'load_view'
-		),
-		'xml' => array(
-			'content-type' => 'application/json',
-			'callback' => 'xml_encode_all'
-		),
-		'json' => array(
-			'content-type' => 'application/xml',
-			'callback' => 'json_encode_all'
-		)
 	);
 
 	/**
@@ -120,14 +109,40 @@ abstract class BaseController extends ArrayObject {
 	 * the viewDir
 	 */
 	function loadView($view) {
-		$output_format = $this->outputFormat;
+
+		if (!in_array($this->outputFormat, $this->allowedFormats)) {
+			throw new RuntimeException("The extension '{$this->outputFormat}' is not supported.");
+		}
+
 		$params = $this->getParams();
 
-		$return_output = $use_layout = ($this->layout && $this->renderPartial === false && $output_format == 'html');
-		$params['content'] = load_view($view, $params, $return_output, $output_format);
+		switch ($this->outputFormat) {
+			case 'html':
+				if ($this->layout && $this->renderPartial === false) {
+					$params['content'] = load_view($view, $params, true);
+					load_view($this->layout, $params, false);
+				} else {
+					load_view($view, $params, false);
+				}
+				break;
 
-		if ($use_layout) {
-			load_view($this->layout, $params, false, $output_format);
+			case 'json':
+				if (!headers_sent()) {
+					header('Content-type: application/json');
+				}
+				echo json_encode_all($params);
+				break;
+
+			case 'xml':
+				if (!headers_sent()) {
+					header('Content-type: application/xml');
+				}
+				echo xml_encode_all($params);
+				break;
+
+			default:
+				throw new RuntimeException("The extension '{$this->outputFormat}' is not supported.");
+				break;
 		}
 
 		$this->loadView = false;
@@ -163,23 +178,25 @@ abstract class BaseController extends ArrayObject {
 
 	/**
 	 * @param string $action_name
-	 * @param array $params
+	 * @param array $args
 	 */
-	function doAction($action_name = null, $params = array()) {
+	function doAction($action_name = null, $args = array()) {
 
-		$action_name = $action_name ? $action_name : DEFAULT_CONTROLLER;
+		if (!$action_name) {
+			$action_name = DEFAULT_CONTROLLER;
+		}
 		$method_name = str_replace(array('-', '_', ' '), '', $action_name);
 		$view = $this->getView($action_name);
 
-		if (!is_array($params) && !($params instanceof ArrayObject)) {
-			$params = array($params);
+		if (!is_array($args) && !($args instanceof ArrayObject)) {
+			$args = array($args);
 		}
 
 		if ((!method_exists($this, $method_name) && !method_exists($this, '__call')) || strpos($action_name, '_') === 0) {
 			file_not_found($view);
 		}
 
-		call_user_func_array(array($this, $method_name), $params);
+		call_user_func_array(array($this, $method_name), $args);
 
 		if (!$this->loadView) {
 			return;
