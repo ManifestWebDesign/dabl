@@ -181,14 +181,14 @@ abstract class BaseModel {
 	 * @return BaseModel[]
 	 */
 	static function fromResult(PDOStatement $result, $class_name, $use_pool = true) {
-		if (!$class_name)
-			throw new Exception('No class name given');
+		if (!$class_name) {
+			throw new RuntimeException('No class name given');
+		}
 
 		$objects = array();
 		if (is_array($class_name)) {
 			$class_names = $class_name;
 			unset($class_name);
-			$starting_column_number = 0;
 			while ($values = $result->fetch(PDO::FETCH_NUM)) {
 				unset($main_object);
 				$startcol = 0;
@@ -228,20 +228,20 @@ abstract class BaseModel {
 				$flags |= PDO::FETCH_PROPS_LATE;
 			}
 			$result->setFetchMode($flags, $class_name);
-			while ($object = $result->fetch()) {
+			while (false !== ($object = $result->fetch())) {
 				if (
 					$use_pool
-					&& ($pk = $object->getPrimaryKey())
+					&& (!empty($pk) || ($pk = $object->getPrimaryKey()))
 					&& ($pool_object = $object->retrieveFromPool($object->{'get' . $pk}()))
 				) {
 					$object = $pool_object;
 				} else {
-					$object = clone $object;
 					$object->castInts();
 					$object->setNew(false);
 				}
 
 				$objects[] = $object;
+
 				if ($use_pool) {
 					$object->insertIntoPool($object);
 				}
