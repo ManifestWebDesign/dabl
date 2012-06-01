@@ -90,7 +90,7 @@ abstract class BaseController extends ArrayObject {
 	 * Appends the given $action_name to the viewDir and appends the resulting string
 	 * @param string $action_name
 	 */
-	private function getView($action_name) {
+	protected function getView($action_name) {
 		return $this->getViewDir() . $action_name;
 	}
 
