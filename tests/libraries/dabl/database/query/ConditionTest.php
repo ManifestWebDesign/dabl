@@ -67,4 +67,21 @@ class ConditionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($q, $stmnt->__toString());
 	}
 
+	function testEmptyCondition() {
+		$c = new Condition();
+		$c2 = new Condition();
+
+		$c->add($c2);
+		$c->add('my_column', 'value');
+
+		$stmnt = $c->getQueryStatement();
+		$stmnt->setConnection(DBManager::getConnection());
+
+		$q = "
+	`my_column` = 'value'";
+
+		$this->assertEquals($q, $stmnt->__toString());
+
+	}
+
 }

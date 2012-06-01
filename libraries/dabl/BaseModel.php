@@ -572,13 +572,11 @@ abstract class BaseModel {
 			$this->setUpdated(CURRENT_TIMESTAMP);
 		}
 
-		if ($this->getPrimaryKeys()) {
-			if ($this->isNew()) {
-				return $this->insert();
-			}
+		if ($this->isNew()) {
+			return $this->insert();
+		} else {
 			return $this->update();
 		}
-		return $this->replace();
 	}
 
 	function archive() {
@@ -668,48 +666,17 @@ abstract class BaseModel {
 	}
 
 	/**
-	 * Creates and executes REPLACE query string for this object.  Returns
-	 * the number of affected rows.
-	 * @return Int
-	 */
-	protected function replace() {
-		$conn = $this->getConnection();
-		$quotedTable = $conn->quoteIdentifier($this->getTableName());
-
-		$fields = array();
-		$values = array();
-		foreach ($this->getColumnNames() as $column) {
-			$fields[] = $conn->quoteIdentifier($column);
-			$values[] = $this->$column;
-			$placeholders[] = '?';
-		}
-		$queryString = "REPLACE INTO $quotedTable (" . implode(', ', $fields) . ") VALUES (" . implode(', ', $placeholders) . ') ';
-
-		$statement = new QueryStatement($conn);
-		$statement->setString($queryString);
-		$statement->setParams($values);
-
-		$result = $statement->bindAndExecute();
-		$count = $result->rowCount();
-
-		$this->resetModified();
-		$this->setNew(false);
-
-		return $count;
-	}
-
-	/**
 	 * Creates and executes UPDATE query string for this object.  Returns
 	 * the number of affected rows.
 	 * @return Int
 	 */
 	protected function update() {
-		$conn = $this->getConnection();
-		$quotedTable = $conn->quoteIdentifier($this->getTableName());
-
 		if (!$this->getPrimaryKeys()) {
 			throw new Exception('This table has no primary keys');
 		}
+
+		$conn = $this->getConnection();
+		$quotedTable = $conn->quoteIdentifier($this->getTableName());
 
 		$fields = array();
 		$values = array();

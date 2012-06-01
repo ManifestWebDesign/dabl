@@ -536,13 +536,9 @@ class Condition {
 
 		$stmnt = new QueryStatement;
 
-		foreach ($this->conds as $num => &$cond) {
-			if (0 === $num) {
-				$sep = '';
-			} else {
-				$sep = ((1 === $num && 'OR' === $this->conds[0][0]) ? 'OR' : $cond[0]) . ' ';
-			}
-
+		$is_first = true;
+		$is_second = false;
+		foreach ($this->conds as &$cond) {
 			$cond_stmnt = null;
 
 			// avoid call_user_func_array for better stack traces
@@ -563,6 +559,15 @@ class Condition {
 
 			if (null === $cond_stmnt) {
 				continue;
+			}
+
+			if ($is_first) {
+				$sep = '';
+				$is_first = false;
+				$is_second = true;
+			} else {
+				$sep = (($is_second && 'OR' === $this->conds[0][0]) ? 'OR' : $cond[0]) . ' ';
+				$is_second = false;
 			}
 
 			$stmnt->string .= "\n\t$sep" . $cond_stmnt->string;
