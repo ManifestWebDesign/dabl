@@ -339,7 +339,7 @@ foreach ($fields as $key => $field):
 ?>
 	static function retrieveByColumn($field, $value) {
 		$conn = <?php echo $class_name ?>::getConnection();
-		return array_shift(<?php echo $class_name ?>::doSelect(Query::create()->add($field, $value)->setLimit(1)->order('<?php echo $PK ?>')));
+		return array_shift(<?php echo $class_name ?>::doSelect(Query::create()->add($field, $value)->setLimit(1)<?php if($PK){ ?>->order('<?php echo $PK ?>')<?php } ?>));
 	}
 
 	/**
