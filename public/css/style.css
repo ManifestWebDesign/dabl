@@ -1,11 +1,28 @@
 /* Global */
 
+body {
+	margin: 0;
+	padding: 0;
+}
+
 body, table, input, select, textarea {
-	font: 12px tahoma, arial;
+	font: 12px Helvetica, Arial, sans-serif;
 }
 
 a img {
 	border: none;
+}
+
+a {
+	color: #7fc241;
+}
+
+h1 {
+	font-size: 20px;
+}
+
+.content-wrapper {
+	padding: 0 12px
 }
 
 /* Forms */
@@ -57,18 +74,15 @@ textarea {
 
 /** UI Grid **/
 table.object-grid{
-	width:100%;
+	width: 100%;
 	border-spacing: 0px;
 	font-size: 12px;
 }
 
 table.object-grid thead th{
-	padding:6px 6px 4px 8px;
-	font-weight: normal;
+	padding: 4px 4px 3px 6px;
+	font-weight: bold;
 	text-align: left;
-}
-
-table.object-grid thead th {
 	border-left: 0px;
 }
 
@@ -86,10 +100,16 @@ table.object-grid th a span {
 }
 
 table.object-grid tbody td {
-	padding: 2px 8px;
+	padding: 2px 6px;
 	border-top: 1px solid #ddd;
 }
 
+tr.even td {
+	background: #f5f5f5;
+}
+
+
+/** Pager **/
 .pager a, .pager span {
 	display: block;
 	float: left;
@@ -100,6 +120,7 @@ table.object-grid tbody td {
 	font-size: 90%;
 	color: #f5822b;
 }
+
 
 /** UI Buttons **/
 .ui-button-link {
@@ -148,8 +169,13 @@ table.object-grid .ui-button-link {
 
 
 /** UI Tabs **/
-.ui-tabs {
+div.ui-tabs {
+	padding: 8px 12px 0;
 	margin-bottom: 10px;
+}
+
+div.ui-tabs ul.ui-tabs-nav {
+	padding: 0;
 }
 
 div.ui-tabs .ui-tabs-nav li.ui-tabs-selected a,
@@ -163,7 +189,7 @@ div.ui-tabs .ui-tabs-nav li.ui-state-processing a {
 div.ui-widget-content {
 	padding: 5px;
 	background: #efefef;
-	border: 1px solid #bbb;
+	border: 1px solid #ccc;
 	margin-bottom: 5px;
 }
 

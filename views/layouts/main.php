@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title><?php echo $title ?></title>
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/style.css', true) ?>" />
-		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/themes/blue-tie/jquery-ui-1.8.custom.css', true) ?>" />
+		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/themes/light-green/jquery-ui-1.8.custom.css', true) ?>" />
 		<script language="Javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 		<script language="Javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 		<script>
@@ -25,8 +25,8 @@
 	</head>
 	<body>
 
-		<div class="ui-tabs ui-widget">
-			<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
+		<div class="ui-tabs ui-widget ui-widget-header">
+			<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix">
 			<?php foreach($actions as $label => $url): ?>
 				<li class="ui-state-default ui-corner-top <?php if (@$current_page == $label) echo "ui-tabs-selected ui-state-active ui-state-hover"?>">
 					<a href="<?php echo $url ?>"><?php echo $label ?></a>
@@ -35,10 +35,13 @@
 			</ul>
 		</div>
 
-		<?php load_view('errors', $params) ?>
-		<?php load_view('messages', $params) ?>
-
-		<?php echo $content ?>
+		<div class="content-wrapper ui-widget">
+			<?php load_view('errors', $params) ?>
+			<?php load_view('messages', $params) ?>
+			<div class="content">
+				<?php echo $content ?>
+			</div>
+		</div>
 
 	</body>
 </html>
