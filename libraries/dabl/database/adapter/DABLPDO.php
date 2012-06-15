@@ -171,7 +171,7 @@ abstract class DABLPDO extends PDO {
 				break;
 
 			default:
-				throw new Exception("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
+				throw new RuntimeException("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
 				break;
 		}
 
@@ -181,7 +181,7 @@ abstract class DABLPDO extends PDO {
 			}
 			$conn = new $class($dsn, $user, $password, $options);
 		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
+			throw new RuntimeException($e->getMessage());
 		}
 		$conn->setDBName(@$connection_params['dbname']);
 		return $conn;
