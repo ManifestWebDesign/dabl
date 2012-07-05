@@ -70,7 +70,7 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 	 */
 	protected static $_columnTypes = array(
 <?php foreach ($fields as $key => $field): ?>
-		'<?php echo $field->getName() ?>' => BaseModel::COLUMN_TYPE_<?php echo $field->getType() ?>,
+		'<?php echo $field->getName() ?>' => Model::COLUMN_TYPE_<?php echo $field->getType() ?>,
 <?php endforeach ?>
 	);
 
@@ -136,7 +136,7 @@ foreach ($fields as $key => $field):
 
 	 */
 	function set<?php echo $method_name ?>($value) {
-		return $this->setColumnValue('<?php echo $field->getName() ?>', $value, BaseModel::COLUMN_TYPE_<?php echo $field->getType() ?>);
+		return $this->setColumnValue('<?php echo $field->getName() ?>', $value, Model::COLUMN_TYPE_<?php echo $field->getType() ?>);
 	}
 
 <?php if(strtolower($raw_method_name) != strtolower($method_name)): ?>
@@ -371,11 +371,11 @@ foreach ($fields as $key => $field):
 	 * Returns an array of <?php echo $class_name ?> objects from
 	 * a PDOStatement(query result).
 	 *
-	 * @see BaseModel::fromResult
+	 * @see Model::fromResult
 	 */
 <?php $used_functions[] = 'fromResult'; ?>
 	static function fromResult(PDOStatement $result, $class = '<?php echo $class_name ?>') {
-		return baseModel::fromResult($result, $class, <?php echo $class_name ?>::$_poolEnabled);
+		return Model::fromResult($result, $class, <?php echo $class_name ?>::$_poolEnabled);
 	}
 
 <?php $used_functions[] = 'castInts'; ?>
@@ -386,7 +386,7 @@ foreach ($fields as $key => $field):
 	 */
 	function castInts() {
 <?php foreach ($fields as $key => $field): ?>
-<?php if (BaseModel::isIntegerType($field->getType())): ?>
+<?php if (Model::isIntegerType($field->getType())): ?>
 		$this-><?php echo $field->getName() ?> = (null === $this-><?php echo $field->getName() ?>) ? null : (int) $this-><?php echo $field->getName() ?>;
 <?php endif ?>
 <?php endforeach ?>

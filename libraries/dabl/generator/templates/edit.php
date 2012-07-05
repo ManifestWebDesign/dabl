@@ -49,7 +49,7 @@ foreach ($this->getColumns($table_name) as $column) {
 			<label class="form-field-label" for="<?php echo $input_id ?>"><?php echo $label ?></label>
 <?php
 	switch ($column->getType()) {
-		case BaseModel::COLUMN_TYPE_BOOLEAN:
+		case Model::COLUMN_TYPE_BOOLEAN:
 ?>
 			<label>
 				<input <?php echo '<?php if ($' . $single . '->' . $method . '() === 1) echo \'checked="checked"\' ?>' ?> name="<?php echo $column_name ?>" type="radio" value="1" />
@@ -62,7 +62,7 @@ foreach ($this->getColumns($table_name) as $column) {
 			</label>
 <?
 			break;
-		case BaseModel::COLUMN_TYPE_LONGVARCHAR:
+		case Model::COLUMN_TYPE_LONGVARCHAR:
 ?>
 			<textarea id="<?php echo $input_id ?>" name="<?php echo $column_name ?>"><?php echo $output ?></textarea>
 <?php

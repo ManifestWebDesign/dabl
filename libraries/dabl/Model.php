@@ -3,30 +3,30 @@
 /**
  * @package dabl
  */
-abstract class BaseModel {
-	const COLUMN_TYPE_CHAR = "CHAR";
-	const COLUMN_TYPE_VARCHAR = "VARCHAR";
-	const COLUMN_TYPE_LONGVARCHAR = "LONGVARCHAR";
-	const COLUMN_TYPE_CLOB = "CLOB";
-	const COLUMN_TYPE_NUMERIC = "NUMERIC";
-	const COLUMN_TYPE_DECIMAL = "DECIMAL";
-	const COLUMN_TYPE_TINYINT = "TINYINT";
-	const COLUMN_TYPE_SMALLINT = "SMALLINT";
-	const COLUMN_TYPE_INTEGER = "INTEGER";
-	const COLUMN_TYPE_BIGINT = "BIGINT";
-	const COLUMN_TYPE_REAL = "REAL";
-	const COLUMN_TYPE_FLOAT = "FLOAT";
-	const COLUMN_TYPE_DOUBLE = "DOUBLE";
-	const COLUMN_TYPE_BINARY = "BINARY";
-	const COLUMN_TYPE_VARBINARY = "VARBINARY";
-	const COLUMN_TYPE_LONGVARBINARY = "LONGVARBINARY";
-	const COLUMN_TYPE_BLOB = "BLOB";
-	const COLUMN_TYPE_DATE = "DATE";
-	const COLUMN_TYPE_TIME = "TIME";
-	const COLUMN_TYPE_TIMESTAMP = "TIMESTAMP";
-	const COLUMN_TYPE_BU_DATE = "BU_DATE";
-	const COLUMN_TYPE_BU_TIMESTAMP = "BU_TIMESTAMP";
-	const COLUMN_TYPE_BOOLEAN = "BOOLEAN";
+abstract class Model {
+	const COLUMN_TYPE_CHAR = 'CHAR';
+	const COLUMN_TYPE_VARCHAR = 'VARCHAR';
+	const COLUMN_TYPE_LONGVARCHAR = 'LONGVARCHAR';
+	const COLUMN_TYPE_CLOB = 'CLOB';
+	const COLUMN_TYPE_NUMERIC = 'NUMERIC';
+	const COLUMN_TYPE_DECIMAL = 'DECIMAL';
+	const COLUMN_TYPE_TINYINT = 'TINYINT';
+	const COLUMN_TYPE_SMALLINT = 'SMALLINT';
+	const COLUMN_TYPE_INTEGER = 'INTEGER';
+	const COLUMN_TYPE_BIGINT = 'BIGINT';
+	const COLUMN_TYPE_REAL = 'REAL';
+	const COLUMN_TYPE_FLOAT = 'FLOAT';
+	const COLUMN_TYPE_DOUBLE = 'DOUBLE';
+	const COLUMN_TYPE_BINARY = 'BINARY';
+	const COLUMN_TYPE_VARBINARY = 'VARBINARY';
+	const COLUMN_TYPE_LONGVARBINARY = 'LONGVARBINARY';
+	const COLUMN_TYPE_BLOB = 'BLOB';
+	const COLUMN_TYPE_DATE = 'DATE';
+	const COLUMN_TYPE_TIME = 'TIME';
+	const COLUMN_TYPE_TIMESTAMP = 'TIMESTAMP';
+	const COLUMN_TYPE_BU_DATE = 'BU_DATE';
+	const COLUMN_TYPE_BU_TIMESTAMP = 'BU_TIMESTAMP';
+	const COLUMN_TYPE_BOOLEAN = 'BOOLEAN';
 
 	private static $TEXT_TYPES = array(
 		self::COLUMN_TYPE_CHAR,
@@ -178,7 +178,7 @@ abstract class BaseModel {
 	 *
 	 * @param PDOStatement $result
 	 * @param string $class_name name of class to create
-	 * @return BaseModel[]
+	 * @return Model[]
 	 */
 	static function fromResult(PDOStatement $result, $class_name, $use_pool = true) {
 		if (!$class_name) {
@@ -288,7 +288,7 @@ abstract class BaseModel {
 	/**
 	 * Creates new instance of self and with the same values as $this, except
 	 * the primary key value is cleared
-	 * @return BaseModel
+	 * @return Model
 	 */
 	function copy() {
 		$class = get_class($this);
@@ -330,7 +330,7 @@ abstract class BaseModel {
 	 * @param string $column_name
 	 * @param mixed $value
 	 * @param string $column_type
-	 * @return BaseModel
+	 * @return Model
 	 */
 	function setColumnValue($column_name, $value, $column_type = null) {
 		if (null === $column_type) {
@@ -400,13 +400,13 @@ abstract class BaseModel {
 			return $value;
 		}
 		switch ($column_type) {
-			case BaseModel::COLUMN_TYPE_TIMESTAMP:
+			case Model::COLUMN_TYPE_TIMESTAMP:
 				$formatter = $conn->getTimestampFormatter();
 				break;
-			case BaseModel::COLUMN_TYPE_DATE:
+			case Model::COLUMN_TYPE_DATE:
 				$formatter = $conn->getDateFormatter();
 				break;
-			case BaseModel::COLUMN_TYPE_TIME:
+			case Model::COLUMN_TYPE_TIME:
 				$formatter = $conn->getTimeFormatter();
 				break;
 		}
@@ -419,7 +419,7 @@ abstract class BaseModel {
 
 	/**
 	 * Clears the array of modified column names
-	 * @return BaseModel
+	 * @return Model
 	 */
 	function resetModified() {
 		$this->_modifiedColumns = array();
@@ -430,7 +430,7 @@ abstract class BaseModel {
 	 * Populates $this with the values of an associative Array.
 	 * Array keys must match column names to be used.
 	 * @param array $array
-	 * @return BaseModel
+	 * @return Model
 	 */
 	function fromArray($array) {
 		$columns = $this->getColumnNames();
@@ -458,7 +458,7 @@ abstract class BaseModel {
 	 * Sets whether to use cached results for foreign keys or to execute
 	 * the query each time, even if it hasn't changed.
 	 * @param bool $value[optional]
-	 * @return BaseModel
+	 * @return Model
 	 */
 	function setCacheResults($value=true) {
 		$this->_cacheResults = (bool) $value;
@@ -604,7 +604,7 @@ abstract class BaseModel {
 	/**
 	 * Indicate whether this object has been saved to the database
 	 * @param bool $bool
-	 * @return BaseModel
+	 * @return Model
 	 */
 	function setNew($bool) {
 		$this->_isNew = (bool) $bool;
@@ -631,15 +631,15 @@ abstract class BaseModel {
 			$placeholders[] = '?';
 		}
 
-		$quotedTable = $conn->quoteIdentifier($this->getTableName());
-		$queryString = "INSERT INTO $quotedTable (" . implode(', ', $fields) . ") VALUES (" . implode(', ', $placeholders) . ') ';
+		$quoted_table = $conn->quoteIdentifier($this->getTableName());
+		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $placeholders) . ') ';
 
 		if ($pk && $this->isAutoIncrement() && $conn instanceof DBPostgres) {
-			$queryString .= ' RETURNING ' . $conn->quoteIdentifier($pk);
+			$query_s .= ' RETURNING ' . $conn->quoteIdentifier($pk);
 		}
 
 		$statement = new QueryStatement($conn);
-		$statement->setString($queryString);
+		$statement->setString($query_s);
 		$statement->setParams($values);
 
 		$result = $statement->bindAndExecute();
@@ -676,7 +676,7 @@ abstract class BaseModel {
 		}
 
 		$conn = $this->getConnection();
-		$quotedTable = $conn->quoteIdentifier($this->getTableName());
+		$quoted_table = $conn->quoteIdentifier($this->getTableName());
 
 		$fields = array();
 		$values = array();
@@ -685,22 +685,22 @@ abstract class BaseModel {
 			$values[] = $this->$column;
 		}
 
-		//If array is empty there is nothing to update
+		// If array is empty there is nothing to update
 		if (!$fields) {
 			return 0;
 		}
 
-		$pkWhere = array();
+		$pk_where = array();
 		foreach ($this->getPrimaryKeys() as $pk) {
 			if ($this->$pk === null)
-				throw new Exception('Cannot update with NULL primary key.');
-			$pkWhere[] = $conn->quoteIdentifier($pk) . ' = ?';
+				throw new RuntimeException('Cannot update with NULL primary key.');
+			$pk_where[] = $conn->quoteIdentifier($pk) . ' = ?';
 			$values[] = $this->$pk;
 		}
 
-		$queryString = "UPDATE $quotedTable SET " . implode(', ', $fields) . ' WHERE ' . implode(' AND ', $pkWhere);
+		$query_s = 'UPDATE ' . $quoted_table . ' SET ' . implode(', ', $fields) . ' WHERE ' . implode(' AND ', $pk_where);
 		$statement = new QueryStatement($conn);
-		$statement->setString($queryString);
+		$statement->setString($query_s);
 		$statement->setParams($values);
 		$result = $statement->bindAndExecute();
 

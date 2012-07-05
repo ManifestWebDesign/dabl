@@ -1,6 +1,6 @@
 <?php
 
-class BaseModelTest extends PHPUnit_Framework_TestCase {
+class ModelTest extends PHPUnit_Framework_TestCase {
 
 	function testMagicGettersAndSetters() {
 		$model_files = glob(MODELS_DIR . '*.php');
@@ -18,10 +18,10 @@ class BaseModelTest extends PHPUnit_Framework_TestCase {
 				} elseif ($instance->isTemporalType($column_type)) {
 					$instance->$column = time();
 					switch ($column_type) {
-						case BaseModel::COLUMN_TYPE_TIME:
+						case Model::COLUMN_TYPE_TIME:
 							$value = date($instance->getConnection()->getTimeFormatter());
 							break;
-						case BaseModel::COLUMN_TYPE_TIMESTAMP:
+						case Model::COLUMN_TYPE_TIMESTAMP:
 							$value = date($instance->getConnection()->getTimestampFormatter());
 							break;
 						default:

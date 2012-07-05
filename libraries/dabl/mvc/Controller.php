@@ -1,6 +1,6 @@
 <?php
 
-abstract class BaseController extends ArrayObject {
+abstract class Controller extends ArrayObject {
 
 	/**
 	 * @var string The layout to render around the view if renderPartial is false
@@ -117,10 +117,10 @@ abstract class BaseController extends ArrayObject {
 		switch ($this->outputFormat) {
 			case 'html':
 				if ($this->layout && $this->renderPartial === false) {
-					$this['content'] = load_view($view, $this, true);
-					load_view($this->layout, $this, false);
+					$this['content'] = View::load($view, $this, true);
+					View::load($this->layout, $this, false);
 				} else {
-					load_view($view, $this, false);
+					View::load($view, $this, false);
 				}
 				break;
 

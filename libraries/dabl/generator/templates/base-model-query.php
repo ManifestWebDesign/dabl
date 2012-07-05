@@ -55,7 +55,7 @@ abstract class base<?php echo $model_name ?>Query extends Query {
 		if (null !== $type && <?php echo $model_name ?>::isTemporalType($type)) {
 			$value = <?php echo $model_name ?>::coerceTemporalValue($value, $type);
 		}
-		if (null === $value && is_array($column) && BaseModel::isTemporalType($type)) {
+		if (null === $value && is_array($column) && Model::isTemporalType($type)) {
 			$column = <?php echo $model_name ?>::coerceTemporalValue($column, $type);
 		}
 		return parent::addAnd($column, $value, $operator, $quote);
@@ -68,7 +68,7 @@ abstract class base<?php echo $model_name ?>Query extends Query {
 		if (null !== $type && <?php echo $model_name ?>::isTemporalType($type)) {
 			$value = <?php echo $model_name ?>::coerceTemporalValue($value, $type);
 		}
-		if (null === $value && is_array($column) && BaseModel::isTemporalType($type)) {
+		if (null === $value && is_array($column) && Model::isTemporalType($type)) {
 			$column = <?php echo $model_name ?>::coerceTemporalValue($column, $type);
 		}
 		return parent::addOr($column, $value, $operator, $quote);

@@ -10,11 +10,11 @@
 
 </h1>
 
-<?php echo "<?php load_view('pager', compact('pager')) ?>" ?>
+<?php echo "<?php View::load('pager', compact('pager')) ?>" ?>
 
 <div class="ui-widget-content ui-corner-all">
-	<?php echo "<?php load_view('" . $plural_url . "/grid', \$params) ?>" ?>
+	<?php echo "<?php View::load('" . $plural_url . "/grid', \$params) ?>" ?>
 
 </div>
 
-<?php echo "<?php load_view('pager', compact('pager')) ?>" ?>
+<?php echo "<?php View::load('pager', compact('pager')) ?>" ?>
