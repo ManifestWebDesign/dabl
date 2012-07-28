@@ -117,11 +117,10 @@ abstract class Controller extends ArrayObject {
 		switch ($this->outputFormat) {
 			case 'html':
 				if ($this->layout && $this->renderPartial === false) {
-					$this['content'] = View::load($view, $this, true);
-					View::load($this->layout, $this, false);
-				} else {
-					View::load($view, $this, false);
+					$this['content_view'] = $view;
+					$view = $this->layout;
 				}
+				View::load($view, $this, false);
 				break;
 
 			case 'json':

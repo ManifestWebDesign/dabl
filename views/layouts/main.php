@@ -26,7 +26,7 @@
 			<?php View::load('messages', compact('messages')) ?>
 
 			<div class="content">
-				<?php echo $content ?>
+				<?php View::load($content_view, $params) ?>
 			</div>
 		</div>
 

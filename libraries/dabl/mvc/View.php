@@ -7,7 +7,14 @@
  */
 class View {
 
+	/**
+	 * @var string
+	 */
 	protected $viewFile;
+
+	/**
+	 * @var array
+	 */
 	protected $params = array();
 
 	public function __toString() {
@@ -29,6 +36,12 @@ class View {
 		return new self($view_file, $params);
 	}
 
+	/**
+	 * @param string $view
+	 * @param array|ArrayObject $params
+	 * @param boolean $return_output
+	 * @return string|null
+	 */
 	public static function load($view = null, $params = array(), $return_output = false) {
 		$view = self::create($view, $params);
 		if ($return_output) {
@@ -37,6 +50,10 @@ class View {
 		$view->render();
 	}
 
+	/**
+	 * @param string $view_file
+	 * @return View
+	 */
 	public function setFile($view_file = null) {
 
 		// normalize slashes
@@ -61,19 +78,33 @@ class View {
 		return $this;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getFile() {
 		return $this->viewFile;
 	}
 
+	/**
+	 * @param array $params
+	 * @return View
+	 */
 	public function setParams($params = null) {
 		$this->params = $params;
 		return $this;
 	}
 
+	/**
+	 * @return array|ArrayObject
+	 */
 	public function getParams() {
 		return $this->params;
 	}
 
+	/**
+	 * @param boolean $return_output
+	 * @return string|null
+	 */
 	public function render($return_output = false) {
 		$params = &$this->params;
 
@@ -81,7 +112,7 @@ class View {
 			ob_start();
 		}
 
-		// $params['my_var'] = $my_var
+		// $params['my_var'] shows up as $my_var
 		foreach ($params as $_var => &$_value) {
 			$$_var = &$_value;
 		}
