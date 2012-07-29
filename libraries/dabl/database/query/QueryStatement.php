@@ -176,6 +176,18 @@ class QueryStatement {
 	static function embedParams($string, $params, DABLPDO $conn = null) {
 		if (null != $conn) {
 			$params = $conn->prepareInput($params);
+		} else {
+			foreach($params as &$value) {
+				if (is_int($value)) {
+					continue;
+				} elseif (is_bool($value)) {
+					$value = $value ? 1 : 0;
+				} elseif (is_null($value)) {
+					$value = 'NULL';
+				} else {
+					$value = "'{$value}'";
+				}
+			}
 		}
 
 		// escape % by making it %%
