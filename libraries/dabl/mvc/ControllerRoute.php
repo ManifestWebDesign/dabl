@@ -222,7 +222,7 @@ class ControllerRoute {
 	}
 
 	/**
-	 * @return BaseController
+	 * @return Controller
 	 */
 	function getController() {
 		if (null === $this->controllerDir || null === $this->controllerClass) {

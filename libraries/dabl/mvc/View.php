@@ -43,11 +43,7 @@ class View {
 	 * @return string|null
 	 */
 	public static function load($view = null, $params = array(), $return_output = false) {
-		$view = self::create($view, $params);
-		if ($return_output) {
-			return $view;
-		}
-		$view->render();
+		return self::create($view, $params)->render($return_output);
 	}
 
 	/**
