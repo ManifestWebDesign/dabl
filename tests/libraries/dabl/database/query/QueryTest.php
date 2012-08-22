@@ -184,4 +184,42 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		$q = new Query('testing');
 		$this->assertNull($q->getAlias());
 	}
+
+	/**
+	 * @covers Query::getQuery
+	 */
+	function testUpdateQuery() {
+		$column_values = array(
+			'my_column1' => 'value1',
+			'my_column2' => 'value2',
+		);
+
+		$q = new Query('my_table');
+		$q->setAction(Query::ACTION_UPDATE);
+		$q->setUpdateColumnValues($column_values);
+		$query = $q->getQuery();
+		$actual = "$query";
+		$expected = "UPDATE `my_table` SET `my_column1` = 'value1', `my_column2` = 'value2'";
+		$this->assertEquals(preg_replace('/\s/', '', $expected), preg_replace('/\s/', '', $actual));
+	}
+
+	/**
+	 * @covers Query::getQuery
+	 */
+	function testUpdateQueryWhere() {
+		$column_values = array(
+			'my_column1' => 'value1',
+			'my_column2' => 'value2',
+		);
+
+		$q = new Query('my_table');
+		$q->setAction(Query::ACTION_UPDATE)
+			->setUpdateColumnValues($column_values)
+			->add('my_column3', array(1, 2, 3));
+
+		$query = $q->getQuery();
+		$actual = "$query";
+		$expected = "UPDATE `my_table` SET `my_column1` = 'value1', `my_column2` = 'value2' WHERE `my_column3` IN (1,2,3)";
+		$this->assertEquals(preg_replace('/\s/', '', $expected), preg_replace('/\s/', '', $actual));
+	}
 }

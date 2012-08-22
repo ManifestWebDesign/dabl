@@ -7,6 +7,7 @@ class Query {
 	const ACTION_COUNT = 'COUNT';
 	const ACTION_DELETE = 'DELETE';
 	const ACTION_SELECT = 'SELECT';
+	const ACTION_UPDATE = 'UPDATE';
 
 	// Comparison types
 	const EQUAL = '=';
@@ -103,6 +104,8 @@ class Query {
 	 * @var bool
 	 */
 	private $_distinct = false;
+
+	private $_updateColumnValues;
 
 	/**
 	 * Creates new instance of Query, parameters will be passed to the
@@ -828,7 +831,7 @@ class Query {
 	 * @param mixed $conn Database connection to use
 	 * @return QueryStatement
 	 */
-	function getQuery($conn = null) {
+	function getQuery(PDO $conn = null) {
 		if (null === $conn) {
 			$conn = DBManager::getConnection();
 		}
@@ -848,17 +851,35 @@ class Query {
 				$columns_stmnt = $this->getColumnsClause($conn);
 				$stmnt->addIdentifiers($columns_stmnt->identifiers);
 				$stmnt->addParams($columns_stmnt->params);
-				$qry_s .= 'SELECT ' . $columns_stmnt->string;
+				$qry_s .= 'SELECT ' . $columns_stmnt->string . "\nFROM ";
 				break;
 			case self::ACTION_DELETE:
-				$qry_s .= 'DELETE';
+				$qry_s .= "DELETE\nFROM ";
+				break;
+			case self::ACTION_UPDATE:
+				$qry_s .= "UPDATE\n";
 				break;
 		}
 
 		$table_stmnt = $this->getTablesClause($conn);
 		$stmnt->addIdentifiers($table_stmnt->identifiers);
 		$stmnt->addParams($table_stmnt->params);
-		$qry_s .= "\nFROM " . $table_stmnt->string;
+		$qry_s .= $table_stmnt->string;
+
+		if (self::ACTION_UPDATE === $action) {
+			if (empty($this->_updateColumnValues)) {
+				throw new RuntimeException('Unable to build UPDATE query without update column values');
+			}
+
+			$column_updates = array();
+
+			foreach ($this->_updateColumnValues as $column_name => &$column_value) {
+				$column_updates[] = QueryStatement::IDENTIFIER . '=' . QueryStatement::PARAM;
+				$stmnt->addIdentifier($column_name);
+				$stmnt->addParam($column_value);
+			}
+			$qry_s .= "\nSET " . implode(',', $column_updates);
+		}
 
 		if ($this->_joins) {
 			foreach ($this->_joins as $join) {
@@ -943,6 +964,7 @@ class Query {
 		}
 
 		switch ($this->_action) {
+			case self::ACTION_UPDATE:
 			case self::ACTION_COUNT:
 			case self::ACTION_SELECT:
 				// setup identifiers for $table_string
@@ -1008,6 +1030,7 @@ class Query {
 				$statement->string = $table_string;
 				break;
 			default:
+				throw new RuntimeException('Uknown action "' . $this->_action . '", cannot build table list');
 				break;
 		}
 		return $statement;
@@ -1179,7 +1202,7 @@ class Query {
 		$q = clone $this;
 
 		if (!$q->getTable()) {
-			throw new Exception('No table specified.');
+			throw new RuntimeException('No table specified.');
 		}
 
 		$q->setAction(self::ACTION_COUNT);
@@ -1196,7 +1219,7 @@ class Query {
 		$q = clone $this;
 
 		if (!$q->getTable()) {
-			throw new Exception('No table specified.');
+			throw new RuntimeException('No table specified.');
 		}
 
 		$q->setAction(self::ACTION_DELETE);
@@ -1212,11 +1235,38 @@ class Query {
 		$q = clone $this;
 
 		if (!$q->getTable()) {
-			throw new Exception('No table specified.');
+			throw new RuntimeException('No table specified.');
 		}
 
 		$q->setAction(self::ACTION_SELECT);
 		return $q->getQuery($conn)->bindAndExecute();
 	}
 
+	/**
+	 * @deprecated
+	 * @return Query
+	 */
+	function setUpdateColumnValues(array $column_values) {
+		$this->_updateColumnValues = &$column_values;
+		return $this;
+	}
+
+	/**
+	 * @param array $column_values
+	 * @param PDO $conn
+	 * @return int
+	 * @throws RuntimeException
+	 */
+	function doUpdate(array $column_values, PDO $conn = null) {
+		$q = clone $this;
+
+		$q->_updateColumnValues = &$column_values;
+
+		if (!$q->getTable()) {
+			throw new RuntimeException('No table specified.');
+		}
+
+		$q->setAction(self::ACTION_UPDATE);
+		return $q->getQuery($conn)->bindAndExecute()->rowCount();
+	}
 }
