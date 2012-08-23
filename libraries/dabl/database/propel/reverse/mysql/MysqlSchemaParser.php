@@ -59,6 +59,7 @@ class MysqlSchemaParser extends BaseSchemaParser
 		'text' => PropelTypes::LONGVARCHAR,
 		'enum' => PropelTypes::CHAR,
 		'set' => PropelTypes::CHAR,
+		'bit' => PropelTypes::BOOLEAN,
 	);
 
 	protected static $defaultTypeSizes = array(

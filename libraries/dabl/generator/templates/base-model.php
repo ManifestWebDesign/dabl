@@ -536,6 +536,23 @@ foreach ($fields as $key => $field):
 		return <?php echo $class_name ?>::fromResult(self::doSelectRS($q), $class);
 	}
 
+	/**
+	 * @param array $column_values
+	 * @param Query $q The Query object that creates the SELECT query string
+	 * @return <?php echo $class_name ?>[]
+	 */
+<?php $used_functions[] = 'doUpdate'; ?>
+	static function doUpdate(array $column_values, Query $q = null) {
+		$q = $q ? clone $q : new Query;
+		$conn = <?php echo $class_name ?>::getConnection();
+
+		if (!$q->getTable() || false === strrpos($q->getTable(), <?php echo $class_name ?>::getTableName())) {
+			$q->setTable(<?php echo $class_name ?>::getTableName());
+		}
+
+		return $q->doUpdate($column_values, $conn);
+	}
+
 	static function coerceTemporalValue($value, $column_type) {
 		return parent::coerceTemporalValue($value, $column_type, <?php echo $class_name ?>::getConnection());
 	}

@@ -533,12 +533,12 @@ abstract class Model {
 	function delete() {
 		$pks = $this->getPrimaryKeys();
 		if (!$pks) {
-			throw new Exception('This table has no primary keys');
+			throw new RuntimeException('This table has no primary keys');
 		}
 		$q = new Query();
 		foreach ($pks as &$pk) {
 			if ($this->$pk === null) {
-				throw new Exception('Cannot delete using NULL primary key.');
+				throw new RuntimeException('Cannot delete using NULL primary key.');
 			}
 			$q->addAnd($pk, $this->$pk);
 		}
@@ -561,7 +561,7 @@ abstract class Model {
 	 */
 	function save() {
 		if (!$this->validate()) {
-			throw new Exception('Cannot save ' . get_class($this) . ' with validation errors: ' . implode(', ', $this->getValidationErrors()));
+			throw new RuntimeException('Cannot save ' . get_class($this) . ' with validation errors: ' . implode(', ', $this->getValidationErrors()));
 		}
 
 		if ($this->isNew() && $this->hasColumn('Created') && !$this->isColumnModified('Created')) {
@@ -581,11 +581,11 @@ abstract class Model {
 
 	function archive() {
 		if (!$this->hasColumn('Archived')) {
-			throw new Exception('Cannot call archive on models without "Archived" column');
+			throw new RuntimeException('Cannot call archive on models without "Archived" column');
 		}
 
 		if (null !== $this->getArchived()) {
-			throw new Exception('This ' . get_class($this) . ' is already archived.');
+			throw new RuntimeException('This ' . get_class($this) . ' is already archived.');
 		}
 
 		$this->setArchived(CURRENT_TIMESTAMP);
@@ -672,40 +672,31 @@ abstract class Model {
 	 */
 	protected function update() {
 		if (!$this->getPrimaryKeys()) {
-			throw new Exception('This table has no primary keys');
+			throw new RuntimeException('This table has no primary keys');
 		}
 
-		$conn = $this->getConnection();
-		$quoted_table = $conn->quoteIdentifier($this->getTableName());
-
-		$fields = array();
-		$values = array();
+		$column_values = array();
 		foreach ($this->getModifiedColumns() as $column) {
-			$fields[] = $conn->quoteIdentifier($column) . ' = ?';
-			$values[] = $this->$column;
+			$column_values[$column] = $this->$column;
 		}
 
 		// If array is empty there is nothing to update
-		if (!$fields) {
+		if (empty($column_values)) {
 			return 0;
 		}
 
-		$pk_where = array();
+		$q = new Query;
+
 		foreach ($this->getPrimaryKeys() as $pk) {
-			if ($this->$pk === null)
+			if ($this->$pk === null) {
 				throw new RuntimeException('Cannot update with NULL primary key.');
-			$pk_where[] = $conn->quoteIdentifier($pk) . ' = ?';
-			$values[] = $this->$pk;
+			}
+			$q->add($pk, $this->$pk);
 		}
 
-		$query_s = 'UPDATE ' . $quoted_table . ' SET ' . implode(', ', $fields) . ' WHERE ' . implode(' AND ', $pk_where);
-		$statement = new QueryStatement($conn);
-		$statement->setString($query_s);
-		$statement->setParams($values);
-		$result = $statement->bindAndExecute();
-
+		$row_count = $this->doUpdate($column_values, $q);
 		$this->resetModified();
-		return $result->rowCount();
+		return $row_count;
 	}
 
 	/**
@@ -722,7 +713,7 @@ abstract class Model {
 	protected function getForeignObjectsQuery($foreign_table, $foreign_column, $local_column, Query $q = null) {
 		$value = $this->{"get$local_column"}();
 		if (null === $value) {
-			throw new Exception('NULL cannot be used to match keys.');
+			throw new RuntimeException('NULL cannot be used to match keys.');
 		}
 		$conn = $this->getConnection();
 		if ($q) {

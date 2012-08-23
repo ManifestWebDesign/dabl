@@ -1243,7 +1243,9 @@ class Query {
 	}
 
 	/**
+	 * Do not use this if you can avoid it.  Just use doUpdate.
 	 * @deprecated
+	 * @see Query::doUpdate
 	 * @return Query
 	 */
 	function setUpdateColumnValues(array $column_values) {
