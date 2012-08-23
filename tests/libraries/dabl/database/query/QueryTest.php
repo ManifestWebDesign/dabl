@@ -186,6 +186,7 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group update
 	 * @covers Query::getQuery
 	 */
 	function testUpdateQuery() {
@@ -204,6 +205,27 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * Uses a table alias
+	 * @group update
+	 * @covers Query::getQuery
+	 */
+	function testUpdateQueryWithAlias() {
+		$column_values = array(
+			'a.my_column1' => 'value1',
+			'a.my_column2' => 'value2',
+		);
+
+		$q = new Query('my_table', 'a');
+		$q->setAction(Query::ACTION_UPDATE);
+		$q->setUpdateColumnValues($column_values);
+		$query = $q->getQuery();
+		$actual = "$query";
+		$expected = "UPDATE `my_table` AS a SET `a`.`my_column1` = 'value1', `a`.`my_column2` = 'value2'";
+		$this->assertEquals(preg_replace('/\s/', '', $expected), preg_replace('/\s/', '', $actual));
+	}
+
+	/**
+	 * @group update
 	 * @covers Query::getQuery
 	 */
 	function testUpdateQueryWhere() {
@@ -222,4 +244,32 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		$expected = "UPDATE `my_table` SET `my_column1` = 'value1', `my_column2` = 'value2' WHERE `my_column3` IN (1,2,3)";
 		$this->assertEquals(preg_replace('/\s/', '', $expected), preg_replace('/\s/', '', $actual));
 	}
+
+	/**
+	 * Test UPDATE query with a JOIN
+	 * @group update
+	 * @covers Query::getQuery
+	 */
+	function testUpdateQueryWithJoin() {
+		$column_values = array(
+			'a.my_column1' => 'value1',
+		);
+
+		$q = new Query('my_table', 'ma');
+		$q->setAction(Query::ACTION_UPDATE)
+			->setUpdateColumnValues($column_values)
+			->join('other_table ob', 'ob.something = ma.my_column')
+			->add('a.my_column3', array(1, 2, 3));
+
+		$query = $q->getQuery();
+		$actual = "$query";
+
+		$expected = "UPDATE `my_table` AS ma ";
+		$expected.= "JOIN`other_table` AS ob ON (ob.something = ma.my_column)";
+		$expected.= "SET`a`.`my_column1`='value1'";
+		$expected.= "WHERE `a`.`my_column3` IN (1,2,3)";
+
+		$this->assertEquals(preg_replace('/\s/', '', $expected), preg_replace('/\s/', '', $actual));
+	}
 }
+

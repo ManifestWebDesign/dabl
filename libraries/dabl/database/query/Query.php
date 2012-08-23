@@ -866,6 +866,15 @@ class Query {
 		$stmnt->addParams($table_stmnt->params);
 		$qry_s .= $table_stmnt->string;
 
+		if ($this->_joins) {
+			foreach ($this->_joins as $join) {
+				$join_stmnt = $join->getQueryStatement($conn);
+				$qry_s .= "\n\t" . $join_stmnt->string;
+				$stmnt->addParams($join_stmnt->params);
+				$stmnt->addIdentifiers($join_stmnt->identifiers);
+			}
+		}
+
 		if (self::ACTION_UPDATE === $action) {
 			if (empty($this->_updateColumnValues)) {
 				throw new RuntimeException('Unable to build UPDATE query without update column values');
@@ -879,15 +888,6 @@ class Query {
 				$stmnt->addParam($column_value);
 			}
 			$qry_s .= "\nSET " . implode(',', $column_updates);
-		}
-
-		if ($this->_joins) {
-			foreach ($this->_joins as $join) {
-				$join_stmnt = $join->getQueryStatement($conn);
-				$qry_s .= "\n\t" . $join_stmnt->string;
-				$stmnt->addParams($join_stmnt->params);
-				$stmnt->addIdentifiers($join_stmnt->identifiers);
-			}
 		}
 
 		$where_stmnt = $this->getWhereClause();
