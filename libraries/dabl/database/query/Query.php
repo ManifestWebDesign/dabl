@@ -832,7 +832,7 @@ class Query {
 	 * @return QueryStatement
 	 */
 	function getQuery(PDO $conn = null) {
-		if (null === $conn) {
+		if (null === $conn && class_exists('DBManager')) {
 			$conn = DBManager::getConnection();
 		}
 
