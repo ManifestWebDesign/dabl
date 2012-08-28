@@ -314,7 +314,7 @@ abstract class Model {
 	 * @return bool
 	 */
 	function isColumnModified($column_name) {
-		return in_array(strtolower($column_name), array_map('strtolower', $this->_modifiedColumns));
+		return array_key_exists(strtolower($column_name), array_map('strtolower', $this->_modifiedColumns));
 	}
 
 	/**
@@ -322,7 +322,7 @@ abstract class Model {
 	 * @return array
 	 */
 	function getModifiedColumns() {
-		return $this->_modifiedColumns ? array_unique($this->_modifiedColumns) : array();
+		return array_values($this->_modifiedColumns);
 	}
 
 	/**
