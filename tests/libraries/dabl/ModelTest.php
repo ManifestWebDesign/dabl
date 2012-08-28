@@ -185,6 +185,29 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @covers Model::isNew
+	 */
+	function testIsNew() {
+		foreach ($this->getModelClasses() as $model_name) {
+			$instance = new $model_name();
+			$con = $instance->getConnection();
+			$con->beginTransaction();
+
+			foreach ($instance->getColumnNames() as $column) {
+				$this->setValueByType($instance, $column);
+			}
+
+			$this->assertTrue($instance->isNew());
+
+			$instance->save();
+
+			$this->assertFalse($instance->isNew());
+
+			$con->rollback();
+		}
+	}
+
+	/**
 	 * @covers Model::isModified
 	 */
 	function testIsModified() {
@@ -213,29 +236,6 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 					break;
 				}
 			}
-		}
-	}
-
-	/**
-	 * @covers Model::isNew
-	 */
-	function testIsNew() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-			$con = $instance->getConnection();
-			$con->beginTransaction();
-
-			foreach ($instance->getColumnNames() as $column) {
-				$this->setValueByType($instance, $column);
-			}
-
-			$this->assertTrue($instance->isNew());
-
-			$instance->save();
-
-			$this->assertFalse($instance->isNew());
-
-			$con->rollback();
 		}
 	}
 
