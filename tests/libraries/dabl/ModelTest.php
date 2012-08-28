@@ -120,8 +120,14 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 				$this->setValueByType($instance, $column);
 			}
 
-			$result = $instance->save();
-			$this->assertEquals(1, $result);
+			try {
+				$result = $instance->save();
+				$this->assertEquals(1, $result);
+			} catch (Exception $e) {
+				$con->rollback();
+				$this->fail($e);
+			}
+
 			$con->rollback();
 		}
 	}
@@ -136,25 +142,32 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 			$con = $instance->getConnection();
 			$con->beginTransaction();
 
-			foreach ($instance->getColumnNames() as $column) {
-				$this->setValueByType($instance, $column);
+			try {
+
+				foreach ($instance->getColumnNames() as $column) {
+					$this->setValueByType($instance, $column);
+				}
+
+				// initial save should alter 1 row
+				$result = $instance->save();
+				$this->assertEquals(1, $result);
+
+				// save again with no changes should alter 0 rows
+				$result = $instance->save();
+				$this->assertEquals(0, $result);
+
+				foreach ($instance->getColumnNames() as $column) {
+					$this->setValueByType($instance, $column, true);
+				}
+
+				// save again with changes should alter 1 row
+				$result = $instance->save();
+				$this->assertEquals(1, $result);
+
+			} catch (Exception $e) {
+				$con->rollback();
+				$this->fail($e);
 			}
-
-			// initial save should alter 1 row
-			$result = $instance->save();
-			$this->assertEquals(1, $result);
-
-			// save again with no changes should alter 0 rows
-			$result = $instance->save();
-			$this->assertEquals(0, $result);
-
-			foreach ($instance->getColumnNames() as $column) {
-				$this->setValueByType($instance, $column, true);
-			}
-
-			// save again with changes should alter 1 row
-			$result = $instance->save();
-			$this->assertEquals(1, $result);
 
 			$con->rollback();
 		}
@@ -169,16 +182,23 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 			$con = $instance->getConnection();
 			$con->beginTransaction();
 
-			foreach ($instance->getColumnNames() as $column) {
-				$this->setValueByType($instance, $column);
+			try {
+
+				foreach ($instance->getColumnNames() as $column) {
+					$this->setValueByType($instance, $column);
+				}
+
+				// initial save should alter 1 row
+				$result = $instance->save();
+				$this->assertEquals(1, $result);
+
+				$result = $instance->delete();
+				$this->assertEquals(1, $result);
+
+			} catch (Exception $e) {
+				$con->rollback();
+				$this->fail($e);
 			}
-
-			// initial save should alter 1 row
-			$result = $instance->save();
-			$this->assertEquals(1, $result);
-
-			$result = $instance->delete();
-			$this->assertEquals(1, $result);
 
 			$con->rollback();
 		}
@@ -193,15 +213,22 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 			$con = $instance->getConnection();
 			$con->beginTransaction();
 
-			foreach ($instance->getColumnNames() as $column) {
-				$this->setValueByType($instance, $column);
+			try {
+
+				foreach ($instance->getColumnNames() as $column) {
+					$this->setValueByType($instance, $column);
+				}
+
+				$this->assertTrue($instance->isNew());
+
+				$instance->save();
+
+				$this->assertFalse($instance->isNew());
+
+			} catch (Exception $e) {
+				$con->rollback();
+				$this->fail($e);
 			}
-
-			$this->assertTrue($instance->isNew());
-
-			$instance->save();
-
-			$this->assertFalse($instance->isNew());
 
 			$con->rollback();
 		}
@@ -269,7 +296,7 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 					$modified = true;
 				}
 			}
-			$this->assertTrue($instance->isModified());
+			$this->assertEquals($modified, $instance->isModified());
 			$instance->resetModified();
 			$this->assertFalse($instance->isModified());
 		}
