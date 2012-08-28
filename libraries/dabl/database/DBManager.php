@@ -52,7 +52,8 @@ class DBManager {
 	 */
 	static function getConnection($db_name=null) {
 		if (null === $db_name) {
-			$db_name = reset(array_keys(self::$parameters));
+			$keys = array_keys(self::$parameters);
+			$db_name = reset($keys);
 		}
 
 		if (!@$db_name) {
