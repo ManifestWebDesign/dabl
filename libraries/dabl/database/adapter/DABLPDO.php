@@ -196,20 +196,14 @@ abstract class DABLPDO extends PDO {
 	}
 
 	/**
-	 *
+	 * Executes an SQL statement, returning a result set as a PDOStatement object
+	 * @param string $statement The query string to execute as a query
+	 * @param int $fetch_mode PDO::FETCH_COLUMN, PDO::FETCH_CLASS, or PDO::FETCH_INTO
+	 * @param mixed $mixed column number(int), class name(string), or object($object)
+	 * @param array $ctorargs Constructor arguments for PDO::FETCH_CLASS
 	 * @return PDOStatement
 	 */
-	function prepare() {
-		$args = func_get_args();
-		$statement = call_user_func_array(array('parent', 'prepare'), $args);
-		return $statement;
-	}
-
-	/**
-	 * Override of PDO::query() to provide query logging functionality
-	 * @return PDOStatement
-	 */
-	function query() {
+	function query($statement, $fetch_mode = null, $mixed = null, array $ctorargs = null) {
 		$args = func_get_args();
 
 		if ($this->logQueries) {
@@ -224,20 +218,21 @@ abstract class DABLPDO extends PDO {
 	}
 
 	/**
+	 * Execute an SQL statement and return the number of affected rows
+	 * @param string $statement The SQL statement to prepare and execute.
 	 * @return PDOStatement
 	 */
-	function exec() {
-		$args = func_get_args();
+	function exec($statement) {
 
 		if ($this->logQueries) {
 			$start = microtime(true);
-			$result = call_user_func_array(array('parent', 'exec'), $args);
+			$result = parent::exec($statement);
 			$time = microtime(true) - $start;
-			$this->logQuery((string) $args[0], $time);
+			$this->logQuery((string) $statement, $time);
 			return $result;
 		}
 
-		return call_user_func_array(array('parent', 'exec'), $args);
+		return parent::exec($statement);
 	}
 
 	function getLoggedQueries() {

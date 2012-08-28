@@ -81,7 +81,7 @@ class DBMySQL extends DABLPDO {
 	 * executed.
 	 */
 	function unlockTable($table){
-		$statement = $this->exec("UNLOCK TABLES");
+		$this->exec("UNLOCK TABLES");
 	}
 
 	/**
