@@ -529,12 +529,12 @@ class Condition {
 	 * Builds and returns a string representation of $this Condition
 	 * @return QueryStatement
 	 */
-	function getQueryStatement() {
+	function getQueryStatement(DABLPDO $conn = null) {
 		if (0 === count($this->conds)) {
 			return null;
 		}
 
-		$stmnt = new QueryStatement;
+		$stmnt = new QueryStatement($conn);
 
 		$is_first = true;
 		$is_second = false;

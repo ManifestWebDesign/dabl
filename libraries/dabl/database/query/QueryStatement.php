@@ -142,6 +142,11 @@ class QueryStatement {
 		$string = $this->string;
 		$conn = $this->connection;
 
+		// if a connection is available, use it
+		if (null === $conn && class_exists('DBManager')) {
+			$conn = DBManager::getConnection();
+		}
+
 		$string = self::embedIdentifiers($string, array_values($this->identifiers), $conn);
 		return self::embedParams($string, array_values($this->params), $conn);
 	}
