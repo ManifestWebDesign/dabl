@@ -13,11 +13,11 @@ class DBManager {
 	private static $parameters = array();
 
 	private function __construct() {
-		
+
 	}
 
 	private function __clone() {
-		
+
 	}
 
 	/**
@@ -52,7 +52,8 @@ class DBManager {
 	 */
 	static function getConnection($db_name=null) {
 		if (null === $db_name) {
-			$db_name = reset(array_keys(self::$parameters));
+			$keys = array_keys(self::$parameters);
+			$db_name = reset($keys);
 		}
 
 		if (!@$db_name) {
@@ -71,7 +72,6 @@ class DBManager {
 	 * @param string $connection_params Parameters for the connection
 	 */
 	static function addConnection($connection_name, $connection_params) {
-		ClassLoader::import('DATABASE:adapter:' . $connection_params['driver']);
 		self::$parameters[$connection_name] = $connection_params;
 	}
 
@@ -107,8 +107,13 @@ class DBManager {
 	 * @throws PDOException If the connection fails
 	 */
 	private static function connect($key) {
-		if (array_key_exists($key, self::$connections))
+		if (array_key_exists($key, self::$connections)) {
 			return self::$connections[$key];
+		}
+
+		if (!array_key_exists($key, self::$parameters)) {
+			throw new RuntimeException('Connection "' . $key . '" has not been set');
+		}
 
 		$conn = DABLPDO::factory(self::$parameters[$key]);
 		return (self::$connections[$key] = $conn);

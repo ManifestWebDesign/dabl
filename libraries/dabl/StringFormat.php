@@ -28,39 +28,49 @@ class StringFormat {
 
 	/**
 	 * Returns non-pluralized version of string, with words separated by dashes.
-	 * @param string $table_name
+	 * @param string $string
 	 * @return string
 	 */
-	static function url($table_name) {
-		return str_replace('_', '-', self::variable($table_name));
+	static function url($string) {
+		return str_replace('_', '-', self::variable($string));
 	}
 
 	/**
 	 * Returns pluralized version of string, with words separated by dashes.
-	 * @param string $table_name
+	 * @param string $string
 	 * @return string
 	 */
-	static function pluralURL($table_name) {
-		return str_replace('_', '-', self::pluralVariable(self::clean($table_name)));
+	static function pluralURL($string) {
+		return str_replace('_', '-', self::pluralVariable(self::clean($string)));
 	}
 
 	/**
 	 * Returns non-pluralized version of string, with words separated by underscores.
-	 * @param string $table_name
+	 * @param string $string
 	 * @return string
 	 */
-	static function variable($table_name) {
-		return strtolower(join('_', self::getWords(self::clean($table_name))));
+	static function variable($string) {
+		return strtolower(join('_', self::getWords(self::clean($string))));
+	}
+
+	/**
+	 * Returns non-pluralized version of string, with upper-case
+	 * words separated by underscores.
+	 * @param string $string
+	 * @return string
+	 */
+	static function constant($string) {
+		return strtoupper(self::variable($string));
 	}
 
 	/**
 	 * Returns pluralized version of string, with words separated by underscores.
 	 * Intended for variable names.
-	 * @param string $table_name
+	 * @param string $string
 	 * @return string
 	 */
-	static function pluralVariable($table_name) {
-		return strtolower(join('_', self::getWords(self::plural(self::clean($table_name)))));
+	static function pluralVariable($string) {
+		return strtolower(join('_', self::getWords(self::plural(self::clean($string)))));
 	}
 
 	/**
@@ -113,7 +123,8 @@ class StringFormat {
 			array('/$/', "s")
 		);
 
-		$word = array_pop(self::getWords($string));
+		$words = self::getWords($string);
+		$word = array_pop($words);
 
 		// check for matches using regular expressions
 		foreach ($plural as &$pattern) {
@@ -144,10 +155,10 @@ class StringFormat {
 
 		// remove all but letters, numbers and dashes
 		$str = preg_replace('/[^a-zA-Z0-9_-]/', '', $str);
-		
+
 		// remove trailing or leading dashes
 		$str = trim($str, '-');
-		
+
 		// remove any occurances of double dashes
 		do {
 			$before = $str;

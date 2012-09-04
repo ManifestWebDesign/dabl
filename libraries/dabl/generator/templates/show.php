@@ -2,27 +2,34 @@
 unset($actions['Show']);
 ?>
 <h1>View <?php echo StringFormat::titleCase($table_name, ' ') ?></h1>
-<p>
-<?php foreach($actions as $action_label => $action_url): ?>
-	<a href="<?php echo $action_url ?>" 
+<div class="action-buttons ui-helper-clearfix">
+<?php
+foreach($actions as $action_label => $action_url):
+	$icon_class = @$this->actionIcons[$action_label] ? 'ui-icon-' . $this->actionIcons[$action_label] : 'ui-icon-carat-1-e';
+?>
+	<a href="<?php echo $action_url ?>"
 	   class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php if(strtolower($action_label) == 'delete'): ?>
 
 	   onclick="return confirm('Are you sure?');"<?php endif ?>>
-		<span class="ui-icon <?php if(array_key_exists($action_label, $this->actionIcons)) echo 'ui-icon-'.$this->actionIcons[$action_label]; ?>"></span><?php echo $action_label ?>
+		<span class="ui-icon <?php echo $icon_class ?>"></span><?php echo $action_label ?>
 
 	</a>
 <?php endforeach ?>
-</p>
-<div class="ui-widget-content ui-corner-all">
+</div>
+<div class="ui-widget-content ui-corner-all ui-helper-clearfix">
 <?php
-foreach($this->getColumns($table_name) as $column){
+foreach ($this->getColumns($table_name) as $column) {
 	$column_name = $column->getName();
-	if($column_name==$pk) {
+	if ($column_name == $pk) {
 		continue;
 	}
+	$column_name = StringFormat::titleCase($column_name);
 	$column_label = StringFormat::titleCase($column_name, ' ');
-	$method = "get$column_name";
-	switch($column->getType()){
+	if ($column->isForeignKey() && strrpos(strtolower($column_label), 'id') === strlen($column_label) - 2) {
+		$column_label = str_replace(array('id', 'Id', 'ID', 'iD'), '', $column_label);
+		$column_label = trim($column_label);
+	}
+	switch ($column->getType()) {
 		case PropelTypes::TIMESTAMP:
 			$format = 'VIEW_TIMESTAMP_FORMAT';
 			break;
@@ -33,12 +40,24 @@ foreach($this->getColumns($table_name) as $column){
 			$format = null;
 			break;
 	}
+	if ($column->isForeignKey()) {
+		$col_fks = $column->getForeignKeys();
+		$fk = array_shift($col_fks);
+		$foreign_table = $fk->getForeignTableName();
+		$local_column = $fk->getLocalColumnName();
+		$long_method = 'get' . StringFormat::titleCase("{$foreign_table}_related_by_{$local_column}", '');
+		$output = '<?php echo htmlentities($' . $single . '->' . "$long_method" . '()) ?>';
+	} elseif ($column->getType() == Model::COLUMN_TYPE_BOOLEAN) {
+		$output = '<?php if ($'.$single.'->'."get$column_name".'('.$format.') === 1) echo \'True\'; elseif ($'.$single.'->'."get$column_name".'('.$format.') === 0) echo \'False\' ?>';
+	} else {
+		$output = '<?php echo htmlentities($' . $single . '->' . "get$column_name" . '(' . $format . ')) ?>';
+	}
 ?>
-	<p>
-		<strong><?php echo $column_label ?>:</strong>
-		<?php echo '<?php echo htmlentities($' . $single . '->' . $method . '(' . $format . ')) ?>' ?>
+	<div class="field-wrapper">
+		<span class="field-label"><?php echo $column_label ?></span>
+		<?php echo $output ?>
 
-	</p>
+	</div>
 <?php
 }
 ?>

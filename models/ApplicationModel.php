@@ -1,5 +1,5 @@
 <?php
 
-abstract class ApplicationModel extends BaseModel {
+abstract class ApplicationModel extends Model {
 
 }

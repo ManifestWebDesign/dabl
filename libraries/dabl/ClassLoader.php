@@ -5,6 +5,7 @@ class ClassLoader {
 	private static $repoPaths;
 	private static $namespaces = array();
 	static $delimiter = ':';
+	private static $dirCache = array();
 
 	/**
 	 * Searches registered class directories for given class and includes it if it is found
@@ -14,26 +15,31 @@ class ClassLoader {
 
 		// check all repository roots first
 		foreach (self::$repoPaths as $module_name => &$module_root) {
-			$class_path = $module_root . '/' . $class_name . '.php';
-
-			// require file if it exists
-			if (is_file($class_path)) {
-				require_once $class_path;
+			if (self::requireFile($module_root, $class_name . '.php')) {
 				return;
 			}
 		}
 
 		foreach (self::$namespaces as $namespace => &$namespace_a) {
-			$class_path = self::$repoPaths[$namespace_a[0]] . '/' .
-					$namespace_a[1] . '/' .
-					$class_name . '.php';
-
-			// require file if it exists
-			if (is_file($class_path)) {
-				require_once $class_path;
+			if (self::requireFile(self::$repoPaths[$namespace_a[0]] . '/' . $namespace_a[1], $class_name . '.php')) {
 				return;
 			}
 		}
+	}
+
+	private static function requireFile($dir, $file) {
+		if (!isset(self::$dirCache[$dir])) {
+			foreach (scandir($dir) as $php_file) {
+				self::$dirCache[$dir][$php_file] = $dir . '/' . $php_file;
+			}
+		}
+
+		if (isset(self::$dirCache[$dir][$file])) {
+			$file = self::$dirCache[$dir][$file];
+			require_once $file;
+			return true;
+		}
+		return false;
 	}
 
 	/**

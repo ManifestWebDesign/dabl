@@ -81,24 +81,22 @@ class DBMySQL extends DABLPDO {
 	 * executed.
 	 */
 	function unlockTable($table){
-		$statement = $this->exec("UNLOCK TABLES");
+		$this->exec("UNLOCK TABLES");
 	}
 
 	/**
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
 	function quoteIdentifier($text) {
-		$quote = '`';
-		
 		if (is_array($text)) {
 			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
-		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
+		if (strpos($text, '`') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
-		
-		return $quote . implode("$quote.$quote", explode('.', $text)) . $quote;
+
+		return '`' . str_replace('.', '`.`', $text) . '`';
 	}
 
 	/**
@@ -158,22 +156,22 @@ class DBMySQL extends DABLPDO {
 
 	/**
 	 * Commit a (possibly nested) transaction.
-	 * FIXME: Make this throw an Exception of a DABL class
+	 * FIXME: Make this throw an ErrorException of a DABL class
 	 *
 	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
 	 * @see PDO::commit()
-	 * @throws Exception
+	 * @throws ErrorException
 	 */
 	function commit() {
 		if ($this->_transaction_count<=0)
-			throw new Exception('DABL: Attempting to commit outside of a transaction');
+			throw new ErrorException('DABL: Attempting to commit outside of a transaction');
 
 		--$this->_transaction_count;
 
 		if ($this->_transaction_count==0) {
 			if ($this->_rollback_connection) {
 				parent::rollback();
-				throw new Exception('DABL: attempting to commit a rolled back transaction');
+				throw new ErrorException('DABL: attempting to commit a rolled back transaction');
 			} else {
 				return parent::commit();
 			}
@@ -182,15 +180,15 @@ class DBMySQL extends DABLPDO {
 
 	/**
 	 * Rollback, and prevent all further commits in this transaction.
-	 * FIXME: Make this throw an Exception of a DABL class
+	 * FIXME: Make this throw an ErrorException of a DABL class
 	 *
 	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
 	 * @see PDO::rollback()
-	 * @throws Exception
+	 * @throws ErrorException
 	 */
 	function rollback() {
 		if ($this->_transaction_count<=0)
-			throw new Exception('DABL: Attempting to rollback outside of a transaction');
+			throw new ErrorException('DABL: Attempting to rollback outside of a transaction');
 
 		--$this->_transaction_count;
 
@@ -224,19 +222,19 @@ class DBMySQL extends DABLPDO {
 	 * @return Database
 	 */
 	function getDatabaseSchema(){
-		
+
 		ClassLoader::import('DATABASE:propel:');
-		ClassLoader::import('DATABASE:propel:database');
-		ClassLoader::import('DATABASE:propel:database:model');
-		ClassLoader::import('DATABASE:propel:database:reverse');
-		ClassLoader::import('DATABASE:propel:database:reverse:mysql');
-		ClassLoader::import('DATABASE:propel:database:tranform');
+		ClassLoader::import('DATABASE:propel:model');
+		ClassLoader::import('DATABASE:propel:reverse');
+		ClassLoader::import('DATABASE:propel:reverse:mysql');
 		ClassLoader::import('DATABASE:propel:platform');
 
 		$parser = new MysqlSchemaParser();
 		$parser->setConnection($this);
 		$database = new Database($this->getDBName());
-		$database->setPlatform(new MysqlPlatform());
+		$platform = new MysqlPlatform();
+		$platform->setDefaultTableEngine('InnoDB');
+		$database->setPlatform($platform);
 		$parser->parse($database);
 		$database->doFinalInitialization();
 		return $database;

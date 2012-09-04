@@ -1,0 +1,57 @@
+/* Global */
+
+body, table, input, select, textarea {
+	font: 12px tahoma, arial;
+}
+
+.main-wrapper {
+	width: 900px;
+	margin: auto;
+}
+
+div.ui-widget-content {
+	padding: 5px;
+	background: #EFEFEF;
+	border: 1px solid #BBB;
+	margin-bottom: 5px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}
+
+/** UI Grid **/
+table.object-grid{
+	width:100%;
+	border-spacing: 0px;
+	font-size: 12px;
+}
+
+table.object-grid th{
+	padding:6px 6px 4px 8px;
+	font-weight: normal;
+	text-align: left;
+	background: white;
+	border-left: 0px;
+	font-weight: bold;
+}
+
+table.object-grid td{
+	background: white;
+	padding: 4px 8px 4px 8px;
+	border-top: 1px solid #ddd;
+}
+
+.ui-state-highlight {
+	border: 1px solid #ffde2e;
+	background: #ffeb80;
+	color: #363636;
+	padding: 5px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}
+
+.ui-state-highlight p {
+	margin: 2px 0;
+	padding: 0;
+}

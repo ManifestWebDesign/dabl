@@ -69,8 +69,8 @@ class DBMSSQL extends DABLPDO {
 		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
-		
-		return '[' . implode('].[', explode('.', $text)) . ']';
+
+		return '[' . str_replace('.', '].[', $text) . ']';
 	}
 
 	/**
@@ -89,12 +89,12 @@ class DBMSSQL extends DABLPDO {
 	 * @param string $alias Alias for the new field - WILL be quoted, if provided
 	 * @return string
 	 */
-	function dateFormat($field, $format, $alias=null) {
-		$alias = $alias ? " AS ".$this->quoteIdentifier($alias) : '';
+	function dateFormat($field, $format, $alias = null) {
+		$alias = $alias ? (' AS "' . $this->quoteIdentifier($alias) . '"') : '';
 
 		// todo: use strtok() to parse $format
 		$parts = array();
-		foreach(explode('-', $format) as $part) {
+		foreach (explode('-', $format) as $part) {
 			$expr = false;
 			switch (strtolower($part)) {
 				case 'yyyy': case 'yy': case '%y':
@@ -132,27 +132,37 @@ class DBMSSQL extends DABLPDO {
 				}
 
 				if ($length) {
-					$expr = "RIGHT('".str_repeat('0', $length)."' + {$expr}, {$length})";
+					$expr = "RIGHT('" . str_repeat('0', $length) . "' + {$expr}, {$length})";
 				}
 
 				$parts[] = $expr;
 			}
 		}
 
-		foreach($parts as &$v) $v = "CAST({$v} AS VARCHAR)";
-		return join("+ '-' +", $parts).$alias;
+		foreach ($parts as &$v)
+			$v = "CAST({$v} AS VARCHAR)";
+		return join("+ '-' +", $parts) . $alias;
 	}
 
 	/**
 	 * Simulated Limit/Offset
+	 *
 	 * This rewrites the $sql query to apply the offset and limit.
-	 * @see		DABLPDO::applyLimit()
-	 * @author	 Justin Carlson <justin.carlson@gmail.com>
+	 * some of the ORDER BY logic borrowed from Doctrine MsSqlPlatform
+	 *
+	 * @see       AdapterInterface::applyLimit()
+	 * @author    Benjamin Runnels <kraven@kraven.org>
+	 *
+	 * @param     string   $sql
+	 * @param     integer  $offset
+	 * @param     integer  $limit
+	 *
+	 * @return    void
 	 */
-	function applyLimit(&$sql, $offset, $limit) {
+	public function applyLimit(&$sql, $offset, $limit) {
 		// make sure offset and limit are numeric
-		if(!is_numeric($offset) || !is_numeric($limit)) {
-			throw new Exception('DBMSSQL::applyLimit() expects a number for argument 2 and 3');
+		if (!is_numeric($offset) || !is_numeric($limit)) {
+			throw new InvalidArgumentException('MssqlAdapter::applyLimit() expects a number for argument 2 and 3');
 		}
 
 		//split the select and from clauses out of the original query
@@ -160,24 +170,24 @@ class DBMSSQL extends DABLPDO {
 
 		$selectText = 'SELECT ';
 
-		if(preg_match('/\Aselect(\s+)distinct/i', $sql)) {
-			$selectText .= 'DISTINCT ';
-		}
-
 		preg_match('/\Aselect(.*)from(.*)/si', $sql, $selectSegment);
-		if(count($selectSegment) == 3) {
+		if (count($selectSegment) == 3) {
 			$selectStatement = trim($selectSegment[1]);
 			$fromStatement = trim($selectSegment[2]);
 		} else {
-			//only works with select statements, ignore limits otherwise.
-			return;
-			throw new Exception('DBMSSQL::applyLimit() could not locate the select statement at the start of the query. ' . $sql);
+			throw new RuntimeException('MssqlAdapter::applyLimit() could not locate the select statement at the start of the query.');
+		}
+
+		if (preg_match('/\Aselect(\s+)distinct/i', $sql)) {
+			$selectText .= 'DISTINCT ';
+			$selectStatement = str_ireplace('distinct ', '', $selectStatement);
 		}
 
 		// if we're starting at offset 0 then theres no need to simulate limit,
 		// just grab the top $limit number of rows
-		if($offset == 0) {
+		if ($offset == 0) {
 			$sql = $selectText . 'TOP ' . $limit . ' ' . $selectStatement . ' FROM ' . $fromStatement;
+
 			return;
 		}
 
@@ -185,14 +195,14 @@ class DBMSSQL extends DABLPDO {
 		$orderStatement = stristr($fromStatement, 'ORDER BY');
 		$orders = '';
 
-		if($orderStatement !== false) {
+		if ($orderStatement !== false) {
 			//remove order statement from the from statement
 			$fromStatement = trim(str_replace($orderStatement, '', $fromStatement));
 
 			$order = str_ireplace('ORDER BY', '', $orderStatement);
 			$orders = explode(',', $order);
 
-			for($i = 0; $i < count($orders); $i++) {
+			for ($i = 0; $i < count($orders); $i++) {
 				$orderArr[trim(preg_replace('/\s+(ASC|DESC)$/i', '', $orders[$i]))] = array(
 					'sort' => (stripos($orders[$i], ' DESC') !== false) ? 'DESC' : 'ASC',
 					'key' => $i
@@ -203,24 +213,25 @@ class DBMSSQL extends DABLPDO {
 		//setup inner and outer select selects
 		$innerSelect = '';
 		$outerSelect = '';
-		foreach(explode(', ', $selectStatement) as $selCol) {
+		foreach (explode(', ', $selectStatement) as $selCol) {
 			$selColArr = explode(' ', $selCol);
 			$selColCount = count($selColArr) - 1;
 
 			//make sure the current column isn't * or an aggregate
-			if(strpos($selColArr[0], '*') === false && !strstr($selColArr[0], '(')) {
-				if(isset($orderArr[$selColArr[0]])) {
+			if (strpos($selColArr[0], '*') === false && !strstr($selColArr[0], '(')) {
+				if (isset($orderArr[$selColArr[0]])) {
 					$orders[$orderArr[$selColArr[0]]['key']] = $selColArr[0] . ' ' . $orderArr[$selColArr[0]]['sort'];
 				}
 
 				//use the alias if one was present otherwise use the column name
 				$alias = (!stristr($selCol, ' AS ')) ? $selColArr[0] : $selColArr[$selColCount];
 				//don't quote the identifier if it is already quoted
-				if($alias[0] != '[')
+				if ($alias[0] != '[') {
 					$alias = $this->quoteIdentifier($alias);
+				}
 
 				//save the first non-aggregate column for use in ROW_NUMBER() if required
-				if(!isset($firstColumnOrderStatement)) {
+				if (!isset($firstColumnOrderStatement)) {
 					$firstColumnOrderStatement = 'ORDER BY ' . $selColArr[0];
 				}
 
@@ -228,16 +239,23 @@ class DBMSSQL extends DABLPDO {
 				$innerSelect .= $selColArr[0] . ' AS ' . $alias . ', ';
 				$outerSelect .= $alias . ', ';
 			} elseif(stristr($selCol, ' AS ')) {
+				//agregate columns must always have an alias clause
+				if (!stristr($selCol, ' AS ')) {
+					throw new RuntimeException('MssqlAdapter::applyLimit() requires aggregate columns to have an Alias clause');
+				}
+
 				//aggregate column alias can't be used as the count column you must use the entire aggregate statement
-				if(isset($orderArr[$selColArr[$selColCount]])) {
+				if (isset($orderArr[$selColArr[$selColCount]])) {
 					$orders[$orderArr[$selColArr[$selColCount]]['key']] = str_replace($selColArr[$selColCount - 1] . ' ' . $selColArr[$selColCount], '', $selCol) . $orderArr[$selColArr[$selColCount]]['sort'];
 				}
 
 				//quote the alias
 				$alias = $selColArr[$selColCount];
 				//don't quote the identifier if it is already quoted
-				if($alias[0] != '[')
+				if ($alias[0] != '[') {
 					$alias = $this->quoteIdentifier($alias);
+				}
+
 				$innerSelect .= str_replace($selColArr[$selColCount], $alias, $selCol) . ', ';
 				$outerSelect .= $alias . ', ';
 			} else {
@@ -247,14 +265,14 @@ class DBMSSQL extends DABLPDO {
 			}
 		}
 
-		if(is_array($orders)) {
+		if (is_array($orders)) {
 			$orderStatement = 'ORDER BY ' . implode(', ', $orders);
 		} else {
 			//use the first non aggregate column in our select statement if no ORDER BY clause present
-			if(isset($firstColumnOrderStatement)) {
+			if (isset($firstColumnOrderStatement)) {
 				$orderStatement = $firstColumnOrderStatement;
 			} else {
-				throw new Exception('DBMSSQL::applyLimit() unable to find column to use with ROW_NUMBER()');
+				throw new RuntimeException('MssqlAdapter::applyLimit() unable to find column to use with ROW_NUMBER()');
 			}
 		}
 
@@ -265,14 +283,13 @@ class DBMSSQL extends DABLPDO {
 
 		//ROW_NUMBER() starts at 1 not 0
 		$sql = $outerSelect . ' (' . $innerSelect . ' ' . $fromStatement . ') AS derivedb WHERE RowNumber BETWEEN ' . ($offset + 1) . ' AND ' . ($limit + $offset);
-		return;
 	}
 
 	function lastInsertId() {
 		$query = "SELECT scope_identity() as ID";
 		$result = $this->query($query);
-		foreach($result as $r) {
-			return (int)$r['ID'];
+		foreach ($result as $r) {
+			return (int) $r['ID'];
 		}
 	}
 
@@ -281,12 +298,10 @@ class DBMSSQL extends DABLPDO {
 	 */
 	function getDatabaseSchema() {
 
-		ClassLoader::import('DATABASE:propel');
-		ClassLoader::import('DATABASE:propel:database');
-		ClassLoader::import('DATABASE:propel:database:model');
-		ClassLoader::import('DATABASE:propel:database:reverse');
-		ClassLoader::import('DATABASE:propel:database:reverse:mssql');
-		ClassLoader::import('DATABASE:propel:database:tranform');
+		ClassLoader::import('DATABASE:propel:');
+		ClassLoader::import('DATABASE:propel:model');
+		ClassLoader::import('DATABASE:propel:reverse');
+		ClassLoader::import('DATABASE:propel:reverse:mssql');
 		ClassLoader::import('DATABASE:propel:platform');
 
 		$parser = new MssqlSchemaParser();
@@ -298,16 +313,16 @@ class DBMSSQL extends DABLPDO {
 		return $database;
 	}
 
-	function beginTransaction() {
-		$this->query('BEGIN TRANSACTION');
-	}
-
-	function commit() {
-		$this->query('COMMIT TRANSACTION');
-	}
-
-	function rollback() {
-		$this->query('ROLLBACK TRANSACTION');
-	}
+//	function beginTransaction() {
+//		$this->query('BEGIN TRANSACTION');
+//	}
+//
+//	function commit() {
+//		$this->query('COMMIT TRANSACTION');
+//	}
+//
+//	function rollback() {
+//		$this->query('ROLLBACK TRANSACTION');
+//	}
 
 }

@@ -45,7 +45,7 @@ abstract class DABLPDO extends PDO {
 		$dsn = '';
 		$user = null;
 		$password = null;
-		
+
 		if (@$connection_params['user']) {
 			$user = $connection_params['user'];
 		}
@@ -53,26 +53,29 @@ abstract class DABLPDO extends PDO {
 		if (@$connection_params['password']) {
 			$password = $connection_params['password'];
 		}
-		
+
 		$options = array(
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 		);
 
-		if (isset($connection_params['persistant'])) {
-			if (
-				true === @$connection_params['persistant']
-				|| 1 === @$connection_params['persistant']
-				|| 'true' === @$connection_params['persistant']
-				|| '1' === @$connection_params['persistant']
-			) {
-				$options[PDO::ATTR_PERSISTENT] = true;
-			}
+		if (
+			isset($connection_params['persistant']) &&
+			(
+				true === $connection_params['persistant']
+				|| 1 === $connection_params['persistant']
+				|| 'true' === $connection_params['persistant']
+				|| '1' === $connection_params['persistant']
+				|| 'on' === strtolower($connection_params['persistant'])
+			)
+		) {
+			$options[PDO::ATTR_PERSISTENT] = true;
 		}
 
 		switch ($connection_params['driver']) {
 			case 'sqlite':
 				$dsn = 'sqlite:' . $connection_params['dbname'];
 				$class = 'DBSQLite';
+				$class_dir = 'sqlite';
 				break;
 
 			case 'mysql':
@@ -90,6 +93,7 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = 'mysql:' . implode(';', $parts);
 				$class = 'DBMySQL';
+				$class_dir = 'mysql';
 				break;
 
 			case 'oracle':
@@ -104,6 +108,7 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = 'oci:' . implode(';', $parts);
 				$class = 'DBOracle';
+				$class_dir = 'oracle';
 				break;
 
 			case 'pgsql':
@@ -125,8 +130,26 @@ abstract class DABLPDO extends PDO {
 				$user = null;
 				$password = null;
 				$class = 'DBPostgres';
+				$class_dir = 'pgsql';
 				break;
 
+			case 'sqlsrv':
+				if (@$connection_params['host'])
+					$parts[] = 'server=' . $connection_params['host'];
+				if (@$connection_params['dbname'])
+					$parts[] = 'database=' . $connection_params['dbname'];
+				if (@$connection_params['charset'])
+					$parts[] = 'charset=' . $connection_params['charset'];
+				if (@$connection_params['appname'])
+					$parts[] = 'appname=' . $connection_params['appname'];
+
+				foreach ($parts as &$v) {
+					$v = str_replace(';', '\;', $v);
+				}
+				$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
+				$class = 'DBMSSQL';
+				$class_dir = 'mssql';
+				break;
 			case 'mssql':
 			case 'sybase':
 			case 'dblib':
@@ -144,17 +167,21 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
 				$class = 'DBMSSQL';
+				$class_dir = 'mssql';
 				break;
 
 			default:
-				throw new Exception("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
+				throw new RuntimeException("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
 				break;
 		}
 
 		try {
+			if (!class_exists($class)) {
+				ClassLoader::import('DATABASE:adapter:' . $class_dir);
+			}
 			$conn = new $class($dsn, $user, $password, $options);
 		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
+			throw new RuntimeException($e->getMessage());
 		}
 		$conn->setDBName(@$connection_params['dbname']);
 		return $conn;
@@ -169,20 +196,14 @@ abstract class DABLPDO extends PDO {
 	}
 
 	/**
-	 *
+	 * Executes an SQL statement, returning a result set as a PDOStatement object
+	 * @param string $statement The query string to execute as a query
+	 * @param int $fetch_mode PDO::FETCH_COLUMN, PDO::FETCH_CLASS, or PDO::FETCH_INTO
+	 * @param mixed $mixed column number(int), class name(string), or object($object)
+	 * @param array $ctorargs Constructor arguments for PDO::FETCH_CLASS
 	 * @return PDOStatement
 	 */
-	function prepare() {
-		$args = func_get_args();
-		$statement = call_user_func_array(array('parent', 'prepare'), $args);
-		return $statement;
-	}
-
-	/**
-	 * Override of PDO::query() to provide query logging functionality
-	 * @return PDOStatement
-	 */
-	function query() {
+	function query($statement, $fetch_mode = null, $mixed = null, array $ctorargs = null) {
 		$args = func_get_args();
 
 		if ($this->logQueries) {
@@ -197,20 +218,21 @@ abstract class DABLPDO extends PDO {
 	}
 
 	/**
+	 * Execute an SQL statement and return the number of affected rows
+	 * @param string $statement The SQL statement to prepare and execute.
 	 * @return PDOStatement
 	 */
-	function exec() {
-		$args = func_get_args();
+	function exec($statement) {
 
 		if ($this->logQueries) {
 			$start = microtime(true);
-			$result = call_user_func_array(array('parent', 'exec'), $args);
+			$result = parent::exec($statement);
 			$time = microtime(true) - $start;
-			$this->logQuery((string) $args[0], $time);
+			$this->logQuery((string) $statement, $time);
 			return $result;
 		}
 
-		return call_user_func_array(array('parent', 'exec'), $args);
+		return parent::exec($statement);
 	}
 
 	function getLoggedQueries() {
@@ -372,17 +394,15 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string The quoted identifier.
 	 */
 	function quoteIdentifier($text) {
-		$quote = '"';
-		
 		if (is_array($text)) {
 			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
-		if (strpos($text, $quote) !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
+		if (strpos($text, '"') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 			return $text;
 		}
-		
-		return $quote . implode("$quote.$quote", explode('.', $text)) . $quote;
+
+		return '"' . str_replace('.', '"."', $text) . '"';
 	}
 
 	/**
@@ -422,7 +442,7 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string
 	 */
 	function getTimestampFormatter() {
-		return "Y-m-d H:i:s";
+		return 'Y-m-d H:i:s';
 	}
 
 	/**
@@ -430,7 +450,7 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string
 	 */
 	function getDateFormatter() {
-		return "Y-m-d";
+		return 'Y-m-d';
 	}
 
 	/**
@@ -438,7 +458,7 @@ abstract class DABLPDO extends PDO {
 	 * @return	 string
 	 */
 	function getTimeFormatter() {
-		return "H:i:s";
+		return 'H:i:s';
 	}
 
 	/**
@@ -469,4 +489,3 @@ abstract class DABLPDO extends PDO {
 
 	abstract function getDatabaseSchema();
 }
-
