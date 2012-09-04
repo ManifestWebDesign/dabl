@@ -32,8 +32,10 @@ class DBManagerTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertInstanceOf('DABLPDO', $connection);
 
+		$connections = DBManager::getConnections();
+
 		// verify that $connection is the first connection
-		$this->assertEquals(array_shift(DBManager::getConnections()), $connection);
+		$this->assertEquals(array_shift($connections), $connection);
 	}
 
 	/**

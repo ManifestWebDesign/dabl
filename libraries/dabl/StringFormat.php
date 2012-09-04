@@ -123,7 +123,8 @@ class StringFormat {
 			array('/$/', "s")
 		);
 
-		$word = array_pop(self::getWords($string));
+		$words = self::getWords($string);
+		$word = array_pop($words);
 
 		// check for matches using regular expressions
 		foreach ($plural as &$pattern) {

@@ -63,7 +63,8 @@ foreach ($columns as $column){
 			break;
 	}
 	if ($column->isForeignKey()) {
-		$fk = array_shift($column->getForeignKeys());
+		$col_fks = $column->getForeignKeys();
+		$fk = array_shift($col_fks);
 		$foreign_table = $fk->getForeignTableName();
 		$local_column = $fk->getLocalColumnName();
 		$long_method = 'get' . StringFormat::titleCase("{$foreign_table}_related_by_{$local_column}", '');

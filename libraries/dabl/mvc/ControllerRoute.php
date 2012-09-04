@@ -59,7 +59,8 @@ class ControllerRoute {
 
 		$route = str_replace('\\', '/', $route);
 		$route = trim($route, '/');
-		$route = array_shift(explode('?', $route, 2));
+		$parts = explode('?', $route, 2);
+		$route = array_shift($parts);
 
 		if (is_array($route)) {
 			$this->route = implode('/', $route);
