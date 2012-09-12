@@ -153,7 +153,7 @@ abstract class Controller extends ArrayObject {
 	 * @param bool $die Whether or not to kill the script
 	 * @return void
 	 */
-	function redirect($url, $die = true) {
+	function redirect($url = '', $die = true) {
 		if ($this->renderPartial) {
 			$url = '/partial/' . ltrim($url, '/');
 		}

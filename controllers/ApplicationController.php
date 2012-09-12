@@ -11,7 +11,7 @@ abstract class ApplicationController extends Controller {
 
 		$current_controller = str_replace('Controller', '', get_class($this));
 
-		if('Index' == $current_controller){
+		if ('Index' == $current_controller){
 			$this['current_page'] = 'Home';
 		} else {
 			$this['current_page'] = StringFormat::titleCase($current_controller, ' ');
