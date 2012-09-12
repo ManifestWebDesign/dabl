@@ -4,7 +4,7 @@
 <?php
 if ($pk) {
 ?>
-		<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo htmlentities($' . $single . '->' . "get" . StringFormat::titleCase($pk) . '()) ?>' ?>" />
+		<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo h($' . $single . '->' . "get" . StringFormat::titleCase($pk) . '()) ?>' ?>" />
 <?php
 }
 foreach ($this->getColumns($table_name) as $column) {
@@ -28,7 +28,7 @@ foreach ($this->getColumns($table_name) as $column) {
 			$format = null;
 			break;
 	}
-	$output = '<?php echo htmlentities($' . $single . '->' . $method . '(' . $format . ')) ?>';
+	$output = '<?php echo h($' . $single . '->' . $method . '(' . $format . ')) ?>';
 	$label = $column_name;
 	if ($column->isForeignKey()) {
 		$fk = reset($column->getForeignKeys());
