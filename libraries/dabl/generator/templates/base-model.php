@@ -55,6 +55,16 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 	protected static $_isAutoIncrement = <?php echo $auto_increment ? 'true' : 'false' ?>;
 
 	/**
+	 * array of all fully-qualified(table.column) columns
+	 * @var string[]
+	 */
+	protected static $_columns = array(
+<?php foreach ($fields as $key => $field): ?>
+		<?php echo $class_name ?>::<?php echo StringFormat::constant($field->getName()) ?>,
+<?php endforeach ?>
+	);
+
+	/**
 	 * array of all column names
 	 * @var string[]
 	 */
@@ -202,6 +212,15 @@ foreach ($fields as $key => $field):
 <?php $used_functions[] = 'getColumnNames'; ?>
 	static function getColumnNames() {
 		return <?php echo $class_name ?>::$_columnNames;
+	}
+
+	/**
+	 * Access to array of fully-qualified(table.column) columns
+	 * @return array
+	 */
+<?php $used_functions[] = 'getColumns'; ?>
+	static function getColumns() {
+		return <?php echo $class_name ?>::$_columns;
 	}
 
 	/**
@@ -764,12 +783,20 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		$alias = $q->getAlias();
 		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
 		if (!$columns) {
-			$columns[] = $this_table . '.*';
+			if ($alias) {
+				foreach (<?php echo $class_name ?>::getColumns() as $column_name) {
+					$columns[] = $alias . '.' . $column_name;
+				}
+			} else {
+				$columns = <?php echo $class_name ?>::getColumns();
+			}
 		}
 
 		$to_table = <?php echo $to_class_name ?>::getTableName();
 		$q->join($to_table, $this_table . '.<?php echo $from_column ?> = ' . $to_table . '.<?php echo $to_column ?>', $join_type);
-		$columns[] = $to_table . '.*';
+		foreach (<?php echo $to_class_name ?>::getColumns() as $column) {
+			$columns[] = $column;
+		}
 		$q->setColumns($columns);
 
 		return <?php echo $class_name ?>::doSelect($q, array('<?php echo $to_class_name ?>'));
@@ -787,7 +814,13 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		$alias = $q->getAlias();
 		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
 		if (!$columns) {
-			$columns[] = $this_table . '.*';
+			if ($alias) {
+				foreach (<?php echo $class_name ?>::getColumns() as $column_name) {
+					$columns[] = $alias . '.' . $column_name;
+				}
+			} else {
+				$columns = <?php echo $class_name ?>::getColumns();
+			}
 		}
 <?php
 	foreach ($this->getForeignKeysFromTable($table_name) as $r):
@@ -799,7 +832,9 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 
 		$to_table = <?php echo $to_class_name ?>::getTableName();
 		$q->join($to_table, $this_table . '.<?php echo $from_column ?> = ' . $to_table . '.<?php echo $to_column ?>', $join_type);
-		$columns[] = $to_table . '.*';
+		foreach (<?php echo $to_class_name ?>::getColumns() as $column) {
+			$columns[] = $column;
+		}
 		$classes[] = '<?php echo $to_class_name ?>';
 	<?php endforeach ?>
 
