@@ -41,15 +41,16 @@ foreach ($this->getColumns($table_name) as $column) {
 			break;
 	}
 	if ($column->isForeignKey()) {
-		$fk = array_shift($column->getForeignKeys());
+		$col_fks = $column->getForeignKeys();
+		$fk = array_shift($col_fks);
 		$foreign_table = $fk->getForeignTableName();
 		$local_column = $fk->getLocalColumnName();
 		$long_method = 'get' . StringFormat::titleCase("{$foreign_table}_related_by_{$local_column}", '');
-		$output = '<?php echo htmlentities($' . $single . '->' . "$long_method" . '()) ?>';
+		$output = '<?php echo h($' . $single . '->' . "$long_method" . '()) ?>';
 	} elseif ($column->getType() == Model::COLUMN_TYPE_BOOLEAN) {
 		$output = '<?php if ($'.$single.'->'."get$column_name".'('.$format.') === 1) echo \'True\'; elseif ($'.$single.'->'."get$column_name".'('.$format.') === 0) echo \'False\' ?>';
 	} else {
-		$output = '<?php echo htmlentities($' . $single . '->' . "get$column_name" . '(' . $format . ')) ?>';
+		$output = '<?php echo h($' . $single . '->' . "get$column_name" . '(' . $format . ')) ?>';
 	}
 ?>
 	<div class="field-wrapper">

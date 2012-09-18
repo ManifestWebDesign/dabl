@@ -325,7 +325,8 @@ foreach ($fields as $key => $field):
 <?php foreach ($PKs as $k => &$v): ?>
 		$q->add('<?php echo $v ?>', $<?php echo strtolower(str_replace('-', '_', $v)) ?>);
 <?php endforeach ?>
-		return array_shift(<?php echo $class_name ?>::doSelect($q));
+		$records = <?php echo $class_name ?>::doSelect($q);
+		return array_shift($records);
 <?php endif ?>
 	}
 
@@ -358,7 +359,9 @@ foreach ($fields as $key => $field):
 ?>
 	static function retrieveByColumn($field, $value) {
 		$conn = <?php echo $class_name ?>::getConnection();
-		return array_shift(<?php echo $class_name ?>::doSelect(Query::create()->add($field, $value)->setLimit(1)<?php if($PK){ ?>->order('<?php echo $PK ?>')<?php } ?>));
+		$q = Query::create()->add($field, $value)->setLimit(1)<?php if($PK){ ?>->order('<?php echo $PK ?>')<?php } ?>;
+		$records = <?php echo $class_name ?>::doSelect($q);
+		return array_shift($records);
 	}
 
 	/**
@@ -370,7 +373,8 @@ foreach ($fields as $key => $field):
 	 */
 <?php $used_functions[] = 'fetchSingle'; ?>
 	static function fetchSingle($query_string) {
-		return array_shift(<?php echo $class_name ?>::fetch($query_string));
+		$records = <?php echo $class_name ?>::fetch($query_string);
+		return array_shift($records);
 	}
 
 	/**
@@ -393,8 +397,11 @@ foreach ($fields as $key => $field):
 	 * @see Model::fromResult
 	 */
 <?php $used_functions[] = 'fromResult'; ?>
-	static function fromResult(PDOStatement $result, $class = '<?php echo $class_name ?>') {
-		return Model::fromResult($result, $class, <?php echo $class_name ?>::$_poolEnabled);
+	static function fromResult(PDOStatement $result, $class = '<?php echo $class_name ?>', $use_pool = null) {
+		if (null === $use_pool) {
+			$use_pool = <?php echo $class_name ?>::$_poolEnabled;
+		}
+		return Model::fromResult($result, $class, $use_pool);
 	}
 
 <?php $used_functions[] = 'castInts'; ?>
@@ -572,8 +579,11 @@ foreach ($fields as $key => $field):
 		return $q->doUpdate($column_values, $conn);
 	}
 
-	static function coerceTemporalValue($value, $column_type) {
-		return parent::coerceTemporalValue($value, $column_type, <?php echo $class_name ?>::getConnection());
+	static function coerceTemporalValue($value, $column_type, DABLPDO $conn = null) {
+		if (null === $conn) {
+			$conn = <?php echo $class_name ?>::getConnection();
+		}
+		return parent::coerceTemporalValue($value, $column_type, $conn);
 	}
 
 	/**
@@ -610,8 +620,10 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	$to_table = $r->getForeignTableName();
 	$to_class_name = $this->getModelName($to_table);
 	$lc_to_class_name = strtolower($to_class_name);
-	$to_column = array_shift($r->getForeignColumns());
-	$from_column = array_shift($r->getLocalColumns());
+	$foreign_columns = $r->getForeignColumns();
+	$to_column = array_shift($foreign_columns);
+	$local_columns = $r->getLocalColumns();
+	$from_column = array_shift($local_columns);
 	$named_id = false;
 
 	$id_pos = strrpos(strtolower($from_column), '_id');
@@ -826,8 +838,10 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 	foreach ($this->getForeignKeysFromTable($table_name) as $r):
 		$to_table = $r->getForeignTableName();
 		$to_class_name = $this->getModelName($to_table);
-		$to_column = array_shift($r->getForeignColumns());
-		$from_column = array_shift($r->getLocalColumns());
+		$foreign_columns = $r->getForeignColumns();
+		$to_column = array_shift($foreign_columns);
+		$local_columns = $r->getLocalColumns();
+		$from_column = array_shift($local_columns);
 ?>
 
 		$to_table = <?php echo $to_class_name ?>::getTableName();
@@ -855,8 +869,10 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	}
 
 	$from_class_name = $this->getModelName($from_table);
-	$from_column = array_shift($r->getLocalColumns());
-	$to_column = array_shift($r->getForeignColumns());
+	$local_columns = $r->getLocalColumns();
+	$from_column = array_shift($local_columns);
+	$foreign_columns = $r->getForeignColumns();
+	$to_column = array_shift($foreign_columns);
 	$to_table = $r->getForeignTableName();
 ?>
 	/**
@@ -939,8 +955,10 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		}
 
 		$from_class_name = $this->getModelName($from_table);
-		$from_column = array_shift($r->getLocalColumns());
-		$to_column = array_shift($r->getForeignColumns());
+		$local_columns = $r->getLocalColumns();
+		$from_column = array_shift($local_columns);
+		$foreign_columns = $r->getForeignColumns();
+		$to_column = array_shift($foreign_columns);
 		$to_table = $r->getForeignTableName();
 
 		if (!in_array('get' . StringFormat::titleCase($from_class_name) . 's', $used_functions)) {

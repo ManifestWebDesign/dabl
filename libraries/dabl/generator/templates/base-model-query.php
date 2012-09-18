@@ -31,7 +31,8 @@ abstract class base<?php echo $model_name ?>Query extends Query {
 
 	 */
 	function selectOne() {
-		return array_shift(<?php echo $model_name ?>::doSelect($this));
+		$records = <?php echo $model_name ?>::doSelect($this);
+		return array_shift($records);
 	}
 
 	/**

@@ -68,7 +68,7 @@ class DBPostgres extends DABLPDO {
 	/**
 	 * Gets ID for specified sequence name.
 	 */
-	function getId($table_name, $column_name) {
+	function getId($table_name = null, $column_name = null) {
 		return $this->query("SELECT currval(pg_get_serial_sequence({$this->quote($table_name)}, {$this->quote($column_name)}))")->fetchColumn(0);
 	}
 

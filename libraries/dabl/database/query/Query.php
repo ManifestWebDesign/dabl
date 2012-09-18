@@ -1223,7 +1223,7 @@ class Query {
 		}
 
 		$q->setAction(self::ACTION_DELETE);
-		return $q->getQuery($conn)->bindAndExecute()->rowCount();
+		return (int) $q->getQuery($conn)->bindAndExecute()->rowCount();
 	}
 
 	/**
@@ -1269,6 +1269,6 @@ class Query {
 		}
 
 		$q->setAction(self::ACTION_UPDATE);
-		return $q->getQuery($conn)->bindAndExecute()->rowCount();
+		return (int) $q->getQuery($conn)->bindAndExecute()->rowCount();
 	}
 }
