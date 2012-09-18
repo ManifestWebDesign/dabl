@@ -240,18 +240,68 @@ abstract class DABLPDO extends PDO {
 	}
 
 	function printQueryLog() {
-		$queries = $this->getLoggedQueries();
 		$total_time = 0.00;
-		$string = '<table border="1" style="clear:both;margin:auto;font-size:11px;font-family:monospace" cellpadding="1" cellspacing="0"><tbody>';
-		$string .= '<tr><th>#</th><th>Query</th><th>Execution Time (Seconds)</th><th>Trace</th></tr>';
+		$total_count = 0;
+		$string = '<div style="padding: 10px"><table width="100%" border="1" bordercolor="#bbb" style="clear:both;margin:auto;white-space:pre-line;font-size:11px;font-family:monospace" cellpadding="1" cellspacing="0">';
+		$string .= '<thead style="background-color: #eee"><tr><th>Query</th><th>Count</th><th>Time (Seconds)</th><th>Traces</th></tr></thead><tbody>';
+		$queries = array();
 		foreach ($this->queryLog as $num => &$query_array) {
-			$string .= '<tr><td>' . ($num + 1) . '</td><td><pre>' . $query_array['query'] . '</pre></td><td>' . round($query_array['time'], 6) . '</td><td><pre>' . $query_array['trace'] . '</pre></td></tr>';
+			$hash = md5(trim($query_array['query']));
+			if (!isset($queries[$hash])) {
+				$queries[$hash] = array(
+					'query' => $query_array['query'],
+					'count' => 0,
+					'time' => 0.0,
+					'traces' => array()
+				);
+			}
+			++$total_count;
+			++$queries[$hash]['count'];
+			$queries[$hash]['time'] += $query_array['time'];
 			$total_time += $query_array['time'];
+			$trace_hash = md5(trim($query_array['trace']));
+			if (!isset($queries[$hash]['traces'][$trace_hash])) {
+				$queries[$hash]['traces'][$trace_hash] = array(
+					'trace' => $query_array['trace'],
+					'count' => 0,
+					'time' => 0.0,
+				);
 		}
-		$string .= '<tr><td></td><td nowrap="nowrap">Total Time: </td><td>' . round($total_time, 6) . '</td><td>&nbsp;</td></tr>';
+			++$queries[$hash]['traces'][$trace_hash]['count'];
+			$queries[$hash]['traces'][$trace_hash]['time'] += $query_array['time'];
+		}
+
+		$sort = function($a, $b){
+			if ($a['count'] < $b['count']) {
+				return 1;
+			} elseif ($a['count'] > $b['count']) {
+				return -1;
+			}
+			if ($a['time'] < $b['time']) {
+				return 1;
+			} elseif ($a['time'] > $b['time']) {
+				return -1;
+			}
+			return 0;
+		};
+		usort($queries, $sort);
+
+		foreach ($queries as $q) {
+			$string .= '<tr><td>' . $q['query'] . '</td><td>' . $q['count'] . '</td><td>' . round($q['time'], 6) . '</td>';
+			$string .= '<td width="60%"><table border="0" style="white-space:pre-line;font-size:11px;font-family:monospace" cellpadding="1" cellspacing="0"><thead><tr><th>Trace</th><th>Count</th><th>Time (Seconds)</th></tr></thead><tbody>';
+			usort($q['traces'], $sort);
+			foreach ($q['traces'] as $trace) {
+				$string .= '<tr>';
+				$string .= '<tr><td>' . $trace['trace'] . '</td><td>' . $trace['count'] . '</td><td>' . round($trace['time'], 6) . '</td>';
+				$string .= '</tr>';
+			}
+			$string .= '</tbody></table></td></tr>';
+		}
+
+		$string .= '<tr><td></td><td nowrap="nowrap">' . $total_count . '</td><td>' . round($total_time, 6) . '</td><td>&nbsp;</td></tr>';
 		$string .= '</tbody></table>';
 		echo $string;
-		echo '<br />' . 'Max Memory Usage: ' . memory_get_peak_usage() / (1024 * 1024) . ' MB';
+		echo '<br />' . 'Max Memory Usage: ' . memory_get_peak_usage() / (1024 * 1024) . ' MB</div>';
 	}
 
 	/**
