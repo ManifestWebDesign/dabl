@@ -988,10 +988,11 @@ class Query {
 
 				// setup identifiers for any additional tables
 				if ($this->_extraTables) {
-					foreach ($this->_extraTables as $tAlias => $extra_table) {
+					$table_string = '(' . $table_string;
+					foreach ($this->_extraTables as $t_alias => $extra_table) {
 						if ($extra_table instanceof Query) {
 							$extra_table_statement = $extra_table->getQuery($conn);
-							$extra_table_string = '(' . $extra_table_statement->string . ') AS ' . $tAlias;
+							$extra_table_string = '(' . $extra_table_statement->string . ') AS ' . $t_alias;
 							$statement->addParams($extra_table_statement->params);
 							$statement->addIdentifiers($extra_table_statement->identifiers);
 						} else {
@@ -1000,12 +1001,13 @@ class Query {
 								$extra_table_string = QueryStatement::IDENTIFIER;
 								$statement->addIdentifier($extra_table);
 							}
-							if ($tAlias != $extra_table) {
-								$extra_table_string .= " AS $tAlias";
+							if ($t_alias != $extra_table) {
+								$extra_table_string .= " AS $t_alias";
 							}
 						}
 						$table_string .= ", $extra_table_string";
 					}
+					$table_string .= ')';
 				}
 				$statement->string = $table_string;
 				break;
