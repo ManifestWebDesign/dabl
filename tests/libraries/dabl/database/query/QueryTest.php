@@ -85,12 +85,34 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals("SELECT `test_table`.*\nFROM `test_table`\nORDER BY `fun` ASC, `good` DESC", $order_clause);
 	}
 
+	function testGetTablesClauseMultipleTablesWithJoin() {
+		$q = new Query('Article');
+		$q->join('UserCard', 'Article.CardID = UserCard.CardID AND UserCard.UserID = 2', Query::LEFT_JOIN);
+		$q->add('UserCard.CardID', null, Query::IS_NULL);
+		$q->join('CardPicture');
+		$q->group('Article.CardID');
+		$q->addOrder('Title', 'DESC');
+		$this->assertEquals(preg_replace('/\s/', '', 'SELECT `Article`.*
+FROM (`Article`, `CardPicture`)
+LEFT JOIN `UserCard` ON (Article.CardID = UserCard.CardID AND UserCard.UserID = 2)
+WHERE `UserCard`.`CardID` IS NULL
+GROUP BY `Article`.`CardID`
+ORDER BY `Title` DESC'), preg_replace('/\s/', '', $q->getQuery() . ''));
+	}
+
 	/**
-	 * @group subquery
 	 * @covers Query::getTable
 	 */
 	function testGetTableSingleWordWithAlias() {
 		$q = new Query('testing', 'alias');
+		$this->assertEquals('testing', $q->getTable());
+	}
+
+	/**
+	 * @covers Query::getTable
+	 */
+	function testGetTableSingleWordNoAlias() {
+		$q = new Query('testing');
 		$this->assertEquals('testing', $q->getTable());
 	}
 
@@ -147,15 +169,6 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 	function testGetQueryTwoWordsWithAlias() {
 		$q = new Query('SELECT testing', 'alias');
 		$this->assertEquals("SELECT alias.*\nFROM SELECT testing AS alias", (string) $q->getQuery());
-	}
-
-	/**
-	 * @group subquery
-	 * @covers Query::getTable
-	 */
-	function testGetTableSingleWordNoAlias() {
-		$q = new Query('testing');
-		$this->assertEquals('testing', $q->getTable());
 	}
 
 	/**

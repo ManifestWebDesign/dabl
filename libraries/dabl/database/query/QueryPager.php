@@ -22,6 +22,7 @@ class QueryPager {
 	 */
 	private $query;
 	private $className;
+	private $methodName;
 
 	/**
 	 * @param Query $q
@@ -29,10 +30,18 @@ class QueryPager {
 	 * @param int $page
 	 * @param string $class_name
 	 */
-	function __construct(Query $q, $limit = null, $page = null, $class_name = null) {
+	function __construct(Query $q, $limit = null, $page = null, $class_name = null, $select_method_name = 'doSelect') {
 		$this->setQuery($q);
-		if ($class_name)
+		if ($class_name) {
 			$this->setClass($class_name);
+		} elseif (($table = $q->getTable()) && !($table instanceof Query)) {
+			$table_parts = explode('.', $table);
+			$table_name = array_pop($table_parts);
+			$this->setClass(StringFormat::className($table_name));
+		}
+		if ($select_method_name) {
+			$this->setMethod($select_method_name);
+		}
 		$this->setLimit($limit);
 		$this->setPageNum($page);
 	}
@@ -51,6 +60,22 @@ class QueryPager {
 	 */
 	function setClass($class_name) {
 		$this->className = $class_name;
+	}
+
+	/**
+	 * Returns the name of the class to use for counting and selecting results
+	 * @return string
+	 */
+	function getClass() {
+		return $this->className;
+	}
+
+	/**
+	 * Sets the name of the method to use for selecting results
+	 * @param string $method_name
+	 */
+	function setMethod($select_method_name) {
+		$this->methodName = $select_method_name;
 	}
 
 	/**
@@ -189,7 +214,7 @@ class QueryPager {
 		$q->setOffset($this->getOffset());
 
 		if ($this->className)
-			return call_user_func_array(array($this->className, 'doSelect'), array($q));
+			return call_user_func_array(array($this->className, $this->methodName), array($q));
 		else
 			return $q->doSelect();
 	}
