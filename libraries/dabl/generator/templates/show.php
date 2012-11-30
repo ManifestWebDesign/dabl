@@ -48,7 +48,7 @@ foreach ($this->getColumns($table_name) as $column) {
 		$long_method = 'get' . StringFormat::titleCase("{$foreign_table}_related_by_{$local_column}", '');
 		$output = '<?php echo h($' . $single . '->' . "$long_method" . '()) ?>';
 	} elseif ($column->getType() == Model::COLUMN_TYPE_BOOLEAN) {
-		$output = '<?php if ($'.$single.'->'."get$column_name".'('.$format.') === 1) echo \'True\'; elseif ($'.$single.'->'."get$column_name".'('.$format.') === 0) echo \'False\' ?>';
+		$output = '<?php if ($'.$single.'->'."get$column_name".'('.$format.') === 1) echo \'Yes\'; elseif ($'.$single.'->'."get$column_name".'('.$format.') === 0) echo \'No\' ?>';
 	} else {
 		$output = '<?php echo h($' . $single . '->' . "get$column_name" . '(' . $format . ')) ?>';
 	}

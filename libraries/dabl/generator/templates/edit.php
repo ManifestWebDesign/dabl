@@ -31,12 +31,13 @@ foreach ($this->getColumns($table_name) as $column) {
 	$output = '<?php echo h($' . $single . '->' . $method . '(' . $format . ')) ?>';
 	$label = $column_name;
 	if ($column->isForeignKey()) {
-		$fk = reset($column->getForeignKeys());
+		$fks = $column->getForeignKeys();
+		$fk = reset($fks);
 		$foreign_table_name = $fk->getForeignTableName();
 		$label = ucfirst($foreign_table_name);
 		$fk_single = strtolower($foreign_table_name);
-		$foreign_method = 'get' . $foreign_table_name . 's';
-		$foreign_column_name = reset($fk->getForeignColumns());
+		$fk_columns = $fk->getForeignColumns();
+		$foreign_column_name = reset($fk_columns);
 		$foreign_column_method = 'get' . StringFormat::titleCase($foreign_column_name);
 		$foreign_open_foreach = '<?php foreach(' . $this->getModelName($foreign_table_name) . '::doSelect() as $' . $fk_single . '): ?>';
 		$foreign_option = '<option <?php if($' . $single . '->get' . StringFormat::titleCase($column_name) . '() === $' . $fk_single . '->' . $foreign_column_method . '()) echo \'selected="selected"\' ?> value="<?php echo $' . $fk_single . '->' . $foreign_column_method . '() ?>"><?php echo $' . $fk_single . '?></option>';
@@ -53,12 +54,12 @@ foreach ($this->getColumns($table_name) as $column) {
 ?>
 			<label>
 				<input <?php echo '<?php if ($' . $single . '->' . $method . '() === 1) echo \'checked="checked"\' ?>' ?> name="<?php echo $column_name ?>" type="radio" value="1" />
-				True
+				Yes
 			</label>
 
 			<label>
 				<input <?php echo '<?php if ($' . $single . '->' . $method . '() === 0) echo \'checked="checked"\' ?>' ?> name="<?php echo $column_name ?>" type="radio" value="0" />
-				False
+				No
 			</label>
 <?
 			break;
