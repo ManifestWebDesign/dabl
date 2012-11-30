@@ -284,5 +284,17 @@ ORDER BY `Title` DESC'), preg_replace('/\s/', '', $q->getQuery() . ''));
 
 		$this->assertEquals(preg_replace('/\s/', '', $expected), preg_replace('/\s/', '', $actual));
 	}
+
+	function testJoinOnce() {
+		$q = new Query('table');
+		$q->join('table.column', 'table2.column');
+		$q->joinOnce('table.column', 'table2.column');
+		$q->joinOnce('table2', 'column = column');
+
+		$joins = $q->getJoins();
+		$this->assertCount(1, $joins);
+		$join = array_shift($joins);
+		$this->assertEquals('JOIN `table2` ON (`table`.`column` = `table2`.`column`)', $join->getQueryStatement() . '');
+	}
 }
 

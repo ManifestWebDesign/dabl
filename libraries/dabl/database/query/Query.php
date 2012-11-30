@@ -364,6 +364,14 @@ class Query {
 	}
 
 	/**
+	 *
+	 * @param string $table_or_column
+	 */
+	function crossJoin($table_or_column) {
+		$this->addJoin($table_or_column);
+	}
+
+	/**
 	 * @param mixed $table_or_column
 	 * @param mixed $on_clause_or_column
 	 * @return Query
@@ -397,6 +405,73 @@ class Query {
 	 */
 	function outerJoin($table_or_column, $on_clause_or_column = null) {
 		return $this->addJoin($table_or_column, $on_clause_or_column, self::OUTER_JOIN);
+	}
+
+	/**
+	 * Add a join after checking to see if Query already has a join for the
+	 * same table and alias.  Similar to php's include_once
+	 * @param QueryJoin $table_or_column
+	 * @param string $on_clause_or_column
+	 * @param string $join_type
+	 * @return Query
+	 */
+	function joinOnce($table_or_column, $on_clause_or_column = null, $join_type = self::JOIN) {
+		if ($table_or_column instanceof QueryJoin) {
+			$join = clone $table_or_column;
+		} else {
+			if (null === $on_clause_or_column) {
+				if ($join_type == self::JOIN || $join_type == self::INNER_JOIN) {
+					foreach ($this->_extraTables as $table) {
+						if ($table == $table_or_column) {
+							return $this;
+						}
+					}
+					$this->addTable($table_or_column);
+					return $this;
+				}
+				$on_clause_or_column = '1 = 1';
+			}
+			$join = new QueryJoin($table_or_column, $on_clause_or_column, $join_type);
+		}
+		foreach ($this->_joins as $existing_join) {
+			if ($join->getTable() == $existing_join->getTable()) {
+				if ($join->getAlias() != $existing_join->getAlias()) {
+					// tables match, but aliases don't match
+					continue;
+				}
+				// tables match, and aliases match or there are no aliases
+				return $this;
+			}
+		}
+		$this->_joins[] = $join;
+		return $this;
+	}
+
+	/**
+	 * @param mixed $table_or_column
+	 * @param mixed $on_clause_or_column
+	 * @return Query
+	 */
+	function leftJoinOnce($table_or_column, $on_clause_or_column = null) {
+		return $this->joinOnce($table_or_column, $on_clause_or_column, self::LEFT_JOIN);
+	}
+
+	/**
+	 * @param mixed $table_or_column
+	 * @param mixed $on_clause_or_column
+	 * @return Query
+	 */
+	function rightJoinOnce($table_or_column, $on_clause_or_column = null) {
+		return $this->joinOnce($table_or_column, $on_clause_or_column, self::RIGHT_JOIN);
+	}
+
+	/**
+	 * @param mixed $table_or_column
+	 * @param mixed $on_clause_or_column
+	 * @return Query
+	 */
+	function outerJoinOnce($table_or_column, $on_clause_or_column = null) {
+		return $this->joinOnce($table_or_column, $on_clause_or_column, self::OUTER_JOIN);
 	}
 
 	/**
