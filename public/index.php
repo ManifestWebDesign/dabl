@@ -7,12 +7,14 @@ require_once '../config.php';
 // @see public/.htaccess
 $requested_route = @$_GET['_url'];
 
+$http_verb = strtolower($_SERVER['REQUEST_METHOD']);
+
 unset($_GET['_url'], $_REQUEST['_url']);
 
 // handle the request with whatever Hooks have been set for that purpose
 // @see config/controllers.php
 try {
-	Hook::call(HOOK_LOAD_ROUTE, $requested_route);
+	Controller::load($requested_route, $http_verb);
 } catch (FileNotFoundException $e) {
 	error_log($e->getMessage());
 	echo '<h1>File Not Found</h1>';

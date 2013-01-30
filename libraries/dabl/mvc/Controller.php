@@ -42,8 +42,79 @@ abstract class Controller extends ArrayObject {
 	 */
 	public $persistant = array();
 
+	/**
+	 * @var ControllerRoute
+	 */
+	protected $route;
+
+	/**
+	 * @var string
+	 */
+	protected $httpVerb;
+
 	function __destruct() {
 		set_persistant_values(array_merge_recursive(get_persistant_values(), $this->persistant));
+	}
+
+	function __construct(ControllerRoute $route = null) {
+		$this->setRoute($route);
+	}
+
+	/**
+	 * @param string $route_string
+	 * @param string $http_verb
+	 * @return Controller
+	 */
+	static function load($route_string, $http_verb) {
+		$controller_route = new ControllerRoute($route_string);
+		$controller = $controller_route->getController();
+		$controller->setHttpVerb($http_verb);
+
+		if (null === $controller) {
+			file_not_found($route_string);
+		}
+
+		$controller->doAction($controller_route->getAction(), $controller_route->getParams());
+		return $controller;
+	}
+
+	/**
+	 * @param string $http_verb
+	 * @return Controller
+	 */
+	function setHttpVerb($http_verb) {
+		$this->httpVerb = $http_verb;
+		return $this;
+	}
+
+	/**
+	 * @return ControllerRoute
+	 */
+	function getRoute() {
+		return $this->route;
+	}
+
+	/**
+	 * @param ControllerRoute $route
+	 * @return Controller
+	 */
+	function setRoute(ControllerRoute $route = null) {
+		$this->route = $route;
+		if (null !== $route) {
+			if ($route->getViewDir()) {
+				$this->viewDir = $route->getViewDir();
+			}
+
+			$this->renderPartial = $route->isPartial();
+
+			if ($route->getExtension()) {
+				$this->outputFormat = $route->getExtension();
+			}
+
+			// Restore Flash params
+			$this->setParams(array_merge_recursive(get_clean_persistant_values(), $route->getParams()));
+		}
+		return $this;
 	}
 
 	/**
@@ -66,8 +137,8 @@ abstract class Controller extends ArrayObject {
 	 * @return string
 	 */
 	function getViewDir() {
-		$view = str_replace('\\', '/', $this->viewDir);
-		$view = trim($view, '/');
+		// normalize slashes
+		$view = trim(str_replace('\\', '/', $this->viewDir), '/');
 
 		if ($view === DEFAULT_CONTROLLER) {
 			$view = '';

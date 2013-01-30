@@ -223,6 +223,13 @@ class ControllerRoute {
 	}
 
 	/**
+	 * @return string
+	 */
+	function getViewDir() {
+		return $this->viewDir;
+	}
+
+	/**
 	 * @return Controller
 	 */
 	function getController() {
@@ -231,7 +238,7 @@ class ControllerRoute {
 		}
 
 		require_once $this->controllerDir . '/' . $this->controllerClass . '.php';
-		$instance = new $this->controllerClass;
+		$instance = new $this->controllerClass($this);
 
 		if (!$instance->viewDir) {
 			$instance->viewDir = $this->viewDir;
@@ -247,6 +254,7 @@ class ControllerRoute {
 
 		// Restore Flash params
 		$instance->setParams(array_merge_recursive(get_clean_persistant_values(), $instance->getParams()));
+
 		return $instance;
 	}
 
