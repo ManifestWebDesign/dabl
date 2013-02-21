@@ -43,15 +43,42 @@ class ControllerRoute {
 	/**
 	 * @var bool
 	 */
-	protected $partial = false;
+	protected $isPartial = false;
+
+	/**
+	 * @var bool
+	 */
+	protected $isRestful = false;
+
+	protected $httpVerb;
+
+	protected $headers = array();
 
 	/**
 	 * @var string
 	 */
 	protected $viewDir;
 
-	function __construct($route) {
+	function __construct($route, $headers = array(), $http_verb = null) {
+		$this->setHeaders($headers);
+		if (null !== $http_verb) {
+			$this->httpVerb = strtoupper($http_verb);
+		}
 		$this->setRoute($route);
+	}
+
+	function setHeaders($headers) {
+		$this->headers = $headers;
+		if (!empty($headers['Accept'])) {
+			if (strpos($headers['Accept'], 'application/json') !== false) {
+				$this->extension = 'json';
+			} elseif ($headers['Accept'] == 'application/xml') {
+				$this->extension = 'xml';
+			}
+		}
+		if (!empty($headers['X-HTTP-Method'])) {
+			$this->httpVerb = strtoupper($headers['X-HTTP-Method']);
+		}
 	}
 
 	function setRoute($route) {
@@ -77,14 +104,20 @@ class ControllerRoute {
 		$last = array_pop($segments);
 		if (null !== $last) {
 			$file_parts = explode('.', $last);
-			if (count($file_parts) > 1)
+			if (count($file_parts) > 1) {
 				$this->extension = array_pop($file_parts);
+			}
 			$segments[] = implode('.', $file_parts);
 		}
 
-		if (@$segments[0] == 'partial') {
-			$this->partial = true;
-			array_shift($segments);
+		while (in_array(@$segments[0], array('partial', 'rest'))){
+			if (@$segments[0] == 'partial') {
+				$this->isPartial = true;
+				array_shift($segments);
+			} elseif (@$segments[0] == 'rest') {
+				$this->isRestful = true;
+				array_shift($segments);
+			}
 		}
 
 		$this->segments = $segments;
@@ -144,8 +177,13 @@ class ControllerRoute {
 		$this->params = $segments;
 	}
 
-	static function load($route) {
-		$controller_route = new self($route);
+	/**
+	 * @param string $route
+	 * @param array $headers
+	 * @param string $http_verb
+	 */
+	static function load($route, $headers = array(), $http_verb = null) {
+		$controller_route = new self($route, $headers, $http_verb);
 
 		$controller = $controller_route->getController();
 
@@ -160,10 +198,11 @@ class ControllerRoute {
 	 * @return string
 	 */
 	function getRoute() {
-		$partial = $this->partial ? 'partial/' : '';
+		$partial = $this->isPartial ? 'partial/' : '';
+		$rest = $this->isRestful ? 'rest/' : '';
 		$segments = implode('/', $this->segments);
 		$extension = ($this->extension ? '.' . $this->extension : '');
-		return $partial . $segments . $extension;
+		return $rest . $partial . $segments . $extension;
 	}
 
 	/**
@@ -198,14 +237,32 @@ class ControllerRoute {
 	 * @param bool $bool
 	 */
 	function setPartial($bool) {
-		$this->partial = (bool) $bool;
+		$this->isPartial = (bool) $bool;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function isPartial() {
-		return $this->partial;
+		return $this->isPartial;
+	}
+
+	/**
+	 * @param bool $bool
+	 */
+	function setRestful($bool) {
+		$this->isRestful = (bool) $bool;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function isRestful() {
+		return $this->isRestful;
+	}
+
+	function getHttpVerb() {
+		return $this->httpVerb;
 	}
 
 	/**
@@ -239,18 +296,6 @@ class ControllerRoute {
 
 		require_once $this->controllerDir . '/' . $this->controllerClass . '.php';
 		$instance = new $this->controllerClass($this);
-
-		if (!$instance->viewDir) {
-			$instance->viewDir = $this->viewDir;
-		}
-
-		if ($this->partial) {
-			$instance->renderPartial = true;
-		}
-
-		if (null !== $this->extension) {
-			$instance->outputFormat = $this->extension;
-		}
 
 		// Restore Flash params
 		$instance->setParams(array_merge_recursive(get_clean_persistant_values(), $instance->getParams()));
