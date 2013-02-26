@@ -197,6 +197,34 @@ foreach ($fields as $key => $field):
 	}
 
 	/**
+	 * @return Query
+	 */
+	static function getQuery(array $params = array(), Query $q = null) {
+		$class = class_exists('<?php echo $class_name ?>Query') ? '<?php echo $class_name ?>Query' : 'Query';
+		$q = $q ? clone $q : new $class;
+		$q->setTable(<?php echo $class_name ?>::getTableName());
+
+		// filters
+		foreach ($params as $key => &$param) {
+			if (<?php echo $class_name ?>::hasColumn($key)) {
+				$q->add($key, $param);
+			}
+		}
+
+		// SortBy (alias of sort_by, deprecated)
+		if (isset($params['SortBy']) && !isset($params['order_by'])) {
+			$params['order_by'] = $params['SortBy'];
+		}
+
+		// order_by
+		if (isset($params['order_by']) && <?php echo $class_name ?>::hasColumn($params['order_by'])) {
+			$q->orderBy($params['order_by'], isset($params['dir']) ? Query::DESC : Query::ASC);
+		}
+
+		return $q;
+	}
+
+	/**
 	 * Returns String representation of table name
 	 * @return string
 	 */
@@ -246,11 +274,11 @@ foreach ($fields as $key => $field):
 	 */
 <?php $used_functions[] = 'hasColumn'; ?>
 	static function hasColumn($column_name) {
-		static $lower_case_columns = null;
-		if (null === $lower_case_columns) {
-			$lower_case_columns = array_map('strtolower', <?php echo $class_name ?>::$_columnNames);
+		static $columns_cache = null;
+		if (null === $columns_cache) {
+			$columns_cache = array_map('strtolower', array_merge(<?php echo $class_name ?>::$_columnNames, <?php echo $class_name ?>::$_columns));
 		}
-		return in_array(strtolower($column_name), $lower_case_columns);
+		return in_array(strtolower($column_name), $columns_cache);
 	}
 
 	/**
