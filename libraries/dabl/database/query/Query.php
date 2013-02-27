@@ -421,7 +421,7 @@ class Query {
 		} else {
 			if (null === $on_clause_or_column) {
 				if ($join_type == self::JOIN || $join_type == self::INNER_JOIN) {
-					foreach ($this->_extraTables as $table) {
+					foreach ($this->_extraTables as &$table) {
 						if ($table == $table_or_column) {
 							return $this;
 						}
@@ -433,7 +433,7 @@ class Query {
 			}
 			$join = new QueryJoin($table_or_column, $on_clause_or_column, $join_type);
 		}
-		foreach ($this->_joins as $existing_join) {
+		foreach ($this->_joins as &$existing_join) {
 			if ($join->getTable() == $existing_join->getTable()) {
 				if ($join->getAlias() != $existing_join->getAlias()) {
 					// tables match, but aliases don't match

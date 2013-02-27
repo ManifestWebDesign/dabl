@@ -36,7 +36,3 @@ define('VIEW_TIMESTAMP_FORMAT', 'n/j/Y g:i a');
 
 // default date format for views
 define('VIEW_DATE_FORMAT', 'n/j/Y');
-
-// hook to handle route
-define('HOOK_LOAD_ROUTE', 'HOOK_LOAD_ROUTE');
-Hook::add(HOOK_LOAD_ROUTE, array('ControllerRoute', 'load'), 100);

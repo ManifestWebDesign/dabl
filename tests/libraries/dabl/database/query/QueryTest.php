@@ -285,6 +285,9 @@ ORDER BY `Title` DESC'), preg_replace('/\s/', '', $q->getQuery() . ''));
 		$this->assertEquals(preg_replace('/\s/', '', $expected), preg_replace('/\s/', '', $actual));
 	}
 
+	/**
+	 * @covers Query::joinOnce
+	 */
 	function testJoinOnce() {
 		$q = new Query('table');
 		$q->join('table.column', 'table2.column');
@@ -297,4 +300,3 @@ ORDER BY `Title` DESC'), preg_replace('/\s/', '', $q->getQuery() . ''));
 		$this->assertEquals('JOIN `table2` ON (`table`.`column` = `table2`.`column`)', $join->getQueryStatement() . '');
 	}
 }
-

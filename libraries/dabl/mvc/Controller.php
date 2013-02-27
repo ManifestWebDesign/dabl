@@ -42,8 +42,69 @@ abstract class Controller extends ArrayObject {
 	 */
 	public $persistant = array();
 
+	/**
+	 * @var ControllerRoute
+	 */
+	protected $route;
+
 	function __destruct() {
 		set_persistant_values(array_merge_recursive(get_persistant_values(), $this->persistant));
+	}
+
+	function __construct(ControllerRoute $route = null) {
+		$this->setRoute($route);
+	}
+
+	/**
+	 * @param string|ControllerRoute $route
+	 * @return Controller
+	 */
+	static function load($route, $headers = array(), $http_verb = null) {
+		if (!($route instanceof ControllerRoute)) {
+			$route = new ControllerRoute($route, $headers, $http_verb);
+		}
+		$controller = $route->getController();
+
+		if (null === $controller) {
+			file_not_found($route);
+		}
+
+		$controller->doAction($route->getAction(), $route->getParams());
+		return $controller;
+	}
+
+	/**
+	 * @return ControllerRoute
+	 */
+	function getRoute() {
+		return $this->route;
+	}
+
+	protected function isRestful() {
+		return ($this->route && $this->route->isRestful());
+	}
+
+	/**
+	 * @param ControllerRoute $route
+	 * @return Controller
+	 */
+	function setRoute(ControllerRoute $route = null) {
+		$this->route = $route;
+		if (null !== $route) {
+			if ($route->getViewDir()) {
+				$this->viewDir = $route->getViewDir();
+			}
+
+			$this->renderPartial = $route->isPartial();
+
+			if ($route->getExtension()) {
+				$this->outputFormat = $route->getExtension();
+			}
+
+			// Restore Flash params
+			$this->setParams(array_merge_recursive(get_clean_persistant_values(), $route->getParams()));
+		}
+		return $this;
 	}
 
 	/**
@@ -66,8 +127,8 @@ abstract class Controller extends ArrayObject {
 	 * @return string
 	 */
 	function getViewDir() {
-		$view = str_replace('\\', '/', $this->viewDir);
-		$view = trim($view, '/');
+		// normalize slashes
+		$view = trim(str_replace('\\', '/', $this->viewDir), '/');
 
 		if ($view === DEFAULT_CONTROLLER) {
 			$view = '';
@@ -108,10 +169,14 @@ abstract class Controller extends ArrayObject {
 	 * @param string $view The view to load.  This should be a full view.  It will not be appended to
 	 * the viewDir
 	 */
-	function loadView($view) {
+	function loadView($view, $params = null) {
 
 		if (!in_array($this->outputFormat, $this->allowedFormats)) {
 			throw new RuntimeException("The extension '{$this->outputFormat}' is not supported.");
+		}
+
+		if (func_num_args() == 1) {
+			$params = $this;
 		}
 
 		switch ($this->outputFormat) {
@@ -120,21 +185,21 @@ abstract class Controller extends ArrayObject {
 					$this['content_view'] = $view;
 					$view = $this->layout;
 				}
-				View::load($view, $this, false);
+				View::load($view, $params, false);
 				break;
 
 			case 'json':
 				if (!headers_sent()) {
 					header('Content-type: application/json');
 				}
-				echo json_encode_all($this);
+				echo json_encode_all($params);
 				break;
 
 			case 'xml':
 				if (!headers_sent()) {
 					header('Content-type: application/xml');
 				}
-				echo xml_encode_all($this);
+				echo xml_encode_all($params);
 				break;
 
 			default:
@@ -170,6 +235,12 @@ abstract class Controller extends ArrayObject {
 			}
 		}
 
+		if ($this->isRestful()) {
+			$url = '/rest/' . ltrim($url, '/');
+			Controller::load($url);
+			die;
+		}
+
 		redirect($url, $die);
 	}
 
@@ -179,9 +250,37 @@ abstract class Controller extends ArrayObject {
 	 */
 	function doAction($action_name = null, $args = array()) {
 
+		if ($this->isRestful()) {
+			$has_id = false;
+			if ((string) (int) $action_name === (string) $action_name) {
+				array_unshift($args, $action_name);
+				$action_name = null;
+				$has_id = true;
+			}
+			if (!$action_name) {
+				switch ($this->route->getHttpVerb()) {
+					case 'POST':
+					case 'PUT':
+						$action_name = 'save';
+						break;
+					case 'GET':
+						if ($has_id) {
+							$action_name = 'show';
+						}
+						break;
+					case 'DELETE':
+						if ($has_id) {
+							$action_name = 'delete';
+						}
+						break;
+				}
+			}
+		}
+
 		if (!$action_name) {
 			$action_name = DEFAULT_CONTROLLER;
 		}
+
 		$method_name = str_replace(array('-', '_', ' '), '', $action_name);
 		$view = $this->getView($action_name);
 
@@ -193,12 +292,16 @@ abstract class Controller extends ArrayObject {
 			file_not_found($view);
 		}
 
-		call_user_func_array(array($this, $method_name), $args);
+		$result = call_user_func_array(array($this, $method_name), $args);
 
 		if (!$this->loadView) {
 			return;
 		}
-		$this->loadView($view);
+		if ($this->isRestful()) {
+			$this->loadView($view, $result);
+		} else {
+			$this->loadView($view);
+		}
 	}
 
 }

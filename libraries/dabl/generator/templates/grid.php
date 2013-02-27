@@ -2,10 +2,10 @@
 
 $_get_args = (array) @$_GET;
 
-if (isset($_REQUEST['Dir'])) {
-	unset($_get_args['Dir']);
-} elseif (isset($_REQUEST['SortBy'])) {
-	$_get_args['Dir'] = 'DESC';
+if (isset($_REQUEST['dir'])) {
+	unset($_get_args['dir']);
+} elseif (isset($_REQUEST['order_by'])) {
+	$_get_args['dir'] = 'DESC';
 }
 <?php echo '?>' ?>
 
@@ -21,13 +21,13 @@ foreach($columns as $key => $column){
 		$column_label = trim($column_label);
 	}
 	$column_constant = $model_name . '::' . StringFormat::constant($column->getName());
-	$sort_href = "<?php echo http_build_query(array_merge(\$_get_args, array('SortBy' => $column_constant))) ?>";
+	$sort_href = "<?php echo http_build_query(array_merge(\$_get_args, array('order_by' => $column_constant))) ?>";
 ?>
 			<th class="ui-widget-header <?php if ($key == 0) echo 'ui-corner-tl' ?>">
 				<a href="?<?php echo $sort_href ?>">
-					<?php echo "<?php if( @\$_REQUEST['SortBy'] == $column_constant): ?>" ?>
+					<?php echo "<?php if( @\$_REQUEST['order_by'] == $column_constant): ?>" ?>
 
-						<span class="ui-icon ui-icon-carat-1-<?php echo "<?php echo isset(\$_REQUEST['Dir']) ? 's' : 'n' ?>" ?>"></span>
+						<span class="ui-icon ui-icon-carat-1-<?php echo "<?php echo isset(\$_REQUEST['dir']) ? 's' : 'n' ?>" ?>"></span>
 					<?php echo "<?php endif ?>"?>
 
 					<?php echo $column_label ?>
@@ -107,7 +107,7 @@ if ($actions) {
 	}
 ?>
 			</td>
-<?
+<?php
 }
 ?>
 		</tr>

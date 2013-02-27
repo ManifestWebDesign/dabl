@@ -2,7 +2,9 @@
 
 abstract class ApplicationController extends Controller {
 
-	function __construct() {
+	function __construct(ControllerRoute $route = null) {
+		parent::__construct($route);
+
 		$this['title'] = 'Site Title';
 
 		$this['actions'] = array(
@@ -11,7 +13,7 @@ abstract class ApplicationController extends Controller {
 
 		$current_controller = str_replace('Controller', '', get_class($this));
 
-		if ('Index' == $current_controller){
+		if ('Index' == $current_controller) {
 			$this['current_page'] = 'Home';
 		} else {
 			$this['current_page'] = StringFormat::titleCase($current_controller, ' ');
@@ -27,11 +29,24 @@ abstract class ApplicationController extends Controller {
 	}
 
 	public function doAction($action_name = null, $params = array()) {
-		if($this->outputFormat != 'html') {
+		if ($this->outputFormat != 'html') {
 			unset($this['title'], $this['current_page'], $this['actions']);
 		}
 
-		return parent::doAction($action_name, $params);
+		if ($this->outputFormat == 'json' || $this->outputFormat == 'xml') {
+			try {
+				return parent::doAction($action_name, $params);
+			} catch (Exception $e) {
+				error_log($e);
+				$this['errors'][] = $e->getMessage();
+				if (!$this->loadView) {
+					return;
+				}
+				$this->loadView('');
+			}
+		} else {
+			return parent::doAction($action_name, $params);
+		}
 	}
 
 }
