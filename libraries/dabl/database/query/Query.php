@@ -1165,28 +1165,30 @@ class Query {
 				return $statement;
 			}
 
-			if ($this->_groups) {
-				$groups = $this->_groups;
-				foreach ($groups as &$group) {
-					$statement->addIdentifier($group);
-					$group = QueryStatement::IDENTIFIER;
-				}
-				$statement->string = implode(', ', $groups);
-				return $statement;
-			}
-
-			if (!$this->_distinct && null === $this->getHaving() && $this->_columns) {
-				$columns_to_use = array();
-				foreach ($this->_columns as $column) {
-					if (strpos($column, '(') === false) {
-						continue;
+			if (null === $this->getHaving()) {
+				if ($this->_groups) {
+					$groups = $this->_groups;
+					foreach ($groups as &$group) {
+						$statement->addIdentifier($group);
+						$group = QueryStatement::IDENTIFIER;
 					}
-					$statement->addIdentifier($column);
-					$columns_to_use[] = QueryStatement::IDENTIFIER;
-				}
-				if ($columns_to_use) {
-					$statement->string = implode(', ', $columns_to_use);
+					$statement->string = implode(', ', $groups);
 					return $statement;
+				}
+
+				if (!$this->_distinct && $this->_columns) {
+					$columns_to_use = array();
+					foreach ($this->_columns as $column) {
+						if (strpos($column, '(') === false) {
+							continue;
+						}
+						$statement->addIdentifier($column);
+						$columns_to_use[] = QueryStatement::IDENTIFIER;
+					}
+					if ($columns_to_use) {
+						$statement->string = implode(', ', $columns_to_use);
+						return $statement;
+					}
 				}
 			}
 		}
