@@ -6,10 +6,10 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		$q = <?php echo $model_name ?>::getQuery($_REQUEST);
 
 		// paginate
-		$qp = new QueryPager($q, 25, @$_REQUEST['page']);
+		$qp = new QueryPager($q, !empty($_REQUEST['limit']) ? $_REQUEST['limit'] : 25, @$_REQUEST['page']);
 
-		$this['<?php echo $plural ?>'] = $qp->fetchPage();
 		$this['pager'] = $qp;
+		return $this['<?php echo $plural ?>'] = $qp->fetchPage();
 	}
 
 	function edit(<?php if (@$pk_method): ?>$<?php echo $single ?>_id = null<?php endif ?>) {

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * @param string $url_format The url to format paging links with, ie: /actu/index.html?page=$page_num. $page_num to be replaced with page number.
+ * @param string $url_format The url to format paging links with, ie: /actu/index.html?page=page_num. page_num to be replaced with page number.
  * @param int $page_limit For limiting the number of page number links
  */
 
