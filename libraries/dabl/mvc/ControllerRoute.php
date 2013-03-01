@@ -76,6 +76,8 @@ class ControllerRoute {
 
 	function setHeaders($headers) {
 		$this->headers = $headers;
+
+		// auto detect output format
 		if (!empty($headers['Accept'])) {
 			if (strpos($headers['Accept'], 'application/json') !== false) {
 				$this->extension = 'json';
@@ -83,8 +85,15 @@ class ControllerRoute {
 				$this->extension = 'xml';
 			}
 		}
+
+		// HTTP verb
 		if (!empty($headers['X-HTTP-Method'])) {
 			$this->httpVerb = strtoupper($headers['X-HTTP-Method']);
+		}
+
+		// Ajax Request = partial (no layout)
+		if (!empty($headers['X-Requested-With']) && $headers['X-Requested-With'] == "XMLHttpRequest") {
+			$this->isPartial = true;
 		}
 	}
 
