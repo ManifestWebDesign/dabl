@@ -174,15 +174,15 @@ class PubSubTest extends PHPUnit_Framework_TestCase {
 		$this->assertNotEmpty(PubSub::events());
 
 		// same event, different priority
-		$this->assertEmpty(PubSub::callbacks('my_event', 50));
+		$this->assertEmpty(PubSub::subscriptions('my_event', 50));
 
 		// same priority, different event
-		$this->assertEmpty(PubSub::callbacks('some_other_event', 100));
+		$this->assertEmpty(PubSub::subscriptions('some_other_event', 100));
 
 		// diffent event, no priority distinction
-		$this->assertEmpty(PubSub::callbacks('some_other_event'));
+		$this->assertEmpty(PubSub::subscriptions('some_other_event'));
 
-		$callbacks = PubSub::callbacks('my_event');
+		$callbacks = PubSub::subscriptions('my_event');
 		$this->assertNotEmpty($callbacks);
 		$this->assertEquals('global_pub_sub_test_callback', $callbacks[0]);
 	}
@@ -224,9 +224,9 @@ class PubSubTest extends PHPUnit_Framework_TestCase {
 		);
 		foreach ($callbacks as $key => $callback) {
 			PubSub::subscribe('my_event', $callback);
-			$this->assertEquals(1, count(PubSub::callbacks('my_event')), '1 callback was added, so 1 callback should be in array.');
+			$this->assertEquals(1, count(PubSub::subscriptions('my_event')), '1 callback was added, so 1 callback should be in array.');
 			PubSub::unsubscribe('my_event', $callback);
-			$this->assertEquals(0, count(PubSub::callbacks('my_event')), '1 callback was unsubscribed, so 0 callbacks should be in array.');
+			$this->assertEquals(0, count(PubSub::subscriptions('my_event')), '1 callback was unsubscribed, so 0 callbacks should be in array.');
 		}
 	}
 

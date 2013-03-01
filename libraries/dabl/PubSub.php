@@ -16,7 +16,7 @@ class PubSub {
 
 		// return all hooks for all hook names
 		foreach (array_keys(self::$callbacks) as $event) {
-			foreach (self::callbacks($event) as $callback) {
+			foreach (self::subscriptions($event) as $callback) {
 				$events[$event][] = $callback;
 			}
 		}
@@ -31,7 +31,7 @@ class PubSub {
 	 * @return array of callbacks, in order of execution priority
 	 * @author Baylor Rae'
 	 */
-	public static function callbacks($event, $priority = null) {
+	public static function subscriptions($event, $priority = null) {
 		$events = array();
 		if (!isset(self::$callbacks[$event])) {
 			return array();
@@ -86,7 +86,7 @@ class PubSub {
 	 * @author Baylor Rae'
 	 */
 	public static function publish($event, $arg1 = null) {
-		$events = self::callbacks($event);
+		$events = self::subscriptions($event);
 		$params = func_get_args();
 		array_shift($params);
 
