@@ -17,6 +17,7 @@ class QueryPager {
 	private $page = 1;
 	private $limit = 50;
 	private $total;
+
 	/**
 	 * @var Query
 	 */
@@ -83,13 +84,25 @@ class QueryPager {
 	 * @param int $page_number
 	 */
 	function setPageNum($page_number) {
-		if (!is_numeric($page_number) || $page_number < 1)
-			$page_number = 1;
+		$this->page = $page_number;
 
-		if ($page_number > $this->getPageCount())
+		if ($this->total !== null) {
+			$this->sanitizePageNum();
+		}
+	}
+
+	/**
+	 * Ensure page num is an intval that does not exceed page
+	 * count. Lazy sanitized because page count is not known
+	 * until after limit is set and count query is run.
+	 */
+	function sanitizePageNum() {
+		if (!is_numeric($this->page) || $this->page < 1) {
+			$this->page = 1;
+		}
+		if ($this->page > $this->getPageCount()) {
 			$this->page = $this->getPageCount();
-		else
-			$this->page = $page_number;
+		}
 	}
 
 	/**
@@ -103,8 +116,9 @@ class QueryPager {
 	 * @return int
 	 */
 	function getPrevPageNum() {
-		if (!$this->isFirstPage())
+		if (!$this->isFirstPage()) {
 			return $this->page - 1;
+		}
 		return 1;
 	}
 
@@ -112,8 +126,9 @@ class QueryPager {
 	 * @return int
 	 */
 	function getNextPageNum() {
-		if (!$this->isLastPage())
+		if (!$this->isLastPage()) {
 			return $this->page + 1;
+		}
 		return 1;
 	}
 
@@ -129,8 +144,9 @@ class QueryPager {
 	 * @param int $per_page
 	 */
 	function setLimit($per_page) {
-		if (!is_numeric($per_page) || $per_page < 1)
+		if (!is_numeric($per_page) || $per_page < 1) {
 			$per_page = 50;
+		}
 		$this->limit = $per_page;
 	}
 
@@ -139,8 +155,9 @@ class QueryPager {
 	 */
 	function getOffset() {
 		$offset = ($this->getPageNum() * $this->limit) - $this->limit;
-		if ($offset < 0)
+		if ($offset < 0) {
 			$offset = 0;
+		}
 		return $offset;
 	}
 
@@ -148,12 +165,14 @@ class QueryPager {
 	 * Gets the count of the results of the query
 	 */
 	function getTotal() {
-		if ($this->total !== null)
+		if ($this->total !== null) {
 			return $this->total;
-		if ($this->className)
+		}
+		if ($this->className) {
 			$total = call_user_func_array(array($this->className, 'doCount'), array($this->query));
-		else
+		} else {
 			$total = $this->query->doCount();
+		}
 		$this->total = $total;
 		return $total;
 	}
@@ -209,6 +228,7 @@ class QueryPager {
 	 * an array of DABL objects (if a classname was provided) or a PDOStatement
 	 */
 	function fetchPage() {
+		$this->sanitizePageNum();
 		$q = clone $this->query;
 		$q->setLimit($this->getLimit());
 		$q->setOffset($this->getOffset());
@@ -219,6 +239,9 @@ class QueryPager {
 			return $q->doSelect();
 	}
 
+	/**
+	 * @deprecated in favor of /views/pager.php
+	 */
 	function getPagerLinks($url_format, $limit = 20, $css_class = '', $css_class_current = '', $link_text = array()) {
 		throw new Exception(__METHOD__ . ' is deprectated');
 	}
@@ -229,6 +252,7 @@ class QueryPager {
 	 * @param int $page_limit For limiting the number of page number links
 	 * @param array $labels ie: array("first" => "go to first page", "prev" => "previous", "next" => "next", "first" => "go to last page")
 	 * @return string Html paging content
+	 * @deprecated in favor of /views/pager.php
 	 */
 	function getLinks($url_format, $page_limit = null, $labels = array()) {
 		$default_labels = array(
@@ -268,7 +292,7 @@ EOF;
 			for ($i = $start; $i <= $end; ++$i):
 				$str .= <<<EOF
 EOF;
- if ($i == $page):
+				if ($i == $page):
 					$str .= <<<EOF
 			<span>{$i}</span>
 EOF;
@@ -280,7 +304,7 @@ EOF;
 				endif;
 				$str .= <<<EOF
 EOF;
- endfor;
+			endfor;
 
 			if ($page < $count):
 				$link = site_url(str_replace('$page_num', $page + 1, $url_format));
