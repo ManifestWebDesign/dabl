@@ -36,7 +36,7 @@ class PubSubTest extends PHPUnit_Framework_TestCase {
 	public function it_should_add_new_event() {
 		PubSub::subscribe('/add/user', function() {
 
-				});
+		});
 		$events = PubSub::events();
 
 		$this->assertArrayHasKey('/add/user', $events);
@@ -49,8 +49,8 @@ class PubSubTest extends PHPUnit_Framework_TestCase {
 	public function it_should_call_the_event_callback() {
 		$mock = $this->getMock('stdClass', array('foo'));
 		$mock->expects($this->once())
-				->method('foo')
-				->with('foobar');
+			->method('foo')
+			->with('foobar');
 
 		PubSub::subscribe('/do/something', array($mock, 'foo'));
 		PubSub::publish('/do/something', 'foobar');
@@ -63,12 +63,12 @@ class PubSubTest extends PHPUnit_Framework_TestCase {
 		$mock = $this->getMock('stdClass', array('foo', 'bar'));
 
 		$mock->expects($this->once())
-				->method('foo')
-				->with('baz');
+			->method('foo')
+			->with('baz');
 
 		$mock->expects($this->once())
-				->method('bar')
-				->with('baz');
+			->method('bar')
+			->with('baz');
 
 		PubSub::subscribe('/a/thing', array($mock, 'foo'));
 		PubSub::subscribe('/a/thing', array($mock, 'bar'));
@@ -147,7 +147,10 @@ class PubSubTest extends PHPUnit_Framework_TestCase {
 	public function testCallbackCanReturnFalse() {
 		$callbacks = array(
 			function() {
-				PubSubTest::$callbackCalled = true;
+				return false;
+			},
+			function() {
+				return true;
 			},
 			array('PubSubTest', 'staticCallback'),
 			array($this, 'instanceCallback'),
@@ -155,29 +158,22 @@ class PubSubTest extends PHPUnit_Framework_TestCase {
 		);
 
 		foreach ($callbacks as $callback) {
-			PubSub::subscribe('my_event', $callback, 100);
+			PubSub::subscribe('my_event', $callback);
 		}
-		PubSub::subscribe('my_event', function() {
-					return false;
-				}, 99);
-		PubSub::publish('my_event');
-		$this->assertFalse(self::$callbackCalled, 'Returning false should have prevented the execution of the other events.');
+		$this->assertFalse(PubSub::publish('my_event'), 'Returning false from any callback should cause a false return value for the publish.');
 	}
 
 	/**
 	 * @covers PubSub::add
 	 */
 	public function testGet() {
-		PubSub::subscribe('my_event', 'global_pub_sub_test_callback', 100);
+		PubSub::subscribe('my_event', 'global_pub_sub_test_callback');
 
 		// all events
 		$this->assertNotEmpty(PubSub::events());
 
-		// same event, different priority
-		$this->assertEmpty(PubSub::subscriptions('my_event', 50));
-
 		// same priority, different event
-		$this->assertEmpty(PubSub::subscriptions('some_other_event', 100));
+		$this->assertEmpty(PubSub::subscriptions('some_other_event'));
 
 		// diffent event, no priority distinction
 		$this->assertEmpty(PubSub::subscriptions('some_other_event'));

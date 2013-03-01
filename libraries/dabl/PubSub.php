@@ -2,7 +2,7 @@
 
 class PubSub {
 
-	private static $callbacks = array();
+	private static $events = array();
 
 	/**
 	 * Get all events that have been subscribed to
@@ -15,7 +15,7 @@ class PubSub {
 		$events = array();
 
 		// return all hooks for all hook names
-		foreach (array_keys(self::$callbacks) as $event) {
+		foreach (array_keys(self::$events) as $event) {
 			foreach (self::subscriptions($event) as $callback) {
 				$events[$event][] = $callback;
 			}
@@ -29,30 +29,14 @@ class PubSub {
 	 * @param string $event
 	 * @param int $priority
 	 * @return array of callbacks, in order of execution priority
-	 * @author Baylor Rae'
 	 */
-	public static function subscriptions($event, $priority = null) {
+	public static function subscriptions($event) {
 		$events = array();
-		if (!isset(self::$callbacks[$event])) {
+		if (!isset(self::$events[$event])) {
 			return array();
 		}
 
-		// return all hooks for a given name
-		if (null === $priority) {
-			ksort(self::$callbacks[$event]);
-			foreach (self::$callbacks[$event] as &$callbacks) {
-				foreach ($callbacks as $callback) {
-					$events[] = $callback;
-				}
-			}
-			return $events;
-		}
-
-		// return only hooks for given name and priority
-		if (!isset(self::$callbacks[$event][$priority])) {
-			return array();
-		}
-		return array_values(self::$callbacks[$event][$priority]);
+		return array_values(self::$events[$event]);
 	}
 
 	/**
@@ -60,21 +44,19 @@ class PubSub {
 	 *
 	 * @param string $event
 	 * @param callback $callback
-	 * @param int $priority
 	 * @throws InvalidArgumentException
 	 * @return void
-	 * @author Baylor Rae'
 	 */
-	public static function subscribe($event, $callback, $priority = 100) {
+	public static function subscribe($event, $callback) {
 		if (!is_callable($callback)) {
 			throw new InvalidArgumentException('Callback "' . print_r($callback, true) . '" is not callable. ');
 		}
 
-		if (!isset(self::$callbacks[$event])) {
-			self::$callbacks[$event] = array();
+		if (!isset(self::$events[$event])) {
+			self::$events[$event] = array();
 		}
 
-		self::$callbacks[$event][$priority][self::getCallbackHash($callback)] = $callback;
+		self::$events[$event][self::getCallbackHash($callback)] = $callback;
 	}
 
 	/**
@@ -83,59 +65,45 @@ class PubSub {
 	 * @param string $event
 	 * @param mixed $arg1
 	 * @return boolean
-	 * @author Baylor Rae'
 	 */
 	public static function publish($event, $arg1 = null) {
 		$events = self::subscriptions($event);
 		$params = func_get_args();
 		array_shift($params);
 
+		$response = true;
 		foreach ($events as $callback) {
 			if (call_user_func_array($callback, $params) === false) {
-				return false;
+				$response = false;
 			}
 		}
+		return $response;
 	}
 
 	/**
 	 * Removes a callback for the given $hook_name
 	 * @param string $event
 	 * @param callback $callback
-	 * @param int $priority
 	 */
-	public static function unsubscribe($event = null, $callback = null, $priority = null) {
+	public static function unsubscribe($event = null, $callback = null) {
 		if (null === $event) {
-			self::$callbacks = array();
+			self::$events = array();
 			return;
 		}
 
-		if (!isset(self::$callbacks[$event])) {
+		if (!isset(self::$events[$event])) {
 			return;
 		}
 
 		if (null === $callback) {
-			// remove all callbacks for this hook name
-			if (null === $priority) {
-				unset(self::$callbacks[$event]);
-				return;
-			}
-			// remove all callbacks for this hook name for specific priority
-			unset(self::$callbacks[$event][$priority]);
+			unset(self::$events[$event]);
 			return;
 		}
 
 		$id = self::getCallbackHash($callback);
 
 		// remove all callbacks for specific hook at specific priority level
-		if (null !== $callback && null !== $priority) {
-			unset(self::$callbacks[$event][$priority][$id]);
-			return;
-		}
-
-		// remove all callbacks for specific hook at all priority levels
-		foreach (self::$callbacks[$event] as $priority => &$callbacks) {
-			unset($callbacks[$id]);
-		}
+		unset(self::$events[$event][$id]);
 	}
 
 	/**
@@ -146,7 +114,7 @@ class PubSub {
 		if (is_object($callback)) {
 			return spl_object_hash($callback);
 		}
-		return md5(print_r($callback, true));
+		return md5(serialize($callback));
 	}
 
 }
