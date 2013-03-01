@@ -145,6 +145,17 @@ abstract class Model {
 		return in_array($type, self::$LOB_TYPES);
 	}
 
+	/**
+	 * @param string $column_name
+	 * @return string
+	 */
+	static function normalizeColumnName($column_name) {
+		if (($pos = strrpos($column_name, '.')) !== false) {
+			return substr($column_name, $pos + 1);
+		}
+		return $column_name;
+	}
+
 	const MAX_INSTANCE_POOL_SIZE = 400;
 
 	/**
@@ -314,7 +325,7 @@ abstract class Model {
 	 * @return bool
 	 */
 	function isColumnModified($column_name) {
-		return array_key_exists(strtolower($column_name), array_map('strtolower', $this->_modifiedColumns));
+		return array_key_exists(strtolower($this->normalizeColumnName($column_name)), array_map('strtolower', $this->_modifiedColumns));
 	}
 
 	/**
@@ -336,6 +347,8 @@ abstract class Model {
 		if (null === $column_type) {
 			$column_type = $this->getColumnType($column_name);
 		}
+
+		$column_name = $this->normalizeColumnName($column_name);
 
 		if ($column_type == self::COLUMN_TYPE_BOOLEAN) {
 			if ($value === true || $value === 1 || $value === '1' || strtolower($value) === 'on' || strtolower($value) === 'true') {

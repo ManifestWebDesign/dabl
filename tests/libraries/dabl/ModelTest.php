@@ -56,6 +56,12 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 		return true;
 	}
 
+	function testNormalizeColumnName() {
+		$this->assertEquals('bar', Model::normalizeColumnName('foo.bar'));
+		$this->assertEquals('bar', Model::normalizeColumnName('foo.foo.bar'));
+		$this->assertEquals('bar', Model::normalizeColumnName('bar'));
+	}
+
 	/**
 	 * @covers Model::__set
 	 * @covers Model::__get

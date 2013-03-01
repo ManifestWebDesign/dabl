@@ -262,11 +262,11 @@ foreach ($fields as $key => $field):
 
 	/**
 	 * Get the type of a column
-	 * @return array
+	 * @return string
 	 */
-<?php $used_functions[] = 'getColumnTypes'; ?>
+<?php $used_functions[] = 'getColumnType'; ?>
 	static function getColumnType($column_name) {
-		return <?php echo $class_name ?>::$_columnTypes[$column_name];
+		return <?php echo $class_name ?>::$_columnTypes[<?php echo $class_name ?>::normalizeColumnName($column_name)];
 	}
 
 	/**
@@ -276,10 +276,11 @@ foreach ($fields as $key => $field):
 	static function hasColumn($column_name) {
 		static $columns_cache = null;
 		if (null === $columns_cache) {
-			$columns_cache = array_map('strtolower', array_merge(<?php echo $class_name ?>::$_columnNames, <?php echo $class_name ?>::$_columns));
+			$columns_cache = array_map('strtolower', <?php echo $class_name ?>::$_columnNames);
 		}
-		return in_array(strtolower($column_name), $columns_cache);
+		return in_array(strtolower(<?php echo $class_name ?>::normalizeColumnName($column_name)), $columns_cache);
 	}
+
 
 	/**
 	 * Access to array of primary keys
@@ -315,11 +316,11 @@ foreach ($fields as $key => $field):
 
 	 */
 <?php $used_functions[] = 'retrieveByPK'; ?>
-	static function retrieveByPK($the_pk) {
+	 static function retrieveByPK(<?php if ($PKs && count($PKs) == 1): ?>$<?php echo StringFormat::variable($PKs[0]) ?><?php else: ?>$the_pk<?php endif ?>) {
 <?php if (count($PKs) > 1): ?>
 		throw new Exception('This table has more than one primary key.  Use retrieveByPKs() instead.');
 <?php else: ?>
-		return <?php echo $class_name ?>::retrieveByPKs($the_pk);
+		return <?php echo $class_name ?>::retrieveByPKs(<?php if ($PKs && count($PKs) == 1): ?>$<?php echo StringFormat::variable($PKs[0]) ?><?php else: ?>$the_pk<?php endif ?>);
 <?php endif ?>
 	}
 
@@ -330,12 +331,12 @@ foreach ($fields as $key => $field):
 
 	 */
 <?php $used_functions[] = 'retrieveByPKs'; ?>
-	static function retrieveByPKs(<?php foreach ($PKs as $k => &$v): ?><?php if ($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><?php endforeach ?>) {
+	static function retrieveByPKs(<?php foreach ($PKs as $k => &$v): ?><?php if ($k > 0): ?>, <?php endif ?>$<?php echo StringFormat::variable($v) ?><?php endforeach ?>) {
 <?php if (0 === count($PKs)): ?>
 		throw new Exception('This table does not have any primary keys.');
 <?php else: ?>
 <?php foreach ($PKs as $k => &$v): ?>
-		if (null === $<?php echo strtolower(str_replace('-', '_', $v)) ?>) {
+		if (null === $<?php echo StringFormat::variable($v) ?>) {
 			return null;
 		}
 <?php endforeach ?>
@@ -343,15 +344,14 @@ foreach ($fields as $key => $field):
 		$args = func_get_args();
 <?php endif; ?>
 		if (<?php echo $class_name ?>::$_poolEnabled) {
-			$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if (1 == count($PKs)): ?>$<?php echo strtolower(str_replace('-', '_', $PK)) ?><?php else: ?>implode('-', $args)<?php endif ?>);
+			$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if (1 == count($PKs)): ?>$<?php echo StringFormat::variable($PK) ?><?php else: ?>implode('-', $args)<?php endif ?>);
 			if (null !== $pool_instance) {
 				return $pool_instance;
 			}
 		}
-		$conn = <?php echo $class_name ?>::getConnection();
 		$q = new Query;
 <?php foreach ($PKs as $k => &$v): ?>
-		$q->add('<?php echo $v ?>', $<?php echo strtolower(str_replace('-', '_', $v)) ?>);
+		$q->add('<?php echo $v ?>', $<?php echo StringFormat::variable($v) ?>);
 <?php endforeach ?>
 		$records = <?php echo $class_name ?>::doSelect($q);
 		return array_shift($records);
@@ -386,8 +386,7 @@ foreach ($fields as $key => $field):
 	}
 ?>
 	static function retrieveByColumn($field, $value) {
-		$conn = <?php echo $class_name ?>::getConnection();
-		$q = Query::create()->add($field, $value)->setLimit(1)<?php if($PK){ ?>->order('<?php echo $PK ?>')<?php } ?>;
+		$q = Query::create()->add($field, $value)->setLimit(1)<?php if ($PK): ?>->order('<?php echo $PK ?>')<?php endif ?>;
 		$records = <?php echo $class_name ?>::doSelect($q);
 		return array_shift($records);
 	}
@@ -693,8 +692,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 
 	 */
 	function set<?php echo StringFormat::titleCase($from_column_clean) ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
-		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($<?php echo $lc_to_class_name ?>);
-		return $this;
+		return $this->set<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($<?php echo $lc_to_class_name ?>);
 	}
 
 <?php
