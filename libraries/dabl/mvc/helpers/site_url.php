@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @link https://github.com/ManifestWebDesign/DABL
+ * @link http://manifestwebdesign.com/redmine/projects/dabl
+ * @author Manifest Web Design
+ * @license    MIT License
+ */
+
+/**
  * Return a rooted path to the given URL.
  * If the URL is already a complete URL (prefixed with http:// or
  * https://), then the URL will be returned unmodified.

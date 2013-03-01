@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @link https://github.com/ManifestWebDesign/DABL
+ * @link http://manifestwebdesign.com/redmine/projects/dabl
+ * @author Baylor Rae
+ * @author Manifest Web Design
+ * @license    MIT License
+ */
+
 class PubSub {
 
 	private static $events = array();
@@ -9,7 +17,6 @@ class PubSub {
 	 *
 	 * @param string $event
 	 * @return array of callbacks, indexed by event name
-	 * @author Baylor Rae'
 	 */
 	public static function events() {
 		$events = array();
