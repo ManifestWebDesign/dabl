@@ -8,13 +8,13 @@ class PubSub {
 	 * Get all events that have been subscribed to
 	 *
 	 * @param string $event
-	 * @return array of callbacks, indexed by event name, in order of execution priority
+	 * @return array of callbacks, indexed by event name
 	 * @author Baylor Rae'
 	 */
 	public static function events() {
 		$events = array();
 
-		// return all hooks for all hook names
+		// return all callbacks for all events
 		foreach (array_keys(self::$events) as $event) {
 			foreach (self::subscriptions($event) as $callback) {
 				$events[$event][] = $callback;
@@ -24,11 +24,10 @@ class PubSub {
 	}
 
 	/**
-	 * Get all callbacks for a given event, in order of execution priority
+	 * Get all callbacks for a given event
 	 *
 	 * @param string $event
-	 * @param int $priority
-	 * @return array of callbacks, in order of execution priority
+	 * @return array of callbacks
 	 */
 	public static function subscriptions($event) {
 		$events = array();
@@ -81,7 +80,7 @@ class PubSub {
 	}
 
 	/**
-	 * Removes a callback for the given $hook_name
+	 * Removes a callback for the given $event
 	 * @param string $event
 	 * @param callback $callback
 	 */
@@ -102,7 +101,7 @@ class PubSub {
 
 		$id = self::getCallbackHash($callback);
 
-		// remove all callbacks for specific hook at specific priority level
+		// remove all callbacks for specific event
 		unset(self::$events[$event][$id]);
 	}
 
