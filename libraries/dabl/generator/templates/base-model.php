@@ -202,7 +202,9 @@ foreach ($fields as $key => $field):
 	static function getQuery(array $params = array(), Query $q = null) {
 		$class = class_exists('<?php echo $class_name ?>Query') ? '<?php echo $class_name ?>Query' : 'Query';
 		$q = $q ? clone $q : new $class;
-		$q->setTable(<?php echo $class_name ?>::getTableName());
+		if (!$q->getTable()) {
+			$q->setTable(<?php echo $class_name ?>::getTableName());
+		}
 
 		// filters
 		foreach ($params as $key => &$param) {
@@ -545,7 +547,7 @@ foreach ($fields as $key => $field):
 	static function doCount(Query $q = null) {
 		$q = $q ? clone $q : new Query;
 		$conn = <?php echo $class_name ?>::getConnection();
-		if (!$q->getTable() || <?php echo $class_name ?>::getTableName() != $q->getTable()) {
+		if (!$q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
 		}
 		return $q->doCount($conn);
@@ -560,7 +562,7 @@ foreach ($fields as $key => $field):
 	static function doDelete(Query $q, $flush_pool = true) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
-		if (!$q->getTable() || <?php echo $class_name ?>::getTableName() != $q->getTable()) {
+		if (!$q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
 		}
 		$result = $q->doDelete($conn);
@@ -599,7 +601,7 @@ foreach ($fields as $key => $field):
 		$q = $q ? clone $q : new Query;
 		$conn = <?php echo $class_name ?>::getConnection();
 
-		if (!$q->getTable() || false === strrpos($q->getTable(), <?php echo $class_name ?>::getTableName())) {
+		if (!$q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
 		}
 
@@ -621,7 +623,7 @@ foreach ($fields as $key => $field):
 		$q = $q ? clone $q : new Query;
 		$conn = <?php echo $class_name ?>::getConnection();
 
-		if (!$q->getTable() || false === strrpos($q->getTable(), <?php echo $class_name ?>::getTableName())) {
+		if (!$q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
 		}
 

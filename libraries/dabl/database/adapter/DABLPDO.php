@@ -227,7 +227,7 @@ abstract class DABLPDO extends PDO {
 	/**
 	 * Execute an SQL statement and return the number of affected rows
 	 * @param string $statement The SQL statement to prepare and execute.
-	 * @return PDOStatement
+	 * @return int
 	 */
 	function exec($statement) {
 
