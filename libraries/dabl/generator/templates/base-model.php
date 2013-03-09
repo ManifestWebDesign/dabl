@@ -33,7 +33,7 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 	/**
 	 * Array of objects to batch insert
 	 */
-	private static $_insertBatch = array();
+	protected static $_insertBatch = array();
 
 	/**
 	 * Maximum size of the insert batch
@@ -1036,7 +1036,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return <?php echo $from_class_name ?>::doDelete($this->get<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>Query($q));
 	}
 
-	private $<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>_c = array();
+	protected $<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>_c = array();
 
 	/**
 	 * Returns an array of <?php echo $from_class_name ?> objects with a <?php echo $from_column ?>
