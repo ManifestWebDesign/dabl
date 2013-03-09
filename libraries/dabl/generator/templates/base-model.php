@@ -31,6 +31,16 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 	protected static $_poolEnabled = true;
 
 	/**
+	 * Array of objects to batch insert
+	 */
+	private static $_insertBatch = array();
+
+	/**
+	 * Maximum size of the insert batch
+	 */
+	protected static $_insertBatchSize = 500;
+
+	/**
 	 * Array of all primary keys
 	 * @var string[]
 	 */
@@ -588,7 +598,7 @@ foreach ($fields as $key => $field):
 			$class = '<?php echo $class_name ?>';
 		}
 
-		return <?php echo $class_name ?>::fromResult(self::doSelectRS($q), $class);
+		return <?php echo $class_name ?>::fromResult(<?php echo $class_name ?>::doSelectRS($q), $class);
 	}
 
 	/**
@@ -606,6 +616,91 @@ foreach ($fields as $key => $field):
 		}
 
 		return $q->doUpdate($column_values, $conn);
+	}
+
+	/**
+	 * Set the maximum insert batch size, once this size is reached the batch automatically inserts.
+	 * @param int $size
+	 * @return int insert batch size
+	 */
+	static function setInsertBatchSize($size = 500) {
+		return <?php echo $class_name ?>::$_insertBatchSize = $size;
+	}
+
+	/**
+	 * Queue for batch insert
+	 * @return Model this
+	 */
+	function queueForInsert() {
+		// If we've reached the maximum batch size, insert it and empty it.
+		if (count(<?php echo $class_name ?>::$_insertBatch) >= <?php echo $class_name ?>::$_insertBatchSize) {
+			<?php echo $class_name ?>::insertBatch();
+		}
+
+		<?php echo $class_name ?>::$_insertBatch[] = $this;
+
+		return $this;
+	}
+
+	/**
+	 * @return int row count
+	 * @throws RuntimeException
+	 */
+	static function insertBatch() {
+		$records = <?php echo $class_name ?>::$_insertBatch;
+		if (!$records) {
+			return 0;
+		}
+		$conn = <?php echo $class_name ?>::getConnection();
+		$columns = <?php echo $class_name ?>::getColumnNames();
+		$quoted_table = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
+
+
+		$values = array();
+
+		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', array_map(array($conn, 'quoteIdentifier'), $columns)) . ') VALUES' . "\n";
+
+		foreach ($records as $k => $r) {
+			$placeholders = array();
+
+			if (!$r->validate()) {
+				throw new RuntimeException('Cannot save ' . get_class($r) . ' with validation errors: ' . implode(', ', $r->getValidationErrors()));
+			}
+			if ($r->isNew() && $r->hasColumn('Created') && !$r->isColumnModified('Created')) {
+				$r->setCreated(time());
+			}
+			if (($r->isNew() || $r->isModified()) && $r->hasColumn('Updated') && !$r->isColumnModified('Updated')) {
+				$r->setUpdated(time());
+			}
+
+			foreach ($columns as &$column) {
+				$values[] = $r->$column;
+				$placeholders[] = '?';
+			}
+
+			if ($k > 0) {
+				$query_s .= ",\n";
+			}
+			$query_s .= '(' . implode(', ', $placeholders) . ')';
+		}
+
+		$statement = new QueryStatement($conn);
+		$statement->setString($query_s);
+		$statement->setParams($values);
+
+		$result = $statement->bindAndExecute();
+
+		foreach ($records as $r) {
+			$r->setNew(false);
+			$r->resetModified();
+
+			if (!$r->hasPrimaryKeyValues()) {
+				$r->setDirty(true);
+			}
+		}
+
+		<?php echo $class_name ?>::$_insertBatch = array();
+		return $result->rowCount();
 	}
 
 	static function coerceTemporalValue($value, $column_type, DABLPDO $conn = null) {
