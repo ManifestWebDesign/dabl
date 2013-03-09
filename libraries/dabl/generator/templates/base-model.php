@@ -694,7 +694,9 @@ foreach ($fields as $key => $field):
 			$r->setNew(false);
 			$r->resetModified();
 
-			if (!$r->hasPrimaryKeyValues()) {
+			if ($r->hasPrimaryKeyValues()) {
+				<?php echo $class_name ?>::insertIntoPool($r);
+			} else {
 				$r->setDirty(true);
 			}
 		}
