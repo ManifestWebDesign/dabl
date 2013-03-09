@@ -382,7 +382,7 @@ foreach ($fields as $key => $field):
 	 */
 	static function retrieveBy<?php echo StringFormat::titleCase($field->getName()) ?>($value) {
 <?php
-		if ($field->isPrimaryKey()) {
+		if ($field->isPrimaryKey() && count($field->getTable()->getPrimaryKey()) === 1) {
 ?>
 		return <?php echo $class_name?>::retrieveByPK($value);
 <?php
