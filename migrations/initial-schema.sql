@@ -63,15 +63,29 @@ CREATE TABLE water_supplier
 
 CREATE TABLE water_tester
 (
-   profile_id integer NOT NULL PRIMARY KEY,
-   created timestamp with time zone,
-   updated timestamp with time zone,
-   gauge_number character varying(255),
-   gauge_calibrated date,
-   certification_number character varying(255),
-   FOREIGN KEY (profile_id) REFERENCES profile (id) ON UPDATE CASCADE ON DELETE CASCADE
+	profile_id integer NOT NULL PRIMARY KEY,
+	created timestamp with time zone,
+	updated timestamp with time zone,
+	gauge_number character varying(255),
+	gauge_calibrated date,
+	certification_number character varying(255),
+	FOREIGN KEY (profile_id) REFERENCES profile (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+CREATE TABLE profile_contract
+(
+	customer_profile_id integer NOT NULL,
+	vendor_profile_id integer NOT NULL,
+	customer_status smallint,
+	vendor_status smallint,
+	PRIMARY KEY (id),
+	UNIQUE (customer_profile_id, vendor_profile_id),
+	FOREIGN KEY (customer_profile_id) REFERENCES profile (id) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY (vendor_profile_id) REFERENCES profile (id) ON UPDATE CASCADE ON DELETE CASCADE
+)
+INHERITS (entity);
+
+ALTER TABLE profile_contract OWNER TO molitech_oms;
 ALTER TABLE water_tester OWNER TO molitech_oms;
 ALTER TABLE water_supplier OWNER TO molitech_oms;
 ALTER TABLE profile_member OWNER TO molitech_oms;
