@@ -85,6 +85,33 @@ CREATE TABLE profile_contract
 )
 INHERITS (entity);
 
+CREATE TABLE "session"
+(
+	id serial,
+	ip_address inet,
+	user_profile_id integer,
+	company_profile_id integer,
+	user_agent character varying(255),
+	started timestamp with time zone,
+	ended timestamp with time zone,
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_profile_id) REFERENCES "user" (profile_id) ON UPDATE CASCADE ON DELETE SET NULL,
+	FOREIGN KEY (company_profile_id) REFERENCES "profile" (id) ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE session_event
+(
+	id serial,
+	session_id integer NOT NULL,
+	event_type integer NOT NULL,
+	target_entity_id integer,
+	created timestamp with time zone,
+	PRIMARY KEY (id),
+	FOREIGN KEY (session_id) REFERENCES session (id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+ALTER TABLE session_event OWNER TO molitech_oms;
+ALTER TABLE "session" OWNER TO molitech_oms;
 ALTER TABLE profile_contract OWNER TO molitech_oms;
 ALTER TABLE water_tester OWNER TO molitech_oms;
 ALTER TABLE water_supplier OWNER TO molitech_oms;
