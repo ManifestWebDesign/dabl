@@ -31,6 +31,16 @@ abstract class base<?php echo $class_name ?> extends ApplicationModel {
 	protected static $_poolEnabled = true;
 
 	/**
+	 * Array of objects to batch insert
+	 */
+	protected static $_insertBatch = array();
+
+	/**
+	 * Maximum size of the insert batch
+	 */
+	protected static $_insertBatchSize = 500;
+
+	/**
 	 * Array of all primary keys
 	 * @var string[]
 	 */
@@ -202,7 +212,9 @@ foreach ($fields as $key => $field):
 	static function getQuery(array $params = array(), Query $q = null) {
 		$class = class_exists('<?php echo $class_name ?>Query') ? '<?php echo $class_name ?>Query' : 'Query';
 		$q = $q ? clone $q : new $class;
-		$q->setTable(<?php echo $class_name ?>::getTableName());
+		if (!$q->getTable()) {
+			$q->setTable(<?php echo $class_name ?>::getTableName());
+		}
 
 		// filters
 		foreach ($params as $key => &$param) {
@@ -262,11 +274,11 @@ foreach ($fields as $key => $field):
 
 	/**
 	 * Get the type of a column
-	 * @return array
+	 * @return string
 	 */
-<?php $used_functions[] = 'getColumnTypes'; ?>
+<?php $used_functions[] = 'getColumnType'; ?>
 	static function getColumnType($column_name) {
-		return <?php echo $class_name ?>::$_columnTypes[$column_name];
+		return <?php echo $class_name ?>::$_columnTypes[<?php echo $class_name ?>::normalizeColumnName($column_name)];
 	}
 
 	/**
@@ -276,10 +288,11 @@ foreach ($fields as $key => $field):
 	static function hasColumn($column_name) {
 		static $columns_cache = null;
 		if (null === $columns_cache) {
-			$columns_cache = array_map('strtolower', array_merge(<?php echo $class_name ?>::$_columnNames, <?php echo $class_name ?>::$_columns));
+			$columns_cache = array_map('strtolower', <?php echo $class_name ?>::$_columnNames);
 		}
-		return in_array(strtolower($column_name), $columns_cache);
+		return in_array(strtolower(<?php echo $class_name ?>::normalizeColumnName($column_name)), $columns_cache);
 	}
+
 
 	/**
 	 * Access to array of primary keys
@@ -315,11 +328,11 @@ foreach ($fields as $key => $field):
 
 	 */
 <?php $used_functions[] = 'retrieveByPK'; ?>
-	static function retrieveByPK($the_pk) {
+	 static function retrieveByPK(<?php if ($PKs && count($PKs) == 1): ?>$<?php echo StringFormat::variable($PKs[0]) ?><?php else: ?>$the_pk<?php endif ?>) {
 <?php if (count($PKs) > 1): ?>
 		throw new Exception('This table has more than one primary key.  Use retrieveByPKs() instead.');
 <?php else: ?>
-		return <?php echo $class_name ?>::retrieveByPKs($the_pk);
+		return <?php echo $class_name ?>::retrieveByPKs(<?php if ($PKs && count($PKs) == 1): ?>$<?php echo StringFormat::variable($PKs[0]) ?><?php else: ?>$the_pk<?php endif ?>);
 <?php endif ?>
 	}
 
@@ -330,12 +343,12 @@ foreach ($fields as $key => $field):
 
 	 */
 <?php $used_functions[] = 'retrieveByPKs'; ?>
-	static function retrieveByPKs(<?php foreach ($PKs as $k => &$v): ?><?php if ($k > 0): ?>, <?php endif ?>$<?php echo strtolower(str_replace('-', '_', $v)) ?><?php endforeach ?>) {
+	static function retrieveByPKs(<?php foreach ($PKs as $k => &$v): ?><?php if ($k > 0): ?>, <?php endif ?>$<?php echo StringFormat::variable($v) ?><?php endforeach ?>) {
 <?php if (0 === count($PKs)): ?>
 		throw new Exception('This table does not have any primary keys.');
 <?php else: ?>
 <?php foreach ($PKs as $k => &$v): ?>
-		if (null === $<?php echo strtolower(str_replace('-', '_', $v)) ?>) {
+		if (null === $<?php echo StringFormat::variable($v) ?>) {
 			return null;
 		}
 <?php endforeach ?>
@@ -343,15 +356,14 @@ foreach ($fields as $key => $field):
 		$args = func_get_args();
 <?php endif; ?>
 		if (<?php echo $class_name ?>::$_poolEnabled) {
-			$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if (1 == count($PKs)): ?>$<?php echo strtolower(str_replace('-', '_', $PK)) ?><?php else: ?>implode('-', $args)<?php endif ?>);
+			$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if (1 == count($PKs)): ?>$<?php echo StringFormat::variable($PK) ?><?php else: ?>implode('-', $args)<?php endif ?>);
 			if (null !== $pool_instance) {
 				return $pool_instance;
 			}
 		}
-		$conn = <?php echo $class_name ?>::getConnection();
 		$q = new Query;
 <?php foreach ($PKs as $k => &$v): ?>
-		$q->add('<?php echo $v ?>', $<?php echo strtolower(str_replace('-', '_', $v)) ?>);
+		$q->add('<?php echo $v ?>', $<?php echo StringFormat::variable($v) ?>);
 <?php endforeach ?>
 		$records = <?php echo $class_name ?>::doSelect($q);
 		return array_shift($records);
@@ -370,7 +382,7 @@ foreach ($fields as $key => $field):
 	 */
 	static function retrieveBy<?php echo StringFormat::titleCase($field->getName()) ?>($value) {
 <?php
-		if ($field->isPrimaryKey()) {
+		if ($field->isPrimaryKey() && count($field->getTable()->getPrimaryKey()) === 1) {
 ?>
 		return <?php echo $class_name?>::retrieveByPK($value);
 <?php
@@ -386,8 +398,7 @@ foreach ($fields as $key => $field):
 	}
 ?>
 	static function retrieveByColumn($field, $value) {
-		$conn = <?php echo $class_name ?>::getConnection();
-		$q = Query::create()->add($field, $value)->setLimit(1)<?php if($PK){ ?>->order('<?php echo $PK ?>')<?php } ?>;
+		$q = Query::create()->add($field, $value)->setLimit(1)<?php if ($PK): ?>->order('<?php echo $PK ?>')<?php endif ?>;
 		$records = <?php echo $class_name ?>::doSelect($q);
 		return array_shift($records);
 	}
@@ -546,7 +557,7 @@ foreach ($fields as $key => $field):
 	static function doCount(Query $q = null) {
 		$q = $q ? clone $q : new Query;
 		$conn = <?php echo $class_name ?>::getConnection();
-		if (!$q->getTable() || <?php echo $class_name ?>::getTableName() != $q->getTable()) {
+		if (!$q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
 		}
 		return $q->doCount($conn);
@@ -561,7 +572,7 @@ foreach ($fields as $key => $field):
 	static function doDelete(Query $q, $flush_pool = true) {
 		$conn = <?php echo $class_name ?>::getConnection();
 		$q = clone $q;
-		if (!$q->getTable() || <?php echo $class_name ?>::getTableName() != $q->getTable()) {
+		if (!$q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
 		}
 		$result = $q->doDelete($conn);
@@ -587,7 +598,7 @@ foreach ($fields as $key => $field):
 			$class = '<?php echo $class_name ?>';
 		}
 
-		return <?php echo $class_name ?>::fromResult(self::doSelectRS($q), $class);
+		return <?php echo $class_name ?>::fromResult(<?php echo $class_name ?>::doSelectRS($q), $class);
 	}
 
 	/**
@@ -600,11 +611,98 @@ foreach ($fields as $key => $field):
 		$q = $q ? clone $q : new Query;
 		$conn = <?php echo $class_name ?>::getConnection();
 
-		if (!$q->getTable() || false === strrpos($q->getTable(), <?php echo $class_name ?>::getTableName())) {
+		if (!$q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
 		}
 
 		return $q->doUpdate($column_values, $conn);
+	}
+
+	/**
+	 * Set the maximum insert batch size, once this size is reached the batch automatically inserts.
+	 * @param int $size
+	 * @return int insert batch size
+	 */
+	static function setInsertBatchSize($size = 500) {
+		return <?php echo $class_name ?>::$_insertBatchSize = $size;
+	}
+
+	/**
+	 * Queue for batch insert
+	 * @return Model this
+	 */
+	function queueForInsert() {
+		// If we've reached the maximum batch size, insert it and empty it.
+		if (count(<?php echo $class_name ?>::$_insertBatch) >= <?php echo $class_name ?>::$_insertBatchSize) {
+			<?php echo $class_name ?>::insertBatch();
+		}
+
+		<?php echo $class_name ?>::$_insertBatch[] = $this;
+
+		return $this;
+	}
+
+	/**
+	 * @return int row count
+	 * @throws RuntimeException
+	 */
+	static function insertBatch() {
+		$records = <?php echo $class_name ?>::$_insertBatch;
+		if (!$records) {
+			return 0;
+		}
+		$conn = <?php echo $class_name ?>::getConnection();
+		$columns = <?php echo $class_name ?>::getColumnNames();
+		$quoted_table = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
+
+
+		$values = array();
+
+		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', array_map(array($conn, 'quoteIdentifier'), $columns)) . ') VALUES' . "\n";
+
+		foreach ($records as $k => $r) {
+			$placeholders = array();
+
+			if (!$r->validate()) {
+				throw new RuntimeException('Cannot save ' . get_class($r) . ' with validation errors: ' . implode(', ', $r->getValidationErrors()));
+			}
+			if ($r->isNew() && $r->hasColumn('Created') && !$r->isColumnModified('Created')) {
+				$r->setCreated(time());
+			}
+			if (($r->isNew() || $r->isModified()) && $r->hasColumn('Updated') && !$r->isColumnModified('Updated')) {
+				$r->setUpdated(time());
+			}
+
+			foreach ($columns as &$column) {
+				$values[] = $r->$column;
+				$placeholders[] = '?';
+			}
+
+			if ($k > 0) {
+				$query_s .= ",\n";
+			}
+			$query_s .= '(' . implode(', ', $placeholders) . ')';
+		}
+
+		$statement = new QueryStatement($conn);
+		$statement->setString($query_s);
+		$statement->setParams($values);
+
+		$result = $statement->bindAndExecute();
+
+		foreach ($records as $r) {
+			$r->setNew(false);
+			$r->resetModified();
+
+			if ($r->hasPrimaryKeyValues()) {
+				<?php echo $class_name ?>::insertIntoPool($r);
+			} else {
+				$r->setDirty(true);
+			}
+		}
+
+		<?php echo $class_name ?>::$_insertBatch = array();
+		return $result->rowCount();
 	}
 
 	static function coerceTemporalValue($value, $column_type, DABLPDO $conn = null) {
@@ -622,7 +720,7 @@ foreach ($fields as $key => $field):
 		$q = $q ? clone $q : new Query;
 		$conn = <?php echo $class_name ?>::getConnection();
 
-		if (!$q->getTable() || false === strrpos($q->getTable(), <?php echo $class_name ?>::getTableName())) {
+		if (!$q->getTable()) {
 			$q->setTable(<?php echo $class_name ?>::getTableName());
 		}
 
@@ -693,8 +791,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 
 	 */
 	function set<?php echo StringFormat::titleCase($from_column_clean) ?>(<?php echo $to_class_name ?> $<?php echo $lc_to_class_name ?> = null) {
-		$this->set<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($<?php echo $lc_to_class_name ?>);
-		return $this;
+		return $this->set<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($<?php echo $lc_to_class_name ?>);
 	}
 
 <?php
@@ -939,7 +1036,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		return <?php echo $from_class_name ?>::doDelete($this->get<?php echo StringFormat::titleCase($from_class_name) ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>Query($q));
 	}
 
-	private $<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>_c = array();
+	protected $<?php echo $from_class_name ?>sRelatedBy<?php echo StringFormat::titleCase($from_column) ?>_c = array();
 
 	/**
 	 * Returns an array of <?php echo $from_class_name ?> objects with a <?php echo $from_column ?>

@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @link https://github.com/ManifestWebDesign/DABL
+ * @link http://manifestwebdesign.com/redmine/projects/dabl
+ * @author Manifest Web Design
+ * @license    MIT License
+ */
+
 if (!function_exists('get_request_headers')) {
 
 	function get_request_headers() {

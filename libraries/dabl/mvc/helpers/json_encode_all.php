@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @link https://github.com/ManifestWebDesign/DABL
+ * @link http://manifestwebdesign.com/redmine/projects/dabl
+ * @author Manifest Web Design
+ * @license    MIT License
+ */
+
+/**
  * Convert a value to JSON
  *
  * This function returns a JSON representation of $param. It uses json_encode

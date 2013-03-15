@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @link https://github.com/ManifestWebDesign/DABL
+ * @link http://manifestwebdesign.com/redmine/projects/dabl
+ * @author Manifest Web Design
+ * @license    MIT License
+ */
+
 function stripslashes_array($array) {
 	return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
 }

@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @link https://github.com/ManifestWebDesign/DABL
+ * @link http://manifestwebdesign.com/redmine/projects/dabl
+ * @author Manifest Web Design
+ * @license    MIT License
+ */
+
 abstract class DABLPDO extends PDO {
 	const ID_METHOD_NONE = 0;
 	const ID_METHOD_AUTOINCREMENT = 1;
@@ -220,7 +227,7 @@ abstract class DABLPDO extends PDO {
 	/**
 	 * Execute an SQL statement and return the number of affected rows
 	 * @param string $statement The SQL statement to prepare and execute.
-	 * @return PDOStatement
+	 * @return int
 	 */
 	function exec($statement) {
 

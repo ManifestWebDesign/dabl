@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @link https://github.com/ManifestWebDesign/DABL
+ * @link http://manifestwebdesign.com/redmine/projects/dabl
+ * @author Manifest Web Design
+ * @license    MIT License
+ */
+
+/**
  * Calls print_r, encodes html entities, and wraps the resulting string in <pre>
  * tags to make it readable in a browser.
  * @param mixed $array

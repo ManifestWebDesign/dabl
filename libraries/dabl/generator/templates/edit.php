@@ -2,15 +2,14 @@
 <form method="post" action="<?php echo "<?php echo site_url('".$plural_url."/save') ?>" ?>">
 	<div class="ui-widget-content ui-corner-all ui-helper-clearfix">
 <?php
-if ($pk) {
+foreach ($this->getColumns($table_name) as $column) {
+	$column_name = $column->getName();
+	if ($column_name == $pk && $column->isAutoIncrement()) {
 ?>
 		<input type="hidden" name="<?php echo $pk ?>" value="<?php echo '<?php echo h($' . $single . '->' . "get" . StringFormat::titleCase($pk) . '()) ?>' ?>" />
 <?php
-}
-foreach ($this->getColumns($table_name) as $column) {
-	$column_name = $column->getName();
-	if ($column_name == $pk)
 		continue;
+	}
 
 	if ($column->isTemporalType() && in_array(strtolower($column_name), array('created', 'updated'))) {
 		continue;

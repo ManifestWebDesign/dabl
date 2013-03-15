@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @link https://github.com/ManifestWebDesign/DABL
+ * @link http://manifestwebdesign.com/redmine/projects/dabl
+ * @author Manifest Web Design
+ * @license    MIT License
+ */
+
+/**
  * @package dabl
  */
 abstract class Model {
@@ -145,6 +152,17 @@ abstract class Model {
 		return in_array($type, self::$LOB_TYPES);
 	}
 
+	/**
+	 * @param string $column_name
+	 * @return string
+	 */
+	static function normalizeColumnName($column_name) {
+		if (($pos = strrpos($column_name, '.')) !== false) {
+			return substr($column_name, $pos + 1);
+		}
+		return $column_name;
+	}
+
 	const MAX_INSTANCE_POOL_SIZE = 400;
 
 	/**
@@ -166,6 +184,11 @@ abstract class Model {
 	 * Whether or not this is a new object
 	 */
 	protected $_isNew = true;
+
+	/**
+	 * Wether or not the object is out of sync with the databse
+	 */
+	protected $_isDirty = false;
 
 	/**
 	 * Errors from the validate() step of saving
@@ -314,7 +337,7 @@ abstract class Model {
 	 * @return bool
 	 */
 	function isColumnModified($column_name) {
-		return array_key_exists(strtolower($column_name), array_map('strtolower', $this->_modifiedColumns));
+		return array_key_exists(strtolower($this->normalizeColumnName($column_name)), array_map('strtolower', $this->_modifiedColumns));
 	}
 
 	/**
@@ -336,6 +359,8 @@ abstract class Model {
 		if (null === $column_type) {
 			$column_type = $this->getColumnType($column_name);
 		}
+
+		$column_name = $this->normalizeColumnName($column_name);
 
 		if ($column_type == self::COLUMN_TYPE_BOOLEAN) {
 			if ($value === true || $value === 1 || $value === '1' || strtolower($value) === 'on' || strtolower($value) === 'true') {
@@ -560,16 +585,20 @@ abstract class Model {
 	 * @return int number of records inserted or updated
 	 */
 	function save() {
+		if ($this->isDirty()) {
+			throw new RuntimeException('Cannot save dirty ' . get_class($this) . '.  Perhaps it was already saved using bulk insert.');
+		}
+
 		if (!$this->validate()) {
 			throw new RuntimeException('Cannot save ' . get_class($this) . ' with validation errors: ' . implode(', ', $this->getValidationErrors()));
 		}
 
 		if ($this->isNew() && $this->hasColumn('Created') && !$this->isColumnModified('Created')) {
-			$this->setCreated(CURRENT_TIMESTAMP);
+			$this->setCreated(time());
 		}
 
 		if (($this->isNew() || $this->isModified()) && $this->hasColumn('Updated') && !$this->isColumnModified('Updated')) {
-			$this->setUpdated(CURRENT_TIMESTAMP);
+			$this->setUpdated(time());
 		}
 
 		if ($this->isNew()) {
@@ -588,7 +617,7 @@ abstract class Model {
 			throw new RuntimeException('This ' . get_class($this) . ' is already archived.');
 		}
 
-		$this->setArchived(CURRENT_TIMESTAMP);
+		$this->setArchived(time());
 
 		return $this->save();
 	}
@@ -608,6 +637,24 @@ abstract class Model {
 	 */
 	function setNew($bool) {
 		$this->_isNew = (bool) $bool;
+		return $this;
+	}
+
+	/**
+	 * Returns true if this is out of sync with the database
+	 * @return bool
+	 */
+	function isDirty() {
+		return (bool) $this->_isDirty;
+	}
+
+	/**
+	 * Indicate whether this object is out of sync with the database
+	 * @param bool $bool
+	 * @return Model
+	 */
+	function setDirty($bool) {
+		$this->_isDirty = (bool) $bool;
 		return $this;
 	}
 

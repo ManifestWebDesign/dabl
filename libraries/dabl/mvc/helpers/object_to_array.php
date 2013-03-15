@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @link https://github.com/ManifestWebDesign/DABL
+ * @link http://manifestwebdesign.com/redmine/projects/dabl
+ * @author Manifest Web Design
+ * @license    MIT License
+ */
+
+/**
  * Convert an object into an associative array
  *
  * This function converts an object into an associative array by iterating
