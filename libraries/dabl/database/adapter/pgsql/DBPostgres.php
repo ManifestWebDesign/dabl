@@ -118,10 +118,9 @@ class DBPostgres extends DABLPDO {
 		ClassLoader::import('DATABASE:propel:reverse:pgsql');
 		ClassLoader::import('DATABASE:propel:platform');
 
-		$parser = new PgsqlSchemaParser();
-		$parser->setConnection($this);
+		$parser = new PgsqlSchemaParser($this);
 		$database = new Database($this->getDBName());
-		$database->setPlatform(new PgsqlPlatform());
+		$database->setPlatform(new PgsqlPlatform($this));
 		$parser->parse($database);
 		$database->doFinalInitialization();
 		return $database;

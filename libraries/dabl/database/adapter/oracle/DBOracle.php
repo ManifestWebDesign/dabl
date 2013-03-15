@@ -120,10 +120,9 @@ EOF;
 		ClassLoader::import('DATABASE:propel:reverse:oracle');
 		ClassLoader::import('DATABASE:propel:platform');
 
-		$parser = new OracleSchemaParser();
-		$parser->setConnection($this);
+		$parser = new OracleSchemaParser($this);
 		$database = new Database($this->getDBName());
-		$database->setPlatform(new OraclePlatform());
+		$database->setPlatform(new OraclePlatform($this));
 		$parser->parse($database);
 		$database->doFinalInitialization();
 		return $database;

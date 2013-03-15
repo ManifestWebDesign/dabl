@@ -304,10 +304,9 @@ class DBMSSQL extends DABLPDO {
 		ClassLoader::import('DATABASE:propel:reverse:mssql');
 		ClassLoader::import('DATABASE:propel:platform');
 
-		$parser = new MssqlSchemaParser();
-		$parser->setConnection($this);
+		$parser = new MssqlSchemaParser($this);
 		$database = new Database($this->getDBName());
-		$database->setPlatform(new MssqlPlatform());
+		$database->setPlatform(new MssqlPlatform($this));
 		$parser->parse($database);
 		$database->doFinalInitialization();
 		return $database;

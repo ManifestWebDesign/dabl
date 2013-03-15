@@ -149,7 +149,7 @@ foreach ($fields as $key => $field):
 		return $this->setColumnValue('<?php echo $field->getName() ?>', $value, Model::COLUMN_TYPE_<?php echo $field->getType() ?>);
 	}
 
-<?php if(strtolower($raw_method_name) != strtolower($method_name)): ?>
+<?php if (strtolower($raw_method_name) != strtolower($method_name)): ?>
 <?php $used_functions[] = "get$raw_method_name"; ?>
 	/**
 	 * Convenience function for <?php echo $class_name ?>::get<?php echo $method_name ?>
