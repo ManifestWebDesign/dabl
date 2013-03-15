@@ -29,7 +29,6 @@ CREATE TABLE "user"
 
 CREATE TABLE "role" (
 	label character varying(255) NOT NULL,
-	"global" boolean NOT NULL DEFAULT false,
 	PRIMARY KEY (id)
 )
 INHERITS (entity);
@@ -96,8 +95,8 @@ CREATE TABLE address
 	street1 character varying(255),
 	street2 character varying(255),
 	city character varying(255),
-	state char DEFAULT 2,
-	zip char DEFAULT 5,
+	state character varying(2),
+	zip character varying(5),
 	PRIMARY KEY (id)
 )
 INHERITS (entity);
@@ -226,6 +225,7 @@ CREATE TABLE backflow_test
 	approved boolean,
 	service_restored boolean,
 	PRIMARY KEY (job_id),
+	FOREIGN KEY (job_id) REFERENCES job (id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	FOREIGN KEY (backflow_assembly_id) REFERENCES backflow_assembly (id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	FOREIGN KEY (backflow_replacement_assembly_id) REFERENCES backflow_assembly (id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
