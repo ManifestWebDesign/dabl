@@ -229,10 +229,9 @@ class DBMySQL extends DABLPDO {
 		ClassLoader::import('DATABASE:propel:reverse:mysql');
 		ClassLoader::import('DATABASE:propel:platform');
 
-		$parser = new MysqlSchemaParser();
-		$parser->setConnection($this);
+		$parser = new MysqlSchemaParser($this);
 		$database = new Database($this->getDBName());
-		$platform = new MysqlPlatform();
+		$platform = new MysqlPlatform($this);
 		$platform->setDefaultTableEngine('InnoDB');
 		$database->setPlatform($platform);
 		$parser->parse($database);

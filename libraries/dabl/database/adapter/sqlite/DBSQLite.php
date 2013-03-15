@@ -109,10 +109,9 @@ class DBSQLite extends DABLPDO {
 		ClassLoader::import('DATABASE:propel:reverse:sqlite');
 		ClassLoader::import('DATABASE:propel:platform');
 
-		$parser = new SqliteSchemaParser();
-		$parser->setConnection($this);
+		$parser = new SqliteSchemaParser($this);
 		$database = new Database($this->getDBName());
-		$database->setPlatform(new SqlitePlatform());
+		$database->setPlatform(new SqlitePlatform($this));
 		$parser->parse($database);
 		$database->doFinalInitialization();
 		return $database;
