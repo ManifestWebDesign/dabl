@@ -1,26 +1,26 @@
 CREATE TABLE `address`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`street1` VARCHAR(255),
 	`street2` VARCHAR(255),
 	`city` VARCHAR(255),
 	`state` VARCHAR(2),
 	`zip` VARCHAR(5),
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `assignment`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`job_id` INTEGER UNSIGNED NOT NULL,
 	`contract_id` INTEGER UNSIGNED NOT NULL,
 	`status` INTEGER UNSIGNED DEFAULT 1 NOT NULL,
-	`due` TIMESTAMP,
-	`submitted` TIMESTAMP,
+	`due` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`submitted` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
@@ -29,8 +29,6 @@ CREATE INDEX `assignment_status_idx` ON `assignment` (`status`);
 CREATE TABLE `backflow_assembly`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`water_site_id` INTEGER UNSIGNED NOT NULL,
 	`backflow_assembly_model_id` INTEGER UNSIGNED,
 	`backflow_assembly_location_id` INTEGER UNSIGNED,
@@ -39,24 +37,26 @@ CREATE TABLE `backflow_assembly`
 	`backflow_assembly_type` INTEGER UNSIGNED NOT NULL,
 	`status` INTEGER UNSIGNED DEFAULT 1 NOT NULL,
 	`feeds` VARCHAR(255),
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `backflow_assembly_location`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`name` VARCHAR(255),
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `backflow_assembly_make`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`name` VARCHAR(255) NOT NULL,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
@@ -65,10 +65,10 @@ CREATE UNIQUE INDEX `backflow_assembly_make_name_key` ON `backflow_assembly_make
 CREATE TABLE `backflow_assembly_model`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`name` VARCHAR(255) NOT NULL,
 	`backflow_assembly_make_id` INTEGER UNSIGNED NOT NULL,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
@@ -77,9 +77,9 @@ CREATE UNIQUE INDEX `backflow_assembly_model_name_bac` ON `backflow_assembly_mod
 CREATE TABLE `backflow_plan`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`name` VARCHAR(255),
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
@@ -106,23 +106,23 @@ CREATE TABLE `backflow_test`
 CREATE TABLE `backflow_tester`
 (
 	`profile_id` INTEGER UNSIGNED NOT NULL,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`gauge_number` VARCHAR(255),
 	`gauge_calibrated` DATE,
 	`certification_number` VARCHAR(255),
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`profile_id`)
 );
 
 CREATE TABLE `contract`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`customer_profile_id` INTEGER UNSIGNED NOT NULL,
 	`vendor_profile_id` INTEGER UNSIGNED NOT NULL,
 	`customer_status` INT2,
 	`vendor_status` INT2,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
@@ -131,36 +131,36 @@ CREATE UNIQUE INDEX `contract_customer_profile_id_ven` ON `contract` (`customer_
 CREATE TABLE `entity`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `job`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`order_id` INTEGER UNSIGNED NOT NULL,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `order`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `profile`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`company_name` VARCHAR(255),
 	`first_name` VARCHAR(255),
 	`last_name` VARCHAR(255),
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
@@ -169,17 +169,17 @@ CREATE TABLE `profile_member`
 	`profile_id` INTEGER UNSIGNED NOT NULL,
 	`member_profile_id` INTEGER UNSIGNED NOT NULL,
 	`role_id` INTEGER UNSIGNED NOT NULL,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`profile_id`,`member_profile_id`,`role_id`)
 );
 
 CREATE TABLE `role`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`label` VARCHAR(255) NOT NULL,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
@@ -197,8 +197,8 @@ CREATE TABLE `session`
 	`user_profile_id` INTEGER UNSIGNED,
 	`company_profile_id` INTEGER UNSIGNED,
 	`user_agent` VARCHAR(255),
-	`started` TIMESTAMP,
-	`ended` TIMESTAMP,
+	`started` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`ended` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
@@ -208,48 +208,48 @@ CREATE TABLE `session_event`
 	`session_id` INTEGER UNSIGNED NOT NULL,
 	`event_type` INTEGER UNSIGNED NOT NULL,
 	`target_entity_id` INTEGER UNSIGNED,
-	`created` TIMESTAMP,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `user`
 (
 	`profile_id` INTEGER UNSIGNED NOT NULL,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`email` VARCHAR(255),
 	`password` VARCHAR(255),
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`profile_id`)
 );
 
 CREATE TABLE `water_account`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`resident_profile_id` INTEGER UNSIGNED,
 	`water_site_id` INTEGER UNSIGNED NOT NULL,
 	`backflow_plan_id` INTEGER UNSIGNED,
 	`supplier_account_number` VARCHAR(255),
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `water_site`
 (
 	`id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
 	`address_id` INTEGER UNSIGNED NOT NULL,
 	`water_supplier_id` INTEGER UNSIGNED NOT NULL,
 	`supplier_account_number` VARCHAR(255),
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `water_supplier`
 (
 	`profile_id` INTEGER UNSIGNED NOT NULL,
-	`created` TIMESTAMP,
-	`updated` TIMESTAMP,
+	`created` INTEGER UNSIGNED COMMENT 'integer_ts',
+	`updated` INTEGER UNSIGNED COMMENT 'integer_ts',
 	PRIMARY KEY (`profile_id`)
 );
 
