@@ -138,6 +138,14 @@ class MysqlSchemaParser extends BaseSchemaParser
 
 		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
+			$row['Comment'] = $this->dbh->query("
+				SELECT
+				COLUMN_COMMENT
+				FROM information_schema.COLUMNS
+				WHERE TABLE_NAME='{$table->getName()}'
+					AND TABLE_SCHEMA='{$table->getDatabase()->getName()}'
+					AND COLUMN_NAME='{$row['Field']}' LIMIT 1")->fetchColumn();
+
 			$name = $row['Field'];
 			$is_nullable = ($row['Null'] == 'YES');
 			$autoincrement = (strpos($row['Extra'], 'auto_increment') !== false);
@@ -173,7 +181,10 @@ class MysqlSchemaParser extends BaseSchemaParser
 			$default = preg_match('~blob|text~', $nativeType) ? null : $row['Default'];
 
 			$propelType = $this->getMappedPropelType($nativeType);
-			if (!$propelType) {
+
+			if ($propelType == PropelTypes::INTEGER && strpos($row['Comment'], 'timestamp') === 0) {
+				$propelType = PropelTypes::INTEGER_TIMESTAMP;
+			} elseif (!$propelType) {
 				$propelType = Column::DEFAULT_TYPE;
 				$this->warn("Column [" . $table->getName() . "." . $name. "] has a column type (".$nativeType.") that Propel does not support.");
 			}

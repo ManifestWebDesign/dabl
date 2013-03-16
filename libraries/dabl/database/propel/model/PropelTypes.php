@@ -28,6 +28,7 @@ class PropelTypes
 	const TINYINT = "TINYINT";
 	const SMALLINT = "SMALLINT";
 	const INTEGER = "INTEGER";
+	const INTEGER_TIMESTAMP = "INTEGER_TIMESTAMP";
 	const BIGINT = "BIGINT";
 	const REAL = "REAL";
 	const FLOAT = "FLOAT";
@@ -56,11 +57,11 @@ class PropelTypes
 	);
 
 	private static $TEMPORAL_TYPES = array(
-		self::DATE, self::TIME, self::TIMESTAMP, self::BU_DATE, self::BU_TIMESTAMP
+		self::DATE, self::TIME, self::TIMESTAMP, self::BU_DATE, self::BU_TIMESTAMP, self::INTEGER_TIMESTAMP
 	);
 
 	private static $NUMERIC_TYPES = array(
-		self::SMALLINT, self::TINYINT, self::INTEGER, self::BIGINT, self::FLOAT, self::DOUBLE, self::NUMERIC, self::DECIMAL, self::REAL
+		self::SMALLINT, self::TINYINT, self::INTEGER, self::BIGINT, self::FLOAT, self::DOUBLE, self::NUMERIC, self::DECIMAL, self::REAL, self::INTEGER_TIMESTAMP
 	);
 
 	private static $BOOLEAN_TYPES = array(
@@ -95,7 +96,7 @@ class PropelTypes
 	const OBJECT_NATIVE_TYPE = "";
 	const PHP_ARRAY_NATIVE_TYPE = "array";
 	const ENUM_NATIVE_TYPE = "string";
-	
+
 	/**
 	 * Mapping between Propel types and PHP native types.
 	 *
@@ -112,6 +113,7 @@ class PropelTypes
 			self::TINYINT => self::TINYINT_NATIVE_TYPE,
 			self::SMALLINT => self::SMALLINT_NATIVE_TYPE,
 			self::INTEGER => self::INTEGER_NATIVE_TYPE,
+			self::INTEGER_TIMESTAMP => self::INTEGER_NATIVE_TYPE,
 			self::BIGINT => self::BIGINT_NATIVE_TYPE,
 			self::REAL => self::REAL_NATIVE_TYPE,
 			self::FLOAT => self::FLOAT_NATIVE_TYPE,
@@ -188,6 +190,7 @@ class PropelTypes
 			self::TINYINT => PDO::PARAM_INT,
 			self::SMALLINT => PDO::PARAM_INT,
 			self::INTEGER => PDO::PARAM_INT,
+			self::INTEGER_TIMESTAMP => PDO::PARAM_INT,
 			self::BIGINT => PDO::PARAM_INT,
 			self::REAL => PDO::PARAM_STR,
 			self::FLOAT => PDO::PARAM_STR,
@@ -300,7 +303,7 @@ class PropelTypes
 	{
 		return in_array($type, self::$NUMERIC_TYPES);
 	}
-	
+
 	/**
 	 * Returns true if values for the type are boolean.
 	 *

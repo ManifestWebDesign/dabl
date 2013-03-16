@@ -20,6 +20,7 @@ abstract class Model {
 	const COLUMN_TYPE_TINYINT = 'TINYINT';
 	const COLUMN_TYPE_SMALLINT = 'SMALLINT';
 	const COLUMN_TYPE_INTEGER = 'INTEGER';
+	const COLUMN_TYPE_INTEGER_TIMESTAMP = 'INTEGER_TIMESTAMP';
 	const COLUMN_TYPE_BIGINT = 'BIGINT';
 	const COLUMN_TYPE_REAL = 'REAL';
 	const COLUMN_TYPE_FLOAT = 'FLOAT';
@@ -52,7 +53,8 @@ abstract class Model {
 		self::COLUMN_TYPE_TINYINT,
 		self::COLUMN_TYPE_INTEGER,
 		self::COLUMN_TYPE_BIGINT,
-		self::COLUMN_TYPE_BOOLEAN
+		self::COLUMN_TYPE_BOOLEAN,
+		self::COLUMN_TYPE_INTEGER_TIMESTAMP
 	);
 
 	private static $LOB_TYPES = array(
@@ -66,7 +68,8 @@ abstract class Model {
 		self::COLUMN_TYPE_TIME,
 		self::COLUMN_TYPE_TIMESTAMP,
 		self::COLUMN_TYPE_BU_DATE,
-		self::COLUMN_TYPE_BU_TIMESTAMP
+		self::COLUMN_TYPE_BU_TIMESTAMP,
+		self::COLUMN_TYPE_INTEGER_TIMESTAMP
 	);
 
 	private static $NUMERIC_TYPES = array(
@@ -78,7 +81,8 @@ abstract class Model {
 		self::COLUMN_TYPE_DOUBLE,
 		self::COLUMN_TYPE_NUMERIC,
 		self::COLUMN_TYPE_DECIMAL,
-		self::COLUMN_TYPE_REAL
+		self::COLUMN_TYPE_REAL,
+		self::COLUMN_TYPE_INTEGER_TIMESTAMP
 	);
 
 	public function __toString() {
@@ -360,12 +364,18 @@ abstract class Model {
 			$column_type = $this->getColumnType($column_name);
 		}
 
+		static $true = array(true, 1, '1', 'on', 'true');
+		static $false = array(false, 0, '0', 'off', 'false');
+
 		$column_name = $this->normalizeColumnName($column_name);
 
 		if ($column_type == self::COLUMN_TYPE_BOOLEAN) {
-			if ($value === true || $value === 1 || $value === '1' || strtolower($value) === 'on' || strtolower($value) === 'true') {
+			if (is_string($value)) {
+				$value = strtolower($value);
+			}
+			if (in_array($value, $true, true)) {
 				$value = 1;
-			} elseif ($value === false || $value === 0 || $value === '0' || strtolower($value) === 'off' || strtolower($value) === 'false') {
+			} elseif (in_array($value, $false, true)) {
 				$value = 0;
 			} elseif ($value === '' || $value === null) {
 				$value = null;
@@ -424,6 +434,12 @@ abstract class Model {
 			}
 			return $value;
 		}
+
+		$timestamp = is_int($value) ? $value : strtotime($value);
+		if (false === $timestamp) {
+			throw new InvalidArgumentException('Unable to parse date: ' . $value);
+		}
+
 		switch ($column_type) {
 			case Model::COLUMN_TYPE_TIMESTAMP:
 				$formatter = $conn->getTimestampFormatter();
@@ -434,11 +450,11 @@ abstract class Model {
 			case Model::COLUMN_TYPE_TIME:
 				$formatter = $conn->getTimeFormatter();
 				break;
+			case Model::COLUMN_TYPE_INTEGER_TIMESTAMP:
+				return $timestamp;
+				break;
 		}
-		$timestamp = is_int($value) ? $value : strtotime($value);
-		if (false === $timestamp) {
-			throw new InvalidArgumentException('Unable to parse date: ' . $value);
-		}
+
 		return date($formatter, $timestamp);
 	}
 

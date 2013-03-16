@@ -1,6 +1,69 @@
 <?php
 
+class TestModel extends Model {
+
+	protected static $_primaryKeys = array(
+		'id',
+	);
+
+	protected static $_primaryKey = 'id';
+
+	protected static $_columnTypes = array(
+		'id' => Model::COLUMN_TYPE_INTEGER,
+		'true_false' => Model::COLUMN_TYPE_BOOLEAN,
+		'created' => Model::COLUMN_TYPE_TIMESTAMP,
+		'updated' => Model::COLUMN_TYPE_INTEGER_TIMESTAMP,
+	);
+
+	protected static $_columnNames = array(
+		'id',
+		'true_false',
+		'created',
+		'updated'
+	);
+
+	protected $id;
+
+	protected $created;
+
+	protected $true_false;
+
+	function getTrueFalse() {
+		return $this->true_false;
+	}
+
+	protected $updated;
+
+	public function castInts() {
+	}
+
+	static function getColumnType($column_name) {
+		return self::$_columnTypes[$column_name];
+	}
+}
+
 class ModelTest extends PHPUnit_Framework_TestCase {
+
+	function testBooleanHandlesDifferentTypes() {
+		$model = new TestModel();
+		$model->setColumnValue('true_false', 'On');
+		$this->assertEquals(1, $model->getTrueFalse());
+		$model->setColumnValue('true_false', 1);
+		$this->assertEquals(1, $model->getTrueFalse());
+		$model->setColumnValue('true_false', 'ON');
+		$this->assertEquals(1, $model->getTrueFalse());
+		$model->setColumnValue('true_false', true);
+		$this->assertEquals(1, $model->getTrueFalse());
+
+		$model->setColumnValue('true_false', 'FALSE');
+		$this->assertEquals(0, $model->getTrueFalse());
+		$model->setColumnValue('true_false', '0');
+		$this->assertEquals(0, $model->getTrueFalse());
+		$model->setColumnValue('true_false', 0);
+		$this->assertEquals(0, $model->getTrueFalse());
+		$model->setColumnValue('true_false', false);
+		$this->assertEquals(0, $model->getTrueFalse());
+	}
 
 	/**
 	 * Return all known models that have a single primary key
