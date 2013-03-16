@@ -143,7 +143,11 @@ foreach ($fields as $key => $field):
 		if (0 === strpos($this-><?php echo $field->getName() ?>, '0000-00-00')) {
 			return null;
 		}
+<?php if ($field->getType() === Model::COLUMN_TYPE_INTEGER_TIMESTAMP): ?>
+		return date($format, $this-><?php echo $field->getName() ?>);
+<?php else: ?>
 		return date($format, strtotime($this-><?php echo $field->getName() ?>));
+<?php endif ?>
 <?php else: ?>
 		return $this-><?php echo $field->getName() ?>;
 <?php endif ?>

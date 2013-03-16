@@ -17,10 +17,11 @@ foreach ($this->getColumns($table_name) as $column) {
 
 	$method = 'get' . StringFormat::titleCase($column_name);
 	switch($column->getType()){
-		case PropelTypes::TIMESTAMP:
+		case Model::COLUMN_TYPE_TIMESTAMP:
+		case Model::COLUMN_TYPE_INTEGER_TIMESTAMP:
 			$format = 'VIEW_TIMESTAMP_FORMAT';
 			break;
-		case PropelTypes::DATE:
+		case Model::COLUMN_TYPE_DATE:
 			$format = 'VIEW_DATE_FORMAT';
 			break;
 		default:
@@ -67,7 +68,7 @@ foreach ($this->getColumns($table_name) as $column) {
 			<textarea id="<?php echo $input_id ?>" name="<?php echo $column_name ?>"><?php echo $output ?></textarea>
 <?php
 			break;
-		case PropelTypes::DATE:
+		case Model::COLUMN_TYPE_DATE:
 ?>
 			<input id="<?php echo $input_id ?>" class="datepicker" type="text" name="<?php echo $column_name ?>" value="<?php echo $output ?>" />
 <?php
