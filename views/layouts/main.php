@@ -7,13 +7,8 @@
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/themes/light-green/jquery-ui-1.8.custom.css', true) ?>" />
 		<script language="Javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 		<script language="Javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
-		<script language="Javascript" type="text/javascript" src="<?php echo site_url('js/dabl.js', true) ?>"></script>
-		<script language="Javascript" type="text/javascript" src="<?php echo site_url('js/angular.js', true) ?>"></script>
-		<script language="Javascript" type="text/javascript" src="<?php echo site_url('js/angular-resource.js', true) ?>"></script>
-		<script language="Javascript" type="text/javascript" src="<?php echo site_url('js/global.js', true) ?>"></script>
-		<script language="Javascript" type="text/javascript" src="<?php echo site_url('js/models.js', true) ?>"></script>
 	</head>
-	<body ng-controller="MainController">
+	<body>
 
 		<div class="ui-tabs ui-widget ui-widget-header">
 			<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix">
