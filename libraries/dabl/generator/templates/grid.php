@@ -52,10 +52,11 @@ if ($actions){
 foreach ($columns as $column){
 	$column_name = StringFormat::titleCase($column->getName());
 	switch ($column->getType()){
-		case PropelTypes::TIMESTAMP:
+		case Model::COLUMN_TYPE_TIMESTAMP:
+		case Model::COLUMN_TYPE_INTEGER_TIMESTAMP:
 			$format = 'VIEW_TIMESTAMP_FORMAT';
 			break;
-		case PropelTypes::DATE:
+		case Model::COLUMN_TYPE_DATE:
 			$format = 'VIEW_DATE_FORMAT';
 			break;
 		default:
