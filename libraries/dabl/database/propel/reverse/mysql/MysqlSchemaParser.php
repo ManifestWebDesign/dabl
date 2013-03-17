@@ -182,7 +182,10 @@ class MysqlSchemaParser extends BaseSchemaParser
 
 			$propelType = $this->getMappedPropelType($nativeType);
 
-			if ($propelType == PropelTypes::INTEGER && strpos($row['Comment'], 'timestamp') === 0) {
+			if (
+				in_array($propelType, array(PropelTypes::INTEGER, PropelTypes::BIGINT))
+				&& strpos($row['Comment'], 'timestamp') === 0
+			) {
 				$propelType = PropelTypes::INTEGER_TIMESTAMP;
 			} elseif (!$propelType) {
 				$propelType = Column::DEFAULT_TYPE;
