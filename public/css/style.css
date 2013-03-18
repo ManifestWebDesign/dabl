@@ -211,3 +211,13 @@ div.ui-state-highlight, div.ui-state-error{
 	margin-top:5px;
 	margin-bottom: 5px;
 }
+
+@media all and (max-width: 599px) {
+	.form-field-label, .field-label {
+		float: none;
+		text-align: left;
+		line-height: 18px;
+		padding-right: 0;
+		width: auto;
+	}
+}
