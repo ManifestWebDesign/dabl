@@ -55,7 +55,7 @@ abstract class Controller extends ArrayObject {
 	protected $route;
 
 	function __destruct() {
-		set_persistant_values(array_merge_recursive(get_persistant_values(), $this->persistant));
+		$this->storePeristant();
 	}
 
 	function __construct(ControllerRoute $route = null) {
@@ -112,6 +112,13 @@ abstract class Controller extends ArrayObject {
 			$this->setParams(array_merge_recursive(get_clean_persistant_values(), $route->getParams()));
 		}
 		return $this;
+	}
+
+	/**
+	 * Stores $this->persistant in the the session for the next page view
+	 */
+	private function storePeristant() {
+		set_persistant_values(array_merge_recursive(get_persistant_values(), $this->persistant));
 	}
 
 	/**
@@ -198,6 +205,9 @@ abstract class Controller extends ArrayObject {
 			case 'json':
 				if (!headers_sent()) {
 					header('Content-type: application/json');
+					if ($this->isRestful() && @$this['errors']) {
+						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
+					}
 				}
 				echo json_encode_all($params);
 				break;
@@ -205,6 +215,9 @@ abstract class Controller extends ArrayObject {
 			case 'xml':
 				if (!headers_sent()) {
 					header('Content-type: application/xml');
+					if ($this->isRestful() && @$this['errors']) {
+						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
+					}
 				}
 				echo xml_encode_all($params);
 				break;
@@ -230,11 +243,26 @@ abstract class Controller extends ArrayObject {
 			$url = '/partial/' . ltrim($url, '/');
 		}
 
+		if ($this->isRestful()) {
+			unset($_GET);
+			unset($_FILES);
+			unset($_POST);
+			unset($_REQUEST);
+		}
+
 		if ('html' !== $this->outputFormat) {
 			if (strpos($url, '?') !== false) {
 				$parts = explode('?', $url, 2);
 				$url = array_shift($parts);
 				$url .= '.' . $this->outputFormat;
+
+				if ($this->isRestful()) {
+					$params = array();
+					parse_str(array_shift($parts), $params);
+					$_GET = $params;
+					$_REQUEST = $params;
+				}
+
 				array_unshift($parts, $url);
 				$url = implode('?', $parts);
 			} else {
@@ -244,6 +272,8 @@ abstract class Controller extends ArrayObject {
 
 		if ($this->isRestful()) {
 			$url = '/rest/' . ltrim($url, '/');
+			$this->storePeristant();
+			$this->persistant = array();
 			Controller::load($url);
 			die;
 		}
