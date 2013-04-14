@@ -18,11 +18,12 @@ if (!function_exists('get_request_headers')) {
 		if (!function_exists('getallheaders')) {
 			foreach ($_SERVER as $key => $value) {
 				if (substr($key, 0, 5) == 'HTTP_') {
-					$key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($key, 5)))));
-					$headers[$key] = $value;
-				} else {
-					$headers[$key] = $value;
+					$key = substr($key, 5);
+				} elseif (array_key_exists($key, $headers)) {
+					continue;
 				}
+				$key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', $key))));
+				$headers[$key] = $value;
 			}
 		} else {
 			$headers = getallheaders();
