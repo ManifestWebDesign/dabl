@@ -42,7 +42,7 @@ class QueryPager {
 		$this->setQuery($q);
 		if ($class_name) {
 			$this->setClass($class_name);
-		} elseif (($table = $q->getTable()) && !($table instanceof Query)) {
+		} elseif (func_num_args() < 4 && ($table = $q->getTable()) && !($table instanceof Query)) {
 			$table_parts = explode('.', $table);
 			$table_name = array_pop($table_parts);
 			$this->setClass(StringFormat::className($table_name));
