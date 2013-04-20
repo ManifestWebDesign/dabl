@@ -14,6 +14,8 @@
 			}
 		});
 		$('input.datepicker').datepicker();
+
+		$('.button-group').buttonset();
 	});
 
 })(jQuery);

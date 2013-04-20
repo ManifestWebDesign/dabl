@@ -24,28 +24,27 @@ $start = max(1, min($count - $page_limit, $page - $mid_page_limit));
 $end = min($count, max($page_limit, $page + $mid_page_limit));
 ?>
 <div class="pager ui-helper-clearfix">
-	<span>
-		Records
-		<?php echo number_format($pager->getStart()) ?>-<?php echo number_format($pager->getEnd()) ?>/<?php echo number_format($pager->getTotal()) ?>
+	<span class="pager-text">
+		<?php echo number_format($pager->getStart()) ?>-<?php echo number_format($pager->getEnd()) ?> / <?php echo number_format($pager->getTotal()) ?>
 	</span>
 <?php if ($count > 1): ?>
-	<span class="pager-label">Page</span>
+	<span class="pager-buttons button-group">
 <?php
 if ($page > 1):
 	$link = str_replace('page_num', 1, $url_format);
 ?>
-	<a href="<?php echo $link ?>">&laquo; First</a>
+	<a href="<?php echo $link ?>">&laquo;</a>
 
 <?php $link = str_replace('page_num', $page - 1, $url_format) ?>
 
-	<a href="<?php echo $link ?>">&lsaquo; Previous</a>
+	<a href="<?php echo $link ?>">&lsaquo;</a>
 
 <?php endif; ?>
 
 <?php for ($i = $start; $i <= $end; ++$i): ?>
 	<?php if ($i == $page): ?>
 
-	<span><?php echo $i ?></span>
+	<span class="pager-current"><?php echo $i ?></span>
 
 	<?php else: ?>
 		<?php $link = str_replace('page_num', $i, $url_format); ?>
@@ -58,11 +57,12 @@ if ($page > 1):
 <?php if ($page < $count): ?>
 	<?php $link = str_replace('page_num', $page + 1, $url_format); ?>
 
-	<a href="<?php echo $link ?>">Next &rsaquo;</a>
+	<a href="<?php echo $link ?>">&rsaquo;</a>
 
 	<?php $link = str_replace('page_num', $count, $url_format); ?>
-	<a href="<?php echo $link ?>">Last &raquo;</a>
+	<a href="<?php echo $link ?>">&raquo;</a>
 
 <?php endif ?>
+	</span>
 <?php endif?>
 </div>
