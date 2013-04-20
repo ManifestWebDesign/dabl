@@ -74,7 +74,7 @@ foreach ($this->getColumns($table_name) as $column) {
 <?php
 			break;
 		default:
-			if($column->isForeignKey()){
+			if ($column->isForeignKey()) {
 ?>
 			<select id="<?php echo $input_id ?>" name="<?php echo $column_name ?>">
 			<?php echo $foreign_open_foreach ?>
@@ -100,14 +100,12 @@ foreach ($this->getColumns($table_name) as $column) {
 ?>
 	</div>
 	<div class="form-action-buttons ui-helper-clearfix">
-		<span class="ui-state-default ui-corner-all ui-button-link">
-			<span class="ui-icon ui-icon-disk"></span>
-			<input type="submit" value="<?php echo '<?php echo $'.$single.'->isNew() ? "Save" : "Save Changes" ?>' ?>" />
+		<span class="button" data-icon="disk">
+			<input type="submit" value="<?php echo '<?php echo $' . $single . '->isNew() ? "Save" : "Save Changes" ?>' ?>" />
 		</span>
 		<?php echo '<?php if (isset($_SERVER[\'HTTP_REFERER\'])): ?>' ?>
 
-		<a class="ui-state-default ui-corner-all ui-button-link" href="<?php echo '<?php echo $_SERVER[\'HTTP_REFERER\'] ?>' ?>">
-			<span class="ui-icon ui-icon-cancel"></span>
+		<a class="button" data-icon="cancel" href="<?php echo '<?php echo $_SERVER[\'HTTP_REFERER\'] ?>' ?>">
 			Cancel
 		</a>
 		<?php echo '<?php endif ?>' ?>

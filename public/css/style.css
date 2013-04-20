@@ -111,6 +111,7 @@ tr.even td {
 
 /** Pager **/
 .pager {
+	font-size: 1em;
 	padding: 5px 0;
 	margin-bottom: 5px;
 }
@@ -121,7 +122,6 @@ tr.even td {
 }
 
 .pager .pager-current, .pager .pager-text {
-	font-size: 1em;
 	border: 1px solid transparent;
 	padding: .4em 1em;
 	display: inline-block;
@@ -141,46 +141,27 @@ tr.even td {
 
 
 /** UI Buttons **/
-.ui-button-link {
-	padding:0.3em .8em 0.3em 18px;
-	font-size: 13px;
-	line-height: 16px;
-	position:relative;
-	text-decoration:none;
-	cursor: pointer;
-	display:inline-block;
-	white-space: nowrap;
-}
-
-.ui-button-link, .ui-button link a, .ui-button-link input {
-	font-weight: bold;
-}
-
-h1 .ui-button-link{
+h1 .button{
 	float:right;
 	margin-left: 10px;
 }
 
-.ui-button-link .ui-icon {
-	left:0.2em;
-	margin:-8px 5px 0 0;
-	position:absolute;
-	top:50%;
-	_top:13px;
+h1 .ui-button-text{
+	font-size: 12px;
 }
 
-.ui-button-link input{
-	border:none;
-	padding:0;
-	margin:0;
-	background: transparent;
-	color:inherit;
-	cursor: inherit;
-	line-height:inherit;
-	font:inherit;
+.ui-button input {
+	border: none;
+	background: none;
+	margin: 0;
+	padding: 0;
+	color: inherit;
+	line-height: inherit;
+	font: inherit;
+	text-decoration: inherit;
 }
 
-table.object-grid .ui-button-link {
+table.object-grid .ui-button-text {
 	line-height: 14px;
 	font-size: 10px;
 }

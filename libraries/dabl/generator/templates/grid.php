@@ -85,7 +85,7 @@ if ($actions) {
 <?php
 	foreach ($actions as $action_label => $action_url) {
 		if ($action_label == 'Index') continue;
-			$icon_class = @$this->actionIcons[$action_label] ? 'ui-icon-' . $this->actionIcons[$action_label] : 'ui-icon-carat-1-e';
+			$icon_class = @$this->actionIcons[$action_label] ? $this->actionIcons[$action_label] : 'carat-1-e';
 			$on_click = '';
 			if (strtolower($action_label) === 'delete') {
 				$on_click = "if (confirm('Are you sure?')) { window.location.href = '$action_url' } return false";
@@ -93,14 +93,14 @@ if ($actions) {
 			}
 ?>
 				<a
-					class="ui-widget ui-state-default ui-corner-all ui-button-link"
+					class="button"
+					data-icon="<?php echo $icon_class ?>"
 <?php if (in_array($action_label, $this->standardActions)) : ?>
 					title="<?php echo $action_label . ' ' . ucfirst($single) ?>"
 <?php endif ?>
 					href="<?php echo $action_url ?>"<?php if ('' !== $on_click): ?>
 
 					onclick="<?php echo $on_click ?>"<?php endif ?>>
-					<span class="ui-icon <?php echo $icon_class ?>"><?php echo $action_label ?></span>
 					<?php echo $action_label ?>
 
 				</a>

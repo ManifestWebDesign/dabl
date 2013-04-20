@@ -33,23 +33,23 @@ $end = min($count, max($page_limit, $page + $mid_page_limit));
 if ($page > 1):
 	$link = str_replace('page_num', 1, $url_format);
 ?>
-	<a href="<?php echo $link ?>">&laquo;</a>
+		<a title="First" href="<?php echo $link ?>">&laquo;</a>
 
 <?php $link = str_replace('page_num', $page - 1, $url_format) ?>
 
-	<a href="<?php echo $link ?>">&lsaquo;</a>
+		<a title="Previous" href="<?php echo $link ?>">&lsaquo;</a>
 
 <?php endif; ?>
 
 <?php for ($i = $start; $i <= $end; ++$i): ?>
 	<?php if ($i == $page): ?>
 
-	<span class="pager-current"><?php echo $i ?></span>
+		<span class="pager-current"><?php echo $i ?></span>
 
 	<?php else: ?>
 		<?php $link = str_replace('page_num', $i, $url_format); ?>
 
-	<a href="<?php echo $link ?>"><?php echo $i ?></a>
+		<a href="<?php echo $link ?>"><?php echo $i ?></a>
 
 	<?php endif ?>
 <?php endfor; ?>
@@ -57,10 +57,10 @@ if ($page > 1):
 <?php if ($page < $count): ?>
 	<?php $link = str_replace('page_num', $page + 1, $url_format); ?>
 
-	<a href="<?php echo $link ?>">&rsaquo;</a>
+		<a title="Next" href="<?php echo $link ?>">&rsaquo;</a>
 
-	<?php $link = str_replace('page_num', $count, $url_format); ?>
-	<a href="<?php echo $link ?>">&raquo;</a>
+		<?php $link = str_replace('page_num', $count, $url_format); ?>
+		<a title="Last" href="<?php echo $link ?>">&raquo;</a>
 
 <?php endif ?>
 	</span>

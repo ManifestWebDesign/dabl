@@ -5,14 +5,13 @@ unset($actions['Show']);
 <div class="action-buttons ui-helper-clearfix">
 <?php
 foreach($actions as $action_label => $action_url):
-	$icon_class = @$this->actionIcons[$action_label] ? 'ui-icon-' . $this->actionIcons[$action_label] : 'ui-icon-carat-1-e';
+	$icon_class = @$this->actionIcons[$action_label] ? $this->actionIcons[$action_label] : 'carat-1-e';
 ?>
 	<a href="<?php echo $action_url ?>"
-	   class="ui-state-default ui-corner-all ui-button-link" title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php if(strtolower($action_label) == 'delete'): ?>
+		class="button" data-icon="<?php echo $icon_class ?>" title="<?php echo $action_label . ' ' . ucfirst($single) ?>"<?php if(strtolower($action_label) == 'delete'): ?>
 
-	   onclick="return confirm('Are you sure?');"<?php endif ?>>
-		<span class="ui-icon <?php echo $icon_class ?>"></span><?php echo $action_label ?>
-
+		onclick="return confirm('Are you sure?');"<?php endif ?>>
+		<?php echo $action_label ?>
 	</a>
 <?php endforeach ?>
 </div>
