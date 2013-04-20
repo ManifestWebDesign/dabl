@@ -1,6 +1,8 @@
 (function($){
 
 	$(function() {
+		$('.button-group').buttonset();
+
 		$('li.ui-state-default, a.ui-state-default, input.ui-state-default, div.ui-state-default, span.ui-state-default')
 			.on('mouseenter', function(){
 				$(this).addClass('ui-state-hover');
@@ -28,8 +30,6 @@
 		});
 
 		$('input.datepicker').datepicker();
-
-		$('.button-group').buttonset();
 	});
 
 })(jQuery);
