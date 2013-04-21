@@ -84,6 +84,7 @@ table.object-grid thead th{
 	font-weight: bold;
 	text-align: left;
 	border-left: 0px;
+	white-space: nowrap;
 }
 
 table.object-grid thead th .ui-corner-tl{
