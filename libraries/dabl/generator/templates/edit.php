@@ -61,7 +61,7 @@ foreach ($this->getColumns($table_name) as $column) {
 				<input <?php echo '<?php if ($' . $single . '->' . $method . '() === 0) echo \'checked="checked"\' ?>' ?> name="<?php echo $column_name ?>" type="radio" value="0" />
 				No
 			</label>
-<?
+<?php
 			break;
 		case Model::COLUMN_TYPE_LONGVARCHAR:
 ?>
