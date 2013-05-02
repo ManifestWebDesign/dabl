@@ -1102,7 +1102,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		}
 
 		if ($this->getCacheResults()) {
-			$this-><?php echo $cache_property ?> = $<?php echo $from_table ?>s;
+			$this-><?php echo $cache_property ?> = $result;
 		}
 		return $result;
 	}
