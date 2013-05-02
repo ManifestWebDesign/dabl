@@ -832,7 +832,7 @@ foreach ($this->getForeignKeysFromTable($table_name) as $r):
 			$this->set<?php echo $from_column ?>($<?php echo $lc_to_class_name ?>->get<?php echo $to_column ?>());
 		}
 <?php
-if ($fk_is_pk) {
+if (!$fk_is_pk) {
 ?>
 		if ($this->getCacheResults()) {
 			$this-><?php echo $fk_property?> = $<?php echo $lc_to_class_name ?>;
@@ -1029,7 +1029,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	$foreign_columns = $r->getForeignColumns();
 	$to_column = array_shift($foreign_columns);
 	$to_table = $r->getForeignTableName();
-	$cache_property = $from_class_name . 'sRelatedBy ' . StringFormat::titleCase($from_column) . '_c';
+	$cache_property = $from_class_name . 'sRelatedBy' . StringFormat::titleCase($from_column) . '_c';
 ?>
 	/**
 	 * Returns a Query for selecting <?php echo $from_table ?> Objects(rows) from the <?php echo $from_table ?> table
@@ -1087,8 +1087,8 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 		}
 
 		if (
-			null === $q;
-			$this->getCacheResults()
+			null === $q
+			&& $this->getCacheResults()
 			&& !empty($this-><?php echo $cache_property ?>)
 			&& !$this->isColumnModified('<?php echo $to_column ?>')
 		) {
