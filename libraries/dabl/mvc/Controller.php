@@ -207,6 +207,7 @@ abstract class Controller extends ArrayObject {
 					header('Content-type: application/json');
 					if ($this->isRestful() && @$this['errors']) {
 						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
+						$params = array('errors' => $this['errors']);
 					}
 				}
 				echo json_encode_all($params);
@@ -217,6 +218,7 @@ abstract class Controller extends ArrayObject {
 					header('Content-type: application/xml');
 					if ($this->isRestful() && @$this['errors']) {
 						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
+						$params = array('errors' => $this['errors']);
 					}
 				}
 				echo xml_encode_all($params);
