@@ -160,6 +160,7 @@ h1 .ui-button-text{
 	line-height: inherit;
 	font: inherit;
 	text-decoration: inherit;
+	cursor: inherit;
 }
 
 table.object-grid .ui-button-text {
