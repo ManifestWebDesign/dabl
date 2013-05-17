@@ -778,17 +778,17 @@ abstract class Model {
 		if (null === $value) {
 			throw new RuntimeException('NULL cannot be used to match keys.');
 		}
-		$conn = $this->getConnection();
+		$column = "$foreign_table.$foreign_column";
 		if ($q) {
 			$q = clone $q;
 			$alias = $q->getAlias();
 			if ($alias && $foreign_table == $q->getTable()) {
-				$foreign_column = "$alias.$foreign_column";
+				$column = "$alias.$foreign_column";
 			}
 		} else {
 			$q = new Query;
 		}
-		$q->add($foreign_column, $value);
+		$q->add($column, $value);
 		return $q;
 	}
 
