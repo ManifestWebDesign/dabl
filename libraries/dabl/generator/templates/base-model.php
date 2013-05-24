@@ -128,6 +128,9 @@ foreach ($fields as $key => $field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
 	$method_name = StringFormat::titleCase($field->getName());
 	$params = $field->isTemporalType() ? '$format = null' : '';
+	if ($field->getType() === Model::COLUMN_TYPE_INTEGER_TIMESTAMP) {
+		$params = $field->isTemporalType() ? '$format = \'Y-m-d H:i:s O\'' : '';
+	}
 	$param_vars = $field->isTemporalType() ? '$format' : '';
 	$used_functions[] = "get$method_name";
 	$raw_method_name = $options['cap_method_names'] ? ucfirst($field->getName()) : $field->getName();
@@ -140,12 +143,12 @@ foreach ($fields as $key => $field):
 		if (null === $this-><?php echo $field->getName() ?> || null === $format) {
 			return $this-><?php echo $field->getName() ?>;
 		}
-		if (0 === strpos($this-><?php echo $field->getName() ?>, '0000-00-00')) {
-			return null;
-		}
 <?php if ($field->getType() === Model::COLUMN_TYPE_INTEGER_TIMESTAMP): ?>
 		return date($format, $this-><?php echo $field->getName() ?>);
 <?php else: ?>
+		if (0 === strpos($this-><?php echo $field->getName() ?>, '0000-00-00')) {
+			return null;
+		}
 		return date($format, strtotime($this-><?php echo $field->getName() ?>));
 <?php endif ?>
 <?php else: ?>

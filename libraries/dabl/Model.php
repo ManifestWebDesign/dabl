@@ -393,7 +393,9 @@ abstract class Model {
 				if ('' === $value) {
 					$value = null;
 				} elseif (null !== $value) {
-					if ($numeric) {
+					if ($temporal && $this->_formatDates) {
+						$value = self::coerceTemporalValue($value, $column_type, $this->getConnection());
+					} elseif ($numeric) {
 						if (is_bool($value)) {
 							$value = $value ? 1 : 0;
 						} elseif (self::isIntegerType($column_type)) {
@@ -412,9 +414,6 @@ abstract class Model {
 								throw new InvalidArgumentException($value . ' is not a valid float or it is too large');
 							}
 						}
-					}
-					if ($this->_formatDates && $temporal) {
-						$value = self::coerceTemporalValue($value, $column_type, $this->getConnection());
 					}
 				}
 			}
