@@ -13,10 +13,21 @@ if (!empty($_REQUEST['_method'])) {
 	$http_verb = $_SERVER['REQUEST_METHOD'];
 }
 
+// clear params used for routing
 unset($_GET['_url'], $_REQUEST['_url'], $_GET['_method'], $_REQUEST['_method']);
 
+$headers = get_request_headers();
+
+// transfer posted json data to global request data arrays
+if (stripos(@$headers['Content-Type'], 'application/json') !== false) {
+	$data = file_get_contents('php://input');
+	$json_data = json_decode($data, true);
+	$_REQUEST = array_merge($_REQUEST, $json_data);
+	$_POST = array_merge($_POST, $json_data);
+}
+
 try {
-	ApplicationController::load($requested_route, get_request_headers(), $http_verb);
+	ApplicationController::load($requested_route, $headers, $http_verb);
 } catch (FileNotFoundException $e) {
 	error_log($e->getMessage());
 	echo '<h1>File Not Found</h1>';
