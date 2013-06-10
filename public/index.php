@@ -22,8 +22,10 @@ $headers = get_request_headers();
 if (stripos(@$headers['Content-Type'], 'application/json') !== false) {
 	$data = file_get_contents('php://input');
 	$json_data = json_decode($data, true);
-	$_REQUEST = array_merge($_REQUEST, $json_data);
-	$_POST = array_merge($_POST, $json_data);
+	if (is_array($json_data)) {
+		$_REQUEST = array_merge($_REQUEST, $json_data);
+		$_POST = array_merge($_POST, $json_data);
+	}
 }
 
 try {
