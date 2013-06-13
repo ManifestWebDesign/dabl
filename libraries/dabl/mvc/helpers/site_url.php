@@ -24,9 +24,9 @@ function site_url($url = '', $version = false) {
 	}
 
 	if (
-		0 === strpos($url, '#') ||
-		0 === strpos($url, 'javascript:') ||
-		false !== strpos($url, '://')
+		false !== strpos($url, ':')
+		|| 0 === strpos($url, '#')
+		|| 0 === strpos($url, '//')
 	) {
 		return $url;
 	}

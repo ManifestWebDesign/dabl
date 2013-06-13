@@ -68,9 +68,9 @@ class SiteURLTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @group site_url
 	 */
-	function testBrokenProtocolSpecBroken() {
+	function testBrokenProtocolSpecReturnsUnmodified() {
 		$result = site_url('http:/ /foo');
-		$expResult = '/http:/ /foo';
+		$expResult = 'http:/ /foo';
 		$this->assertEquals($expResult, $result);
 	}
 
@@ -90,6 +90,19 @@ class SiteURLTest extends PHPUnit_Framework_TestCase {
 		$result = site_url('#');
 		$expResult = '#';
 		$this->assertEquals($expResult, $result);
+	}
+
+	/**
+	 * @group site_url
+	 */
+	function testDoubleLeadingSlashReturnsUnmodified() {
+		$result = site_url('//foo.com/bar.html');
+		$expResult = '//foo.com/bar.html';
+		$this->assertEquals($expResult, $result);
+
+		$result = site_url('dir//bar.html');
+		$expResult = 'dir//bar.html';
+		$this->assertNotEquals($expResult, $result);
 	}
 
 } // SiteURLTest
