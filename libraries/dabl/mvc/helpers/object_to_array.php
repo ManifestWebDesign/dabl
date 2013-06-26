@@ -33,7 +33,7 @@ function object_to_array($var, $loop_exclude = array()) {
 			foreach ($var as $key => $val) {
 				$_var[$key] = $val;
 			}
-			$var = $_var;
+			$var = &$_var;
 		} else {
 			$var = get_object_vars($var);
 		}
