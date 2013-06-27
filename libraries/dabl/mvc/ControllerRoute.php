@@ -67,9 +67,6 @@ class ControllerRoute {
 	protected $viewDir;
 
 	function __construct($route, array $headers = array(), array $request_params = array()) {
-		if ($this->httpVerb === null) {
-			$this->httpVerb = 'GET';
-		}
 		if (!empty($request_params['_method'])) {
 			$this->httpVerb = $request_params['_method'];
 			unset($request_params['_method']);
@@ -77,6 +74,10 @@ class ControllerRoute {
 
 		$this->setHeaders($headers);
 		$this->setRoute($route);
+
+		if ($this->httpVerb === null) {
+			$this->httpVerb = 'GET';
+		}
 	}
 
 	function setHeaders($headers) {
@@ -96,6 +97,8 @@ class ControllerRoute {
 			$this->httpVerb = strtoupper($headers['X-HTTP-Method-Override']);
 		} elseif (!$this->httpVerb && !empty($headers['X-HTTP-Method'])) {
 			$this->httpVerb = strtoupper($headers['X-HTTP-Method']);
+		} elseif (!$this->httpVerb && !empty($headers['Method'])) {
+			$this->httpVerb = strtoupper($headers['Method']);
 		}
 
 		// Ajax Request = partial (no layout)
