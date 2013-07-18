@@ -18,7 +18,7 @@ if (stripos(@$headers['Content-Type'], 'application/json') !== false) {
 	$json_data = json_decode($data, true);
 	if (is_array($json_data)) {
 		$_REQUEST = array_merge($_REQUEST, $json_data);
-		$_POST = array_merge($_POST, $json_data);
+		$_POST = $json_data;
 	}
 }
 
