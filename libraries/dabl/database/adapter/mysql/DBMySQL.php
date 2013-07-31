@@ -5,8 +5,10 @@
  */
 class DBMySQL extends DABLPDO {
 
-	private $_transaction_count = 0;
-	private $_rollback_connection = false;
+	/**
+	 * @var int the current transaction depth
+	 */
+	protected $_transactionDepth = 0;
 
 	/**
 	 * This method is used to ignore case.
@@ -140,82 +142,53 @@ class DBMySQL extends DABLPDO {
 	}
 
 	/**
-	 * Begin a (possibly nested) transaction.
+	 * Start transaction
 	 *
-	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
-	 * @see PDO::beginTransaction()
+	 * @return bool|void
 	 */
-	function beginTransaction() {
-		if ($this->_transaction_count<=0) {
-			$this->_rollback_connection = false;
-			$this->_transaction_count = 0;
+	public function beginTransaction() {
+		if ($this->_transactionDepth == 0) {
 			parent::beginTransaction();
+		} else {
+			$this->exec("SAVEPOINT LEVEL{$this->_transactionDepth}");
 		}
-		++$this->_transaction_count;
+
+		$this->_transactionDepth++;
 	}
 
 	/**
-	 * Commit a (possibly nested) transaction.
-	 * FIXME: Make this throw an ErrorException of a DABL class
+	 * Commit current transaction
 	 *
-	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
-	 * @see PDO::commit()
-	 * @throws ErrorException
+	 * @return bool|void
 	 */
-	function commit() {
-		if ($this->_transaction_count<=0)
-			throw new ErrorException('DABL: Attempting to commit outside of a transaction');
+	public function commit() {
+		$this->_transactionDepth--;
 
-		--$this->_transaction_count;
-
-		if ($this->_transaction_count==0) {
-			if ($this->_rollback_connection) {
-				parent::rollback();
-				throw new ErrorException('DABL: attempting to commit a rolled back transaction');
-			} else {
-				return parent::commit();
-			}
+		if ($this->_transactionDepth == 0) {
+			parent::commit();
+		} else {
+			$this->exec("RELEASE SAVEPOINT LEVEL{$this->_transactionDepth}");
 		}
 	}
 
 	/**
-	 * Rollback, and prevent all further commits in this transaction.
-	 * FIXME: Make this throw an ErrorException of a DABL class
+	 * Rollback current transaction,
 	 *
-	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
-	 * @see PDO::rollback()
-	 * @throws ErrorException
+	 * @throws PDOException if there is no transaction started
+	 * @return bool|void
 	 */
-	function rollback() {
-		if ($this->_transaction_count<=0)
-			throw new ErrorException('DABL: Attempting to rollback outside of a transaction');
-
-		--$this->_transaction_count;
-
-		$this->_rollback_connection = true;
-		if ($this->_transaction_count==0) {
-			return parent::rollback();
+	public function rollBack() {
+		if ($this->_transactionDepth == 0) {
+			throw new PDOException('Rollback error : There is no transaction started');
 		}
-	}
 
-	/**
-	 * Utility function for writing test cases.
-	 *
-	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
-	 * @return int
-	 */
-	function getTransactionCount() {
-		return $this->_transaction_count;
-	}
+		$this->_transactionDepth--;
 
-	/**
-	 * Utility function for writing test cases.
-	 *
-	 * @author Aaron Fellin <aaron@manifestwebdesign.com>
-	 * @return bool
-	 */
-	function getRollbackImminent() {
-		return $this->_rollback_connection;
+		if ($this->_transactionDepth == 0) {
+			parent::rollBack();
+		} else {
+			$this->exec("ROLLBACK TO SAVEPOINT LEVEL{$this->_transactionDepth}");
+		}
 	}
 
 	/**

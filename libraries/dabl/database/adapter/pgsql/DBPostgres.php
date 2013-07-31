@@ -6,6 +6,11 @@
 class DBPostgres extends DABLPDO {
 
 	/**
+	 * @var int the current transaction depth
+	 */
+	protected $_transactionDepth = 0;
+
+	/**
 	 * This method is used to ignore case.
 	 *
 	 * @param	  string $in The string to transform to upper case.
@@ -124,5 +129,55 @@ class DBPostgres extends DABLPDO {
 		$parser->parse($database);
 		$database->doFinalInitialization();
 		return $database;
+	}
+
+	/**
+	 * Start transaction
+	 *
+	 * @return bool|void
+	 */
+	public function beginTransaction() {
+		if ($this->_transactionDepth == 0) {
+			parent::beginTransaction();
+		} else {
+			$this->exec("SAVEPOINT LEVEL{$this->_transactionDepth}");
+		}
+
+		$this->_transactionDepth++;
+	}
+
+	/**
+	 * Commit current transaction
+	 *
+	 * @return bool|void
+	 */
+	public function commit() {
+		$this->_transactionDepth--;
+
+		if ($this->_transactionDepth == 0) {
+			parent::commit();
+		} else {
+			$this->exec("RELEASE SAVEPOINT LEVEL{$this->_transactionDepth}");
+		}
+	}
+
+	/**
+	 * Rollback current transaction,
+	 *
+	 * @throws PDOException if there is no transaction started
+	 * @return bool|void
+	 */
+	public function rollBack() {
+		if ($this->_transactionDepth == 0) {
+			throw new PDOException('Rollback error : There is no transaction started');
+		}
+
+		$this->_transactionDepth--;
+
+		if ($this->_transactionDepth == 0) {
+			parent::rollBack();
+		} else {
+			$this->exec("ROLLBACK TO SAVEPOINT LEVEL{$this->_transactionDepth}");
+		}
 	}
 }
