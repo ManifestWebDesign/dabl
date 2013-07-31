@@ -32,6 +32,18 @@ class QueryPager {
 	private $className;
 	private $methodName;
 
+	function toArray() {
+		return array(
+			'total' => $this->getTotal(),
+			'limit' => $this->getLimit(),
+			'pageCount' => $this->getPageCount(),
+			'page' => $this->getPageNum(),
+			'offset' => $this->getOffset(),
+			'start' => $this->getStart(),
+			'end' => $this->getEnd()
+		);
+	}
+
 	/**
 	 * @param Query $q
 	 * @param int $limit
