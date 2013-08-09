@@ -675,7 +675,12 @@ foreach ($fields as $key => $field):
 
 <?php if ($auto_increment): ?>
 		$pk = <?php echo $class_name ?>::getPrimaryKey();
-		unset($columns[$pk]);
+		foreach ($columns as $key => &$c) {
+			if ($c == $pk) {
+				unset($columns[$key]);
+				break;
+			}
+		}
 <?php endif ?>
 
 		$values = array();
