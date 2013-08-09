@@ -691,6 +691,8 @@ foreach ($fields as $key => $field):
 		$values = array();
 
 		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', array_map(array($conn, 'quoteIdentifier'), $columns)) . ') VALUES' . "\n";
+		$ts_format = $conn->getTimestampFormatter();
+		$date_format = $conn->getDateFormatter();
 
 		foreach ($records as $k => $r) {
 			$placeholders = array();
@@ -711,7 +713,14 @@ foreach ($fields as $key => $field):
 					continue;
 				}
 <?php endif ?>
-				$values[] = $r->$column;
+				$type = <?php echo $class_name ?>::getColumnType($column);
+				if ($type === Model::COLUMN_TYPE_TIMESTAMP) {
+					$values[] = $r->{'get' . $column}($ts_format);
+				} elseif ($type === Model::COLUMN_TYPE_DATE) {
+					$values[] = $r->{'get' . $column}($date_format);
+				} else {
+					$values[] = $r->{'get' . $column}();
+				}
 				$placeholders[] = '?';
 			}
 
