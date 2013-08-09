@@ -506,10 +506,10 @@ abstract class Model implements JsonSerializable {
 		foreach ($array as $column => &$value) {
 			$type = $this->getColumnType($column);
 			if ($type === Model::COLUMN_TYPE_TIMESTAMP || $type === Model::COLUMN_TYPE_INTEGER_TIMESTAMP) {
-				if ($type === Model::COLUMN_TYPE_TIMESTAMP) {
+				if (!is_int($value)) {
 					$value = strtotime($value);
 				}
-				if ($value === false) {
+				if (!is_int($value)) {
 					throw new RuntimeException('Error parsing date.');
 				}
 				$value = date('c', $value);
