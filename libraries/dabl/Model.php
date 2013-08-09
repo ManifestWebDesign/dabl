@@ -507,11 +507,15 @@ abstract class Model implements JsonSerializable {
 			$type = $this->getColumnType($column);
 			if ($type === Model::COLUMN_TYPE_TIMESTAMP || $type === Model::COLUMN_TYPE_INTEGER_TIMESTAMP && isset($array[$column])) {
 				$value = $array[$column];
+				if (!$value) {
+					$array[$column] = null;
+					continue;
+				}
 				if (!is_int($value)) {
 					$value = strtotime($value);
 				}
 				if (!is_int($value)) {
-					throw new RuntimeException('Error parsing date.');
+					throw new RuntimeException('Error parsing date "' . $array[$column] . '"');
 				}
 				$array[$column] = date('c', $value);
 			}
