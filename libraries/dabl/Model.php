@@ -11,6 +11,7 @@
  * @package dabl
  */
 abstract class Model {
+
 	const COLUMN_TYPE_CHAR = 'CHAR';
 	const COLUMN_TYPE_VARCHAR = 'VARCHAR';
 	const COLUMN_TYPE_LONGVARCHAR = 'LONGVARCHAR';
@@ -322,7 +323,7 @@ abstract class Model {
 		$new_object = new $class;
 		$new_object->fromArray($this->toArray());
 
-		foreach($this->getPrimaryKeys() as $pk){
+		foreach ($this->getPrimaryKeys() as $pk) {
 			$new_object->{'set' . $pk}(null);
 		}
 		return $new_object;
@@ -500,7 +501,7 @@ abstract class Model {
 	 * @param bool $value[optional]
 	 * @return Model
 	 */
-	function setCacheResults($value=true) {
+	function setCacheResults($value = true) {
 		$this->_cacheResults = (bool) $value;
 		return $this;
 	}
