@@ -673,6 +673,10 @@ foreach ($fields as $key => $field):
 		$columns = <?php echo $class_name ?>::getColumnNames();
 		$quoted_table = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
 
+<?php if ($auto_increment): ?>
+		$pk = <?php echo $class_name ?>::getPrimaryKey();
+		unset($columns[$pk]);
+<?php endif ?>
 
 		$values = array();
 
@@ -692,6 +696,11 @@ foreach ($fields as $key => $field):
 			}
 
 			foreach ($columns as &$column) {
+<?php if ($auto_increment): ?>
+				if ($column == $pk) {
+					continue;
+				}
+<?php endif ?>
 				$values[] = $r->$column;
 				$placeholders[] = '?';
 			}
