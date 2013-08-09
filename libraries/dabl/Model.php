@@ -503,16 +503,17 @@ abstract class Model implements JsonSerializable {
 	 */
     public function jsonSerialize() {
 		$array = $this->toArray();
-		foreach ($array as $column => &$value) {
+		foreach ($this->getColumns() as $column) {
 			$type = $this->getColumnType($column);
 			if ($type === Model::COLUMN_TYPE_TIMESTAMP || $type === Model::COLUMN_TYPE_INTEGER_TIMESTAMP) {
+				$value = $array[$column];
 				if (!is_int($value)) {
 					$value = strtotime($value);
 				}
 				if (!is_int($value)) {
 					throw new RuntimeException('Error parsing date.');
 				}
-				$value = date('c', $value);
+				$array[$column] = date('c', $value);
 			}
 		}
 		return $array;
