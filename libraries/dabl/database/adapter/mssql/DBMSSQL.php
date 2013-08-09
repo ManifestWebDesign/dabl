@@ -285,14 +285,6 @@ class DBMSSQL extends DABLPDO {
 		$sql = $outerSelect . ' (' . $innerSelect . ' ' . $fromStatement . ') AS derivedb WHERE RowNumber BETWEEN ' . ($offset + 1) . ' AND ' . ($limit + $offset);
 	}
 
-	function lastInsertId() {
-		$query = "SELECT scope_identity() as ID";
-		$result = $this->query($query);
-		foreach ($result as $r) {
-			return (int) $r['ID'];
-		}
-	}
-
 	/**
 	 * @return Database
 	 */
