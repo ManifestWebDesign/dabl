@@ -503,9 +503,9 @@ abstract class Model implements JsonSerializable {
 	 */
     public function jsonSerialize() {
 		$array = $this->toArray();
-		foreach ($this->getColumns() as $column) {
+		foreach ($this->getColumnNames() as $column) {
 			$type = $this->getColumnType($column);
-			if ($type === Model::COLUMN_TYPE_TIMESTAMP || $type === Model::COLUMN_TYPE_INTEGER_TIMESTAMP) {
+			if ($type === Model::COLUMN_TYPE_TIMESTAMP || $type === Model::COLUMN_TYPE_INTEGER_TIMESTAMP && isset($array[$column])) {
 				$value = $array[$column];
 				if (!is_int($value)) {
 					$value = strtotime($value);
