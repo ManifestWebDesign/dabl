@@ -130,8 +130,8 @@ foreach ($fields as $key => $field):
 	$params = '';
 	$param_vars = '';
 	if ($field->isTemporalType()) {
-		if ($field->getType() === Model::COLUMN_TYPE_INTEGER_TIMESTAMP || $field->getType() === Model::COLUMN_TYPE_TIMESTAMP) {
-			$params = '$format = \'c\'';
+		if ($field->getType() === Model::COLUMN_TYPE_INTEGER_TIMESTAMP) {
+			$params = '$format = \'' . $conn->getTimeStampFormatter() . '\'';
 		} else {
 			$params = '$format = null';
 		}
@@ -691,8 +691,6 @@ foreach ($fields as $key => $field):
 		$values = array();
 
 		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', array_map(array($conn, 'quoteIdentifier'), $columns)) . ') VALUES' . "\n";
-		$ts_format = $conn->getTimestampFormatter();
-		$date_format = $conn->getDateFormatter();
 
 		foreach ($records as $k => $r) {
 			$placeholders = array();
@@ -713,14 +711,7 @@ foreach ($fields as $key => $field):
 					continue;
 				}
 <?php endif ?>
-				$type = <?php echo $class_name ?>::getColumnType($column);
-				if ($type === Model::COLUMN_TYPE_TIMESTAMP) {
-					$values[] = $r->{'get' . $column}($ts_format);
-				} elseif ($type === Model::COLUMN_TYPE_DATE) {
-					$values[] = $r->{'get' . $column}($date_format);
-				} else {
-					$values[] = $r->{'get' . $column}();
-				}
+				$values[] = $r->$column;
 				$placeholders[] = '?';
 			}
 

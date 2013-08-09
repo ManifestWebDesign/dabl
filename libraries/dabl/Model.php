@@ -10,7 +10,7 @@
 /**
  * @package dabl
  */
-abstract class Model {
+abstract class Model implements JsonSerializable {
 
 	const COLUMN_TYPE_CHAR = 'CHAR';
 	const COLUMN_TYPE_VARCHAR = 'VARCHAR';
@@ -494,6 +494,29 @@ abstract class Model {
 			$array[$column] = $this->{'get' . $column}();
 		return $array;
 	}
+
+	/**
+	 * Returns an associative Array with the values of $this that are JSON friendly.
+	 * Timestamps will be in ISO 8601 format.
+	 * Array keys match column names.
+	 * @return array
+	 */
+    public function jsonSerialize() {
+		$array = $this->toArray();
+		foreach ($array as $column => &$value) {
+			$type = Entity::getColumnType($column);
+			if ($type === Model::COLUMN_TYPE_TIMESTAMP || $type === Model::COLUMN_TYPE_INTEGER_TIMESTAMP) {
+				if ($type === Model::COLUMN_TYPE_TIMESTAMP) {
+					$value = strtotime($value);
+				}
+				if ($value === false) {
+					throw new RuntimeException('Error parsing date.');
+				}
+				$value = date('c', $value);
+			}
+		}
+		return $array;
+    }
 
 	/**
 	 * Sets whether to use cached results for foreign keys or to execute
