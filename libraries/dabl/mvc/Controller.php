@@ -55,20 +55,26 @@ abstract class Controller extends ArrayObject {
 	protected $route;
 
 	function __destruct() {
+		// store flash params in session
 		$this->storePeristant();
 	}
 
 	function __construct(ControllerRoute $route = null) {
 		$this->setRoute($route);
+
+		// recover flash params from session
+		$this->setParams(array_merge_recursive(get_clean_persistant_values(), $this->getParams()));
 	}
 
 	/**
 	 * @param string|ControllerRoute $route
+	 * @param string $headers ControllerRoute construct arg.  Use only if $route is a string.
+	 * @param string $request_params ControllerRoute construct arg.  Use only if $route is a string.
 	 * @return Controller
 	 */
-	static function load($route, $headers = array(), $http_verb = null) {
+	static function load($route, array $headers = array(), array $request_params = array()) {
 		if (!($route instanceof ControllerRoute)) {
-			$route = new ControllerRoute($route, $headers, $http_verb);
+			$route = new ControllerRoute($route, $headers, $request_params);
 		}
 		$controller = $route->getController();
 
@@ -78,6 +84,13 @@ abstract class Controller extends ArrayObject {
 
 		$controller->doAction($route->getAction(), $route->getParams());
 		return $controller;
+	}
+
+	/**
+	 * Stores $this->persistant in the the session for the next page view
+	 */
+	private function storePeristant() {
+		set_persistant_values(array_merge_recursive(get_persistant_values(), $this->persistant));
 	}
 
 	/**
@@ -95,7 +108,7 @@ abstract class Controller extends ArrayObject {
 	 * @param ControllerRoute $route
 	 * @return Controller
 	 */
-	function setRoute(ControllerRoute $route = null) {
+	protected function setRoute(ControllerRoute $route = null) {
 		$this->route = $route;
 		if (null !== $route) {
 			if ($route->getViewDir()) {
@@ -107,18 +120,8 @@ abstract class Controller extends ArrayObject {
 			if ($route->getExtension()) {
 				$this->outputFormat = $route->getExtension();
 			}
-
-			// Restore Flash params
-			$this->setParams(array_merge_recursive(get_clean_persistant_values(), $route->getParams()));
 		}
 		return $this;
-	}
-
-	/**
-	 * Stores $this->persistant in the the session for the next page view
-	 */
-	private function storePeristant() {
-		set_persistant_values(array_merge_recursive(get_persistant_values(), $this->persistant));
 	}
 
 	/**
@@ -167,15 +170,6 @@ abstract class Controller extends ArrayObject {
 	 */
 	protected function getView($action_name) {
 		return $this->getViewDir() . $action_name;
-	}
-
-	/**
-	 * @deprecated use loadView instead
-	 * @param string $view
-	 * @see loadView
-	 */
-	function renderView($view) {
-		return $this->loadView($view);
 	}
 
 	/**
@@ -246,10 +240,7 @@ abstract class Controller extends ArrayObject {
 		}
 
 		if ($this->isRestful()) {
-			unset($_GET);
-			unset($_FILES);
-			unset($_POST);
-			unset($_REQUEST);
+			$_REQUEST = $_POST = $_FILES = $_GET = array();
 		}
 
 		if ('html' !== $this->outputFormat) {

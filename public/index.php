@@ -7,14 +7,8 @@ require_once '../config.php';
 // @see public/.htaccess
 $requested_route = @$_GET['_url'];
 
-if (!empty($_REQUEST['_method'])) {
-	$http_verb = $_REQUEST['_method'];
-} elseif (!empty($_SERVER['REQUEST_METHOD'])) {
-	$http_verb = $_SERVER['REQUEST_METHOD'];
-}
-
 // clear params used for routing
-unset($_GET['_url'], $_REQUEST['_url'], $_GET['_method'], $_REQUEST['_method']);
+unset($_GET['_url'], $_REQUEST['_url']);
 
 $headers = get_request_headers();
 
@@ -24,12 +18,12 @@ if (stripos(@$headers['Content-Type'], 'application/json') !== false) {
 	$json_data = json_decode($data, true);
 	if (is_array($json_data)) {
 		$_REQUEST = array_merge($_REQUEST, $json_data);
-		$_POST = array_merge($_POST, $json_data);
+		$_POST = $json_data;
 	}
 }
 
 try {
-	ApplicationController::load($requested_route, $headers, $http_verb);
+	ApplicationController::load($requested_route, $headers, $_REQUEST);
 } catch (FileNotFoundException $e) {
 	error_log($e->getMessage());
 	echo '<h1>File Not Found</h1>';

@@ -28,6 +28,9 @@ if (!function_exists('get_request_headers')) {
 		} else {
 			$headers = getallheaders();
 		}
+		if (!empty($_SERVER['REQUEST_METHOD']) && empty($headers['Method'])) {
+			$headers['Method'] = $_SERVER['REQUEST_METHOD'];
+		}
 		return $headers;
 	}
 

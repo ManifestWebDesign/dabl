@@ -66,12 +66,18 @@ class ControllerRoute {
 	 */
 	protected $viewDir;
 
-	function __construct($route, $headers = array(), $http_verb = null) {
-		$this->setHeaders($headers);
-		if (null !== $http_verb) {
-			$this->httpVerb = strtoupper($http_verb);
+	function __construct($route, array $headers = array(), array $request_params = array()) {
+		if (!empty($request_params['_method'])) {
+			$this->httpVerb = $request_params['_method'];
+			unset($request_params['_method']);
 		}
+
+		$this->setHeaders($headers);
 		$this->setRoute($route);
+
+		if ($this->httpVerb === null) {
+			$this->httpVerb = 'GET';
+		}
 	}
 
 	function setHeaders($headers) {
@@ -87,8 +93,12 @@ class ControllerRoute {
 		}
 
 		// HTTP verb
-		if (!empty($headers['X-HTTP-Method'])) {
+ 		if (!empty($headers['X-HTTP-Method-Override'])) {
+			$this->httpVerb = strtoupper($headers['X-HTTP-Method-Override']);
+		} elseif (!$this->httpVerb && !empty($headers['X-HTTP-Method'])) {
 			$this->httpVerb = strtoupper($headers['X-HTTP-Method']);
+		} elseif (!$this->httpVerb && !empty($headers['Method'])) {
+			$this->httpVerb = strtoupper($headers['Method']);
 		}
 
 		// Ajax Request = partial (no layout)
@@ -277,6 +287,9 @@ class ControllerRoute {
 		return $this->isRestful;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getHttpVerb() {
 		return $this->httpVerb;
 	}
