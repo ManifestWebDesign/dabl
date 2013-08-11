@@ -217,6 +217,7 @@ abstract class BaseGenerator {
 			'pk' => $pk,
 			'primary_keys' => $pks,
 			'pk_method' => $pk ? StringFormat::classMethod('get' . StringFormat::titleCase($pk)) : null,
+			'pk_var' => $pk ? StringFormat::variable($pk) : null,
 			'actions' => $this->getActions($table_name),
 			'columns' => $columns
 		);

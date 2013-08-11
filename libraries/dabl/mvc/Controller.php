@@ -47,7 +47,12 @@ abstract class Controller extends ArrayObject {
 	/**
 	 * @var array containing controller params that should persist until the next request
 	 */
-	public $persistant = array();
+	public $flash = array();
+
+	/**
+	 * @deprecated use $this->flash instead
+	 */
+	public $persistant;
 
 	/**
 	 * @var ControllerRoute
@@ -56,14 +61,13 @@ abstract class Controller extends ArrayObject {
 
 	function __destruct() {
 		// store flash params in session
-		$this->storePeristant();
+		$this->writeFlashValues();
 	}
 
 	function __construct(ControllerRoute $route = null) {
 		$this->setRoute($route);
 
-		// recover flash params from session
-		$this->setParams(array_merge_recursive(get_clean_persistant_values(), $this->getParams()));
+		$this->loadFlashValues();
 	}
 
 	/**
@@ -87,10 +91,29 @@ abstract class Controller extends ArrayObject {
 	}
 
 	/**
-	 * Stores $this->persistant in the the session for the next page view
+	 * Recover flash params from session
 	 */
-	private function storePeristant() {
-		set_persistant_values(array_merge_recursive(get_persistant_values(), $this->persistant));
+	private function loadFlashValues() {
+		foreach ($this->flash as $key => $value) {
+			$this[$key] = $value;
+		}
+		$this->flash = array();
+		$this->persistant = &$this->flash;
+
+		foreach (Flash::getCleanAll() as $key => $value) {
+			$this[$key] = $value;
+		}
+	}
+
+	/**
+	 * Stores $this->flash in the the session for the next page view
+	 */
+	private function writeFlashValues() {
+		foreach ($this->flash as $key => $value) {
+			Flash::set($key, $value);
+		}
+		$this->flash = array();
+		$this->persistant = &$this->flash;
 	}
 
 	/**
@@ -125,19 +148,33 @@ abstract class Controller extends ArrayObject {
 	}
 
 	/**
-	 * Returns an array with the view parameters
+	 * Returns an array with the response/view parameters
 	 * @return array
 	 */
-	function getParams() {
+	function getValues() {
 		return $this->getArrayCopy();
 	}
 
 	/**
-	 * Replaces the view parameters with the given array
+	 * @deprecated use getValues
+	 */
+	function getParams() {
+		return getValues();
+	}
+
+	/**
+	 * Replaces the response/view parameters with the given array
 	 * @param array $array
 	 */
-	function setParams($array) {
+	function setValues($array) {
 		$this->exchangeArray($array);
+	}
+
+	/**
+	 * @deprecated use setValues
+	 */
+	function setParams($array) {
+		return $this->setValues($array);
 	}
 
 	/**
@@ -263,10 +300,10 @@ abstract class Controller extends ArrayObject {
 			}
 		}
 
-		if ($this->isRestful()) {
+		if ($this->isRestful() && strpos($url, 'http') !== 0) {
 			$url = '/rest/' . ltrim($url, '/');
-			$this->storePeristant();
-			$this->persistant = array();
+			$this->writeFlashValues();
+			$this->flash = array();
 			Controller::load($url);
 			die;
 		}
@@ -280,6 +317,7 @@ abstract class Controller extends ArrayObject {
 	 */
 	function doAction($action_name = null, $args = array()) {
 
+		// todo: this probably belongs somewhere else
 		if ($this->isRestful()) {
 			$has_id = false;
 			if ((string) (int) $action_name === (string) $action_name) {

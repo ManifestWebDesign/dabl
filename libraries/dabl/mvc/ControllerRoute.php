@@ -326,9 +326,6 @@ class ControllerRoute {
 		require_once $this->controllerDir . '/' . $this->controllerClass . '.php';
 		$instance = new $this->controllerClass($this);
 
-		// Restore Flash params
-		$instance->setParams(array_merge_recursive(get_clean_persistant_values(), $instance->getParams()));
-
 		return $instance;
 	}
 
