@@ -105,20 +105,21 @@ class QueryPager {
 	function setPageNum($page_number) {
 		$this->page = $page_number;
 
+		if (!is_numeric($this->page) || $this->page < 1) {
+			$this->page = 1;
+		}
+
 		if ($this->total !== null) {
 			$this->sanitizePageNum();
 		}
 	}
 
 	/**
-	 * Ensure page num is an intval that does not exceed page
+	 * Ensure page num does not exceed page
 	 * count. Lazy sanitized because page count is not known
 	 * until after limit is set and count query is run.
 	 */
 	function sanitizePageNum() {
-		if (!is_numeric($this->page) || $this->page < 1) {
-			$this->page = 1;
-		}
 		if ($this->page > $this->getPageCount()) {
 			$this->page = $this->getPageCount();
 		}

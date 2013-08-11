@@ -15,9 +15,8 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		// paginate
 		$this['pager'] = new QueryPager($q, !empty($_REQUEST['limit']) ? $_REQUEST['limit'] : 25, @$_REQUEST['page']);
 
-		$this['total_count'] = $this['pager']->getTotal();
 		if (isset($_REQUEST['count_only'])) {
-			return $this['total_count'];
+			return $this['pager'];
 		}
 		return $this['<?php echo $plural ?>'] = $this['pager']->fetchPage();
 	}
