@@ -26,7 +26,10 @@ if (!function_exists('get_request_headers')) {
 				$headers[$key] = $value;
 			}
 		} else {
-			$headers = getallheaders();
+			foreach (getallheaders() as $key => $value) {
+				$key = str_replace(' ', '-', ucwords(strtolower(str_replace(array('_', '-'), ' ', $key))));
+				$headers[$key] = $value;
+			}
 		}
 		if (!empty($_SERVER['REQUEST_METHOD']) && empty($headers['Method'])) {
 			$headers['Method'] = $_SERVER['REQUEST_METHOD'];
