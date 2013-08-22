@@ -2,58 +2,97 @@
 
 class <?php echo $controller_name ?> extends ApplicationController {
 
+	/**
+	 * Returns all <?php echo $model_name ?> records matching the query. Examples:
+	 * GET /<?php echo $plural_url ?>?column=value&order_by=column&dir=DESC&limit=20&page=2&count_only
+	 * GET /rest/<?php echo $plural_url ?>.json&limit=5
+	 *
+	 * @return <?php echo $model_name ?>[]
+	 */
 	function index() {
 		$q = <?php echo $model_name ?>::getQuery($_REQUEST);
 
 		// paginate
-		$qp = new QueryPager($q, !empty($_REQUEST['limit']) ? $_REQUEST['limit'] : 25, @$_REQUEST['page']);
+		$this['pager'] = new QueryPager($q, !empty($_REQUEST['limit']) ? $_REQUEST['limit'] : 25, @$_REQUEST['page']);
 
-		$this['pager'] = $qp;
-		return $this['<?php echo $plural ?>'] = $qp->fetchPage();
+		if (isset($_REQUEST['count_only'])) {
+			return $this['pager'];
+		}
+		return $this['<?php echo $plural ?>'] = $this['pager']->fetchPage();
 	}
 
-	function edit(<?php if (@$pk_method): ?>$<?php echo $single ?>_id = null<?php endif ?>) {
-		return $this->_get<?php echo $model_name ?>(<?php if(@$pk_method): ?>$<?php echo $single ?>_id<?php endif ?>)->fromArray(@$_REQUEST);
+	/**
+	 * Form to create or edit a <?php echo $model_name ?>. Example:
+	 * GET /<?php echo $plural_url ?>/edit/1
+	 *
+	 * @return <?php echo $model_name ?>
+
+	 */
+	function edit(<?php if ($pk): ?>$<?php echo $pk_var ?> = null<?php endif ?>) {
+		return $this->get<?php echo $model_name ?>(<?php if ($pk): ?>$<?php echo $pk_var ?><?php endif ?>)->fromArray(@$_REQUEST);
 	}
 
-	function save(<?php if(@$pk_method): ?>$<?php echo $single ?>_id = null<?php endif ?>) {
-		$<?php echo $single ?> = $this->_get<?php echo $model_name ?>(<?php if(@$pk_method): ?>$<?php echo $single ?>_id<?php endif ?>);
+	/**
+	 * Saves a <?php echo $model_name ?>. Examples:
+	 * POST /<?php echo $plural_url ?>/save/1
+	 * POST /rest/<?php echo $plural_url ?>/.json
+	 * PUT /rest/<?php echo $plural_url ?>/1.json
+	 */
+	function save(<?php if ($pk): ?>$<?php echo $pk_var ?> = null<?php endif ?>) {
+		$<?php echo $single ?> = $this->get<?php echo $model_name ?>(<?php if ($pk): ?>$<?php echo $pk_var ?><?php endif ?>);
 
 		try {
 			$<?php echo $single ?>->fromArray($_REQUEST);
 			if ($<?php echo $single ?>->validate()) {
 				$<?php echo $single ?>->save();
-				$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> saved';
-				$this-><?php if(@$pk_method): ?>redirect('<?php echo $plural_url ?>/show/' . $<?php echo $single ?>-><?php echo $pk_method ?>());<?php else: ?>redirect('<?php echo $plural_url ?>');<?php endif ?>
+				$this->flash['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> saved';
+				$this-><?php if ($pk): ?>redirect('<?php echo $plural_url ?>/show/' . $<?php echo $single ?>-><?php echo $pk_method ?>());<?php else: ?>redirect('<?php echo $plural_url ?>');<?php endif ?>
 
 			}
-			$this->persistant['errors'] = $<?php echo $single ?>->getValidationErrors();
+			$this->flash['errors'] = $<?php echo $single ?>->getValidationErrors();
 		} catch (Exception $e) {
-			$this->persistant['errors'][] = $e->getMessage();
+			$this->flash['errors'][] = $e->getMessage();
 		}
 
-		$this->redirect('<?php echo $plural_url ?>/edit/'<?php if(@$pk_method): ?> . $<?php echo $single ?>-><?php echo $pk_method ?>()<?php endif ?> . '?' . http_build_query($_REQUEST));
+		$this->redirect('<?php echo $plural_url ?>/edit/'<?php if ($pk): ?> . $<?php echo $single ?>-><?php echo $pk_method ?>()<?php endif ?> . '?' . http_build_query($_REQUEST));
 	}
-<?php if (@$pk_method): ?>
+<?php if ($pk): ?>
 
-	function show($<?php echo $single ?>_id = null) {
-		return $this->_get<?php echo $model_name ?>(<?php if(@$pk_method): ?>$<?php echo $single ?>_id<?php endif ?>);
+	/**
+	 * Returns the <?php echo $model_name ?> with the <?php echo $pk_var ?>. Examples:
+	 * GET /<?php echo $plural_url ?>/show/1
+	 * GET /rest/<?php echo $plural_url ?>/1.json
+	 *
+	 * @return <?php echo $model_name ?>
+
+	 */
+	function show($<?php echo $pk_var ?> = null) {
+		return $this->get<?php echo $model_name ?>(<?php if ($pk): ?>$<?php echo $pk_var ?><?php endif ?>);
 	}
 
-	function delete($<?php echo $single ?>_id = null) {
-		$<?php echo $single ?> = $this->_get<?php echo $model_name ?>($<?php echo $single ?>_id);
+	/**
+	 * Deletes the <?php echo $model_name ?> with the <?php echo $pk_var ?>. Examples:
+	 * GET /<?php echo $plural_url ?>/delete/1
+	 * DELETE /rest/<?php echo $plural_url ?>/1.json
+	 */
+	function delete($<?php echo $pk_var ?> = null) {
+		$<?php echo $single ?> = $this->get<?php echo $model_name ?>($<?php echo $pk_var ?>);
 
 		try {
 			if (null !== $<?php echo $single ?> && $<?php echo $single ?>->delete()) {
-				$this->persistant['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> deleted';
+				$this['messages'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> deleted';
 			} else {
-				$this->persistant['errors'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> could not be deleted';
+				$this['errors'][] = '<?php echo StringFormat::titleCase($single, ' ') ?> could not be deleted';
 			}
 		} catch (Exception $e) {
-			$this->persistant['errors'][] = $e->getMessage();
+			$this['errors'][] = $e->getMessage();
 		}
 
-		$this->redirect('<?php echo $plural_url ?>');
+		if ($this->outputFormat === 'html') {
+			$this->flash['errors'] = @$this['errors'];
+			$this->flash['messages'] = @$this['messages'];
+			$this->redirect('<?php echo $plural_url ?>');
+		}
 	}
 <?php endif ?>
 
@@ -61,20 +100,20 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	 * @return <?php echo $model_name ?>
 
 	 */
-	private function _get<?php echo $model_name ?>(<?php if(@$pk_method): ?>$<?php echo $single ?>_id = null<?php endif ?>) {
-<?php if (@$pk_method): ?>
+	private function get<?php echo $model_name ?>(<?php if ($pk): ?>$<?php echo $pk_var ?> = null<?php endif ?>) {
+<?php if ($pk): ?>
 		// look for id in param or in $_REQUEST array
-		if (null === $<?php echo $single ?>_id && isset($_REQUEST[<?php echo $model_name ?>::getPrimaryKey()])) {
-			$<?php echo $single ?>_id = $_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
+		if (null === $<?php echo $pk_var ?> && isset($_REQUEST[<?php echo $model_name ?>::getPrimaryKey()])) {
+			$<?php echo $pk_var ?> = $_REQUEST[<?php echo $model_name ?>::getPrimaryKey()];
 		}
 
-		if ('' === $<?php echo $single ?>_id || null === $<?php echo $single ?>_id) {
-			// if no primary key found, create new <?php echo $model_name ?>
+		if ('' === $<?php echo $pk_var ?> || null === $<?php echo $pk_var ?>) {
+			// if no primary key provided, create new <?php echo $model_name ?>
 
 			$this['<?php echo $single ?>'] = new <?php echo $model_name ?>;
 		} else {
-			// if primary key found, retrieve the record from the db
-			$this['<?php echo $single ?>'] = <?php echo $model_name ?>::retrieveByPK($<?php echo $single ?>_id);
+			// if primary key provided, retrieve the record from the db
+			$this['<?php echo $single ?>'] = <?php echo $model_name ?>::retrieveByPK($<?php echo $pk_var ?>);
 		}
 		return $this['<?php echo $single ?>'];
 <?php else: ?>		return $this['<?php echo $single ?>'] = new <?php echo $model_name ?>;

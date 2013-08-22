@@ -23,7 +23,9 @@ function object_to_array($var, $loop_exclude = array()) {
 		}
 		$loop_exclude[] = $var;
 
-		if ($var instanceof ArrayObject) {
+		if ($var instanceof JsonSerializable) {
+			$var = $var->jsonSerialize();
+		} elseif ($var instanceof ArrayObject) {
 			$var = $var->getArrayCopy();
 		} elseif (method_exists($var, 'toArray')) {
 			// use toArray() if it exists so object can control array conversion if it wants to

@@ -105,20 +105,21 @@ class QueryPager {
 	function setPageNum($page_number) {
 		$this->page = $page_number;
 
+		if (!is_numeric($this->page) || $this->page < 1) {
+			$this->page = 1;
+		}
+
 		if ($this->total !== null) {
 			$this->sanitizePageNum();
 		}
 	}
 
 	/**
-	 * Ensure page num is an intval that does not exceed page
+	 * Ensure page num does not exceed page
 	 * count. Lazy sanitized because page count is not known
 	 * until after limit is set and count query is run.
 	 */
 	function sanitizePageNum() {
-		if (!is_numeric($this->page) || $this->page < 1) {
-			$this->page = 1;
-		}
 		if ($this->page > $this->getPageCount()) {
 			$this->page = $this->getPageCount();
 		}
@@ -188,7 +189,7 @@ class QueryPager {
 			return $this->total;
 		}
 		if ($this->className) {
-			$total = call_user_func_array(array($this->className, 'doCount'), array($this->query));
+			$total = call_user_func(array($this->className, 'doCount'), $this->query);
 		} else {
 			$total = $this->query->doCount();
 		}
@@ -252,93 +253,11 @@ class QueryPager {
 		$q->setLimit($this->getLimit());
 		$q->setOffset($this->getOffset());
 
-		if ($this->className)
-			return call_user_func_array(array($this->className, $this->methodName), array($q));
-		else
+		if ($this->className) {
+			return call_user_func(array($this->className, $this->methodName), $q);
+		} else {
 			return $q->doSelect();
-	}
-
-	/**
-	 * @deprecated in favor of /views/pager.php
-	 */
-	function getPagerLinks($url_format, $limit = 20, $css_class = '', $css_class_current = '', $link_text = array()) {
-		throw new Exception(__METHOD__ . ' is deprectated');
-	}
-
-	/**
-	 * Generates pagination html in the form of <a> tags
-	 * @param string $url_format The url to format paging links with, ie: /actu/index.html?page=$page_num. $page_num to be replaced with page number.
-	 * @param int $page_limit For limiting the number of page number links
-	 * @param array $labels ie: array("first" => "go to first page", "prev" => "previous", "next" => "next", "first" => "go to last page")
-	 * @return string Html paging content
-	 * @deprecated in favor of /views/pager.php
-	 */
-	function getLinks($url_format, $page_limit = null, $labels = array()) {
-		$default_labels = array(
-			'first' => '&laquo;',
-			'prev' => '&lsaquo;',
-			'next' => '&rsaquo;',
-			'last' => '&raquo;'
-		);
-		$labels = array_merge($default_labels, $labels);
-
-		$page_limit = intval($page_limit);
-		if (!$page_limit)
-			$page_limit = 9;
-		$mid_page_limit = $page_limit >> 1;
-		$page = $this->getPageNum();
-		$count = $this->getPageCount();
-		$start = max(1, min($count - $page_limit, $page - $mid_page_limit));
-		$end = min($count, max($page_limit, $page + $mid_page_limit));
-
-		$str = '';
-		if ($count !== 1):
-			$str .= <<<EOF
-		Page:
-EOF;
-			if ($page > 1):
-				$link = site_url(str_replace('$page_num', 1, $url_format));
-				$str .= <<<EOF
-			<a href="{$link}">{$labels['first']}</a>
-EOF;
-
-				$link = site_url(str_replace('$page_num', $page - 1, $url_format));
-				$str .= <<<EOF
-			<a href="{$link}">{$labels['prev']}</a>
-EOF;
-			endif;
-
-			for ($i = $start; $i <= $end; ++$i):
-				$str .= <<<EOF
-EOF;
-				if ($i == $page):
-					$str .= <<<EOF
-			<span>{$i}</span>
-EOF;
-				else:
-					$link = site_url(str_replace('$page_num', $i, $url_format));
-					$str .= <<<EOF
-			<a href="{$link}">{$i}</a>
-EOF;
-				endif;
-				$str .= <<<EOF
-EOF;
-			endfor;
-
-			if ($page < $count):
-				$link = site_url(str_replace('$page_num', $page + 1, $url_format));
-				$str .= <<<EOF
-			<a href="{$link}">{$labels['next']}</a>
-EOF;
-
-				$link = site_url(str_replace('$page_num', $count, $url_format));
-				$str .= <<<EOF
-			<a href="{$link}">{$labels['last']}</a>
-EOF;
-			endif;
-		endif;
-
-		return $str;
+		}
 	}
 
 }

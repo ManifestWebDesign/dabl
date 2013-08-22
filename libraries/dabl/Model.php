@@ -10,7 +10,8 @@
 /**
  * @package dabl
  */
-abstract class Model {
+abstract class Model implements JsonSerializable {
+
 	const COLUMN_TYPE_CHAR = 'CHAR';
 	const COLUMN_TYPE_VARCHAR = 'VARCHAR';
 	const COLUMN_TYPE_LONGVARCHAR = 'LONGVARCHAR';
@@ -322,7 +323,7 @@ abstract class Model {
 		$new_object = new $class;
 		$new_object->fromArray($this->toArray());
 
-		foreach($this->getPrimaryKeys() as $pk){
+		foreach ($this->getPrimaryKeys() as $pk) {
 			$new_object->{'set' . $pk}(null);
 		}
 		return $new_object;
@@ -495,12 +496,40 @@ abstract class Model {
 	}
 
 	/**
+	 * Returns an associative Array with the values of $this that are JSON friendly.
+	 * Timestamps will be in ISO 8601 format.
+	 * Array keys match column names.
+	 * @return array
+	 */
+    public function jsonSerialize() {
+		$array = $this->toArray();
+		foreach ($this->getColumnNames() as $column) {
+			$type = $this->getColumnType($column);
+			if ($type === Model::COLUMN_TYPE_TIMESTAMP || $type === Model::COLUMN_TYPE_INTEGER_TIMESTAMP && isset($array[$column])) {
+				$value = $array[$column];
+				if (!$value) {
+					$array[$column] = null;
+					continue;
+				}
+				if (!is_int($value)) {
+					$value = strtotime($value);
+				}
+				if (!is_int($value)) {
+					throw new RuntimeException('Error parsing date "' . $array[$column] . '"');
+				}
+				$array[$column] = date('c', $value);
+			}
+		}
+		return $array;
+    }
+
+	/**
 	 * Sets whether to use cached results for foreign keys or to execute
 	 * the query each time, even if it hasn't changed.
 	 * @param bool $value[optional]
 	 * @return Model
 	 */
-	function setCacheResults($value=true) {
+	function setCacheResults($value = true) {
 		$this->_cacheResults = (bool) $value;
 		return $this;
 	}
