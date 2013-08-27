@@ -185,15 +185,14 @@ class QueryPager {
 	 * Gets the count of the results of the query
 	 */
 	function getTotal() {
-		if ($this->total !== null) {
-			return $this->total;
+		if ($this->total === null) {
+			if ($this->className) {
+				$total = call_user_func(array($this->className, 'doCount'), $this->query);
+			} else {
+				$total = $this->query->doCount();
+			}
+			$this->total = $total;
 		}
-		if ($this->className) {
-			$total = call_user_func(array($this->className, 'doCount'), $this->query);
-		} else {
-			$total = $this->query->doCount();
-		}
-		$this->total = $total;
 		return $total;
 	}
 

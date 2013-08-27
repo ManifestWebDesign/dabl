@@ -93,10 +93,10 @@ class ControllerRoute {
 		}
 
 		// HTTP verb
- 		if (!empty($headers['X-HTTP-Method-Override'])) {
-			$this->httpVerb = strtoupper($headers['X-HTTP-Method-Override']);
-		} elseif (!$this->httpVerb && !empty($headers['X-HTTP-Method'])) {
-			$this->httpVerb = strtoupper($headers['X-HTTP-Method']);
+ 		if (!empty($headers['X-Http-Method-Override'])) {
+			$this->httpVerb = strtoupper($headers['X-Http-Method-Override']);
+		} elseif (!$this->httpVerb && !empty($headers['X-Http-Method'])) {
+			$this->httpVerb = strtoupper($headers['X-Http-Method']);
 		} elseif (!$this->httpVerb && !empty($headers['Method'])) {
 			$this->httpVerb = strtoupper($headers['Method']);
 		}
