@@ -193,7 +193,7 @@ class QueryPager {
 			}
 			$this->total = $total;
 		}
-		return $total;
+		return $this->total;
 	}
 
 	/**
