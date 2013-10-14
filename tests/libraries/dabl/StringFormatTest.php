@@ -6,108 +6,111 @@
 class StringFormatTest extends PHPUnit_Framework_TestCase {
 
 	public function testClassName() {
-		$this->assertEquals(StringFormat::className('myClassName'), 'MyClassName');
-		$this->assertEquals(StringFormat::className('my-class-name'), 'MyClassName');
-		$this->assertEquals(StringFormat::className('my Class name'), 'MyClassName');
-		$this->assertEquals(StringFormat::className('my %^&* Class name'), 'MyClassName');
-		$this->assertEquals(StringFormat::className('my____Class name'), 'MyClassName');
-		$this->assertEquals(StringFormat::className('my/Class name'), 'MyClassName');
+		$this->assertEquals('MyClassName', StringFormat::className('myClassName'));
+		$this->assertEquals('MyClassName', StringFormat::className('my-class-name'));
+		$this->assertEquals('MyClassName', StringFormat::className('my Class name'));
+		$this->assertEquals('MyClassName', StringFormat::className('my %^&* Class name'));
+		$this->assertEquals('MyClassName', StringFormat::className('my____Class name'));
+		$this->assertEquals('MyClassName', StringFormat::className('my/Class name'));
 	}
 
 	public function testClassMethod() {
-		$this->assertEquals(StringFormat::classMethod('myClassMethod'), 'myClassMethod');
-		$this->assertEquals(StringFormat::classMethod('my-class-Method'), 'myClassMethod');
-		$this->assertEquals(StringFormat::classMethod('my Class Method'), 'myClassMethod');
-		$this->assertEquals(StringFormat::classMethod('my %^&* Class Method'), 'myClassMethod');
-		$this->assertEquals(StringFormat::classMethod('my____Class Method'), 'myClassMethod');
-		$this->assertEquals(StringFormat::classMethod('my/Class Method'), 'myClassMethod');
+		$this->assertEquals('myClassMethod', StringFormat::classMethod('myClassMethod'));
+		$this->assertEquals('myClassMethod', StringFormat::classMethod('my-class-Method'));
+		$this->assertEquals('myClassMethod', StringFormat::classMethod('my Class Method'));
+		$this->assertEquals('myClassMethod', StringFormat::classMethod('my %^&* Class Method'));
+		$this->assertEquals('myClassMethod', StringFormat::classMethod('my____Class Method'));
+		$this->assertEquals('myClassMethod', StringFormat::classMethod('my/Class Method'));
 	}
 
 	public function testClassProperty() {
-		$this->assertEquals(StringFormat::classProperty('myClassProperty'), 'myClassProperty');
-		$this->assertEquals(StringFormat::classProperty('my-class-Property'), 'myClassProperty');
-		$this->assertEquals(StringFormat::classProperty('my Class Property'), 'myClassProperty');
-		$this->assertEquals(StringFormat::classProperty('my %^&* Class Property'), 'myClassProperty');
-		$this->assertEquals(StringFormat::classProperty('my____Class Property'), 'myClassProperty');
-		$this->assertEquals(StringFormat::classProperty('my/Class Property'), 'myClassProperty');
+		$this->assertEquals('myClassProperty', StringFormat::classProperty('myClassProperty'));
+		$this->assertEquals('myClassProperty', StringFormat::classProperty('my-class-Property'));
+		$this->assertEquals('myClassProperty', StringFormat::classProperty('my Class Property'));
+		$this->assertEquals('myClassProperty', StringFormat::classProperty('my %^&* Class Property'));
+		$this->assertEquals('myClassProperty', StringFormat::classProperty('my____Class Property'));
+		$this->assertEquals('myClassProperty', StringFormat::classProperty('my/Class Property'));
 	}
 
 	public function testUrl() {
-		$this->assertEquals(StringFormat::URL('myURL'), 'my-url');
-		$this->assertEquals(StringFormat::URL('my--URL'), 'my-url');
-		$this->assertEquals(StringFormat::URL('my  URL'), 'my-url');
-		$this->assertEquals(StringFormat::URL('my %^&*  URL'), 'my-url');
-		$this->assertEquals(StringFormat::URL('my____ URL--'), 'my-url');
-		$this->assertEquals(StringFormat::URL('my/ \URL'), 'my-url');
+		$this->assertEquals('my-url', StringFormat::URL('myURL'));
+		$this->assertEquals('my-url', StringFormat::URL('my--URL'));
+		$this->assertEquals('my-url', StringFormat::URL('my  URL'));
+		$this->assertEquals('my-url', StringFormat::URL('my %^&*  URL'));
+		$this->assertEquals('my-url', StringFormat::URL('my____ URL--'));
+		$this->assertEquals('my-url', StringFormat::URL('my/ \URL'));
 	}
 
 	public function testPluralURL() {
-		$this->assertEquals(StringFormat::pluralURL('myURL'), 'my-urls');
-		$this->assertEquals(StringFormat::pluralURL('my--URL'), 'my-urls');
-		$this->assertEquals(StringFormat::pluralURL('my  URL'), 'my-urls');
-		$this->assertEquals(StringFormat::pluralURL('my %^&*  URL'), 'my-urls');
-		$this->assertEquals(StringFormat::pluralURL('my____ URL--'), 'my-urls');
-		$this->assertEquals(StringFormat::pluralURL('my/ \URL'), 'my-urls');
+		$this->assertEquals('my-urls', StringFormat::pluralURL('myURL'));
+		$this->assertEquals('my-urls', StringFormat::pluralURL('my--URL'));
+		$this->assertEquals('my-urls', StringFormat::pluralURL('my  URL'));
+		$this->assertEquals('my-urls', StringFormat::pluralURL('my %^&*  URL'));
+		$this->assertEquals('my-urls', StringFormat::pluralURL('my____ URL--'));
+		$this->assertEquals('my-urls', StringFormat::pluralURL('my/ \URL'));
 	}
 
 	public function testVariable() {
-		$this->assertEquals(StringFormat::variable('myVar'), 'my_var');
-		$this->assertEquals(StringFormat::variable('my--var'), 'my_var');
-		$this->assertEquals(StringFormat::variable('my  var'), 'my_var');
-		$this->assertEquals(StringFormat::variable('my %^&*  var'), 'my_var');
-		$this->assertEquals(StringFormat::variable('my____ var--'), 'my_var');
-		$this->assertEquals(StringFormat::variable('my/ \var'), 'my_var');
+		$this->assertEquals('my_var', StringFormat::variable('myVar'));
+		$this->assertEquals('my_var', StringFormat::variable('my--var'));
+		$this->assertEquals('my_var', StringFormat::variable('my  var'));
+		$this->assertEquals('my_var', StringFormat::variable('my %^&*  var'));
+		$this->assertEquals('my_var', StringFormat::variable('my____ var--'));
+		$this->assertEquals('my_var', StringFormat::variable('my/ \var'));
 	}
 
 	public function testConstant() {
-		$this->assertEquals(StringFormat::constant('myConstant'), 'MY_CONSTANT');
-		$this->assertEquals(StringFormat::constant('my--constant'), 'MY_CONSTANT');
-		$this->assertEquals(StringFormat::constant('my  constant'), 'MY_CONSTANT');
-		$this->assertEquals(StringFormat::constant('my %^&*  constant'), 'MY_CONSTANT');
-		$this->assertEquals(StringFormat::constant('my____ constant--'), 'MY_CONSTANT');
-		$this->assertEquals(StringFormat::constant('my/ \constant'), 'MY_CONSTANT');
+		$this->assertEquals('MY_CONSTANT', StringFormat::constant('myConstant'));
+		$this->assertEquals('MY_CONSTANT', StringFormat::constant('my--constant'));
+		$this->assertEquals('MY_CONSTANT', StringFormat::constant('my  constant'));
+		$this->assertEquals('MY_CONSTANT', StringFormat::constant('my %^&*  constant'));
+		$this->assertEquals('MY_CONSTANT', StringFormat::constant('my____ constant--'));
+		$this->assertEquals('MY_CONSTANT', StringFormat::constant('my/ \constant'));
 	}
 
 	public function testPluralVariable() {
-		$this->assertEquals(StringFormat::pluralVariable('myVar'), 'my_vars');
-		$this->assertEquals(StringFormat::pluralVariable('my--var'), 'my_vars');
-		$this->assertEquals(StringFormat::pluralVariable('my  var'), 'my_vars');
-		$this->assertEquals(StringFormat::pluralVariable('my %^&*  var'), 'my_vars');
-		$this->assertEquals(StringFormat::pluralVariable('my____ var--'), 'my_vars');
-		$this->assertEquals(StringFormat::pluralVariable('my/ \var'), 'my_vars');
+		$this->assertEquals('my_vars', StringFormat::pluralVariable('myVar'));
+		$this->assertEquals('my_vars', StringFormat::pluralVariable('my--var'));
+		$this->assertEquals('my_vars', StringFormat::pluralVariable('my  var'));
+		$this->assertEquals('my_vars', StringFormat::pluralVariable('my %^&*  var'));
+		$this->assertEquals('my_vars', StringFormat::pluralVariable('my____ var--'));
+		$this->assertEquals('my_vars', StringFormat::pluralVariable('my/ \var'));
 	}
 
 	public function testTitleCase() {
-		$this->assertEquals(StringFormat::titleCase('title case'), 'TitleCase');
-		$this->assertEquals(StringFormat::titleCase('Title_case'), 'TitleCase');
-		$this->assertEquals(StringFormat::titleCase('TitleCase'), 'TitleCase');
-		$this->assertEquals(StringFormat::titleCase('Title\Case', '-'), 'Title\Case');
-		$this->assertEquals(StringFormat::titleCase('TitleCase', '_'), 'Title_Case');
+		$this->assertEquals('TitleCase', StringFormat::titleCase('title case'));
+		$this->assertEquals('TitleCase', StringFormat::titleCase('Title_case'));
+		$this->assertEquals('TitleCase', StringFormat::titleCase('TitleCase'));
+		$this->assertEquals('Title-Case', StringFormat::titleCase('Title\case', '-'));
+		$this->assertEquals('Title_Case', StringFormat::titleCase('TitleCase', '_'));
+		$this->assertEquals('TTCase', StringFormat::titleCase('TTCase', '_'));
 	}
 
 	public function testGetWords() {
-		$this->assertEquals(StringFormat::getWords('test case'), array('test', 'case'));
-		$this->assertEquals(StringFormat::getWords('testCase'), array('test', 'Case'));
-		$this->assertEquals(StringFormat::getWords('test_case'), array('test', 'case'));
-		$this->assertEquals(StringFormat::getWords('test-case'), array('test', 'case'));
+		$this->assertEquals(array('test', 'case'), StringFormat::getWords('test case'));
+		$this->assertEquals(array('test', 'Case'), StringFormat::getWords('testCase'));
+		$this->assertEquals(array('test', 'case'), StringFormat::getWords('test_case'));
+		$this->assertEquals(array('test', 'case'), StringFormat::getWords('test-case'));
+		$this->assertEquals(array('my', 'ID'), StringFormat::getWords('myID'));
+		$this->assertEquals(array('ru', '4', 'real'), StringFormat::getWords('ru4real'));
 	}
 
 	public function testPlural() {
-		$this->assertEquals(StringFormat::plural('test-case'), 'test-cases');
-		$this->assertEquals(StringFormat::plural('x-man'), 'x-men');
-		$this->assertEquals(StringFormat::plural('test-quiz'), 'test-quizzes');
-		$this->assertEquals(StringFormat::plural('test-ox'), 'test-oxen');
-		$this->assertEquals(StringFormat::plural('test-mouse'), 'test-mice');
-		$this->assertEquals(StringFormat::plural('test-vertex'), 'test-vertices');
-		$this->assertEquals(StringFormat::plural('test-mess'), 'test-messes');
-		$this->assertEquals(StringFormat::plural('test-max'), 'test-maxes');
-		$this->assertEquals(StringFormat::plural('test-marty'), 'test-marties');
-		$this->assertEquals(StringFormat::plural('test hive'), 'test hives');
-		$this->assertEquals(StringFormat::plural('test half'), 'test halves');
-		$this->assertEquals(StringFormat::plural('test calf'), 'test calves');
-		$this->assertEquals(StringFormat::plural('test crisis'), 'test crises');
-		$this->assertEquals(StringFormat::plural('test titanium'), 'test titania');
-		$this->assertEquals(StringFormat::plural('test tomotato'), 'test tomotatos');
+		$this->assertEquals('test-cases', StringFormat::plural('test-case'));
+		$this->assertEquals('x-men', StringFormat::plural('x-man'));
+		$this->assertEquals('test-quizzes', StringFormat::plural('test-quiz'));
+		$this->assertEquals('test-oxen', StringFormat::plural('test-ox'));
+		$this->assertEquals('test-mice', StringFormat::plural('test-mouse'));
+		$this->assertEquals('test-vertices', StringFormat::plural('test-vertex'));
+		$this->assertEquals('test-messes', StringFormat::plural('test-mess'));
+		$this->assertEquals('test-maxes', StringFormat::plural('test-max'));
+		$this->assertEquals('test-marties', StringFormat::plural('test-marty'));
+		$this->assertEquals('test hives', StringFormat::plural('test hive'));
+		$this->assertEquals('test halves', StringFormat::plural('test half'));
+		$this->assertEquals('test calves', StringFormat::plural('test calf'));
+		$this->assertEquals('test crises', StringFormat::plural('test crisis'));
+		$this->assertEquals('test titania', StringFormat::plural('test titanium'));
+		$this->assertEquals('test tomotatos', StringFormat::plural('test tomotato'));
 //			array('/(bu)s$/i', "$1ses"),
 //			array('/(alias|status|campus)$/i', "$1es"),
 //			array('/(octop|cact|vir)us$/i', "$1i"),

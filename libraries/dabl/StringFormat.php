@@ -14,7 +14,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function className($string) {
-		return self::titleCase(self::clean($string));
+		return self::titleCase($string);
 	}
 
 	/**
@@ -22,7 +22,15 @@ class StringFormat {
 	 * @return string
 	 */
 	static function classMethod($string) {
-		return lcfirst(self::titleCase(self::clean($string)));
+		return lcfirst(self::titleCase($string));
+	}
+
+	/**
+	 * @param string $string
+	 * @return string
+	 */
+	static function pluralClassMethod($string) {
+		return lcfirst(self::titleCase(self::plural($string)));
 	}
 
 	/**
@@ -30,7 +38,15 @@ class StringFormat {
 	 * @return string
 	 */
 	static function classProperty($string) {
-		return lcfirst(self::titleCase(self::clean($string)));
+		return lcfirst(self::titleCase($string));
+	}
+
+	/**
+	 * @param string $string
+	 * @return string
+	 */
+	static function pluralClassProperty($string) {
+		return lcfirst(self::titleCase(self::plural($string)));
 	}
 
 	/**
@@ -48,7 +64,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function pluralURL($string) {
-		return str_replace('_', '-', self::pluralVariable(self::clean($string)));
+		return str_replace('_', '-', self::pluralVariable($string));
 	}
 
 	/**
@@ -57,7 +73,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function variable($string) {
-		return strtolower(join('_', self::getWords(self::clean($string))));
+		return strtolower(join('_', self::getWords($string)));
 	}
 
 	/**
@@ -77,7 +93,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function pluralVariable($string) {
-		return strtolower(join('_', self::getWords(self::plural(self::clean($string)))));
+		return strtolower(join('_', self::getWords(self::plural($string))));
 	}
 
 	/**
@@ -95,7 +111,17 @@ class StringFormat {
 	 * @return array
 	 */
 	static function getWords($string) {
-		return explode(' ', preg_replace('/([a-z])([A-Z])/', '$1 $2', str_replace(array("\n", '_', '-'), ' ', $string)));
+		$all_upper_case = strtoupper($string) == $string;
+		$all_lower_case = strtolower($string) == $string;
+
+		if (!$all_upper_case && !$all_lower_case) {
+			$string = preg_replace('/([^A-Z])([A-Z])/', '$1-$2', $string);
+		}
+		$string = preg_replace('/([^0-9])([0-9])/', '$1-$2', $string);
+		$string = preg_replace('/([0-9])([^0-9])/', '$1-$2', $string);
+		$string = self::clean($string, '-');
+
+		return explode('-', $string);
 	}
 
 	/**
