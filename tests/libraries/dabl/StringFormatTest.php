@@ -83,7 +83,7 @@ class StringFormatTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('TitleCase', StringFormat::titleCase('TitleCase'));
 		$this->assertEquals('Title-Case', StringFormat::titleCase('Title\case', '-'));
 		$this->assertEquals('Title_Case', StringFormat::titleCase('TitleCase', '_'));
-		$this->assertEquals('Tt_Case', StringFormat::titleCase('TTCase', '_'));
+		$this->assertEquals('TT_Case', StringFormat::titleCase('TTCase', '_'));
 		$this->assertEquals('PersonId', StringFormat::titleCase('PersonID'));
 	}
 
