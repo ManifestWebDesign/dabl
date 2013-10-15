@@ -83,7 +83,8 @@ class StringFormatTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('TitleCase', StringFormat::titleCase('TitleCase'));
 		$this->assertEquals('Title-Case', StringFormat::titleCase('Title\case', '-'));
 		$this->assertEquals('Title_Case', StringFormat::titleCase('TitleCase', '_'));
-		$this->assertEquals('TTCase', StringFormat::titleCase('TTCase', '_'));
+		$this->assertEquals('Tt_Case', StringFormat::titleCase('TTCase', '_'));
+		$this->assertEquals('PersonId', StringFormat::titleCase('PersonID'));
 	}
 
 	public function testGetWords() {
@@ -92,7 +93,9 @@ class StringFormatTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('test', 'case'), StringFormat::getWords('test_case'));
 		$this->assertEquals(array('test', 'case'), StringFormat::getWords('test-case'));
 		$this->assertEquals(array('my', 'ID'), StringFormat::getWords('myID'));
-		$this->assertEquals(array('ru', '4', 'real'), StringFormat::getWords('ru4real'));
+		$this->assertEquals(array('RU', '4', 'real'), StringFormat::getWords('RU4real'));
+		$this->assertEquals(array('5', '14', '1985'), StringFormat::getWords("5'14'1985"));
+		$this->assertEquals(array('who', 'me', 'yes', 'you', 'couldnt', 'be'), StringFormat::getWords(" Who me?  Yes you! couldn't be.", true));
 	}
 
 	public function testPlural() {

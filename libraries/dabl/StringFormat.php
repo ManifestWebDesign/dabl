@@ -30,7 +30,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function pluralClassMethod($string) {
-		return lcfirst(self::titleCase(self::plural($string)));
+		return lcfirst(self::plural(self::titleCase($string)));
 	}
 
 	/**
@@ -46,7 +46,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function pluralClassProperty($string) {
-		return lcfirst(self::titleCase(self::plural($string)));
+		return lcfirst(self::plural(self::titleCase($string)));
 	}
 
 	/**
@@ -73,7 +73,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function variable($string) {
-		return strtolower(join('_', self::getWords($string)));
+		return implode('_', self::getWords($string, true));
 	}
 
 	/**
@@ -93,7 +93,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function pluralVariable($string) {
-		return strtolower(join('_', self::getWords(self::plural($string))));
+		return self::plural(implode('_', self::getWords($string, true)));
 	}
 
 	/**
@@ -102,7 +102,9 @@ class StringFormat {
 	 * @return string
 	 */
 	static function titleCase($string, $delimiter = '') {
-		return implode($delimiter, array_map('ucfirst', self::getWords($string)));
+		$all_upper_case = strtolower($string) == $string;
+
+		return implode($delimiter, array_map('ucfirst', self::getWords($string, $all_upper_case)));
 	}
 
 	/**
@@ -110,18 +112,29 @@ class StringFormat {
 	 * @param string $string
 	 * @return array
 	 */
-	static function getWords($string) {
-		$all_upper_case = strtoupper($string) == $string;
-		$all_lower_case = strtolower($string) == $string;
+	static function getWords($string, $lowercase = false) {
 
-		if (!$all_upper_case && !$all_lower_case) {
-			$string = preg_replace('/([^A-Z])([A-Z])/', '$1-$2', $string);
+		$string = self::clean($string, ' ');
+
+		// before an upper and a lower. FBar -> F Bar
+		$string = preg_replace('/(.)([A-Z])([a-z])/', '$1 $2$3', $string);
+
+		// between a lower and an upper. fooB -> foo B
+		$string = preg_replace('/([a-z])([A-Z])/', '$1 $2', $string);
+
+		// before and after any sequence of numbers.  45times -> 45 times
+		$string = preg_replace('/([^0-9])([0-9])/', '$1 $2', $string);
+		$string = preg_replace('/([0-9])([^0-9])/', '$1 $2', $string);
+
+		if ($lowercase) {
+			$string = strtolower($string);
 		}
-		$string = preg_replace('/([^0-9])([0-9])/', '$1-$2', $string);
-		$string = preg_replace('/([0-9])([^0-9])/', '$1-$2', $string);
-		$string = self::clean($string, '-');
 
-		return explode('-', $string);
+		do {
+			$string = str_replace('  ', ' ', $string, $count);
+		} while ($count > 0);
+
+		return explode(' ', $string);
 	}
 
 	/**
@@ -180,27 +193,26 @@ class StringFormat {
 		return str_replace($a, $b, $str);
 	}
 
-	static function clean($str, $delimiter = '-') {
+	static function clean($str, $delimiter = ' ') {
 		$str = self::removeAccents($str);
 
-		// replace punctuation with dashes
-		$str = str_replace(str_split("!@#$%^&*()_+={}[]:\";\|,./<>?\n "), '-', $str);
+		// remove apostrophes and don't use them to separate words
+		$str = preg_replace("/([a-zA-Z])'([a-zA-Z])/", '$1$2', $str);
 
-		// remove all but letters, numbers and dashes
-		$str = preg_replace('/[^a-zA-Z0-9_-]/', '', $str);
+		// treat all characters that aren't numbers and letters as word separators
+		$str = preg_replace('/[^a-zA-Z0-9]/', ' ', $str);
 
 		// remove trailing or leading dashes
-		$str = trim($str, '-');
+		$str = trim($str, ' ');
 
 		// remove any occurances of double dashes
 		do {
-			$before = $str;
-			$str = str_replace('--', '-', $str);
-		} while ($before != $str);
+			$str = str_replace('  ', ' ', $str, $count);
+		} while ($count > 0);
 
 		// replace dashes with delimiter if delimiter is not a dash
-		if ($delimiter !== '-') {
-			$str = str_replace('-', $delimiter, $str);
+		if ($delimiter !== ' ') {
+			$str = str_replace(' ', $delimiter, $str);
 		}
 		return $str;
 	}
