@@ -102,9 +102,7 @@ class StringFormat {
 	 * @return string
 	 */
 	static function titleCase($string, $delimiter = '') {
-		$all_upper_case = strtolower($string) == $string;
-
-		return implode($delimiter, array_map('ucfirst', self::getWords($string, $all_upper_case)));
+		return implode($delimiter, array_map('ucfirst', self::getWords($string, true)));
 	}
 
 	/**
