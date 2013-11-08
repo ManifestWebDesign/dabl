@@ -120,8 +120,7 @@ class StringFormat {
 		// between a lower and an upper. fooB -> foo B
 		$string = preg_replace('/([a-z])([A-Z])/', '$1 $2', $string);
 
-		// before and after any sequence of numbers.  45times -> 45 times
-		$string = preg_replace('/([^0-9])([0-9])/', '$1 $2', $string);
+		// after any sequence of numbers.  45times -> 45 times
 		$string = preg_replace('/([0-9])([^0-9])/', '$1 $2', $string);
 
 		if ($lowercase) {
