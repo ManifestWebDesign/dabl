@@ -10,12 +10,12 @@ class <?php echo $controller_name ?> extends ApplicationController {
 	 * @return <?php echo $model_name ?>[]
 	 */
 	function index() {
-		$q = <?php echo $model_name ?>::getQuery($_REQUEST);
+		$q = <?php echo $model_name ?>::getQuery(@$_GET);
 
 		// paginate
-		$this['pager'] = new QueryPager($q, !empty($_REQUEST['limit']) ? $_REQUEST['limit'] : 25, @$_REQUEST['page']);
+		$this['pager'] = new QueryPager($q, !empty($_GET['limit']) ? $_GET['limit'] : 25, @$_GET['page']);
 
-		if (isset($_REQUEST['count_only'])) {
+		if (isset($_GET['count_only'])) {
 			return $this['pager'];
 		}
 		return $this['<?php echo $plural ?>'] = $this['pager']->fetchPage();
@@ -29,7 +29,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 
 	 */
 	function edit(<?php if ($pk): ?>$<?php echo $pk_var ?> = null<?php endif ?>) {
-		return $this->get<?php echo $model_name ?>(<?php if ($pk): ?>$<?php echo $pk_var ?><?php endif ?>)->fromArray(@$_REQUEST);
+		return $this->get<?php echo $model_name ?>(<?php if ($pk): ?>$<?php echo $pk_var ?><?php endif ?>)->fromArray(@$_GET);
 	}
 
 	/**
