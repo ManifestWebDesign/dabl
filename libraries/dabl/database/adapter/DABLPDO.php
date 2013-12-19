@@ -544,5 +544,8 @@ abstract class DABLPDO extends PDO {
 	 */
 	abstract function random($seed = null);
 
+	/**
+	 * @return Database
+	 */
 	abstract function getDatabaseSchema();
 }

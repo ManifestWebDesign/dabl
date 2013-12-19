@@ -273,7 +273,7 @@ class Database extends ScopedElement
 
 	/**
 	 * Return the list of all tables
-	 * @return array
+	 * @return Table[]
 	 */
 	public function getTables()
 	{
