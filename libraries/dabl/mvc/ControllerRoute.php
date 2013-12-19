@@ -48,6 +48,11 @@ class ControllerRoute {
 	protected $extension;
 
 	/**
+	 * @var string
+	 */
+	protected $jsonPCallback;
+
+	/**
 	 * @var bool
 	 */
 	protected $isPartial = false;
@@ -66,60 +71,49 @@ class ControllerRoute {
 	 */
 	protected $viewDir;
 
-	function __construct($route, array $headers = array(), array $request_params = array()) {
-		if (!empty($request_params['_method'])) {
-			$this->httpVerb = $request_params['_method'];
-			unset($request_params['_method']);
-		}
-
-		$this->setHeaders($headers);
+	/**
+	 * @param string|array $route
+	 * @param array $headers
+	 * @param array $request_params
+	 */
+	function __construct($route = '', array $headers = array(), array $request_params = array()) {
 		$this->setRoute($route);
-
+		$this->setHeaders($headers);
+		$this->setRequestParams($request_params);
 		if ($this->httpVerb === null) {
 			$this->httpVerb = 'GET';
 		}
 	}
 
-	function setHeaders($headers) {
-		$this->headers = $headers;
+	/**
+	 * @param string|array $route
+	 * @param array $headers
+	 * @param array $request_params
+	 */
+	static function load($route = '', $headers = array(), array $request_params = array()) {
+		$controller_route = new self($route, $headers, $request_params);
 
-		// auto detect output format
-		if (!empty($headers['Accept'])) {
-			if (strpos($headers['Accept'], 'application/json') !== false) {
-				$this->extension = 'json';
-			} elseif ($headers['Accept'] == 'application/xml') {
-				$this->extension = 'xml';
-			}
+		$controller = $controller_route->getController();
+
+		if (null === $controller) {
+			file_not_found($route);
 		}
 
-		// HTTP verb
- 		if (!empty($headers['X-Http-Method-Override'])) {
-			$this->httpVerb = strtoupper($headers['X-Http-Method-Override']);
-		} elseif (!$this->httpVerb && !empty($headers['X-Http-Method'])) {
-			$this->httpVerb = strtoupper($headers['X-Http-Method']);
-		} elseif (!$this->httpVerb && !empty($headers['Method'])) {
-			$this->httpVerb = strtoupper($headers['Method']);
-		}
-
-		// Ajax Request = partial (no layout)
-		if (!empty($headers['X-Requested-With']) && $headers['X-Requested-With'] == "XMLHttpRequest") {
-			$this->isPartial = true;
-		}
+		$controller->doAction($controller_route->getAction(), $controller_route->getParams());
 	}
 
+	/**
+	 * @param string|array $route
+	 */
 	function setRoute($route) {
-		$this->route = $route;
-
-		$route = str_replace('\\', '/', $route);
-		$route = trim($route, '/');
-		$parts = explode('?', $route, 2);
-		$route = array_shift($parts);
 
 		if (is_array($route)) {
 			$this->route = implode('/', $route);
 			$segments = $route;
 		} else {
-			$this->route = $route;
+			$parts = explode('?', $route, 2);
+			$this->route = $route = trim(str_replace('\\', '/', array_shift($parts)), '/');
+//			$query_string = array_shift($parts);
 			if ($route === '') {
 				$segments = array();
 			} else {
@@ -127,20 +121,19 @@ class ControllerRoute {
 			}
 		}
 
-		$last = array_pop($segments);
+		$last = end($segments);
 		if (null !== $last) {
 			$file_parts = explode('.', $last);
 			if (count($file_parts) > 1) {
 				$this->extension = array_pop($file_parts);
 			}
-			$segments[] = implode('.', $file_parts);
 		}
 
-		while (in_array(@$segments[0], array('partial', 'rest'))){
-			if (@$segments[0] == 'partial') {
+		while (in_array(reset($segments), array('partial', 'rest'))){
+			if ($segments[0] == 'partial') {
 				$this->isPartial = true;
 				array_shift($segments);
-			} elseif (@$segments[0] == 'rest') {
+			} elseif ($segments[0] == 'rest') {
 				$this->isRestful = true;
 				array_shift($segments);
 			}
@@ -155,8 +148,7 @@ class ControllerRoute {
 		$found = false;
 
 		foreach ($segments as $key => &$segment) {
-			$c_class = str_replace(array('_', '-'), ' ', $segment);
-			$c_class = ucwords($c_class);
+			$c_class = ucwords(str_replace(array('_', '-'), ' ', $segment));
 			$c_class = str_replace(' ', '', $c_class) . 'Controller';
 			$c_class_file = $c_dir . $c_class . '.php';
 
@@ -204,20 +196,50 @@ class ControllerRoute {
 	}
 
 	/**
-	 * @param string $route
 	 * @param array $headers
-	 * @param string $http_verb
 	 */
-	static function load($route, $headers = array(), $http_verb = null) {
-		$controller_route = new self($route, $headers, $http_verb);
+	function setHeaders($headers) {
+		$this->headers = $headers;
 
-		$controller = $controller_route->getController();
-
-		if (null === $controller) {
-			file_not_found($route);
+		// auto detect output format
+		if (!empty($headers['Accept'])) {
+			if (strpos($headers['Accept'], 'application/json') !== false) {
+				$this->extension = 'json';
+			} elseif ($headers['Accept'] == 'application/xml') {
+				$this->extension = 'xml';
+			}
 		}
 
-		$controller->doAction($controller_route->getAction(), $controller_route->getParams());
+		// HTTP verb
+ 		if (!empty($headers['X-Http-Method-Override'])) {
+			$this->httpVerb = strtoupper($headers['X-Http-Method-Override']);
+		} elseif (!empty($headers['X-Http-Method'])) {
+			$this->httpVerb = strtoupper($headers['X-Http-Method']);
+		} elseif (!empty($headers['Method'])) {
+			$this->httpVerb = strtoupper($headers['Method']);
+		}
+
+		// Ajax Request = partial (no layout)
+		if (
+			!empty($headers['X-Requested-With'])
+			&& $headers['X-Requested-With'] == "XMLHttpRequest"
+		) {
+			$this->isPartial = true;
+		}
+	}
+
+	/**
+	 * @param array $request_params
+	 */
+	function setRequestParams(array $request_params = array()) {
+		if (!empty($request_params['_method'])) {
+			$this->httpVerb = $request_params['_method'];
+			unset($request_params['_method']);
+		}
+		if (!empty($request_params['jsonp'])) {
+			$this->extension = 'jsonp';
+			$this->jsonPCallback = $request_params['jsonp'];
+		}
 	}
 
 	/**
@@ -243,6 +265,13 @@ class ControllerRoute {
 	 */
 	function getExtension() {
 		return $this->extension;
+	}
+
+	/**
+	 * @return string
+	 */
+	function getJsonPCallback() {
+		return $this->jsonPCallback;
 	}
 
 	/**

@@ -31,7 +31,8 @@ abstract class Controller extends ArrayObject {
 	public $allowedFormats = array(
 		'html',
 		'xml',
-		'json'
+		'json',
+		'jsonp'
 	);
 
 	/**
@@ -233,10 +234,24 @@ abstract class Controller extends ArrayObject {
 				View::load($view, $params, false);
 				break;
 
+			case 'jsonp':
+				if (!headers_sent()) {
+					header('Content-type: application/javascript');
+					if ($this->isRestful() && !empty($this['errors'])) {
+						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
+						$params = array('errors' => $this['errors']);
+					}
+				}
+				$callback = 'callback';
+				if ($this->route) {
+					$callback = $this->route->getJsonPCallback();
+				}
+				echo $callback . '(' . json_encode_all($params) . ')';
+				break;
 			case 'json':
 				if (!headers_sent()) {
 					header('Content-type: application/json');
-					if ($this->isRestful() && @$this['errors']) {
+					if ($this->isRestful() && !empty($this['errors'])) {
 						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
 						$params = array('errors' => $this['errors']);
 					}
@@ -247,7 +262,7 @@ abstract class Controller extends ArrayObject {
 			case 'xml':
 				if (!headers_sent()) {
 					header('Content-type: application/xml');
-					if ($this->isRestful() && @$this['errors']) {
+					if ($this->isRestful() && !empty($this['errors'])) {
 						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
 						$params = array('errors' => $this['errors']);
 					}
