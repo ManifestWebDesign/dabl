@@ -183,9 +183,6 @@ abstract class DABLPDO extends PDO {
 		}
 
 		try {
-			if (!class_exists($class)) {
-				ClassLoader::import('DATABASE:adapter:' . $class_dir);
-			}
 			$conn = new $class($dsn, $user, $password, $options);
 		} catch (Exception $e) {
 			throw new RuntimeException($e->getMessage());
