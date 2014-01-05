@@ -121,12 +121,13 @@ class ControllerRoute {
 			}
 		}
 
-		$last = end($segments);
+		$last = array_pop($segments);
 		if (null !== $last) {
 			$file_parts = explode('.', $last);
 			if (count($file_parts) > 1) {
 				$this->extension = array_pop($file_parts);
 			}
+			$segments[] = implode('.', $file_parts);
 		}
 
 		while (in_array(reset($segments), array('partial', 'rest'))){
