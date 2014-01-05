@@ -28,11 +28,11 @@ class TestModel extends Model {
 
 	protected $true_false;
 
+	protected $updated;
+
 	function getTrueFalse() {
 		return $this->true_false;
 	}
-
-	protected $updated;
 
 	public function castInts() {
 	}
@@ -43,6 +43,34 @@ class TestModel extends Model {
 }
 
 class ModelTest extends PHPUnit_Framework_TestCase {
+
+	/**
+	 * @var DABLPDO
+	 */
+	protected $pdo = null;
+
+	protected function setUp() {
+		return parent::setUp();
+	}
+
+	protected function setUpConnection() {
+
+	}
+
+	protected function tearDown() {
+		if ($this->pdo) {
+			if (
+				$this->pdo instanceof DBMySQL
+				&& $this->pdo->getTransactionDepth() > 0
+			) {
+				while ($this->pdo->getTransactionDepth() > 0) {
+					$this->pdo->rollback();
+				}
+			}
+		}
+
+		return parent::tearDown();
+	}
 
 	function testBooleanHandlesDifferentTypes() {
 		$model = new TestModel();
@@ -182,8 +210,8 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	function testSave() {
 		foreach ($this->getModelClasses() as $model_name) {
 			$instance = new $model_name();
-			$con = $instance->getConnection();
-			$con->beginTransaction();
+			$this->pdo = $instance->getConnection();
+			$this->pdo->beginTransaction();
 
 			foreach ($instance->getColumnNames() as $column) {
 				$this->setValueByType($instance, $column);
@@ -192,12 +220,11 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 			try {
 				$result = $instance->save();
 				$this->assertEquals(1, $result);
+				$this->pdo->rollback();
 			} catch (Exception $e) {
-				$con->rollback();
+				$this->pdo->rollback();
 				$this->fail($e);
 			}
-
-			$con->rollback();
 		}
 	}
 
@@ -208,11 +235,10 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	function testUpdate() {
 		foreach ($this->getModelClasses() as $model_name) {
 			$instance = new $model_name();
-			$con = $instance->getConnection();
-			$con->beginTransaction();
+			$this->pdo = $instance->getConnection();
+			$this->pdo->beginTransaction();
 
 			try {
-
 				foreach ($instance->getColumnNames() as $column) {
 					$this->setValueByType($instance, $column);
 				}
@@ -232,13 +258,11 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 				// save again with changes should alter 1 row
 				$result = $instance->save();
 				$this->assertEquals(1, $result);
-
+				$this->pdo->rollback();
 			} catch (Exception $e) {
-				$con->rollback();
+				$this->pdo->rollback();
 				$this->fail($e);
 			}
-
-			$con->rollback();
 		}
 	}
 
@@ -248,11 +272,10 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	function testDelete() {
 		foreach ($this->getModelClasses() as $model_name) {
 			$instance = new $model_name();
-			$con = $instance->getConnection();
-			$con->beginTransaction();
+			$this->pdo = $instance->getConnection();
+			$this->pdo->beginTransaction();
 
 			try {
-
 				foreach ($instance->getColumnNames() as $column) {
 					$this->setValueByType($instance, $column);
 				}
@@ -264,12 +287,11 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 				$result = $instance->delete();
 				$this->assertEquals(1, $result);
 
+				$this->pdo->rollback();
 			} catch (Exception $e) {
-				$con->rollback();
+				$this->pdo->rollback();
 				$this->fail($e);
 			}
-
-			$con->rollback();
 		}
 	}
 
@@ -279,11 +301,10 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	function testIsNew() {
 		foreach ($this->getModelClasses() as $model_name) {
 			$instance = new $model_name();
-			$con = $instance->getConnection();
-			$con->beginTransaction();
+			$this->pdo = $instance->getConnection();
+			$this->pdo->beginTransaction();
 
 			try {
-
 				foreach ($instance->getColumnNames() as $column) {
 					$this->setValueByType($instance, $column);
 				}
@@ -293,13 +314,11 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 				$instance->save();
 
 				$this->assertFalse($instance->isNew());
-
+				$this->pdo->rollback();
 			} catch (Exception $e) {
-				$con->rollback();
+				$this->pdo->rollback();
 				$this->fail($e);
 			}
-
-			$con->rollback();
 		}
 	}
 
