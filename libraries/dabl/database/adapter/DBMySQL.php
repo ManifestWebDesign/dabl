@@ -147,7 +147,7 @@ class DBMySQL extends DABLPDO {
 	 * @return bool|void
 	 */
 	public function beginTransaction() {
-		if ($this->_transactionDepth == 0) {
+		if ($this->_transactionDepth === 0) {
 			parent::beginTransaction();
 		} else {
 			$this->exec("SAVEPOINT LEVEL{$this->_transactionDepth}");
@@ -157,14 +157,25 @@ class DBMySQL extends DABLPDO {
 	}
 
 	/**
+	 * @return int
+	 */
+	public function getTransactionDepth() {
+		return $this->_transactionDepth;
+	}
+
+	/**
 	 * Commit current transaction
 	 *
 	 * @return bool|void
 	 */
 	public function commit() {
+		if ($this->_transactionDepth === 0) {
+			throw new PDOException('Rollback error : There is no transaction started');
+		}
+
 		$this->_transactionDepth--;
 
-		if ($this->_transactionDepth == 0) {
+		if ($this->_transactionDepth === 0) {
 			parent::commit();
 		} else {
 			$this->exec("RELEASE SAVEPOINT LEVEL{$this->_transactionDepth}");
@@ -178,13 +189,13 @@ class DBMySQL extends DABLPDO {
 	 * @return bool|void
 	 */
 	public function rollBack() {
-		if ($this->_transactionDepth == 0) {
+		if ($this->_transactionDepth === 0) {
 			throw new PDOException('Rollback error : There is no transaction started');
 		}
 
 		$this->_transactionDepth--;
 
-		if ($this->_transactionDepth == 0) {
+		if ($this->_transactionDepth === 0) {
 			parent::rollBack();
 		} else {
 			$this->exec("ROLLBACK TO SAVEPOINT LEVEL{$this->_transactionDepth}");
