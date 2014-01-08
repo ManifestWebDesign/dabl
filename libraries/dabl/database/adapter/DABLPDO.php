@@ -79,10 +79,44 @@ abstract class DABLPDO extends PDO {
 		}
 
 		switch ($connection_params['driver']) {
+			case 'access':
+
+//				You may need to download the AccessDatabaseEngine.exe from Microsoft.
+//
+//				http://www.microsoft.com/en-us/download/details.aspx?id=23734 (2007)
+//				http://www.microsoft.com/en-us/download/details.aspx?id=13255 (2010)
+//
+//				After the download finishes, and installs for your architecture (32 or 64 bit), You will need to create an ODBC connection.
+//
+//				Instead of creating an ODBC connection through your Administrative Tools, Data Sources (ODBC) interface, you will need to run
+//				the 64-bit instance of Data Sources (ODBC). Run "c:\windows\sysWOW64\odbcad32.exe" -- without quotes. Then create the
+//				connection to the database as you would on a 32 bit machine.
+
+				$parts = array();
+				if (@$connection_params['dbname']) {
+					if (!file_exists($connection_params['dbname'])) {
+						throw new RuntimeException("Could not find database file: {$connection_params['dbname']}");
+					}
+					$parts[] = 'Dbq=' . addslashes($connection_params['dbname']);
+				}
+				if (@$connection_params['user']) {
+					$parts[] = 'Uid=' . $connection_params['user'];
+					$user = null;
+				}
+				if (@$connection_params['password']) {
+					$parts[] = 'Pwd=' . $connection_params['password'];
+					$password = null;
+				}
+				foreach ($parts as &$v) {
+					$v = str_replace(';', '\;', $v);
+				}
+				$dsn = 'odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};' . implode(';', $parts);
+				$class = 'DBAccess';
+				break;
+
 			case 'sqlite':
 				$dsn = 'sqlite:' . $connection_params['dbname'];
 				$class = 'DBSQLite';
-				$class_dir = 'sqlite';
 				break;
 
 			case 'mysql':
@@ -100,7 +134,6 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = 'mysql:' . implode(';', $parts);
 				$class = 'DBMySQL';
-				$class_dir = 'mysql';
 				break;
 
 			case 'oracle':
@@ -115,7 +148,6 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = 'oci:' . implode(';', $parts);
 				$class = 'DBOracle';
-				$class_dir = 'oracle';
 				break;
 
 			case 'pgsql':
@@ -137,7 +169,6 @@ abstract class DABLPDO extends PDO {
 				$user = null;
 				$password = null;
 				$class = 'DBPostgres';
-				$class_dir = 'pgsql';
 				break;
 
 			case 'sqlsrv':
@@ -155,7 +186,6 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
 				$class = 'DBMSSQL';
-				$class_dir = 'mssql';
 				break;
 			case 'mssql':
 			case 'sybase':
@@ -174,7 +204,6 @@ abstract class DABLPDO extends PDO {
 				}
 				$dsn = $connection_params['driver'] . ':' . implode(';', $parts);
 				$class = 'DBMSSQL';
-				$class_dir = 'mssql';
 				break;
 
 			default:

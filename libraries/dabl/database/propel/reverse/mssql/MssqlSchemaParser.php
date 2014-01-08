@@ -125,7 +125,10 @@ class MssqlSchemaParser extends BaseSchemaParser
 			$precision = $row['PRECISION'];
 			$scale = $row['SCALE'];
 			$autoincrement = false;
-			if (strtolower($type) == "int identity") {
+			if (
+				strtolower($type) == 'int identity'
+				|| strtolower($type) == 'bigint identity'
+			) {
 				$autoincrement = true;
 			}
 
