@@ -240,6 +240,9 @@ class ControllerRoute {
 		if (!empty($request_params['jsonp'])) {
 			$this->extension = 'jsonp';
 			$this->jsonPCallback = $request_params['jsonp'];
+		} elseif (!empty($request_params['callback'])) {
+			$this->extension = 'jsonp';
+			$this->jsonPCallback = $request_params['callback'];
 		}
 	}
 

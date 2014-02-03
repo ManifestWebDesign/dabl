@@ -125,6 +125,12 @@ class ControllerRouteTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('myCallback', $this->route->getJsonPCallback());
 	}
 
+	public function testSetRequestParamsDetectsJsonPCallback() {
+		$this->route->setRequestParams(array('callback' => 'myCallback'));
+		$this->assertEquals('jsonp', $this->route->getExtension());
+		$this->assertEquals('myCallback', $this->route->getJsonPCallback());
+	}
+
 	/**
 	 * @covers ControllerRoute::getRoute
 	 * @todo   Implement testGetRoute().
