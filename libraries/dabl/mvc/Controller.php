@@ -234,9 +234,20 @@ abstract class Controller extends ArrayObject {
 				View::load($view, $params, false);
 				break;
 
+			case 'json':
+				if (!headers_sent()) {
+					header('Content-type: application/json; charset=utf-8');
+					if ($this->isRestful() && !empty($this['errors'])) {
+						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
+						$params = array('errors' => $this['errors']);
+					}
+				}
+				echo json_encode_all($params);
+				break;
+
 			case 'jsonp':
 				if (!headers_sent()) {
-					header('Content-type: application/javascript');
+					header('Content-type: application/javascript; charset=utf-8');
 					if ($this->isRestful() && !empty($this['errors'])) {
 						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
 						$params = array('errors' => $this['errors']);
@@ -247,16 +258,6 @@ abstract class Controller extends ArrayObject {
 					$callback = $this->route->getJsonPCallback();
 				}
 				echo $callback . '(' . json_encode_all($params) . ')';
-				break;
-			case 'json':
-				if (!headers_sent()) {
-					header('Content-type: application/json');
-					if ($this->isRestful() && !empty($this['errors'])) {
-						header($_SERVER['SERVER_PROTOCOL'] . ' 400 Error');
-						$params = array('errors' => $this['errors']);
-					}
-				}
-				echo json_encode_all($params);
 				break;
 
 			case 'xml':
