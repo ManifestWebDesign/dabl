@@ -33,7 +33,7 @@ abstract class ApplicationController extends Controller {
 			unset($this['title'], $this['current_page'], $this['actions']);
 		}
 
-		if ($this->outputFormat == 'json' || $this->outputFormat == 'xml') {
+		if (in_array($this->outputFormat, array('json', 'jsonp', 'xml'), true)) {
 			try {
 				return parent::doAction($action_name, $params);
 			} catch (Exception $e) {
