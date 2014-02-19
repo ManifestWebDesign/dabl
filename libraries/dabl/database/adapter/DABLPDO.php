@@ -15,13 +15,14 @@ abstract class DABLPDO extends PDO {
 	protected $queryLog = array();
 	protected $logQueries = false;
 	protected $dbName = null;
-
-	function setDBName($db_name) {
-		$this->dbName = $db_name;
-	}
+	protected $driver = null;
 
 	function getDBName() {
 		return $this->dbName;
+	}
+
+	function getDriver() {
+		return $this->driver;
 	}
 
 	function logQuery($query_string, $time) {
@@ -216,7 +217,10 @@ abstract class DABLPDO extends PDO {
 		} catch (Exception $e) {
 			throw new RuntimeException($e->getMessage());
 		}
-		$conn->setDBName(@$connection_params['dbname']);
+
+		$conn->dbName = @$connection_params['dbname'];
+		$conn->driver = $connection_params['driver'];
+
 		return $conn;
 	}
 

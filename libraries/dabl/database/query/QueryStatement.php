@@ -146,7 +146,6 @@ class QueryStatement {
 	 * @return string
 	 */
 	function __toString() {
-		$string = $this->string;
 		$conn = $this->connection;
 
 		// if a connection is available, use it
@@ -154,7 +153,7 @@ class QueryStatement {
 			$conn = DBManager::getConnection();
 		}
 
-		$string = self::embedIdentifiers($string, array_values($this->identifiers), $conn);
+		$string = self::embedIdentifiers($this->string, array_values($this->identifiers), $conn);
 		return self::embedParams($string, array_values($this->params), $conn);
 	}
 
@@ -223,7 +222,15 @@ class QueryStatement {
 	 * @return PDOStatement
 	 */
 	function bindAndExecute() {
-		$conn = $this->getConnection();
+		$conn = $this->connection;
+
+		if ($conn === null) {
+			throw new RuntimeException('bindAndExecute cannot be called on a QueryStatement without a connection.');
+		}
+		if ($conn instanceof DBMSSQL && $conn->getDriver() === 'dblib' && function_exists('mb_detect_encoding')) {
+			return $conn->query($this->__toString());
+		}
+
 		$string = self::embedIdentifiers($this->getString(), array_values($this->identifiers), $conn);
 
 		$result = $conn->prepare($string);

@@ -316,4 +316,16 @@ class DBMSSQL extends DABLPDO {
 //		$this->query('ROLLBACK TRANSACTION');
 //	}
 
+	public function prepareInput($value) {
+		if (
+			is_string($value)
+			&& function_exists('mb_detect_encoding')
+			&& mb_detect_encoding($value) === 'UTF-8'
+		) {
+			return 'N' . parent::prepareInput($value);
+		}
+
+		return parent::prepareInput($value);
+	}
+
 }
