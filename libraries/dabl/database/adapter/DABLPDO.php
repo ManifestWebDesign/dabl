@@ -54,11 +54,11 @@ abstract class DABLPDO extends PDO {
 		$user = null;
 		$password = null;
 
-		if (@$connection_params['user']) {
+		if (!empty($connection_params['user'])) {
 			$user = $connection_params['user'];
 		}
 
-		if (@$connection_params['password']) {
+		if (!empty($connection_params['password'])) {
 			$password = $connection_params['password'];
 		}
 
@@ -94,17 +94,17 @@ abstract class DABLPDO extends PDO {
 //				connection to the database as you would on a 32 bit machine.
 
 				$parts = array();
-				if (@$connection_params['dbname']) {
+				if (!empty($connection_params['dbname'])) {
 					if (!file_exists($connection_params['dbname'])) {
 						throw new RuntimeException("Could not find database file: {$connection_params['dbname']}");
 					}
 					$parts[] = 'Dbq=' . addslashes($connection_params['dbname']);
 				}
-				if (@$connection_params['user']) {
+				if (!empty($connection_params['user'])) {
 					$parts[] = 'Uid=' . $connection_params['user'];
 					$user = null;
 				}
-				if (@$connection_params['password']) {
+				if (!empty($connection_params['password'])) {
 					$parts[] = 'Pwd=' . $connection_params['password'];
 					$password = null;
 				}
@@ -122,14 +122,18 @@ abstract class DABLPDO extends PDO {
 
 			case 'mysql':
 				$parts = array();
-				if (@$connection_params['host'])
+				if (!empty($connection_params['host'])) {
 					$parts[] = 'host=' . $connection_params['host'];
-				if (@$connection_params['port'])
+				}
+				if (!empty($connection_params['port'])) {
 					$parts[] = 'port=' . $connection_params['port'];
-				if (@$connection_params['unix_socket'])
+				}
+				if (!empty($connection_params['unix_socket'])) {
 					$parts[] = 'unix_socket=' . $connection_params['unix_socket'];
-				if (@$connection_params['dbname'])
+				}
+				if (!empty($connection_params['dbname'])) {
 					$parts[] = 'dbname=' . $connection_params['dbname'];
+				}
 				foreach ($parts as &$v) {
 					$v = str_replace(';', '\;', $v);
 				}
@@ -140,10 +144,12 @@ abstract class DABLPDO extends PDO {
 			case 'oracle':
 			case 'oci':
 				$parts = array();
-				if (@$connection_params['dbname'])
+				if (!empty($connection_params['dbname'])) {
 					$parts[] = 'dbname=' . $connection_params['dbname'];
-				if (@$connection_params['charset'])
+				}
+				if (!empty($connection_params['charset'])) {
 					$parts[] = 'charset=' . $connection_params['charset'];
+				}
 				foreach ($parts as &$v) {
 					$v = str_replace(';', '\;', $v);
 				}
@@ -153,16 +159,21 @@ abstract class DABLPDO extends PDO {
 
 			case 'pgsql':
 				$parts = array();
-				if (@$connection_params['host'])
+				if (!empty($connection_params['host'])) {
 					$parts[] = 'host=' . $connection_params['host'];
-				if (@$connection_params['port'])
+				}
+				if (!empty($connection_params['port'])) {
 					$parts[] = 'port=' . $connection_params['port'];
-				if (@$connection_params['dbname'])
+				}
+				if (!empty($connection_params['dbname'])) {
 					$parts[] = 'dbname=' . $connection_params['dbname'];
-				if (@$connection_params['user'])
+				}
+				if (!empty($connection_params['user'])) {
 					$parts[] = 'user=' . $connection_params['user'];
-				if (@$connection_params['password'])
+				}
+				if (!empty($connection_params['password'])) {
 					$parts[] = 'password=' . $connection_params['password'];
+				}
 				foreach ($parts as &$v) {
 					$v = str_replace(' ', '\ ', $v);
 				}
@@ -173,14 +184,18 @@ abstract class DABLPDO extends PDO {
 				break;
 
 			case 'sqlsrv':
-				if (@$connection_params['host'])
+				if (!empty($connection_params['host'])) {
 					$parts[] = 'server=' . $connection_params['host'];
-				if (@$connection_params['dbname'])
+				}
+				if (!empty($connection_params['dbname'])) {
 					$parts[] = 'database=' . $connection_params['dbname'];
-				if (@$connection_params['charset'])
+				}
+				if (!empty($connection_params['charset'])) {
 					$parts[] = 'charset=' . $connection_params['charset'];
-				if (@$connection_params['appname'])
+				}
+				if (!empty($connection_params['appname'])) {
 					$parts[] = 'appname=' . $connection_params['appname'];
+				}
 
 				foreach ($parts as &$v) {
 					$v = str_replace(';', '\;', $v);
@@ -191,14 +206,22 @@ abstract class DABLPDO extends PDO {
 			case 'mssql':
 			case 'sybase':
 			case 'dblib':
-				if (@$connection_params['host'])
-					$parts[] = 'host=' . $connection_params['host'];
-				if (@$connection_params['dbname'])
+				if (!empty($connection_params['host'])) {
+					$host = 'host=' . $connection_params['host'];
+					if (!empty($connection_params['port'])) {
+						$host .= ':' . $connection_params['port'];
+					}
+					$parts[] = $host;
+				}
+				if (!empty($connection_params['dbname'])) {
 					$parts[] = 'dbname=' . $connection_params['dbname'];
-				if (@$connection_params['charset'])
+				}
+				if (!empty($connection_params['charset'])) {
 					$parts[] = 'charset=' . $connection_params['charset'];
-				if (@$connection_params['appname'])
+				}
+				if (!empty($connection_params['appname'])) {
 					$parts[] = 'appname=' . $connection_params['appname'];
+				}
 
 				foreach ($parts as &$v) {
 					$v = str_replace(';', '\;', $v);
@@ -209,7 +232,6 @@ abstract class DABLPDO extends PDO {
 
 			default:
 				throw new RuntimeException("Unsupported database driver: " . $connection_params['driver'] . ": Check your configuration file");
-				break;
 		}
 
 		try {
@@ -218,7 +240,9 @@ abstract class DABLPDO extends PDO {
 			throw new RuntimeException($e->getMessage());
 		}
 
-		$conn->dbName = @$connection_params['dbname'];
+		if (!empty($connection_params['dbname'])) {
+			$conn->dbName = $connection_params['dbname'];
+		}
 		$conn->driver = $connection_params['driver'];
 
 		return $conn;
