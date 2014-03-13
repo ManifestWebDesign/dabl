@@ -30,8 +30,36 @@ class TestModel extends Model {
 
 	protected $updated;
 
+	function getId() {
+		return $this->id;
+	}
+
+	function settrue_false($value) {
+		$this->setColumnValue('true_false', $value, Model::COLUMN_TYPE_BOOLEAN);
+	}
+
+	function gettrue_false() {
+		return $this->true_false;
+	}
+
 	function getTrueFalse() {
 		return $this->true_false;
+	}
+
+	function setCreated($value) {
+		$this->setColumnValue('created', $value, Model::COLUMN_TYPE_TIMESTAMP);
+	}
+
+	function getCreated() {
+		return $this->created;
+	}
+
+	function setUpdated($value) {
+		$this->setColumnValue('updated', $value, Model::COLUMN_TYPE_INTEGER_TIMESTAMP);
+	}
+
+	function getUpdated() {
+		return $this->updated;
 	}
 
 	public function castInts() {
@@ -39,6 +67,26 @@ class TestModel extends Model {
 
 	static function getColumnType($column_name) {
 		return self::$_columnTypes[$column_name];
+	}
+
+	static function getConnection() {
+		return DBManager::getConnection();
+	}
+
+	static function getColumnNames() {
+		return self::$_columnNames;
+	}
+
+	static function hasColumn($column_name) {
+		static $columns_cache = null;
+		if (null === $columns_cache) {
+			$columns_cache = array_map('strtolower', self::$_columnNames);
+		}
+		return in_array(strtolower(self::normalizeColumnName($column_name)), $columns_cache);
+	}
+
+	static function getPrimaryKeys() {
+		return self::$_primaryKeys;
 	}
 }
 
@@ -49,108 +97,43 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	 */
 	protected $pdo = null;
 
+	/**
+	 * @var TestModel
+	 */
+	protected $instance;
+
 	protected function setUp() {
+		$this->instance = new TestModel();
 		return parent::setUp();
 	}
 
-	protected function setUpConnection() {
-
-	}
-
-	protected function tearDown() {
-		if ($this->pdo) {
-			if (
-				$this->pdo instanceof DBMySQL
-				&& $this->pdo->getTransactionDepth() > 0
-			) {
-				while ($this->pdo->getTransactionDepth() > 0) {
-					$this->pdo->rollback();
-				}
-			}
-		}
-
-		return parent::tearDown();
-	}
-
 	function testBooleanHandlesDifferentTypes() {
-		$model = new TestModel();
-		$model->setColumnValue('true_false', 'On');
-		$this->assertEquals(1, $model->getTrueFalse());
-		$model->setColumnValue('true_false', 1);
-		$this->assertEquals(1, $model->getTrueFalse());
-		$model->setColumnValue('true_false', 'ON');
-		$this->assertEquals(1, $model->getTrueFalse());
-		$model->setColumnValue('true_false', true);
-		$this->assertEquals(1, $model->getTrueFalse());
+		$this->instance->setColumnValue('true_false', 'On');
+		$this->assertSame(1, $this->instance->getTrueFalse());
+		$this->instance->setColumnValue('true_false', 1);
+		$this->assertSame(1, $this->instance->getTrueFalse());
+		$this->instance->setColumnValue('true_false', 'ON');
+		$this->assertSame(1, $this->instance->getTrueFalse());
+		$this->instance->setColumnValue('true_false', true);
+		$this->assertSame(1, $this->instance->getTrueFalse());
 
-		$model->setColumnValue('true_false', 'FALSE');
-		$this->assertEquals(0, $model->getTrueFalse());
-		$model->setColumnValue('true_false', '0');
-		$this->assertEquals(0, $model->getTrueFalse());
-		$model->setColumnValue('true_false', 0);
-		$this->assertEquals(0, $model->getTrueFalse());
-		$model->setColumnValue('true_false', false);
-		$this->assertEquals(0, $model->getTrueFalse());
+		$this->instance->setColumnValue('true_false', 'FALSE');
+		$this->assertSame(0, $this->instance->getTrueFalse());
+		$this->instance->setColumnValue('true_false', '0');
+		$this->assertSame(0, $this->instance->getTrueFalse());
+		$this->instance->setColumnValue('true_false', 0);
+		$this->assertSame(0, $this->instance->getTrueFalse());
+		$this->instance->setColumnValue('true_false', false);
+		$this->assertSame(0, $this->instance->getTrueFalse());
 	}
 
 	/**
-	 * Return all known models that have a single primary key
-	 * @return array
+	 * @covers Model::normalizeColumnName
 	 */
-	private function getModelClasses() {
-		$classes = array();
-		$model_files = glob(MODELS_DIR . '*.php');
-		foreach ($model_files as $model_file) {
-			$model_name = str_replace('.php', '', basename($model_file));
-			if ($model_name == 'ApplicationModel') {
-				continue;
-			}
-			$instance = new $model_name;
-			if (count($instance->getPrimaryKeys()) !== 1) {
-				continue;
-			}
-			$classes[] = $model_name;
-		}
-		return $classes;
-	}
-
-	private function setValueByType($instance, $column, $variant = false) {
-		if (
-			$column == $instance->getPrimaryKey()
-			|| in_array(strtolower($column), array('created', 'updated'))
-		) {
-			return false;
-		}
-
-		$column_type = $instance->getColumnType($column);
-		if (Model::COLUMN_TYPE_BOOLEAN === $column_type) {
-			$instance->$column = !$variant;
-		} elseif ($instance->isNumericType($column_type)) {
-			if ($variant) {
-				$instance->$column = 6;
-			} else {
-				$instance->$column = '5';
-			}
-		} elseif ($instance->isTemporalType($column_type)) {
-			if ($variant) {
-				$instance->$column = time() + 10;
-			} else {
-				$instance->$column = time();
-			}
-		} else {
-			if ($variant) {
-				$instance->$column = 'another test value';
-			} else {
-				$instance->$column = 'test value';
-			}
-		}
-		return true;
-	}
-
 	function testNormalizeColumnName() {
-		$this->assertEquals('bar', Model::normalizeColumnName('foo.bar'));
-		$this->assertEquals('bar', Model::normalizeColumnName('foo.foo.bar'));
-		$this->assertEquals('bar', Model::normalizeColumnName('bar'));
+		$this->assertSame('bar', Model::normalizeColumnName('foo.bar'));
+		$this->assertSame('bar', Model::normalizeColumnName('foo.foo.bar'));
+		$this->assertSame('bar', Model::normalizeColumnName('bar'));
 	}
 
 	/**
@@ -158,49 +141,35 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	 * @covers Model::__get
 	 */
 	function testMagicGettersAndSetters() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-			foreach ($instance->getColumnNames() as $column) {
-				if ($column == $instance->getPrimaryKey()) {
-					continue;
-				}
-				$column_type = $instance->getColumnType($column);
-				if (Model::COLUMN_TYPE_BOOLEAN === $column_type) {
-					$instance->$column = true;
-					$this->assertEquals(1, $instance->$column);
-					$instance->$column = false;
-					$this->assertEquals(0, $instance->$column);
-					$instance->$column = 'true';
-					$this->assertEquals(1, $instance->$column);
-					$instance->$column = 'false';
-					$this->assertEquals(0, $instance->$column);
-					$instance->$column = 'on';
-					$this->assertEquals(1, $instance->$column);
-					$instance->$column = 'off';
-					$this->assertEquals(0, $instance->$column);
-				} elseif ($instance->isNumericType($column_type)) {
-					$instance->$column = '5';
-					$this->assertEquals($instance->$column, 5);
-				} elseif ($instance->isTemporalType($column_type)) {
-					$instance->$column = time();
-					switch ($column_type) {
-						case Model::COLUMN_TYPE_TIME:
-							$value = date($instance->getConnection()->getTimeFormatter());
-							break;
-						case Model::COLUMN_TYPE_TIMESTAMP:
-							$value = date($instance->getConnection()->getTimestampFormatter());
-							break;
-						default:
-							$value = date($instance->getConnection()->getDateFormatter());
-							break;
-					}
-					$this->assertEquals($instance->$column, $value);
-				} else {
-					$instance->$column = 'test-value';
-					$this->assertEquals($instance->$column, 'test-value');
-				}
-			}
-		}
+		$this->assertNull($this->instance->true_false);
+
+		$this->instance->true_false = '0';
+		$this->assertSame(0, $this->instance->true_false);
+
+		$this->instance->true_false = '1';
+		$this->assertSame(1, $this->instance->true_false);
+
+		$this->instance->true_false = 'false';
+		$this->assertSame(0, $this->instance->true_false);
+
+		$this->instance->true_false = 'true';
+		$this->assertSame(1, $this->instance->true_false);
+
+		$this->instance->true_false = 'off';
+		$this->assertSame(0, $this->instance->true_false);
+
+		$this->instance->true_false = 'on';
+		$this->assertSame(1, $this->instance->true_false);
+
+		$now = time();
+		$now_string = date(TestModel::getConnection()->getTimestampFormatter(), $now);
+		$this->instance->created = $now;
+		$this->assertSame($now_string, $this->instance->created);
+
+		$this->instance->updated = $now;
+		$this->assertSame($now_string, $this->instance->created);
+
+		// Todo: numeric, string, time, timestamp
 	}
 
 	/**
@@ -208,24 +177,24 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	 * @covers Model::insert
 	 */
 	function testSave() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-			$this->pdo = $instance->getConnection();
-			$this->pdo->beginTransaction();
-
-			foreach ($instance->getColumnNames() as $column) {
-				$this->setValueByType($instance, $column);
-			}
-
-			try {
-				$result = $instance->save();
-				$this->assertEquals(1, $result);
-				$this->pdo->rollback();
-			} catch (Exception $e) {
-				$this->pdo->rollback();
-				$this->fail($e);
-			}
-		}
+//		foreach ($this->getModelClasses() as $model_name) {
+//			$instance = new $model_name();
+//			$this->pdo = $instance->getConnection();
+//			$this->pdo->beginTransaction();
+//
+//			foreach ($instance->getColumnNames() as $column) {
+//				$this->setValueByType($instance, $column);
+//			}
+//
+//			try {
+//				$result = $instance->save();
+//				$this->assertSame(1, $result);
+//				$this->pdo->rollback();
+//			} catch (Exception $e) {
+//				$this->pdo->rollback();
+//				$this->fail($e);
+//			}
+//		}
 	}
 
 	/**
@@ -233,160 +202,125 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	 * @covers Model::update
 	 */
 	function testUpdate() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-			$this->pdo = $instance->getConnection();
-			$this->pdo->beginTransaction();
-
-			try {
-				foreach ($instance->getColumnNames() as $column) {
-					$this->setValueByType($instance, $column);
-				}
-
-				// initial save should alter 1 row
-				$result = $instance->save();
-				$this->assertEquals(1, $result);
-
-				// save again with no changes should alter 0 rows
-				$result = $instance->save();
-				$this->assertEquals(0, $result);
-
-				foreach ($instance->getColumnNames() as $column) {
-					$this->setValueByType($instance, $column, true);
-				}
-
-				// save again with changes should alter 1 row
-				$result = $instance->save();
-				$this->assertEquals(1, $result);
-				$this->pdo->rollback();
-			} catch (Exception $e) {
-				$this->pdo->rollback();
-				$this->fail($e);
-			}
-		}
+//		foreach ($this->getModelClasses() as $model_name) {
+//			$instance = new $model_name();
+//			$this->pdo = $instance->getConnection();
+//			$this->pdo->beginTransaction();
+//
+//			try {
+//				foreach ($instance->getColumnNames() as $column) {
+//					$this->setValueByType($instance, $column);
+//				}
+//
+//				// initial save should alter 1 row
+//				$result = $instance->save();
+//				$this->assertSame(1, $result);
+//
+//				// save again with no changes should alter 0 rows
+//				$result = $instance->save();
+//				$this->assertSame(0, $result);
+//
+//				foreach ($instance->getColumnNames() as $column) {
+//					$this->setValueByType($instance, $column, true);
+//				}
+//
+//				// save again with changes should alter 1 row
+//				$result = $instance->save();
+//				$this->assertSame(1, $result);
+//				$this->pdo->rollback();
+//			} catch (Exception $e) {
+//				$this->pdo->rollback();
+//				$this->fail($e);
+//			}
+//		}
 	}
 
 	/**
 	 * @covers Model::delete
 	 */
 	function testDelete() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-			$this->pdo = $instance->getConnection();
-			$this->pdo->beginTransaction();
-
-			try {
-				foreach ($instance->getColumnNames() as $column) {
-					$this->setValueByType($instance, $column);
-				}
-
-				// initial save should alter 1 row
-				$result = $instance->save();
-				$this->assertEquals(1, $result);
-
-				$result = $instance->delete();
-				$this->assertEquals(1, $result);
-
-				$this->pdo->rollback();
-			} catch (Exception $e) {
-				$this->pdo->rollback();
-				$this->fail($e);
-			}
-		}
+//		foreach ($this->getModelClasses() as $model_name) {
+//			$instance = new $model_name();
+//			$this->pdo = $instance->getConnection();
+//			$this->pdo->beginTransaction();
+//
+//			try {
+//				foreach ($instance->getColumnNames() as $column) {
+//					$this->setValueByType($instance, $column);
+//				}
+//
+//				// initial save should alter 1 row
+//				$result = $instance->save();
+//				$this->assertSame(1, $result);
+//
+//				$result = $instance->delete();
+//				$this->assertSame(1, $result);
+//
+//				$this->pdo->rollback();
+//			} catch (Exception $e) {
+//				$this->pdo->rollback();
+//				$this->fail($e);
+//			}
+//		}
 	}
 
 	/**
 	 * @covers Model::isNew
 	 */
 	function testIsNew() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-			$this->pdo = $instance->getConnection();
-			$this->pdo->beginTransaction();
+		$this->assertTrue($this->instance->isNew());
+		$this->instance->setColumnValue('id', 1);
+		$this->assertTrue($this->instance->isNew());
+	}
 
-			try {
-				foreach ($instance->getColumnNames() as $column) {
-					$this->setValueByType($instance, $column);
-				}
+	/**
+	 * @covers Model::copy
+	 */
+	function testCopy() {
+		$this->instance->setColumnValue('id', 1);
+		$this->instance->setColumnValue('created', time());
 
-				$this->assertTrue($instance->isNew());
-
-				$instance->save();
-
-				$this->assertFalse($instance->isNew());
-				$this->pdo->rollback();
-			} catch (Exception $e) {
-				$this->pdo->rollback();
-				$this->fail($e);
-			}
-		}
+		$clone = $this->instance->copy();
+		$this->assertFalse($clone->isColumnModified('id'));
+		$this->assertTrue($clone->isColumnModified('created'));
+		$this->assertNull($clone->getId());
 	}
 
 	/**
 	 * @covers Model::isModified
 	 */
 	function testIsModified() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-
-			foreach ($instance->getColumnNames() as $column) {
-				if ($this->setValueByType($instance, $column)) {
-					break;
-				}
-			}
-			$this->assertTrue($instance->isModified());
-		}
+		$this->assertFalse($this->instance->isModified());
+		$this->instance->setColumnValue('created', time());
+		$this->assertTrue($this->instance->isModified());
 	}
 
 	/**
 	 * @covers Model::isColumnModified
 	 */
 	function testIsColumnModified() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-
-			foreach ($instance->getColumnNames() as $column) {
-				if ($this->setValueByType($instance, $column)) {
-					$this->assertTrue($instance->isColumnModified($column));
-					break;
-				}
-			}
-		}
+		$this->assertFalse($this->instance->isColumnModified('created'));
+		$this->instance->setColumnValue('created', time());
+		$this->assertTrue($this->instance->isColumnModified('created'));
 	}
 
 	/**
 	 * @covers Model::getModifiedColumns
 	 */
 	function testGetModifiedColumns() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-
-			$modified_columns = array();
-			foreach ($instance->getColumnNames() as $column) {
-				if ($this->setValueByType($instance, $column)) {
-					$modified_columns[] = $column;
-				}
-			}
-			$this->assertEquals($modified_columns, $instance->getModifiedColumns());
-		}
+		$this->assertSame(array(), $this->instance->getModifiedColumns());
+		$this->instance->setColumnValue('created', time());
+		$this->assertSame(array('created'), $this->instance->getModifiedColumns());
 	}
 
 	/**
 	 * @covers Model::resetModified
 	 */
 	function testResetModified() {
-		foreach ($this->getModelClasses() as $model_name) {
-			$instance = new $model_name();
-
-			$modified = false;
-			foreach ($instance->getColumnNames() as $column) {
-				if ($this->setValueByType($instance, $column)) {
-					$modified = true;
-				}
-			}
-			$this->assertEquals($modified, $instance->isModified());
-			$instance->resetModified();
-			$this->assertFalse($instance->isModified());
-		}
+		$this->assertFalse($this->instance->isModified());
+		$this->instance->setColumnValue('created', time());
+		$this->assertTrue($this->instance->isModified());
+		$this->instance->resetModified();
+		$this->assertFalse($this->instance->isModified());
 	}
 }

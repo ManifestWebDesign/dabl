@@ -321,11 +321,13 @@ abstract class Model implements JsonSerializable {
 	function copy() {
 		$class = get_class($this);
 		$new_object = new $class;
-		$new_object->fromArray($this->toArray());
+		$values = $this->toArray();
 
 		foreach ($this->getPrimaryKeys() as $pk) {
-			$new_object->{'set' . $pk}(null);
+			unset($values[$pk]);
 		}
+
+		$new_object->fromArray($values);
 		return $new_object;
 	}
 
