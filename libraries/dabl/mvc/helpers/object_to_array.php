@@ -18,24 +18,21 @@
  */
 function object_to_array($var, $loop_exclude = array()) {
 	if (is_object($var)) {
+		if ($var instanceof JsonSerializable) {
+			return $var->jsonSerialize();
+		}
+
 		if (in_array($var, $loop_exclude, true)) {
 			return '*RECURSION*';
 		}
 		$loop_exclude[] = $var;
 
-		if ($var instanceof JsonSerializable) {
-			$var = $var->jsonSerialize();
-		} elseif ($var instanceof ArrayObject) {
+		if ($var instanceof ArrayObject) {
 			$var = $var->getArrayCopy();
 		} elseif (method_exists($var, 'toArray')) {
-			// use toArray() if it exists so object can control array conversion if it wants to
 			$var = $var->toArray();
 		} elseif ($var instanceof Traversable) {
-			$_var = array();
-			foreach ($var as $key => $val) {
-				$_var[$key] = $val;
-			}
-			$var = &$_var;
+			$var = iterator_to_array($var, true);
 		} else {
 			$var = get_object_vars($var);
 		}
