@@ -1357,7 +1357,7 @@ abstract class Model implements JsonSerializable {
 				$column = "$alias.$foreign_column";
 			}
 		} else {
-			$q = static::getQuery();
+			$q = new Query;
 		}
 		$q->add($column, $value);
 		return $q;
