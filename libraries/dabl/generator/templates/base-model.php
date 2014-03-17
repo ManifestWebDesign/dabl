@@ -1,13 +1,6 @@
-<?php echo '<?php' ?>
+<?php
 
-/**
- *		Created by Dan Blaisdell's DABL
- *		Do not alter base files, as they will be overwritten.
- *		To alter the objects, alter the extended classes in
- *		the 'models' folder.
- *
- */
-<?php $used_methods = array(
+$used_methods = array(
 	'getTableName',
 	'getColumnNames',
 	'getColumns',
@@ -33,8 +26,18 @@
 	'doSelect',
 	'doSelectOne',
 	'doUpdate'
-); ?>
+);
 
+echo '<?php';
+?>
+
+/**
+ *		Created by Dan Blaisdell's DABL
+ *		Do not alter base files, as they will be overwritten.
+ *		To alter the objects, alter the extended classes in
+ *		the 'models' folder.
+ *
+ */
 abstract class base<?php echo $class_name ?> extends ApplicationModel {
 
 <?php foreach ($fields as $key => $field): ?>
