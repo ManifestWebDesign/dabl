@@ -22,11 +22,11 @@ class TestModel extends Model {
 
 	protected static $_primaryKey = 'id';
 
-	public static $_columnTypes = array(
-		'id' => Model::COLUMN_TYPE_INTEGER,
-		'true_false' => Model::COLUMN_TYPE_BOOLEAN,
-		'created' => Model::COLUMN_TYPE_TIMESTAMP,
-		'updated' => Model::COLUMN_TYPE_INTEGER_TIMESTAMP,
+	public static $_columns = array(
+		'test_model.id',
+		'test_model.true_false',
+		'test_model.created',
+		'test_model.updated'
 	);
 
 	public static $_columnNames = array(
@@ -36,11 +36,11 @@ class TestModel extends Model {
 		'updated'
 	);
 
-	public static $_columns = array(
-		'test_model.id',
-		'test_model.true_false',
-		'test_model.created',
-		'test_model.updated'
+	public static $_columnTypes = array(
+		'id' => Model::COLUMN_TYPE_INTEGER,
+		'true_false' => Model::COLUMN_TYPE_BOOLEAN,
+		'created' => Model::COLUMN_TYPE_TIMESTAMP,
+		'updated' => Model::COLUMN_TYPE_INTEGER_TIMESTAMP,
 	);
 
 	static function getConnection() {
@@ -91,8 +91,54 @@ class TestModel extends Model {
 		return $this->updated;
 	}
 
-	public function castInts() {
-		return $this;
+}
+
+class TestModel2 extends Model {
+
+	protected $nullInteger;
+
+	protected $emptyInteger = '';
+
+	protected $integer = '6897';
+
+	protected $boolean = false;
+
+	protected $integerTimestamp = '3456789999';
+
+	public static $_columnNames = array(
+		'nullInteger',
+		'emptyInteger',
+		'integer',
+		'boolean',
+		'integerTimestamp',
+	);
+
+	public static $_columnTypes = array(
+		'nullInteger' => Model::COLUMN_TYPE_INTEGER,
+		'emptyInteger' => Model::COLUMN_TYPE_INTEGER,
+		'integer' => Model::COLUMN_TYPE_INTEGER,
+		'boolean' => Model::COLUMN_TYPE_BOOLEAN,
+		'integerTimestamp' => Model::COLUMN_TYPE_INTEGER_TIMESTAMP
+	);
+
+	function getNullInteger() {
+		return $this->nullInteger;
+	}
+
+	function getEmptyInteger() {
+		return $this->emptyInteger;
+	}
+
+	function getInteger() {
+		return $this->integer;
+	}
+
+	function getBoolean() {
+		return $this->boolean;
+	}
+
+	function getIntegerTimestamp() {
+		return $this->integerTimestamp;
 	}
 }
 
@@ -307,8 +353,11 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testHasColumn() {
 		$this->assertTrue(TestModel::hasColumn('id'));
-		$this->assertTrue(TestModel::hasColumn('test_model.id'));
+		$this->assertTrue(TestModel::hasColumn('test_model.Id'));
 		$this->assertFalse(TestModel::hasColumn('foo'));
+
+		$this->assertFalse(TestModel2::hasColumn('id'));
+		$this->assertTrue(TestModel2::hasColumn('Integer'));
 	}
 
 	/**
@@ -687,35 +736,33 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * @covers Model::jsonSerialize
-	 * @todo   Implement testJsonSerialize().
 	 */
 	public function testJsonSerialize() {
-		// Remove the following lines when you implement this test.
-		$this->markTestIncomplete(
-				'This test has not been implemented yet.'
-		);
+		$now = time();
+
+		$this->instance
+			->settrue_false(false)
+			->setCreated($now)
+			->setUpdated($now);
+
+		$this->assertSame(array(
+			'id' => null,
+			'true_false' => false,
+			'created' => date('c', $now),
+			'updated' => date('c', $now)
+		), $this->instance->jsonSerialize());
 	}
 
 	/**
 	 * @covers Model::setCacheResults
-	 * @todo   Implement testSetCacheResults().
-	 */
-	public function testSetCacheResults() {
-		// Remove the following lines when you implement this test.
-		$this->markTestIncomplete(
-				'This test has not been implemented yet.'
-		);
-	}
-
-	/**
 	 * @covers Model::getCacheResults
-	 * @todo   Implement testGetCacheResults().
 	 */
-	public function testGetCacheResults() {
-		// Remove the following lines when you implement this test.
-		$this->markTestIncomplete(
-				'This test has not been implemented yet.'
-		);
+	public function testGetAndSetCacheResults() {
+		$this->instance->setCacheResults(true);
+		$this->assertSame(true, $this->instance->getCacheResults());
+
+		$this->instance->setCacheResults(false);
+		$this->assertSame(false, $this->instance->getCacheResults());
 	}
 
 	/**
@@ -811,6 +858,20 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(false, $this->instance->isDirty());
 		$this->instance->setDirty(true);
 		$this->assertTrue($this->instance->isDirty());
+	}
+
+	/**
+	 * @covers Model::castInts
+	 */
+	public function testCastInts() {
+		$instance = new TestModel2();
+		$instance->castInts();
+
+		$this->assertSame(null, $instance->getNullInteger());
+		$this->assertSame(null, $instance->getEmptyInteger());
+		$this->assertSame(6897, $instance->getInteger());
+		$this->assertSame(0, $instance->getBoolean());
+		$this->assertSame(3456789999, $instance->getIntegerTimestamp());
 	}
 
 }

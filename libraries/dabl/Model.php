@@ -189,8 +189,9 @@ abstract class Model implements JsonSerializable {
 	 * Magic get
 	 */
 	function __get($name) {
-		if ($this->hasColumn($name)) {
-			return $this->{'get' . $name}();
+		$method = 'get' . $name;
+		if (method_exists($this, $method)) {
+			return $this->$method();
 		}
 	}
 
@@ -198,8 +199,9 @@ abstract class Model implements JsonSerializable {
 	 * Magic set
 	 */
 	function __set($name, $value) {
-		if ($this->hasColumn($name)) {
-			$this->{'set' . $name}($value);
+		$method = 'set' . $name;
+		if (method_exists($this, $method)) {
+			$this->$method($value);
 		}
 	}
 
@@ -300,15 +302,20 @@ abstract class Model implements JsonSerializable {
 		return static::$_columnTypes[static::normalizeColumnName($column_name)];
 	}
 
+	private static $_lowerCaseColumns = array();
+
 	/**
 	 * @return bool
 	 */
 	static function hasColumn($column_name) {
-		static $columns_cache = null;
-		if (null === $columns_cache) {
-			$columns_cache = array_map('strtolower', static::$_columnNames);
+		$class = get_called_class();
+		if (!isset(self::$_lowerCaseColumns[$class])) {
+			self::$_lowerCaseColumns[$class] = array_map('strtolower', static::$_columnNames);
 		}
-		return in_array(strtolower(static::normalizeColumnName($column_name)), $columns_cache);
+		return in_array(
+			strtolower(static::normalizeColumnName($column_name)),
+			self::$_lowerCaseColumns[$class]
+		);
 	}
 
 	/**
@@ -394,7 +401,7 @@ abstract class Model implements JsonSerializable {
 	 * @return static
 	 */
 	static function retrieveByColumn($field, $value) {
-		$pk = static::getPrimaryKey();
+		$pk = static::$_primaryKey;
 		if ($pk) {
 			if ($field === $pk) {
 				return static::retrieveByPK($value);
@@ -437,8 +444,10 @@ abstract class Model implements JsonSerializable {
 	 */
 	static function getQuery(array $params = array(), Query $q = null) {
 		$model_class = get_called_class();
-		$class = class_exists($model_class . 'Query') ? $model_class . 'Query' : 'Query';
-		$q = $q ? clone $q : new $class;
+		$query_class = class_exists($model_class . 'Query') ? $model_class . 'Query' : 'Query';
+
+		$q = $q ? clone $q : new $query_class;
+
 		if (!$q->getTable()) {
 			$q->setTable(static::getTableName());
 		}
@@ -720,10 +729,10 @@ abstract class Model implements JsonSerializable {
 	 * @param int $startcol
 	 */
 	function fromNumericResultArray($values, &$startcol) {
-		foreach ($this->getColumnNames() as $column_name) {
+		foreach (static::$_columnNames as &$column_name) {
 			$this->{$column_name} = $values[$startcol++];
 		}
-		if ($this->getPrimaryKeys() && !$this->hasPrimaryKeyValues()) {
+		if (static::$_primaryKeys && !$this->hasPrimaryKeyValues()) {
 			return false;
 		}
 		$this->castInts();
@@ -736,12 +745,12 @@ abstract class Model implements JsonSerializable {
 	 * @param array $values
 	 */
 	function fromAssociativeResultArray($values) {
-		foreach ($this->getColumnNames() as $column_name) {
+		foreach (static::$_columnNames as &$column_name) {
 			if (array_key_exists($column_name, $values)) {
 				$this->{$column_name} = $values[$column_name];
 			}
 		}
-		if ($this->getPrimaryKeys() && !$this->hasPrimaryKeyValues()) {
+		if (static::$_primaryKeys && !$this->hasPrimaryKeyValues()) {
 			return false;
 		}
 		$this->castInts();
@@ -793,21 +802,6 @@ abstract class Model implements JsonSerializable {
 	}
 
 	/**
-	 * Queue for batch insert
-	 * @return Model this
-	 */
-	function queueForInsert() {
-		// If we've reached the maximum batch size, insert it and empty it.
-		if (count(static::$_insertBatch) >= static::$_insertBatchSize) {
-			static::insertBatch();
-		}
-
-		static::$_insertBatch[] = $this;
-
-		return $this;
-	}
-
-	/**
 	 * @return int row count
 	 * @throws RuntimeException
 	 */
@@ -817,14 +811,14 @@ abstract class Model implements JsonSerializable {
 			return 0;
 		}
 		$conn = static::getConnection();
-		$columns = static::getColumnNames();
+		$columns = static::$_columnNames;
 		$quoted_table = $conn->quoteIdentifier(static::getTableName());
 
 		$auto_increment = static::isAutoIncrement();
 		if ($auto_increment) {
-			$pk = static::getPrimaryKey();
+			$pk = static::$_primaryKey;
 			foreach ($columns as $index => &$column_name) {
-				if ($column_name == $pk) {
+				if ($column_name === $pk) {
 					unset($columns[$index]);
 					break;
 				}
@@ -840,15 +834,24 @@ abstract class Model implements JsonSerializable {
 			if (!$r->validate()) {
 				throw new RuntimeException('Cannot save ' . get_class($r) . ' with validation errors: ' . implode(', ', $r->getValidationErrors()));
 			}
-			if ($r->isNew() && $r->hasColumn('Created') && !$r->isColumnModified('Created')) {
+			if (
+				$r->isNew()
+				&& $r->hasColumn('created')
+				&& !$r->isColumnModified('created')
+			) {
 				$r->setCreated(time());
 			}
-			if (($r->isNew() || $r->isModified()) && $r->hasColumn('Updated') && !$r->isColumnModified('Updated')) {
+
+			if (
+				($r->isNew() || $r->isModified())
+				&& $r->hasColumn('updated')
+				&& !$r->isColumnModified('updated')
+			) {
 				$r->setUpdated(time());
 			}
 
 			foreach ($columns as &$column) {
-				if ($auto_increment && $column == $pk) {
+				if ($auto_increment && $column === $pk) {
 					continue;
 				}
 				$values[] = $r->$column;
@@ -883,16 +886,30 @@ abstract class Model implements JsonSerializable {
 	}
 
 	/**
+	 * Queue for batch insert
+	 * @return Model this
+	 */
+	function queueForInsert() {
+		// If we've reached the maximum batch size, insert it and empty it.
+		if (count(static::$_insertBatch) >= static::$_insertBatchSize) {
+			static::insertBatch();
+		}
+
+		static::$_insertBatch[] = $this;
+
+		return $this;
+	}
+
+	/**
 	 * Creates new instance of self and with the same values as $this, except
 	 * the primary key value is cleared
 	 * @return static
 	 */
 	function copy() {
-		$class = get_class($this);
-		$new_object = new $class;
+		$new_object = new static();
 		$values = $this->toArray();
 
-		foreach ($this->getPrimaryKeys() as $pk) {
+		foreach (static::$_primaryKeys as $pk) {
 			unset($values[$pk]);
 		}
 
@@ -905,7 +922,7 @@ abstract class Model implements JsonSerializable {
 	 * @return bool
 	 */
 	function isModified() {
-		return (bool) $this->getModifiedColumns();
+		return !empty($this->_modifiedColumns);
 	}
 
 	/**
@@ -914,7 +931,7 @@ abstract class Model implements JsonSerializable {
 	 */
 	function isColumnModified($column_name) {
 		return array_key_exists(
-			strtolower($this->normalizeColumnName($column_name)),
+			strtolower(static::normalizeColumnName($column_name)),
 			array_map('strtolower', $this->_modifiedColumns)
 		);
 	}
@@ -936,15 +953,13 @@ abstract class Model implements JsonSerializable {
 	 */
 	function setColumnValue($column_name, $value, $column_type = null) {
 		if (null === $column_type) {
-			$column_type = $this->getColumnType($column_name);
+			$column_type = static::getColumnType($column_name);
 		}
 
 		static $true = array(true, 1, '1', 'on', 'true');
 		static $false = array(false, 0, '0', 'off', 'false');
 
-		$column_name = $this->normalizeColumnName($column_name);
-
-		if ($column_type == self::COLUMN_TYPE_BOOLEAN) {
+		if ($column_type === self::COLUMN_TYPE_BOOLEAN) {
 			if (is_string($value)) {
 				$value = strtolower($value);
 			}
@@ -969,7 +984,7 @@ abstract class Model implements JsonSerializable {
 					$value = null;
 				} elseif (null !== $value) {
 					if ($temporal) {
-						$value = static::coerceTemporalValue($value, $column_type, $this->getConnection());
+						$value = static::coerceTemporalValue($value, $column_type, static::getConnection());
 					} elseif ($numeric) {
 						if (is_bool($value)) {
 							$value = $value ? 1 : 0;
@@ -1017,10 +1032,13 @@ abstract class Model implements JsonSerializable {
 	 * @return static
 	 */
 	function fromArray($array) {
-		$columns = $this->getColumnNames();
 		foreach ($array as $column => &$v) {
-			if (is_string($column) === false || in_array($column, $columns) === false)
+			if (
+				is_string($column) === false
+				|| !isset(static::$_columnTypes[$column])
+			) {
 				continue;
+			}
 			$this->{'set' . $column}($v);
 		}
 		return $this;
@@ -1033,7 +1051,7 @@ abstract class Model implements JsonSerializable {
 	 */
 	function toArray() {
 		$array = array();
-		foreach ($this->getColumnNames() as $column)
+		foreach (static::$_columnNames as &$column)
 			$array[$column] = $this->{'get' . $column}();
 		return $array;
 	}
@@ -1044,12 +1062,24 @@ abstract class Model implements JsonSerializable {
 	 * Array keys match column names.
 	 * @return array
 	 */
-    public function jsonSerialize() {
+    function jsonSerialize() {
 		$array = $this->toArray();
-		foreach ($this->getColumnNames() as $column) {
-			$type = $this->getColumnType($column);
-			if ($type === Model::COLUMN_TYPE_TIMESTAMP || $type === Model::COLUMN_TYPE_INTEGER_TIMESTAMP && isset($array[$column])) {
-				$value = $array[$column];
+		foreach (static::$_columnTypes as $column => &$type) {
+			if (!isset($array[$column])) {
+				continue;
+			}
+			$value = &$array[$column];
+
+			if ($type === Model::COLUMN_TYPE_BOOLEAN) {
+				if (0 === $value) {
+					$value = false;
+				} elseif (1 === $value) {
+					$value = true;
+				}
+			} else if (
+				$type === Model::COLUMN_TYPE_TIMESTAMP
+				|| $type === Model::COLUMN_TYPE_INTEGER_TIMESTAMP
+			) {
 				if (!$value) {
 					$array[$column] = null;
 					continue;
@@ -1060,7 +1090,7 @@ abstract class Model implements JsonSerializable {
 				if (!is_int($value)) {
 					throw new RuntimeException('Error parsing date "' . $array[$column] . '"');
 				}
-				$array[$column] = date('c', $value);
+				$value = date('c', $value);
 			}
 		}
 		return $array;
@@ -1090,7 +1120,7 @@ abstract class Model implements JsonSerializable {
 	 * @return bool
 	 */
 	function hasPrimaryKeyValues() {
-		$pks = $this->getPrimaryKeys();
+		$pks = static::$_primaryKeys;
 		if (!$pks)
 			return false;
 
@@ -1107,7 +1137,7 @@ abstract class Model implements JsonSerializable {
 	 */
 	function getPrimaryKeyValues() {
 		$arr = array();
-		$pks = $this->getPrimaryKeys();
+		$pks = static::$_primaryKeys;
 
 		foreach ($pks as &$pk) {
 			$arr[] = $this->{"get$pk"}();
@@ -1143,7 +1173,7 @@ abstract class Model implements JsonSerializable {
 	 * @return int number of records deleted
 	 */
 	function delete() {
-		$pks = $this->getPrimaryKeys();
+		$pks = static::$_primaryKeys;
 		if (!$pks) {
 			throw new RuntimeException('This table has no primary keys');
 		}
@@ -1154,9 +1184,9 @@ abstract class Model implements JsonSerializable {
 			}
 			$q->addAnd($pk, $this->$pk);
 		}
-		$q->setTable($this->getTableName());
+		$q->setTable(static::getTableName());
 		$result = $this->doDelete($q, false);
-		$this->removeFromPool($this);
+		static::removeFromPool($this);
 		return $result;
 	}
 
@@ -1180,11 +1210,19 @@ abstract class Model implements JsonSerializable {
 			throw new RuntimeException('Cannot save ' . get_class($this) . ' with validation errors: ' . implode(', ', $this->getValidationErrors()));
 		}
 
-		if ($this->isNew() && $this->hasColumn('Created') && !$this->isColumnModified('Created')) {
+		if (
+			$this->isNew()
+			&& static::hasColumn('created')
+			&& !$this->isColumnModified('created')
+		) {
 			$this->setCreated(time());
 		}
 
-		if (($this->isNew() || $this->isModified()) && $this->hasColumn('Updated') && !$this->isColumnModified('Updated')) {
+		if (
+			($this->isNew() || $this->isModified())
+			&& static::hasColumn('updated')
+			&& !$this->isColumnModified('Updated')
+		) {
 			$this->setUpdated(time());
 		}
 
@@ -1196,8 +1234,8 @@ abstract class Model implements JsonSerializable {
 	}
 
 	function archive() {
-		if (!$this->hasColumn('Archived')) {
-			throw new RuntimeException('Cannot call archive on models without "Archived" column');
+		if (!static::hasColumn('archived')) {
+			throw new RuntimeException('Cannot call archive on models without "archived" column');
 		}
 
 		if (null !== $this->getArchived()) {
@@ -1246,17 +1284,35 @@ abstract class Model implements JsonSerializable {
 	}
 
 	/**
+	 * Cast returned values from the database into integers where appropriate.
+	 * @return static
+	 */
+	function castInts() {
+		foreach (static::$_columnTypes as $column => &$type) {
+			if ($this->{$column} === null || !static::isIntegerType($type)) {
+				continue;
+			}
+			if ('' === $this->{$column}) {
+				$this->{$column} = null;
+				continue;
+			}
+			$this->{$column} = (int) $this->{$column};
+		}
+		return $this;
+	}
+
+	/**
 	 * Creates and executes INSERT query string for this object
 	 * @return int
 	 */
 	protected function insert() {
-		$conn = $this->getConnection();
-		$pk = $this->getPrimaryKey();
+		$conn = static::getConnection();
+		$pk = static::$_primaryKey;
 
 		$fields = array();
 		$values = array();
 		$placeholders = array();
-		foreach ($this->getColumnNames() as $column) {
+		foreach (static::$_columnNames as &$column) {
 			$value = $this->$column;
 			if ($value === null && !$this->isColumnModified($column))
 				continue;
@@ -1265,7 +1321,7 @@ abstract class Model implements JsonSerializable {
 			$placeholders[] = '?';
 		}
 
-		$quoted_table = $conn->quoteIdentifier($this->getTableName());
+		$quoted_table = $conn->quoteIdentifier(static::getTableName());
 		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $placeholders) . ') ';
 
 		if ($pk && $this->isAutoIncrement() && $conn instanceof DBPostgres) {
@@ -1305,7 +1361,7 @@ abstract class Model implements JsonSerializable {
 	 * @return Int
 	 */
 	protected function update() {
-		if (!$this->getPrimaryKeys()) {
+		if (!static::$_primaryKeys) {
 			throw new RuntimeException('This table has no primary keys');
 		}
 
@@ -1321,7 +1377,7 @@ abstract class Model implements JsonSerializable {
 
 		$q = static::getQuery();
 
-		foreach ($this->getPrimaryKeys() as $pk) {
+		foreach (static::$_primaryKeys as $pk) {
 			if ($this->$pk === null) {
 				throw new RuntimeException('Cannot update with NULL primary key.');
 			}
@@ -1332,11 +1388,6 @@ abstract class Model implements JsonSerializable {
 		$this->resetModified();
 		return $row_count;
 	}
-
-	/**
-	 * Cast returned values from the database into integers where appropriate.
-	 */
-	abstract function castInts();
 
 	/**
 	 * @param string $foreign_table

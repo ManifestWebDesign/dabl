@@ -64,10 +64,6 @@ class QueryModelIterator implements Iterator, JsonSerializable {
 	}
 
 	protected function fetchRow() {
-		if (null === $this->pdoStatement) {
-			$this->initQuery();
-		}
-
 		$this->current = $this->pdoStatement->fetch();
 
 		if ($this->current) {
