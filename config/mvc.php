@@ -22,22 +22,27 @@ if (isset($_COOKIE[$sn])) {
 }
 //Check for valid sessionid
 if ($sessid && !preg_match('/^[a-zA-Z0-9,\-]{22,40}$/', $sessid)) {
-	//If invalid,
+	//If invalid, delete the cookie and redirect to /
 	$params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-    );
+	setcookie(
+		session_name(),
+		'',
+		time() - 42000,
+		$params['path'],
+		$params['domain'],
+		$params['secure'],
+		$params['httponly']
+	);
 
-	if(!headers_sent()) {
-		header('Location: /');
+	if (!headers_sent()) {
+		redirect('/');
 	}
 	throw new RuntimeException('Session ID was invalid and couldn\'t recover');
 }
 $result = @session_start();
-if(!$result) {
-	if(!headers_sent()) {
-		header('Location: /');
+if (!$result) {
+	if (!headers_sent()) {
+		redirect('/');
 	}
 	throw new RuntimeException('Session ID was invalid and couldn\'t recover');
 }
