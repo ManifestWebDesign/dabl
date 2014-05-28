@@ -10,8 +10,37 @@ foreach ($helpers as $helper) {
 	require_once $helper;
 }
 
+/** Session * */
 // start the session
-session_start();
+$sn = session_name();
+$sessid = null;
+//Find the session either in the cookie or the $_GET
+if (isset($_COOKIE[$sn])) {
+	$sessid = $_COOKIE[$sn];
+} else if (isset($_GET[$sn])) {
+	$sessid = $_GET[$sn];
+}
+//Check for valid sessionid
+if ($sessid && !preg_match('/^[a-zA-Z0-9,\-]{22,40}$/', $sessid)) {
+	//If invalid,
+	$params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+
+	if(!headers_sent()) {
+		header('Location: /');
+	}
+	throw new RuntimeException('Session ID was invalid and couldn\'t recover');
+}
+$result = @session_start();
+if(!$result) {
+	if(!headers_sent()) {
+		header('Location: /');
+	}
+	throw new RuntimeException('Session ID was invalid and couldn\'t recover');
+}
 
 // the browser path to this application.  it should be:
 // a full url with http:// and a trailing slash OR
