@@ -171,12 +171,12 @@ table.object-grid .ui-button-text {
 
 /** UI Tabs **/
 div.ui-tabs {
-	padding: 8px 12px 0;
+	padding: 0;
 	margin-bottom: 10px;
 }
 
 div.ui-tabs ul.ui-tabs-nav {
-	padding: 0;
+	padding: 8px 12px 0;
 }
 
 div.ui-tabs ul.ui-tabs-nav li {
@@ -184,7 +184,7 @@ div.ui-tabs ul.ui-tabs-nav li {
 	margin-left: 0;
 }
 
-div.ui-tabs .ui-tabs-nav li.ui-tabs-selected a,
+div.ui-tabs .ui-tabs-nav li.ui-tabs-active a,
 div.ui-tabs .ui-tabs-nav li.ui-state-disabled a,
 div.ui-tabs .ui-tabs-nav li.ui-state-processing a {
 	cursor: default;
