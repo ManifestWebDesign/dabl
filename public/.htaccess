@@ -1,8 +1,10 @@
+DirectoryIndex index.html index.php server.php
+
 <IfModule mod_rewrite.c>
 	RewriteEngine On
 #	uncomment the following line if using a VirtualDocumentRoot
 #	RewriteBase /
 	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteCond %{REQUEST_FILENAME} !-f
-	RewriteRule ^(.*)$ index.php?_url=$1 [QSA,L]
+	RewriteRule ^(.*)$ server.php?_url=$1 [QSA,L]
 </IfModule>

@@ -186,10 +186,13 @@ class QueryPager {
 	 */
 	function getTotal() {
 		if ($this->total === null) {
+			$q = clone $this->query;
+			$q->setLimit(null);
+			$q->setOffset(null);
 			if ($this->className) {
-				$total = call_user_func(array($this->className, 'doCount'), $this->query);
+				$total = call_user_func(array($this->className, 'doCount'), $q);
 			} else {
-				$total = $this->query->doCount();
+				$total = $q->doCount();
 			}
 			$this->total = $total;
 		}

@@ -884,7 +884,10 @@ class Query {
 	 * @param $limit Int
 	 */
 	function setLimit($limit) {
-		$this->_limit = (int) $limit;
+		if (null !== $limit) {
+			$limit = (int) $limit;
+		}
+		$this->_limit = $limit;
 		return $this;
 	}
 

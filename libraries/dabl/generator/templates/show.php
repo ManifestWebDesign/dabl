@@ -24,8 +24,11 @@ foreach ($this->getColumns($table_name) as $column) {
 	}
 	$column_name = StringFormat::titleCase($column_name);
 	$column_label = StringFormat::titleCase($column_name, ' ');
-	if ($column->isForeignKey() && strrpos(strtolower($column_label), 'id') === strlen($column_label) - 2) {
-		$column_label = str_replace(array('id', 'Id', 'ID', 'iD'), '', $column_label);
+	if (
+		$column->isForeignKey()
+		&& strrpos(strtolower($column_label), ' id') === strlen($column_label) - 3
+	) {
+		$column_label = substr($column_label, 0, -3);
 		$column_label = trim($column_label);
 	}
 	switch ($column->getType()) {

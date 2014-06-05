@@ -1,4 +1,35 @@
-<?php echo '<?php' ?>
+<?php
+
+$used_methods = array(
+	'getTableName',
+	'getColumnNames',
+	'getColumns',
+	'getColumnTypes',
+	'getColumnType',
+	'hasColumn',
+	'getPrimaryKeys',
+	'getPrimaryKey',
+	'isAutoIncrement',
+	'fetchSingle',
+	'fetch',
+	'fromResult',
+	'castInts',
+	'insertIntoPool',
+	'retrieveFromPool',
+	'removeFromPool',
+	'flushPool',
+	'setPoolEnabled',
+	'getPoolEnabled',
+	'getAll',
+	'doCount',
+	'doDelete',
+	'doSelect',
+	'doSelectOne',
+	'doUpdate'
+);
+
+echo '<?php';
+?>
 
 /**
  *		Created by Dan Blaisdell's DABL
@@ -7,7 +38,6 @@
  *		the 'models' folder.
  *
  */
-<?php $used_methods = array(); ?>
 abstract class base<?php echo $class_name ?> extends ApplicationModel {
 
 <?php foreach ($fields as $key => $field): ?>
@@ -211,129 +241,6 @@ foreach ($fields as $key => $field):
 	}
 
 	/**
-	 * @return <?php echo $class_name ?>
-
-	 */
-	static function create() {
-		return new <?php echo $class_name ?>();
-	}
-
-	/**
-	 * @return Query
-	 */
-	static function getQuery(array $params = array(), Query $q = null) {
-		$class = class_exists('<?php echo $class_name ?>Query') ? '<?php echo $class_name ?>Query' : 'Query';
-		$q = $q ? clone $q : new $class;
-		if (!$q->getTable()) {
-			$q->setTable(<?php echo $class_name ?>::getTableName());
-		}
-
-		// filters
-		foreach ($params as $key => &$param) {
-			if (<?php echo $class_name ?>::hasColumn($key)) {
-				$q->add($key, $param);
-			}
-		}
-
-		// SortBy (alias of sort_by, deprecated)
-		if (isset($params['SortBy']) && !isset($params['order_by'])) {
-			$params['order_by'] = $params['SortBy'];
-		}
-
-		// order_by
-		if (isset($params['order_by']) && <?php echo $class_name ?>::hasColumn($params['order_by'])) {
-			$q->orderBy($params['order_by'], isset($params['dir']) ? Query::DESC : Query::ASC);
-		}
-
-		return $q;
-	}
-
-	/**
-	 * Returns String representation of table name
-	 * @return string
-	 */
-<?php $used_methods[] = 'getTableName'; ?>
-	static function getTableName() {
-		return <?php echo $class_name ?>::$_tableName;
-	}
-
-	/**
-	 * Access to array of column names
-	 * @return array
-	 */
-<?php $used_methods[] = 'getColumnNames'; ?>
-	static function getColumnNames() {
-		return <?php echo $class_name ?>::$_columnNames;
-	}
-
-	/**
-	 * Access to array of fully-qualified(table.column) columns
-	 * @return array
-	 */
-<?php $used_methods[] = 'getColumns'; ?>
-	static function getColumns() {
-		return <?php echo $class_name ?>::$_columns;
-	}
-
-	/**
-	 * Access to array of column types, indexed by column name
-	 * @return array
-	 */
-<?php $used_methods[] = 'getColumnTypes'; ?>
-	static function getColumnTypes() {
-		return <?php echo $class_name ?>::$_columnTypes;
-	}
-
-	/**
-	 * Get the type of a column
-	 * @return string
-	 */
-<?php $used_methods[] = 'getColumnType'; ?>
-	static function getColumnType($column_name) {
-		return <?php echo $class_name ?>::$_columnTypes[<?php echo $class_name ?>::normalizeColumnName($column_name)];
-	}
-
-	/**
-	 * @return bool
-	 */
-<?php $used_methods[] = 'hasColumn'; ?>
-	static function hasColumn($column_name) {
-		static $columns_cache = null;
-		if (null === $columns_cache) {
-			$columns_cache = array_map('strtolower', <?php echo $class_name ?>::$_columnNames);
-		}
-		return in_array(strtolower(<?php echo $class_name ?>::normalizeColumnName($column_name)), $columns_cache);
-	}
-
-
-	/**
-	 * Access to array of primary keys
-	 * @return array
-	 */
-<?php $used_methods[] = 'getPrimaryKeys'; ?>
-	static function getPrimaryKeys() {
-		return <?php echo $class_name ?>::$_primaryKeys;
-	}
-
-	/**
-	 * Access to name of primary key
-	 * @return array
-	 */
-<?php $used_methods[] = 'getPrimaryKey'; ?>
-	static function getPrimaryKey() {
-		return <?php echo $class_name ?>::$_primaryKey;
-	}
-
-	/**
-	 * Returns true if the primary key column for this table is auto-increment
-	 * @return bool
-	 */
-<?php $used_methods[] = 'isAutoIncrement'; ?>
-	static function isAutoIncrement() {
-		return <?php echo $class_name ?>::$_isAutoIncrement;
-	}
-
-	/**
 	 * Searches the database for a row with the ID(primary key) that matches
 	 * the one input.
 	 * @return <?php echo $class_name ?>
@@ -344,7 +251,7 @@ foreach ($fields as $key => $field):
 <?php if (count($PKs) > 1): ?>
 		throw new Exception('This table has more than one primary key.  Use retrieveByPKs() instead.');
 <?php else: ?>
-		return <?php echo $class_name ?>::retrieveByPKs(<?php if ($PKs && count($PKs) == 1): ?>$<?php echo StringFormat::variable($PKs[0]) ?><?php else: ?>$the_pk<?php endif ?>);
+		return static::retrieveByPKs(<?php if ($PKs && count($PKs) == 1): ?>$<?php echo StringFormat::variable($PKs[0]) ?><?php else: ?>$the_pk<?php endif ?>);
 <?php endif ?>
 	}
 
@@ -367,8 +274,8 @@ foreach ($fields as $key => $field):
 <?php if (1 !== count($PKs)): ?>
 		$args = func_get_args();
 <?php endif; ?>
-		if (<?php echo $class_name ?>::$_poolEnabled) {
-			$pool_instance = <?php echo $class_name ?>::retrieveFromPool(<?php if (1 == count($PKs)): ?>$<?php echo StringFormat::variable($PK) ?><?php else: ?>implode('-', $args)<?php endif ?>);
+		if (static::$_poolEnabled) {
+			$pool_instance = static::retrieveFromPool(<?php if (1 == count($PKs)): ?>$<?php echo StringFormat::variable($PK) ?><?php else: ?>implode('-', $args)<?php endif ?>);
 			if (null !== $pool_instance) {
 				return $pool_instance;
 			}
@@ -377,7 +284,7 @@ foreach ($fields as $key => $field):
 <?php foreach ($PKs as $k => &$v): ?>
 		$q->add('<?php echo $v ?>', $<?php echo StringFormat::variable($v) ?>);
 <?php endforeach ?>
-		return <?php echo $class_name ?>::doSelectOne($q);
+		return static::doSelectOne($q);
 <?php endif ?>
 	}
 
@@ -399,7 +306,7 @@ foreach ($fields as $key => $field):
 <?php
 		} else {
 ?>
-		return <?php echo $class_name ?>::retrieveByColumn('<?php echo $field->getName() ?>', $value);
+		return static::retrieveByColumn('<?php echo $field->getName() ?>', $value);
 <?php
 		}
 ?>
@@ -408,52 +315,7 @@ foreach ($fields as $key => $field):
 <?php
 	}
 ?>
-	static function retrieveByColumn($field, $value) {
-		$q = Query::create()->add($field, $value)->setLimit(1)<?php if ($PK): ?>->order('<?php echo $PK ?>')<?php endif ?>;
-		return <?php echo $class_name ?>::doSelectOne($q);
-	}
 
-	/**
-	 * Populates and returns an instance of <?php echo $class_name ?> with the
-	 * first result of a query.  If the query returns no results,
-	 * returns null.
-	 * @return <?php echo $class_name ?>
-
-	 */
-<?php $used_methods[] = 'fetchSingle'; ?>
-	static function fetchSingle($query_string) {
-		$records = <?php echo $class_name ?>::fetch($query_string);
-		return array_shift($records);
-	}
-
-	/**
-	 * Populates and returns an array of <?php echo $class_name ?> objects with the
-	 * results of a query.  If the query returns no results,
-	 * returns an empty Array.
-	 * @return <?php echo $class_name ?>[]
-	 */
-<?php $used_methods[] = 'fetch'; ?>
-	static function fetch($query_string) {
-		$conn = <?php echo $class_name ?>::getConnection();
-		$result = $conn->query($query_string);
-		return <?php echo $class_name ?>::fromResult($result, '<?php echo $class_name ?>');
-	}
-
-	/**
-	 * Returns an array of <?php echo $class_name ?> objects from
-	 * a PDOStatement(query result).
-	 *
-	 * @see Model::fromResult
-	 */
-<?php $used_methods[] = 'fromResult'; ?>
-	static function fromResult(PDOStatement $result, $class = '<?php echo $class_name ?>', $use_pool = null) {
-		if (null === $use_pool) {
-			$use_pool = <?php echo $class_name ?>::$_poolEnabled;
-		}
-		return Model::fromResult($result, $class, $use_pool);
-	}
-
-<?php $used_methods[] = 'castInts'; ?>
 	/**
 	 * Casts values of int fields to (int)
 	 * @return <?php echo $class_name ?>
@@ -466,302 +328,6 @@ foreach ($fields as $key => $field):
 <?php endif ?>
 <?php endforeach ?>
 		return $this;
-	}
-
-	/**
-	 * Add (or replace) to the instance pool.
-	 *
-	 * @param <?php echo $class_name ?> $object
-	 * @return void
-	 */
-<?php $used_methods[] = 'insertIntoPool'; ?>
-	static function insertIntoPool(<?php echo $class_name ?> $object) {
-		if (!<?php echo $class_name ?>::$_poolEnabled) {
-			return;
-		}
-<?php if (!$PKs): ?>
-		// This table doesn't have primary keys, so there's no way to key the instance pool array
-		return;
-<?php endif ?>
-		if (<?php echo $class_name ?>::$_instancePoolCount > <?php echo $class_name ?>::MAX_INSTANCE_POOL_SIZE) {
-			return;
-		}
-
-		<?php echo $class_name ?>::$_instancePool[implode('-', $object->getPrimaryKeyValues())] = $object;
-		++<?php echo $class_name ?>::$_instancePoolCount;
-	}
-
-	/**
-	 * Return the cached instance from the pool.
-	 *
-	 * @param mixed $pk Primary Key
-	 * @return <?php echo $class_name ?>
-
-	 */
-<?php $used_methods[] = 'retrieveFromPool'; ?>
-	static function retrieveFromPool($pk) {
-		if (!<?php echo $class_name ?>::$_poolEnabled || null === $pk) {
-			return null;
-		}
-		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool)) {
-			return <?php echo $class_name ?>::$_instancePool[$pk];
-		}
-
-		return null;
-	}
-
-	/**
-	 * Remove the object from the instance pool.
-	 *
-	 * @param mixed $object Object or PK to remove
-	 * @return void
-	 */
-<?php $used_methods[] = 'removeFromPool'; ?>
-	static function removeFromPool($object) {
-		$pk = is_object($object) ? implode('-', $object->getPrimaryKeyValues()) : $object;
-
-		if (array_key_exists($pk, <?php echo $class_name ?>::$_instancePool)) {
-			unset(<?php echo $class_name ?>::$_instancePool[$pk]);
-			--<?php echo $class_name ?>::$_instancePoolCount;
-		}
-	}
-
-	/**
-	 * Empty the instance pool.
-	 *
-	 * @return void
-	 */
-<?php $used_methods[] = 'flushPool'; ?>
-	static function flushPool() {
-		<?php echo $class_name ?>::$_instancePool = array();
-	}
-
-<?php $used_methods[] = 'setPoolEnabled'; ?>
-	static function setPoolEnabled($bool = true) {
-		<?php echo $class_name ?>::$_poolEnabled = $bool;
-	}
-
-<?php $used_methods[] = 'getPoolEnabled'; ?>
-	static function getPoolEnabled() {
-		return <?php echo $class_name ?>::$_poolEnabled;
-	}
-
-	/**
-	 * Returns an array of all <?php echo $class_name ?> objects in the database.
-	 * $extra SQL can be appended to the query to LIMIT, SORT, and/or GROUP results.
-	 * If there are no results, returns an empty Array.
-	 * @param $extra string
-	 * @return <?php echo $class_name ?>[]
-	 */
-<?php $used_methods[] = 'getAll'; ?>
-	static function getAll($extra = null) {
-		$conn = <?php echo $class_name ?>::getConnection();
-		$table_quoted = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
-		return <?php echo $class_name ?>::fetch("SELECT * FROM $table_quoted $extra ");
-	}
-
-	/**
-	 * @return int
-	 */
-<?php $used_methods[] = 'doCount'; ?>
-	static function doCount(Query $q = null) {
-		$q = $q ? clone $q : new Query;
-		$conn = <?php echo $class_name ?>::getConnection();
-		if (!$q->getTable()) {
-			$q->setTable(<?php echo $class_name ?>::getTableName());
-		}
-		return $q->doCount($conn);
-	}
-
-	/**
-	 * @param Query $q
-	 * @param bool $flush_pool
-	 * @return int
-	 */
-<?php $used_methods[] = 'doDelete'; ?>
-	static function doDelete(Query $q, $flush_pool = true) {
-		$conn = <?php echo $class_name ?>::getConnection();
-		$q = clone $q;
-		if (!$q->getTable()) {
-			$q->setTable(<?php echo $class_name ?>::getTableName());
-		}
-		$result = $q->doDelete($conn);
-
-		if ($flush_pool) {
-			<?php echo $class_name ?>::flushPool();
-		}
-
-		return $result;
-	}
-
-	/**
-	 * @param Query $q The Query object that creates the SELECT query string
-	 * @param array $additional_classes Array of additional classes for fromResult to instantiate as properties
-	 * @return <?php echo $class_name ?>[]
-	 */
-<?php $used_methods[] = 'doSelect'; ?>
-	static function doSelect(Query $q = null, $additional_classes = null) {
-		if (is_array($additional_classes)) {
-			array_unshift($additional_classes, '<?php echo $class_name ?>');
-			$class = $additional_classes;
-		} else {
-			$class = '<?php echo $class_name ?>';
-		}
-
-		return <?php echo $class_name ?>::fromResult(<?php echo $class_name ?>::doSelectRS($q), $class);
-	}
-
-	/**
-	 * @param Query $q The Query object that creates the SELECT query string
-	 * @param array $additional_classes Array of additional classes for fromResult to instantiate as properties
-	 * @return <?php echo $class_name ?>
-	 */
-<?php $used_methods[] = 'doSelectOne'; ?>
-	static function doSelectOne(Query $q = null, $additional_classes = null) {
-		$q = $q ? clone $q : new Query;
-		$q->setLimit(1);
-		$result = <?php echo $class_name ?>::doSelect($q, $additional_classes);
-		return array_shift($result);
-	}
-
-	/**
-	 * @param array $column_values
-	 * @param Query $q The Query object that creates the SELECT query string
-	 * @return <?php echo $class_name ?>[]
-	 */
-<?php $used_methods[] = 'doUpdate'; ?>
-	static function doUpdate(array $column_values, Query $q = null) {
-		$q = $q ? clone $q : new Query;
-		$conn = <?php echo $class_name ?>::getConnection();
-
-		if (!$q->getTable()) {
-			$q->setTable(<?php echo $class_name ?>::getTableName());
-		}
-
-		return $q->doUpdate($column_values, $conn);
-	}
-
-	/**
-	 * Set the maximum insert batch size, once this size is reached the batch automatically inserts.
-	 * @param int $size
-	 * @return int insert batch size
-	 */
-	static function setInsertBatchSize($size = 500) {
-		return <?php echo $class_name ?>::$_insertBatchSize = $size;
-	}
-
-	/**
-	 * Queue for batch insert
-	 * @return Model this
-	 */
-	function queueForInsert() {
-		// If we've reached the maximum batch size, insert it and empty it.
-		if (count(<?php echo $class_name ?>::$_insertBatch) >= <?php echo $class_name ?>::$_insertBatchSize) {
-			<?php echo $class_name ?>::insertBatch();
-		}
-
-		<?php echo $class_name ?>::$_insertBatch[] = $this;
-
-		return $this;
-	}
-
-	/**
-	 * @return int row count
-	 * @throws RuntimeException
-	 */
-	static function insertBatch() {
-		$records = <?php echo $class_name ?>::$_insertBatch;
-		if (!$records) {
-			return 0;
-		}
-		$conn = <?php echo $class_name ?>::getConnection();
-		$columns = <?php echo $class_name ?>::getColumnNames();
-		$quoted_table = $conn->quoteIdentifier(<?php echo $class_name ?>::getTableName());
-
-<?php if ($auto_increment): ?>
-		$pk = <?php echo $class_name ?>::getPrimaryKey();
-		foreach ($columns as $key => &$c) {
-			if ($c == $pk) {
-				unset($columns[$key]);
-				break;
-			}
-		}
-<?php endif ?>
-
-		$values = array();
-
-		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', array_map(array($conn, 'quoteIdentifier'), $columns)) . ') VALUES' . "\n";
-
-		foreach ($records as $k => $r) {
-			$placeholders = array();
-
-			if (!$r->validate()) {
-				throw new RuntimeException('Cannot save ' . get_class($r) . ' with validation errors: ' . implode(', ', $r->getValidationErrors()));
-			}
-			if ($r->isNew() && $r->hasColumn('Created') && !$r->isColumnModified('Created')) {
-				$r->setCreated(time());
-			}
-			if (($r->isNew() || $r->isModified()) && $r->hasColumn('Updated') && !$r->isColumnModified('Updated')) {
-				$r->setUpdated(time());
-			}
-
-			foreach ($columns as &$column) {
-<?php if ($auto_increment): ?>
-				if ($column == $pk) {
-					continue;
-				}
-<?php endif ?>
-				$values[] = $r->$column;
-				$placeholders[] = '?';
-			}
-
-			if ($k > 0) {
-				$query_s .= ",\n";
-			}
-			$query_s .= '(' . implode(', ', $placeholders) . ')';
-		}
-
-		$statement = new QueryStatement($conn);
-		$statement->setString($query_s);
-		$statement->setParams($values);
-
-		$result = $statement->bindAndExecute();
-
-		foreach ($records as $r) {
-			$r->setNew(false);
-			$r->resetModified();
-
-			if ($r->hasPrimaryKeyValues()) {
-				<?php echo $class_name ?>::insertIntoPool($r);
-			} else {
-				$r->setDirty(true);
-			}
-		}
-
-		<?php echo $class_name ?>::$_insertBatch = array();
-		return $result->rowCount();
-	}
-
-	static function coerceTemporalValue($value, $column_type, DABLPDO $conn = null) {
-		if (null === $conn) {
-			$conn = <?php echo $class_name ?>::getConnection();
-		}
-		return parent::coerceTemporalValue($value, $column_type, $conn);
-	}
-
-	/**
-	 * Executes a select query and returns the PDO result
-	 * @return PDOStatement
-	 */
-	static function doSelectRS(Query $q = null) {
-		$q = $q ? clone $q : new Query;
-		$conn = <?php echo $class_name ?>::getConnection();
-
-		if (!$q->getTable()) {
-			$q->setTable(<?php echo $class_name ?>::getTableName());
-		}
-
-		return $q->doSelect($conn);
 	}
 
 <?php
@@ -924,7 +490,7 @@ if (!$fk_is_pk) {
 ?>
 <?php $used_methods[] = 'doSelectJoin' . StringFormat::titleCase($from_column_clean); ?>
 	static function doSelectJoin<?php echo StringFormat::titleCase($from_column_clean) ?>(Query $q = null, $join_type = Query::LEFT_JOIN) {
-		return <?php echo $class_name ?>::doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q, $join_type);
+		return static::doSelectJoin<?php echo $to_class_name ?>RelatedBy<?php echo StringFormat::titleCase($from_column) ?>($q, $join_type);
 	}
 
 <?php
@@ -970,14 +536,14 @@ if (!$fk_is_pk) {
 		$q = $q ? clone $q : new Query;
 		$columns = $q->getColumns();
 		$alias = $q->getAlias();
-		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
+		$this_table = $alias ? $alias : static::getTableName();
 		if (!$columns) {
 			if ($alias) {
-				foreach (<?php echo $class_name ?>::getColumns() as $column_name) {
+				foreach (static::getColumns() as $column_name) {
 					$columns[] = $alias . '.' . $column_name;
 				}
 			} else {
-				$columns = <?php echo $class_name ?>::getColumns();
+				$columns = static::getColumns();
 			}
 		}
 
@@ -988,7 +554,7 @@ if (!$fk_is_pk) {
 		}
 		$q->setColumns($columns);
 
-		return <?php echo $class_name ?>::doSelect($q, array('<?php echo $to_class_name ?>'));
+		return static::doSelect($q, array('<?php echo $to_class_name ?>'));
 	}
 
 <?php endforeach ?>
@@ -1001,14 +567,14 @@ if (!$fk_is_pk) {
 		$columns = $q->getColumns();
 		$classes = array();
 		$alias = $q->getAlias();
-		$this_table = $alias ? $alias : <?php echo $class_name ?>::getTableName();
+		$this_table = $alias ? $alias : static::getTableName();
 		if (!$columns) {
 			if ($alias) {
-				foreach (<?php echo $class_name ?>::getColumns() as $column_name) {
+				foreach (static::getColumns() as $column_name) {
 					$columns[] = $alias . '.' . $column_name;
 				}
 			} else {
-				$columns = <?php echo $class_name ?>::getColumns();
+				$columns = static::getColumns();
 			}
 		}
 <?php
@@ -1030,7 +596,7 @@ if (!$fk_is_pk) {
 	<?php endforeach ?>
 
 		$q->setColumns($columns);
-		return <?php echo $class_name ?>::doSelect($q, $classes);
+		return static::doSelect($q, $classes);
 	}
 
 <?php

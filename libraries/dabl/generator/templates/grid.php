@@ -13,11 +13,14 @@ if (isset($_REQUEST['dir'])) {
 	<thead>
 		<tr>
 <?php
-foreach($columns as $key => $column){
+foreach ($columns as $key => $column){
 	$column_name = $column->getName();
 	$column_label = StringFormat::titleCase($column_name, ' ');
-	if ($column->isForeignKey() && strrpos(strtolower($column_label), 'id') === strlen($column_label) - 2) {
-		$column_label = str_replace(array('id', 'Id', 'ID', 'iD'), '', $column_label);
+	if (
+		$column->isForeignKey()
+		&& strrpos(strtolower($column_label), ' id') === strlen($column_label) - 3
+	) {
+		$column_label = substr($column_label, 0, -3);
 		$column_label = trim($column_label);
 	}
 	$column_constant = $model_name . '::' . StringFormat::constant($column->getName());
@@ -25,7 +28,7 @@ foreach($columns as $key => $column){
 ?>
 			<th class="ui-widget-header <?php if ($key == 0) echo 'ui-corner-tl' ?>">
 				<a href="?<?php echo $sort_href ?>">
-					<?php echo "<?php if( @\$_REQUEST['order_by'] == $column_constant): ?>" ?>
+					<?php echo "<?php if ( @\$_REQUEST['order_by'] == $column_constant): ?>" ?>
 
 						<span class="ui-icon ui-icon-carat-1-<?php echo "<?php echo isset(\$_REQUEST['dir']) ? 's' : 'n' ?>" ?>"></span>
 					<?php echo "<?php endif ?>"?>
@@ -45,7 +48,7 @@ if ($actions){
 		</tr>
 	</thead>
 	<tbody>
-<?php echo '<?php foreach($'.$plural.' as $key => $'.$single.'): ?>' ?>
+<?php echo '<?php foreach ($' . $plural . ' as $key => $' . $single . '): ?>' ?>
 
 		<tr class="<?php echo '<?php echo' ?> ($key & 1) ? 'even' : 'odd' <?php echo '?>' ?> ui-widget-content">
 <?php
@@ -69,11 +72,11 @@ foreach ($columns as $column){
 		$foreign_table = $fk->getForeignTableName();
 		$local_column = $fk->getLocalColumnName();
 		$long_method = 'get' . StringFormat::titleCase("{$foreign_table}_related_by_{$local_column}", '');
-		$output = '<?php echo h($'.$single.'->'."$long_method".'()) ?>';
+		$output = '<?php echo h($' . $single . '->' . "$long_method" . '()) ?>';
 	} elseif ($column->getType() == Model::COLUMN_TYPE_BOOLEAN) {
-		$output = '<?php if ($'.$single.'->'."get$column_name".'('.$format.') === 1) echo \'Yes\'; elseif ($'.$single.'->'."get$column_name".'('.$format.') === 0) echo \'No\' ?>';
+		$output = '<?php if ($' . $single . '->' . "get$column_name" . '(' . $format . ') === 1) echo \'Yes\'; elseif ($' . $single . '->' . "get$column_name" . '(' . $format . ') === 0) echo \'No\' ?>';
 	} else {
-		$output = '<?php echo h($'.$single.'->'."get$column_name".'('.$format.')) ?>';
+		$output = '<?php echo h($' . $single . '->' . "get$column_name" . '(' . $format . ')) ?>';
 	}
 ?>
 			<td><?php echo $output ?>&nbsp;</td>
@@ -88,7 +91,7 @@ if ($actions) {
 			$icon_class = @$this->actionIcons[$action_label] ? $this->actionIcons[$action_label] : 'carat-1-e';
 			$on_click = '';
 			if (strtolower($action_label) === 'delete') {
-				$on_click = "if (confirm('Are you sure?')) { window.location.href = '$action_url' } return false";
+				$on_click = "if (confirm('Are you sure?')) { window.location.href = '$action_url'; } return false";
 				$action_url = '#';
 			}
 ?>
