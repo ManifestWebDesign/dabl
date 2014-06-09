@@ -9,32 +9,44 @@
 
 class LoggedPDOStatement extends PDOStatement{
 
+	/**
+	 * @var DABLPDO
+	 */
 	private $_connection;
 
-	protected function __construct(PDO $conn) {
+	protected function __construct(DABLPDO $conn) {
 		$this->setConnection($conn);
     }
 
-
-  	function setConnection(PDO $conn){
+  	function setConnection(DABLPDO $conn){
 		$this->_connection = $conn;
 	}
 
 	/**
-	 * @return PDO
+	 * @return DABLPDO
 	 */
 	function getConnection(){
 		return $this->_connection;
 	}
 
-	function execute() {
+	function execute($bound_input_params = null) {
+		$conn = $this->_connection;
+
+		if ($conn->printQueries) {
+			$conn->printQuery($this->queryString);
+		}
+
 		$args = func_get_args();
 
-		$conn = $this->getConnection();
-		$start = microtime(true);
-		$result = call_user_func_array(array('parent', 'execute'), $args);
-		$time = microtime(true) - $start;
-		$conn->logQuery($this->queryString, $time);
+		if ($conn->logQueries) {
+			$start = microtime(true);
+			$result = call_user_func_array(array('parent', 'execute'), $args);
+			$time = microtime(true) - $start;
+			$conn->logQuery($this->queryString, $time);
+		} else {
+			$result = call_user_func_array(array('parent', 'execute'), $args);
+		}
+
 		return $result;
 	}
 }

@@ -12,8 +12,9 @@ abstract class DABLPDO extends PDO {
 	const ID_METHOD_AUTOINCREMENT = 1;
 	const ID_METHOD_SEQUENCE = 2;
 
-	protected $queryLog = array();
-	protected $logQueries = false;
+	public $queryLog = array();
+	public $logQueries = false;
+	public $printQueries = false;
 	protected $dbName = null;
 	protected $driver = null;
 
@@ -251,9 +252,14 @@ abstract class DABLPDO extends PDO {
 	function __construct() {
 		$args = func_get_args();
 		$result = call_user_func_array(array('parent', '__construct'), $args);
-		if ($this->logQueries)
+		if ($this->logQueries || $this->printQueries)
 			$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('LoggedPDOStatement', array($this)));
 		return $result;
+	}
+
+	function printQuery($query_string) {
+		print_r($query_string);
+		echo PHP_EOL . PHP_EOL;
 	}
 
 	/**
@@ -271,8 +277,12 @@ abstract class DABLPDO extends PDO {
 			$start = microtime(true);
 			$result = call_user_func_array(array('parent', 'query'), $args);
 			$time = microtime(true) - $start;
-			$this->logQuery((string) $args[0], $time);
+			$this->logQuery((string) $statement, $time);
 			return $result;
+		}
+
+		if ($this->printQueries) {
+			$this->printQuery((string) $statement);
 		}
 
 		return call_user_func_array(array('parent', 'query'), $args);
@@ -291,6 +301,9 @@ abstract class DABLPDO extends PDO {
 			$time = microtime(true) - $start;
 			$this->logQuery((string) $statement, $time);
 			return $result;
+		}
+		if ($this->printQueries) {
+			$this->printQuery((string) $statement);
 		}
 
 		return parent::exec($statement);
