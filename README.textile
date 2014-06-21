@@ -1,3 +1,5 @@
+!https://travis-ci.org/davidstelter/DABL.svg?branch=travis-ci!:https://travis-ci.org/davidstelter/DABL
+
 h1. DABL
 
 DABL is a database ORM that builds PHP classes to represent and interact with each table in your database.  Using these classes, table rows can be "created":https://manifestwebdesign.com/redmine/projects/dabl/wiki/Inserting_Rows, "retrieved":https://manifestwebdesign.com/redmine/projects/dabl/wiki/Selecting_Rows, updated, "deleted":https://manifestwebdesign.com/redmine/projects/dabl/wiki/Deleting_Rows, and "counted":https://manifestwebdesign.com/redmine/dabl/wiki/Counting_Rows using very simple and short commands without writing raw SQL (unless you want to).  DABL is designed to make the repetitive tasks of database access easier using the "Object-Oriented":http://us2.php.net/zend-engine-2.php functionality of PHP 5.  DABL also recognizes foreign key relationships and automatically creates class methods for them.
