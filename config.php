@@ -48,6 +48,10 @@ if (get_magic_quotes_gpc()) {
 ClassLoader::addRepository('LIBRARIES', LIBRARIES_DIR);
 ClassLoader::import('LIBRARIES:dabl');
 
+if (is_file(APP_DIR . 'vendor/autoload.php')) {
+	require_once APP_DIR . 'vendor/autoload.php';
+}
+
 // load all config files
 $config_files = glob(CONFIG_DIR . '*.php');
 sort($config_files);
