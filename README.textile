@@ -25,3 +25,5 @@ DABL is a database ORM that builds PHP classes to represent and interact with ea
 *** "Populate Object Values from an Array":https://manifestwebdesign.com/redmine/projects/dabl/wiki/Populate_Object_Values_from_an_Array
 *** "Selecting Rows":https://manifestwebdesign.com/redmine/projects/dabl/wiki/Selecting_Rows
 *** "Transactions":https://manifestwebdesign.com/redmine/projects/dabl/wiki/Transactions
+
+DABL is released under the MIT license. See the file LICENSE for the full text.
