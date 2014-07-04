@@ -48,21 +48,13 @@ class QueryJoin {
 
 		// check for Propel type join: table.column, table.column
 		if (
-				!($table_or_column instanceof Query)
-				&& !($on_clause_or_column instanceof Condition)
-				&& strpos($on_clause_or_column, '=') === false
-				&& strpos($on_clause_or_column, ' ') === false
-				&& strpos($on_clause_or_column, '(') === false
-				&& substr_count($on_clause_or_column, '.') === 1
-				&& strpos($table_or_column, ' ') === false
-				&& strpos($table_or_column, '=') === false
-				&& strpos($table_or_column, '(') === false
-				&& substr_count($table_or_column, '.') === 1
+			$this->isQualifiedColumn($table_or_column)
+			&& $this->isQualifiedColumn($on_clause_or_column)
 		) {
 			$this->_isLikePropel = true;
 			$this->_leftColumn = $table_or_column;
 			$this->_rightColumn = $on_clause_or_column;
-			$this->setTable(substr($this->_rightColumn, 0, strpos($this->_rightColumn, '.')));
+			$this->setTable(substr($this->_rightColumn, 0, strrpos($this->_rightColumn, '.')));
 			$this->setJoinType($join_type);
 			return;
 		}
@@ -89,6 +81,30 @@ class QueryJoin {
 		if (!$j->getTable())
 			$j->setTable('{UNSPECIFIED-TABLE}');
 		return (string) $j->getQueryStatement();
+	}
+
+	public function isQualifiedColumn($string) {
+		// Query or Condition is not a column
+		if ($string instanceof Query || $string instanceof Condition) {
+			return false;
+		}
+
+		// must be database.table.column or table.column
+		$dot_count = substr_count($string, '.');
+		if ($dot_count === 0 || $dot_count > 2) {
+			return false;
+		}
+
+		// equals, space or parent is not a column
+		if (
+			strpos($string, '=') !== false
+			|| strpos($string, ' ') !== false
+			|| strpos($string, '(') !== false
+		) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
