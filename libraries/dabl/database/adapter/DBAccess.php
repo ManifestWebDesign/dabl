@@ -90,12 +90,12 @@ class DBAccess extends DABLPDO {
 		}
 
 		if (!$force) {
-			if (strpos($text, '`') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
+			if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
 				return $text;
 			}
 		}
 
-		return '`' . str_replace('.', '`.`', $text) . '`';
+		return '[' . str_replace('.', '].[', $text) . ']';
 	}
 
 	/**
