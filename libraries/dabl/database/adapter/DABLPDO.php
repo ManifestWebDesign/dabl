@@ -514,16 +514,19 @@ abstract class DABLPDO extends PDO {
 
 	/**
 	 * Quotes database object identifiers (table names, col names, sequences, etc.).
-	 * @param	  string $text The identifier to quote.
+	 * @param	  string|array $text The identifier(s) to quote.
+	 * @param    bool $force Quote, even if quotes or spaces are already found.  Has no effect when $text is an array.
 	 * @return	 string The quoted identifier.
 	 */
-	function quoteIdentifier($text) {
+	function quoteIdentifier($text, $force = false) {
 		if (is_array($text)) {
 			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
-		if (strpos($text, '"') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
-			return $text;
+		if (!$force) {
+			if (strpos($text, '"') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
+				return $text;
+			}
 		}
 
 		return '"' . str_replace('.', '"."', $text) . '"';

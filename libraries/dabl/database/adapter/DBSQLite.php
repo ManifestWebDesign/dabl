@@ -71,13 +71,15 @@ class DBSQLite extends DABLPDO {
 	/**
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
-	function quoteIdentifier($text) {
+	function quoteIdentifier($text, $force = false) {
 		if (is_array($text)) {
 			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
-		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
-			return $text;
+		if (!$force) {
+			if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
+				return $text;
+			}
 		}
 
 		return '[' . str_replace('.', '].[', $text) . ']';

@@ -569,7 +569,7 @@ abstract class Model implements JsonSerializable {
 	 * @return static[]
 	 */
 	static function getAll($extra = null) {
-		$table_quoted = static::getConnection()->quoteIdentifier(static::getTableName());
+		$table_quoted = static::getConnection()->quoteIdentifier(static::getTableName(), true);
 		return static::fetch("SELECT * FROM $table_quoted $extra ");
 	}
 
@@ -812,7 +812,7 @@ abstract class Model implements JsonSerializable {
 		}
 		$conn = static::getConnection();
 		$columns = static::$_columnNames;
-		$quoted_table = $conn->quoteIdentifier(static::getTableName());
+		$quoted_table = $conn->quoteIdentifier(static::getTableName(), true);
 
 		$auto_increment = static::isAutoIncrement();
 		if ($auto_increment) {
@@ -1316,16 +1316,16 @@ abstract class Model implements JsonSerializable {
 			$value = $this->$column;
 			if ($value === null && !$this->isColumnModified($column))
 				continue;
-			$fields[] = $conn->quoteIdentifier($column);
+			$fields[] = $conn->quoteIdentifier($column, true);
 			$values[] = $value;
 			$placeholders[] = '?';
 		}
 
-		$quoted_table = $conn->quoteIdentifier(static::getTableName());
+		$quoted_table = $conn->quoteIdentifier(static::getTableName(), true);
 		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $placeholders) . ') ';
 
 		if ($pk && $this->isAutoIncrement() && $conn instanceof DBPostgres) {
-			$query_s .= ' RETURNING ' . $conn->quoteIdentifier($pk);
+			$query_s .= ' RETURNING ' . $conn->quoteIdentifier($pk, true);
 		}
 
 		$statement = new QueryStatement($conn);

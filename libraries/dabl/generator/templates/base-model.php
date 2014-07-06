@@ -133,7 +133,7 @@ foreach ($fields as $key => $field) {
 	}
 ?>
 	/**
-	 * <?php echo $conn->quoteIdentifier($field->getName()) ?> <?php echo $field->getType() ?>
+	 * <?php echo $conn->quoteIdentifier($field->getName(), true) ?> <?php echo $field->getType() ?>
 <?php if ($field->isNotNull()): ?> NOT NULL<?php endif ?>
 <?php if (null !== $default): ?> DEFAULT <?php echo ctype_digit($default) ? $default : $conn->quote($default) ?><?php endif ?>
 

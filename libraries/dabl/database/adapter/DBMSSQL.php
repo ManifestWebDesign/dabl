@@ -61,13 +61,15 @@ class DBMSSQL extends DABLPDO {
 	/**
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
-	function quoteIdentifier($text) {
+	function quoteIdentifier($text, $force = false) {
 		if (is_array($text)) {
 			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
-		if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
-			return $text;
+		if (!$force) {
+			if (strpos($text, '[') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
+				return $text;
+			}
 		}
 
 		return '[' . str_replace('.', '].[', $text) . ']';
@@ -90,7 +92,7 @@ class DBMSSQL extends DABLPDO {
 	 * @return string
 	 */
 	function dateFormat($field, $format, $alias = null) {
-		$alias = $alias ? (' AS "' . $this->quoteIdentifier($alias) . '"') : '';
+		$alias = $alias ? (' AS "' . $this->quoteIdentifier($alias, true) . '"') : '';
 
 		// todo: use strtok() to parse $format
 		$parts = array();
@@ -227,7 +229,7 @@ class DBMSSQL extends DABLPDO {
 				$alias = (!stristr($selCol, ' AS ')) ? $selColArr[0] : $selColArr[$selColCount];
 				//don't quote the identifier if it is already quoted
 				if ($alias[0] != '[') {
-					$alias = $this->quoteIdentifier($alias);
+					$alias = $this->quoteIdentifier($alias, true);
 				}
 
 				//save the first non-aggregate column for use in ROW_NUMBER() if required
@@ -253,7 +255,7 @@ class DBMSSQL extends DABLPDO {
 				$alias = $selColArr[$selColCount];
 				//don't quote the identifier if it is already quoted
 				if ($alias[0] != '[') {
-					$alias = $this->quoteIdentifier($alias);
+					$alias = $this->quoteIdentifier($alias, true);
 				}
 
 				$innerSelect .= str_replace($selColArr[$selColCount], $alias, $selCol) . ', ';

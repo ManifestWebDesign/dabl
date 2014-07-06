@@ -84,13 +84,15 @@ class DBAccess extends DABLPDO {
 	/**
 	 * @see		DABLPDO::quoteIdentifier()
 	 */
-	function quoteIdentifier($text) {
+	function quoteIdentifier($text, $force = false) {
 		if (is_array($text)) {
 			return array_map(array($this, 'quoteIdentifier'), $text);
 		}
 
-		if (strpos($text, '`') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
-			return $text;
+		if (!$force) {
+			if (strpos($text, '`') !== false || strpos($text, ' ') !== false || strpos($text, '(') !== false || strpos($text, '*') !== false) {
+				return $text;
+			}
 		}
 
 		return '`' . str_replace('.', '`.`', $text) . '`';
@@ -130,8 +132,8 @@ class DBAccess extends DABLPDO {
 	 * @param string $alias Alias for the new field - WILL be quoted, if provided
 	 * @return string
 	 */
-	function dateFormat($field, $format, $alias=null) {
-		$alias = $alias ? " AS ".$this->quoteIdentifier($alias) : '';
+	function dateFormat($field, $format, $alias = null) {
+		$alias = $alias ? " AS " . $this->quoteIdentifier($alias, true) : '';
 
 		return "DATE_FORMAT({$field}, '{$format}'){$alias}";
 	}
