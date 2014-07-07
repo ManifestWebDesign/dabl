@@ -24,14 +24,14 @@ class DABLPDOTest extends PHPUnit_Framework_TestCase {
 
 	function testQuoteIdentifierForce() {
 		$string = 'foo bar';
-		$expected = '[foo bar]';
+		$expected = '"foo bar"';
 		$actual = $this->pdoSQLite->quoteIdentifier($string, true);
 		$this->assertEquals($expected, $actual);
 	}
 
 	function testQuoteIdentifierArray() {
 		$values = array('foo_bar');
-		$expected = array('[foo_bar]');
+		$expected = array('"foo_bar"');
 		$actual = $this->pdoSQLite->quoteIdentifier($values);
 		$this->assertEquals($expected, $actual);
 	}

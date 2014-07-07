@@ -117,7 +117,8 @@ abstract class DABLPDO extends PDO {
 				break;
 
 			case 'sqlite':
-				$dsn = 'sqlite:' . $connection_params['dbname'];
+			case 'sqlite2':
+				$dsn = $connection_params['driver'] . ':' . $connection_params['dbname'];
 				$class = 'DBSQLite';
 				break;
 
