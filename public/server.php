@@ -27,5 +27,5 @@ try {
 } catch (FileNotFoundException $e) {
 	error_log($e->getMessage());
 	echo '<h1>File Not Found</h1>';
-	die($e->getMessage());
+	die(htmlentities($e->getMessage()));
 }
