@@ -123,6 +123,8 @@ abstract class DABLPDO extends PDO {
 				break;
 
 			case 'mysql':
+				$options[PDO::MYSQL_ATTR_LOCAL_INFILE] = 1;
+
 				$parts = array();
 				if (!empty($connection_params['host'])) {
 					$parts[] = 'host=' . $connection_params['host'];
