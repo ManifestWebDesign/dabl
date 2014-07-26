@@ -6,6 +6,64 @@
 class DBAccess extends DABLPDO {
 
 	/**
+	 * Returns SQL that converts a date value to the start of the hour
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function hourStart($date) {
+		throw new RuntimeException('Not implemented!');
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the start of the day
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function dayStart($date) {
+		throw new RuntimeException('Not implemented!');
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the week
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function weekStart($date) {
+		throw new RuntimeException('Not implemented!');
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the month
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function monthStart($date) {
+		throw new RuntimeException('Not implemented!');
+	}
+
+	/**
+	 * Returns SQL which converts the date value to its value in the target timezone
+	 *
+	 * @param string $date SQL column expression
+	 * @param string|DateTimeZone $to_tz DateTimeZone or timezone id
+	 * @param string|DateTimeZone $from_tz DateTimeZone or timezone id
+	 * @return string
+	 */
+	function convertTimeZone($date, $to_tz, $from_tz = null) {
+		if ($to_tz instanceof DateTimeZone) {
+			$to_tz = $to_tz->getName();
+		}
+		if ($from_tz instanceof DateTimeZone) {
+			$from_tz = $from_tz->getName();
+		}
+		throw new RuntimeException('Not implemented!');
+	}
+
+	/**
 	 * This method is used to ignore case.
 	 *
 	 * @param	  in The string to transform to upper case.

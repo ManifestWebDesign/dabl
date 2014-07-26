@@ -6,6 +6,65 @@
 class DBSQLite extends DABLPDO {
 
 	/**
+	 * Returns SQL that converts a date value to the start of the hour
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function hourStart($date) {
+		return "datetime($date, '-' || STRFTIME('%M', $date) || ' minutes', '-' || STRFTIME('%S', $date) || ' seconds')";
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the start of the day
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function dayStart($date) {
+		return "DATE($date, 'start of day')";
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the week
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function weekStart($date) {
+		return "DATE($date, 'weekday 0', '-7 days')";
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the month
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function monthStart($date) {
+		return "DATE($date, 'start of month')";
+	}
+
+	/**
+	 * Returns SQL which converts the date value to its value in the target timezone
+	 *
+	 * @param string $date SQL column expression
+	 * @param string|DateTimeZone $to_tz DateTimeZone or timezone id
+	 * @param string|DateTimeZone $from_tz DateTimeZone or timezone id
+	 * @return string
+	 */
+	function convertTimeZone($date, $to_tz, $from_tz = null) {
+		return "DATETIME($date)";
+//		if ($to_tz instanceof DateTimeZone) {
+//			$to_tz = $to_tz->getName();
+//		}
+//		if ($from_tz instanceof DateTimeZone) {
+//			$from_tz = $from_tz->getName();
+//		}
+//		return "DATETIME($date, '$to_tz')";
+	}
+
+	/**
 	 * For SQLite this method has no effect, since SQLite doesn't support specifying a character
 	 * set (or, another way to look at it, it doesn't require a single character set per DB).
 	 *

@@ -489,6 +489,48 @@ abstract class DABLPDO extends PDO {
 	}
 
 	/**
+	 * Returns SQL that converts a date value to the start of the hour
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	abstract function hourStart($date);
+
+	/**
+	 * Returns SQL that converts a date value to the start of the day
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	abstract function dayStart($date);
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the week
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	abstract function weekStart($date);
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the month
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	abstract function monthStart($date);
+
+	/**
+	 * Returns SQL which converts the date value to its value in the target timezone
+	 *
+	 * @param string $date SQL column expression
+	 * @param string|DateTimeZone $to_tz DateTimeZone or timezone id
+	 * @param string|DateTimeZone $from_tz DateTimeZone or timezone id
+	 * @return string
+	 */
+	abstract function convertTimeZone($date, $to_tz, $from_tz = null);
+
+	/**
 	 * Returns SQL which concatenates the second string to the first.
 	 *
 	 * @param	  string String to concatenate.

@@ -11,6 +11,70 @@ class DBMySQL extends DABLPDO {
 	protected $_transactionDepth = 0;
 
 	/**
+	 * Returns SQL that converts a date value to the start of the hour
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function hourStart($date) {
+		return "DATE_FORMAT(" . $date . ", '%Y-%m-%d %H:00:00')";
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the start of the day
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function dayStart($date) {
+		return 'DATE(' . $date . ')';
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the week
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function weekStart($date) {
+		return 'DATE(DATE_ADD(' . $date . ', INTERVAL(1 - DAYOFWEEK(' . $date . ')) DAY))';
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the month
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function monthStart($date) {
+		return 'ADDDATE(LAST_DAY(SUBDATE(' . $date . ', INTERVAL 1 MONTH)), 1)';
+	}
+
+	/**
+	 * Returns SQL which converts the date value to its value in the target timezone
+	 *
+	 * @param string $date SQL column expression
+	 * @param string|DateTimeZone $to_tz DateTimeZone or timezone id
+	 * @param string|DateTimeZone $from_tz DateTimeZone or timezone id
+	 * @return string
+	 */
+	function convertTimeZone($date, $to_tz, $from_tz = null) {
+		if ($to_tz instanceof DateTimeZone) {
+			$to_tz = $to_tz->getName();
+		}
+		if ($from_tz instanceof DateTimeZone) {
+			$from_tz = $from_tz->getName();
+		}
+		if (!$from_tz) {
+			$from_tz = '@@session.time_zone';
+		} else {
+			$from_tz = "'$from_tz'";
+		}
+
+		return "CONVERT_TZ($date, $from_tz, '$to_tz')";
+	}
+
+	/**
 	 * This method is used to ignore case.
 	 *
 	 * @param	  in The string to transform to upper case.

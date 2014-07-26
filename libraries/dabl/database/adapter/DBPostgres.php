@@ -6,6 +6,68 @@
 class DBPostgres extends DABLPDO {
 
 	/**
+	 * Returns SQL that converts a date value to the start of the hour
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function hourStart($date) {
+		return "DATE_TRUNC('hour', $date::TIMESTAMP)::TIMESTAMP";
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the start of the day
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function dayStart($date) {
+		return "DATE_TRUNC('day', $date::DATE)::DATE";
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the week
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function weekStart($date) {
+		return "(DATE_TRUNC('week', $date::DATE) - '1 days'::INTERVAL)::DATE";
+	}
+
+	/**
+	 * Returns SQL that converts a date value to the first day of the month
+	 *
+	 * @param string $date
+	 * @return string
+	 */
+	function monthStart($date) {
+		return "DATE_TRUNC('month', $date::DATE)::DATE";
+	}
+
+	/**
+	 * Returns SQL which converts the date value to its value in the target timezone
+	 *
+	 * @param string $date SQL column expression
+	 * @param string|DateTimeZone $to_tz DateTimeZone or timezone id
+	 * @param string|DateTimeZone $from_tz DateTimeZone or timezone id
+	 * @return string
+	 */
+	function convertTimeZone($date, $to_tz, $from_tz = null) {
+		if ($to_tz instanceof DateTimeZone) {
+			$to_tz = $to_tz->getName();
+		}
+		if ($from_tz) {
+			if ($from_tz instanceof DateTimeZone) {
+				$from_tz = $from_tz->getName();
+			}
+			return "(($date)::TIMESTAMP AT TIME ZONE '$from_tz' AT TIME ZONE '$to_tz')";
+		}
+
+		return "(($date)::TIMESTAMPTZ AT TIME ZONE '$to_tz')";
+	}
+
+	/**
 	 * @var int the current transaction depth
 	 */
 	protected $_transactionDepth = 0;
@@ -108,7 +170,7 @@ class DBPostgres extends DABLPDO {
 	/**
 	 * @see		DABLPDO::random()
 	 */
-	function random($seed=NULL) {
+	function random($seed = NULL) {
 		return 'random()';
 	}
 
