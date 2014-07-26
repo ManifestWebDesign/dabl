@@ -32,7 +32,10 @@ class DBSQLite extends DABLPDO {
 	 * @return string
 	 */
 	function weekStart($date) {
-		return "DATE($date, 'weekday 0', '-7 days')";
+		return "CASE DATE($date, 'weekday 0') "
+				. "WHEN DATE($date) THEN DATE($date) "
+				. "ELSE DATE($date, 'weekday 0', '-7 days') "
+				. "END";
 	}
 
 	/**
