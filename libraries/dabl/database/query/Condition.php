@@ -210,6 +210,10 @@ class Condition {
 				$right = QueryStatement::PARAM;
 			}
 		}
+
+		if (!in_array($operator, Query::$operators, true)) {
+			throw new InvalidArgumentException('"' . $operator . '" is not a valid SQL operator.');
+		}
 		$statement->string = $left . ' ' . $operator . ' ' . $right;
 
 		return $statement;

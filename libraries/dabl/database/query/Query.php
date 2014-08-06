@@ -58,6 +58,31 @@ class Query {
 	// Binary OR
 	const BINARY_OR = '|';
 
+	static $operators = array(
+		self::EQUAL,
+		self::NOT_EQUAL,
+		self::ALT_NOT_EQUAL,
+		self::GREATER_THAN,
+		self::LESS_THAN,
+		self::GREATER_EQUAL,
+		self::LESS_EQUAL,
+		self::LIKE,
+		self::BEGINS_WITH,
+		self::ENDS_WITH,
+		self::CONTAINS,
+		self::NOT_LIKE,
+		self::IN,
+		self::NOT_IN,
+		self::ALL,
+		self::IS_NULL,
+		self::IS_NOT_NULL,
+		self::BETWEEN,
+		self::ILIKE,
+		self::NOT_ILIKE,
+		self::BINARY_AND,
+		self::BINARY_OR
+	);
+
 	// 'Order by' qualifiers
 	const ASC = 'ASC';
 	const DESC = 'DESC';

@@ -84,4 +84,14 @@ class ConditionTest extends PHPUnit_Framework_TestCase {
 
 	}
 
+	function testValidateOperator() {
+		$c = new Condition();
+		$c->add('foo', 'bar', 'SQL injection!');
+
+		$this->setExpectedException('InvalidArgumentException');
+
+		$stmnt = $c->getQueryStatement();
+		$stmnt->setConnection(DBManager::getConnection());
+	}
+
 }
