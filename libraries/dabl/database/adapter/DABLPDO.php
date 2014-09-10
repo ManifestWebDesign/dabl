@@ -442,17 +442,21 @@ abstract class DABLPDO extends PDO {
 	 * @return mixed
 	 */
 	function prepareInput($value) {
-		if (is_array($value))
+		if (is_array($value)) {
 			return array_map(array($this, 'prepareInput'), $value);
+		}
 
-		if (is_int($value))
+		if (is_int($value) || is_float($value)) {
 			return $value;
+		}
 
-		if (is_bool($value))
+		if (is_bool($value)) {
 			return $value ? 1 : 0;
+		}
 
-		if ($value === null)
+		if ($value === null) {
 			return 'NULL';
+		}
 
 		return $this->quote($value);
 	}
