@@ -162,7 +162,6 @@ abstract class DABLPDO extends PDO {
 				break;
 
 			case 'pgsql':
-			case 'redshift':
 				$parts = array();
 				if (!empty($connection_params['host'])) {
 					$parts[] = 'host=' . $connection_params['host'];
@@ -186,6 +185,31 @@ abstract class DABLPDO extends PDO {
 				$user = null;
 				$password = null;
 				$class = 'DBPostgres';
+				break;
+			case 'redshift':
+				$parts = array();
+				if (!empty($connection_params['host'])) {
+					$parts[] = 'host=' . $connection_params['host'];
+				}
+				if (!empty($connection_params['port'])) {
+					$parts[] = 'port=' . $connection_params['port'];
+				}
+				if (!empty($connection_params['dbname'])) {
+					$parts[] = 'dbname=' . $connection_params['dbname'];
+				}
+				if (!empty($connection_params['user'])) {
+					$parts[] = 'user=' . $connection_params['user'];
+				}
+				if (!empty($connection_params['password'])) {
+					$parts[] = 'password=' . $connection_params['password'];
+				}
+				foreach ($parts as &$v) {
+					$v = str_replace(' ', '\ ', $v);
+				}
+				$dsn = 'pgsql:' . implode(' ', $parts);
+				$user = null;
+				$password = null;
+				$class = 'DBRedshift';
 				break;
 
 			case 'sqlsrv':

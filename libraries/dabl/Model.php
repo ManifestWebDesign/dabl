@@ -1341,6 +1341,9 @@ abstract class Model implements JsonSerializable {
 				$id = $result->fetchColumn(0);
 			} elseif ($conn->isGetIdAfterInsert()) {
 				$id = $conn->lastInsertId();
+				if(empty($id) && $conn instanceof DBRedshift) {
+					$id = $conn->query('SELECT MAX(' . $conn->quoteIdentifier($pk) . ") FROM $quoted_table")->fetchColumn();
+				}
 			}
 			if (null !== $id) {
 				$this->{"set$pk"}($id);
