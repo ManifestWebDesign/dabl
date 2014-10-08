@@ -162,6 +162,7 @@ abstract class DABLPDO extends PDO {
 				break;
 
 			case 'pgsql':
+			case 'redshift':
 				$parts = array();
 				if (!empty($connection_params['host'])) {
 					$parts[] = 'host=' . $connection_params['host'];
