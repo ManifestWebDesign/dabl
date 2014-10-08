@@ -175,7 +175,7 @@ class DBRedshift extends DABLPDO {
 		ClassLoader::import('DATABASE:propel:reverse:pgsql');
 		ClassLoader::import('DATABASE:propel:platform');
 
-		$parser = new PgsqlSchemaParser($this);
+		$parser = new RedshiftSchemaParser($this);
 		$database = new Database($this->getDBName());
 		$database->setPlatform(new PgsqlPlatform($this));
 		$parser->parse($database);
