@@ -135,16 +135,19 @@ class MysqlSchemaParser extends BaseSchemaParser
 	protected function addColumns(Table $table)
 	{
 		$stmt = $this->dbh->query("SHOW COLUMNS FROM `" . $table->getName() . "`");
+		$table_quoted = $this->dbh->quote($table->getName());
+		$db_quoted = $this->dbh->quote($table->getDatabase()->getName());
 
 		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+			$field_quoted = $this->dbh->quote($row['Field']);
 
 			$row['Comment'] = $this->dbh->query("
 				SELECT
 				COLUMN_COMMENT
 				FROM information_schema.COLUMNS
-				WHERE TABLE_NAME='{$table->getName()}'
-					AND TABLE_SCHEMA='{$table->getDatabase()->getName()}'
-					AND COLUMN_NAME='{$row['Field']}' LIMIT 1")->fetchColumn();
+				WHERE TABLE_NAME=$table_quoted
+					AND TABLE_SCHEMA=$db_quoted
+					AND COLUMN_NAME=$field_quoted LIMIT 1")->fetchColumn();
 
 			$name = $row['Field'];
 			$is_nullable = ($row['Null'] == 'YES');
@@ -377,7 +380,7 @@ class MysqlSchemaParser extends BaseSchemaParser
 	 */
 	protected function addTableVendorInfo(Table $table)
 	{
-		$stmt = $this->dbh->query("SHOW TABLE STATUS LIKE '" . $table->getName() . "'");
+		$stmt = $this->dbh->query("SHOW TABLE STATUS LIKE " . $this->dbh->quote($table->getName()));
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 		$vi = $this->getNewVendorInfoObject($row);
 		$table->addVendorInfo($vi);
