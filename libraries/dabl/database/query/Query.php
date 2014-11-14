@@ -886,6 +886,11 @@ class Query {
 		return $this;
 	}
 
+	function removeOrderBys() {
+		$this->_orders = array();
+		return $this;
+	}
+
 	/**
 	 * Shortcut for addOrder()
 	 * @return Query
