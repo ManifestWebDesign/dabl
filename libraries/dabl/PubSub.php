@@ -120,6 +120,9 @@ class PubSub {
 		if (is_object($callback)) {
 			return spl_object_hash($callback);
 		}
+		if (is_array($callback) && !empty($callback[0]) && is_object($callback[0])) {
+			$callback[0] = spl_object_hash($callback[0]);
+		}
 		return md5(serialize($callback));
 	}
 

@@ -144,7 +144,7 @@ class Condition {
 						$operator = Query::NOT_IN;
 						break;
 					default:
-						throw new Exception($operator . ' unknown for comparing an array.');
+						throw new Exception('Operator "' . $operator . '" cannot be used for comparing an array.');
 				}
 			}
 
