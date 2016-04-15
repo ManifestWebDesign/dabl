@@ -252,6 +252,11 @@ abstract class DABLPDO extends PDO {
 					$parts[] = 'appname=' . $connection_params['appname'];
 				}
 
+				// UTF-8 support requires at least tds version 7.0
+				if ($connection_params['driver'] === 'dblib') {
+					$parts[] = 'version=7.0';
+				}
+
 				foreach ($parts as &$v) {
 					$v = str_replace(';', '\;', $v);
 				}
