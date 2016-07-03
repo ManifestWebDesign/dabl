@@ -7,7 +7,7 @@
  * @license    MIT License
  */
 
-abstract class Controller extends ArrayObject {
+class Controller extends ArrayObject {
 
 	/**
 	 * @var string The layout to render around the view if renderPartial is false
@@ -59,6 +59,11 @@ abstract class Controller extends ArrayObject {
 	 * @var ControllerRoute
 	 */
 	protected $route;
+
+	/**
+	 * @var array
+	 */
+	protected $requestParams = array();
 
 	function __destruct() {
 		// store flash params in session
@@ -132,7 +137,7 @@ abstract class Controller extends ArrayObject {
 	 * @param ControllerRoute $route
 	 * @return Controller
 	 */
-	protected function setRoute(ControllerRoute $route = null) {
+	public function setRoute(ControllerRoute $route = null) {
 		$this->route = $route;
 		if (null !== $route) {
 			if ($route->getViewDir()) {
@@ -144,8 +149,14 @@ abstract class Controller extends ArrayObject {
 			if ($route->getExtension()) {
 				$this->outputFormat = $route->getExtension();
 			}
+
+			$this->requestParams = $route->getRequestParams();
 		}
 		return $this;
+	}
+
+	function getRequestParams() {
+		return $this->requestParams;
 	}
 
 	/**

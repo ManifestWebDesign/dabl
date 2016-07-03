@@ -2,6 +2,11 @@
 
 class DBMySQLTest extends PHPUnit_Framework_TestCase {
 
+	/**
+	 * @var DBMySQL
+	 */
+	protected $pdo;
+
 	function setUp() {
 		$this->pdo = DBManager::getConnection();
 		if (!($this->pdo instanceof DBMySQL)) {
@@ -115,6 +120,7 @@ class DBMySQLTest extends PHPUnit_Framework_TestCase {
 		$this->pdo->beginTransaction();
 		$this->pdo->rollback();
 		$this->pdo->rollback();
+		$this->assertTrue(true);
 	}
 
 	/**
@@ -140,5 +146,6 @@ class DBMySQLTest extends PHPUnit_Framework_TestCase {
 		$this->pdo->beginTransaction();
 		$this->pdo->rollback();
 		$this->pdo->commit();
+		$this->assertTrue(true);
 	}
 }

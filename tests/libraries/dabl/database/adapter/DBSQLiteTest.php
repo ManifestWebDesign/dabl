@@ -43,6 +43,16 @@ class DBSQLiteTest extends PHPUnit_Framework_TestCase {
 		$actual = $this->pdoSQLite->query($sql)->fetchColumn();
 		$this->assertEquals($expected, $actual, $sql . ' should have returned ' . $expected);
 
+		$sql = 'SELECT ' . $this->pdoSQLite->weekStart("'2013-12-29'");
+		$expected = '2013-12-29';
+		$actual = $this->pdoSQLite->query($sql)->fetchColumn();
+		$this->assertEquals($expected, $actual, $sql . ' should have returned ' . $expected);
+
+		$sql = 'SELECT ' . $this->pdoSQLite->weekStart("'2014-01-05'");
+		$expected = '2014-01-05';
+		$actual = $this->pdoSQLite->query($sql)->fetchColumn();
+		$this->assertEquals($expected, $actual, $sql . ' should have returned ' . $expected);
+
 		$sql = 'SELECT ' . $this->pdoSQLite->weekStart("'2014-07-20'");
 		$expected = '2014-07-20';
 		$actual = $this->pdoSQLite->query($sql)->fetchColumn();

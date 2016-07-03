@@ -72,6 +72,11 @@ class ControllerRoute {
 	protected $viewDir;
 
 	/**
+	 * @var array
+	 */
+	protected $requestParams;
+
+	/**
 	 * @param string|array $route
 	 * @param array $headers
 	 * @param array $request_params
@@ -244,6 +249,15 @@ class ControllerRoute {
 			$this->extension = 'jsonp';
 			$this->jsonPCallback = $request_params['callback'];
 		}
+
+		$this->requestParams = &$request_params;
+	}
+
+	/**
+	 * @return array
+	 */
+	function getRequestParams() {
+		return $this->requestParams;
 	}
 
 	/**
