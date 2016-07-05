@@ -1,4 +1,8 @@
-<?php require_once('./config.php') ?>
+<?php
+
+require_once('./config.php');
+
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
@@ -12,10 +16,10 @@
 	<h2>Generating Files for connection: <?php echo $connection_name ?>...</h2>
 <?php
 	$options = $generator->getOptions();
-	$generator->generateModels(@$_REQUEST['Models'][$connection_name]);
-	$generator->generateViews(@$_REQUEST['Views'][$connection_name]);
-	$generator->generateModelQueries(@$_REQUEST['ModelQueries'][$connection_name]);
-	$generator->generateControllers(@$_REQUEST['Controllers'][$connection_name]);
+	$generator->generateModels(@$_REQUEST['Models'][$connection_name], MODELS_DIR, MODELS_BASE_DIR);
+	$generator->generateViews(@$_REQUEST['Views'][$connection_name], VIEWS_DIR);
+	$generator->generateModelQueries(@$_REQUEST['ModelQueries'][$connection_name], MODELS_QUERY_DIR, MODELS_BASE_QUERY_DIR);
+	$generator->generateControllers(@$_REQUEST['Controllers'][$connection_name], CONTROLLERS_DIR);
 ?>
 	<?php if (isset($generator->warnings)): ?>
 		<div class="ui-state-highlight ui-corner-all">
@@ -32,7 +36,7 @@
 				<div style="float:left;width:50%">
 					<strong>Base<br /></strong>
 <?php
-foreach (glob($options['base_model_path'] . '*.php') as $filename) {
+foreach (glob(MODELS_BASE_DIR . '*.php') as $filename) {
 	echo basename($filename) . '<br />';
 	require_once($filename);
 }
@@ -41,7 +45,7 @@ foreach (glob($options['base_model_path'] . '*.php') as $filename) {
 				<div style="float:left;width:50%">
 					<strong>Extended<br /></strong>
 <?php
-foreach (glob($options['model_path'] . '*.php') as $filename) {
+foreach (glob(MODELS_DIR . '*.php') as $filename) {
 	echo basename($filename) . '<br />';
 	require_once($filename);
 }

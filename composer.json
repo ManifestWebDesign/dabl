@@ -1,4 +1,33 @@
 {
+	"name": "dabl/mvc",
+	"description": "DABL MVC framework",
+	"license": "MIT",
+	"keywords": ["database", "abstraction", "orm", "propel", "dabl", "sql", "query", "mvc", "rest"],
+	"authors": [
+		{
+			"name": "Manifest Web Design",
+			"email": "dan@manifestwebdesign.com"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"": [
+				"controllers",
+				"models",
+				"models/base",
+				"models/query",
+				"models/query/base"
+			]
+		}
+	},
+	"require": {
+		"dabl/adapter": "1.0.*",
+		"dabl/query": "1.0.*",
+		"dabl/orm": "1.0.*",
+		"dabl/view": "1.0.*",
+		"dabl/controller": "1.0.*",
+		"dabl/generator": "1.0.*"
+	},
 	"require-dev": {
 		"phpunit/phpunit": "4.8.*"
 	}

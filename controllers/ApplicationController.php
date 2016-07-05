@@ -1,5 +1,9 @@
 <?php
 
+use Dabl\Controller\Controller;
+use Dabl\Controller\ControllerRoute;
+use Dabl\Generator\StringFormat;
+
 abstract class ApplicationController extends Controller {
 
 	function __construct(ControllerRoute $route = null) {

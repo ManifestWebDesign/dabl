@@ -9,17 +9,11 @@ date_default_timezone_set(@date_default_timezone_get());
 // lets other scripts know that this file has been included
 define('CONFIG_LOADED', true);
 
-// directory where this file lives.  Borderline deprecated, so use APP_DIR
-define('ROOT', dirname(__FILE__) . '/');
-
 // directory where application lives, usually the same as ROOT
-define('APP_DIR', ROOT);
+define('APP_DIR', __DIR__ . '/');
 
 // directory of configurations files
 define('CONFIG_DIR', APP_DIR . 'config/');
-
-// directory where libraries are located
-define('LIBRARIES_DIR', APP_DIR . 'libraries/');
 
 // directory for logs
 define('LOGS_DIR', APP_DIR . 'logs/');
@@ -36,20 +30,10 @@ ini_set('log_errors', true);
 // file for error logging
 ini_set('error_log', LOGS_DIR . 'error_log');
 
-require_once(LIBRARIES_DIR . 'dabl/ClassLoader.php');
-require_once(LIBRARIES_DIR . 'dabl/print_r2.php');
-
-// Strip added slashes if needed
-if (get_magic_quotes_gpc()) {
-	require_once(LIBRARIES_DIR . 'dabl/strip_request_slashes.php');
-	strip_request_slashes();
-}
-
-ClassLoader::addRepository('LIBRARIES', LIBRARIES_DIR);
-ClassLoader::import('LIBRARIES:dabl');
-
 if (is_file(APP_DIR . 'vendor/autoload.php')) {
 	require_once APP_DIR . 'vendor/autoload.php';
+} else {
+	throw new RuntimeException('Vendor directory missing.  Please run "composer install".');
 }
 
 // load all config files

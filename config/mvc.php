@@ -1,14 +1,41 @@
 <?php
 
+//use Dabl\Controller\Controller;
+//use Dabl\View\View;
+
+// for backwards compatibility and convenience
+class View extends Dabl\View\View {}
+class Controller extends Dabl\Controller\Controller {}
+class StringFormat extends Dabl\Generator\StringFormat {}
+class FileNotFoundException extends Dabl\Controller\Exception\FileNotFoundException {}
+
 define('IS_MVC', true);
 
-ClassLoader::addRepository('MVC', LIBRARIES_DIR . 'dabl/mvc');
+// the browser path to this application.  it should be:
+// a full url with http:// and a trailing slash OR
+// a subdirectory with leading and trailing slashes
+define('BASE_URL', '/');
 
-$helpers = glob(LIBRARIES_DIR . 'dabl/mvc/helpers/*.php');
-sort($helpers);
-foreach ($helpers as $helper) {
-	require_once $helper;
-}
+// directory for public html files that are directly exposed to the web server
+define('PUBLIC_DIR', APP_DIR . 'public/');
+
+// default controller
+define('DEFAULT_CONTROLLER', 'index');
+
+// controllers directory
+define('CONTROLLERS_DIR', APP_DIR . 'controllers/');
+Controller::addDirectory(CONTROLLERS_DIR);
+
+// views directory
+define('VIEWS_DIR', APP_DIR . 'views/');
+View::addDirectory(VIEWS_DIR);
+
+// default timestamp format for views
+define('VIEW_TIMESTAMP_FORMAT', 'n/j/Y g:i a');
+
+// default date format for views
+define('VIEW_DATE_FORMAT', 'n/j/Y');
+
 
 /** Session * */
 // start the session
@@ -46,27 +73,3 @@ if (!$result) {
 	}
 	throw new RuntimeException('Session ID was invalid and couldn\'t recover');
 }
-
-// the browser path to this application.  it should be:
-// a full url with http:// and a trailing slash OR
-// a subdirectory with leading and trailing slashes
-define('BASE_URL', '/');
-
-// directory for public html files that are directly exposed to the web server
-define('PUBLIC_DIR', APP_DIR . 'public/');
-
-// default controller
-define('DEFAULT_CONTROLLER', 'index');
-
-// controllers directory
-define('CONTROLLERS_DIR', APP_DIR . 'controllers/');
-ClassLoader::addRepository('CONTROLLERS', CONTROLLERS_DIR);
-
-// views directory
-define('VIEWS_DIR', APP_DIR . 'views/');
-
-// default timestamp format for views
-define('VIEW_TIMESTAMP_FORMAT', 'n/j/Y g:i a');
-
-// default date format for views
-define('VIEW_DATE_FORMAT', 'n/j/Y');
