@@ -26,7 +26,8 @@
 		"dabl/orm": "1.0.*",
 		"dabl/view": "1.0.*",
 		"dabl/controller": "1.0.*",
-		"dabl/generator": "1.0.*"
+		"dabl/generator": "1.0.*",
+		"dabl/stringformat": "1.0.*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "4.8.*"

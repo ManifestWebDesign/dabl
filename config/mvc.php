@@ -6,7 +6,7 @@
 // for backwards compatibility and convenience
 class View extends Dabl\View\View {}
 class Controller extends Dabl\Controller\Controller {}
-class StringFormat extends Dabl\Generator\StringFormat {}
+class StringFormat extends Dabl\StringFormat\StringFormat {}
 class FileNotFoundException extends Dabl\Controller\Exception\FileNotFoundException {}
 
 define('IS_MVC', true);
