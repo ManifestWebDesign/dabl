@@ -3,10 +3,34 @@
 //use Dabl\Query\DBManager;
 
 // for backwards compatibility and convenience
+/**
+ * Class DBManager
+ * @deprecated Use Dabl\Query\DBManager
+ */
 class DBManager extends Dabl\Query\DBManager {}
+
+/**
+ * Class Model
+ * @deprecated use Dabl\Orm\Model
+ */
 class Model extends Dabl\Orm\Model {}
+
+/**
+ * Class Query
+ * @deprecated use Dabl\Query\Query
+ */
 class Query extends Dabl\Query\Query {}
+
+/**
+ * Class Condition
+ * @deprecated use Dabl\Query\Condition
+ */
 class Condition extends Dabl\Query\Condition {}
+
+/**
+ * Class QueryPager
+ * @deprecated use Dabl\Query\QueryPager
+ */
 class QueryPager extends Dabl\Query\QueryPager {}
 
 $db_connections = parse_ini_file(CONFIG_DIR . 'connections.ini', true);

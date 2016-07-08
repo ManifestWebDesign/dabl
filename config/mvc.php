@@ -4,9 +4,28 @@
 //use Dabl\View\View;
 
 // for backwards compatibility and convenience
+/**
+ * Class View
+ * @deprecated
+ */
 class View extends Dabl\View\View {}
+
+/**
+ * Class Controller
+ * @deprecated
+ */
 class Controller extends Dabl\Controller\Controller {}
+
+/**
+ * Class StringFormat
+ * @deprecated
+ */
 class StringFormat extends Dabl\StringFormat\StringFormat {}
+
+/**
+ * Class FileNotFoundException
+ * @deprecated
+ */
 class FileNotFoundException extends Dabl\Controller\Exception\FileNotFoundException {}
 
 define('IS_MVC', true);
