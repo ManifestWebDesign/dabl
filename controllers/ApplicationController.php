@@ -2,7 +2,7 @@
 
 use Dabl\Controller\Controller;
 use Dabl\Controller\ControllerRoute;
-use Dabl\Generator\StringFormat;
+use Dabl\StringFormat\StringFormat;
 
 abstract class ApplicationController extends Controller {
 

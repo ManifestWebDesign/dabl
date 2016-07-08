@@ -12,7 +12,5 @@
          strict="true">
 		 <!-- backupStaticAttributes must be false or DB tests are broken due to serialization -->
 	<php>
-		<includepath>../libraries/dabl/</includepath>
-		<server name='HTTP_HOST' value='test'/>
 	</php>
 </phpunit>
