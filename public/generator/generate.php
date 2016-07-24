@@ -16,10 +16,10 @@ require_once('./config.php');
 	<h2>Generating Files for connection: <?php echo $connection_name ?>...</h2>
 <?php
 	$options = $generator->getOptions();
-	$generator->generateModels(@$_REQUEST['Models'][$connection_name], MODELS_DIR, MODELS_BASE_DIR);
-	$generator->generateViews(@$_REQUEST['Views'][$connection_name], VIEWS_DIR);
-	$generator->generateModelQueries(@$_REQUEST['ModelQueries'][$connection_name], MODELS_QUERY_DIR, MODELS_BASE_QUERY_DIR);
-	$generator->generateControllers(@$_REQUEST['Controllers'][$connection_name], CONTROLLERS_DIR);
+	$generator->generateModels(empty($_REQUEST['Models'][$connection_name]) ? array() : $_REQUEST['Models'][$connection_name], MODELS_DIR, MODELS_BASE_DIR);
+	$generator->generateViews(empty($_REQUEST['Views'][$connection_name]) ? array() : $_REQUEST['Views'][$connection_name], VIEWS_DIR);
+	$generator->generateModelQueries(empty($_REQUEST['ModelQueries'][$connection_name]) ? array() : $_REQUEST['ModelQueries'][$connection_name], MODELS_QUERY_DIR, MODELS_BASE_QUERY_DIR);
+	$generator->generateControllers(empty($_REQUEST['Controllers'][$connection_name]) ? array() : $_REQUEST['Controllers'][$connection_name], CONTROLLERS_DIR);
 ?>
 	<?php if (isset($generator->warnings)): ?>
 		<div class="ui-state-highlight ui-corner-all">
