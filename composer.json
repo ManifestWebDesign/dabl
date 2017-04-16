@@ -21,12 +21,12 @@
 		}
 	},
 	"require": {
-		"dabl/adapter": "1.1.*",
-		"dabl/query": "1.1.*",
-		"dabl/orm": "1.1.*",
+		"dabl/adapter": "1.2.*",
+		"dabl/query": "1.2.*",
+		"dabl/orm": "1.2.*",
 		"dabl/view": "1.0.*",
 		"dabl/controller": "1.0.*",
-		"dabl/generator": "1.1.*",
+		"dabl/generator": "1.2.*",
 		"dabl/stringformat": "1.1.*"
 	},
 	"require-dev": {
